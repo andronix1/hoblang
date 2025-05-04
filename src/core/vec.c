@@ -34,6 +34,10 @@ inline size_t vec_len(const void *vec) {
     return vec_header(vec)->len;
 }
 
+inline size_t vec_esize(const void *vec) {
+    return vec_header(vec)->esize;
+}
+
 void *__vec_append(void *vec, const void *ptr) {
     vec = __vec_reserve(vec, vec_len(vec) + 1);
     VecHeader *header = vec_header(vec);
@@ -46,6 +50,12 @@ void *__vec_pop(void *vec) {
     assert(vec_len(vec) > 0);
     vec_header(vec)->len--;
     return vec;
+}
+
+void *__vec_at(void *vec, size_t idx) {
+    VecHeader *header = vec_header(vec);
+    assert(idx < header->len);
+    return &(((char*)vec)[header->esize * idx]);
 }
 
 void vec_free(void *vec) {

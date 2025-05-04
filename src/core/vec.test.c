@@ -30,6 +30,14 @@ static void test_vec_push_pop() {
     vec_free(test);
 }
 
+static void test_vec_at() {
+    char *test = vec_new(char);
+    CU_ASSERT_EQUAL(vec_at(test, 0), &test[0]);
+    CU_ASSERT_EQUAL(vec_at(test, 123), &test[123]);
+    CU_ASSERT_EQUAL(vec_at(test, 2), &test[2]);
+    vec_free(test);
+}
+
 void test_vec() {
     CU_pSuite suite = CU_add_suite("vec tests", NULL, NULL);
     CU_ADD_TEST(suite, test_vec_push_pop);
