@@ -12,10 +12,14 @@ static void hob_log_slice(va_list list) {
 }
 
 int main(int argc, const char **argv) {
-    log_register('V', sizeof(const char*), file_in_lines_view_print);
+    log_register('s', hob_log_cstr);
+    log_register('V', file_in_lines_view_print);
     const char *str = "hello, bro, how are you?\n    i am very cool, lol\nyes, very cool\n";
     FileContent *content = file_content_new_in_memory(str);
-    logln("$V", file_content_get_in_lines_view(content, slice_new(&str[30], 25)));
+    logln("error: $s\n$V",
+        "super strange error",
+        file_content_get_in_lines_view(content, slice_new(&str[30], 25))
+    );
     file_content_free(content);
     return 0;
 }

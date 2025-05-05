@@ -4,19 +4,11 @@
 #include <stdio.h>
 #include <string.h>
 
-typedef struct {
-    size_t size;
-    HobLogHandleFunc func;
-} HobLogHandle;
+static HobLogHandleFunc print_handles[1 << (sizeof(char) * 8)] = { NULL };
 
-static HobLogHandle print_handles[1 << (sizeof(char) * 8)] = {
-    { .size = 0, .func = NULL },
-};
-
-void log_register(char id, size_t size, HobLogHandleFunc func) {
-    assert(print_handles[id].func == NULL);
-    print_handles[id].size = size;
-    print_handles[id].func = func;
+void log_register(char id, HobLogHandleFunc func) {
+    assert(print_handles[id] == NULL);
+    print_handles[id] = func;
 }
 
 void logv(const char *fmt, va_list list) {
@@ -29,11 +21,11 @@ void logv(const char *fmt, va_list list) {
                 i++;
                 continue;
             }
-            HobLogHandle handle = print_handles[id];
-            if (!handle.func) {
+            HobLogHandleFunc handle = print_handles[id];
+            if (!handle) {
                 printf("$%c", id);
             } else {
-                handle.func(list);
+                handle(list);
             }
             i++;
         } else {
