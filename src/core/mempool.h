@@ -14,6 +14,7 @@ void mempool_free(Mempool *mempool);
 #define vec_new_in(MEMPOOL, TYPE) ({ \
     TYPE *__vec = vec_new(TYPE); \
     mempool_add_vec(MEMPOOL, __vec); \
+    __vec; \
 })
 
 #define mempool_alloc(MEMPOOL, TYPE) ((TYPE*)__mempool_alloc(MEMPOOL, sizeof(TYPE), alignof(TYPE)))
