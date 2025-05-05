@@ -30,6 +30,12 @@ inline void *__vec_reserve(void *vec, size_t size) {
     return vec;
 }
 
+void *__vec_resize(void *vec, size_t size) {
+    vec_reserve(vec, size);
+    vec_header(vec)->len = size;
+    return vec;
+}
+
 inline size_t vec_len(const void *vec) {
     return vec_header(vec)->len;
 }

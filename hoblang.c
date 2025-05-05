@@ -1,19 +1,21 @@
+#include "core/log.h"
+#include "core/slice.h"
 #include <stdio.h>
-#include "core/vec.h"
 
-int main() {
-    char *asd = vec_new(char);
-    vec_push(asd, 'H');
-    vec_push(asd, 'e');
-    vec_push(asd, 'l');
-    vec_push(asd, 'l');
-    vec_push(asd, 'o');
-    vec_push(asd, '\n');
-    vec_push(asd, '\0');
-    puts(asd);
-    vec_free(asd);
+static void hob_log_cstr(va_list list) { printf("%s", va_arg(list, char*)); }
+static void hob_log_int(va_list list) { printf("%d", va_arg(list, int)); }
+static void hob_log_hex(va_list list) { printf("%lx", va_arg(list, long)); }
+static void hob_log_slice(va_list list) {
+    Slice arg = va_arg(list, Slice);
+    fwrite(arg.value, 1, arg.length, stdout);
+}
 
-    char *a = "asd";
-    printf("Hello, world!\n");
+int main(int argc, const char **argv) {
+    log_register('i', sizeof(int), hob_log_int);
+    log_register('X', sizeof(long), hob_log_hex);
+    log_register('S', sizeof(Slice), hob_log_slice);
+    log_register('s', sizeof(const char*), hob_log_cstr);
+    long a = 0xffffCcba321;
+    logln("$$ $$1 $$2: $i, $X, '$S', '$s'", 123, a, slice_from_cstr("ASDSSDASAD"), "lol kek");
     return 0;
 }

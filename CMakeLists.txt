@@ -8,6 +8,8 @@ option(DISABLE_TESTS "Disable tests generation" OFF)
 file(GLOB_RECURSE sources src/*.c)
 list(FILTER sources EXCLUDE REGEX "\\.test\\.")
 add_executable(hoblang ${sources} hoblang.c)
+set_target_properties(hoblang PROPERTIES LINK_FLAGS -fsanitize=address)
+set_target_properties(hoblang PROPERTIES COMPILE_FLAGS -fsanitize=address)
 include_directories(hoblang src)
 
 if (NOT DISABLE_TESTS)
