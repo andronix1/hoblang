@@ -52,6 +52,11 @@ void *__vec_pop(void *vec) {
     return vec;
 }
 
+void *__vec_erase(void *vec) {
+    vec_header(vec)->len = 0;
+    return vec;
+}
+
 void *__vec_at(void *vec, size_t idx) {
     VecHeader *header = vec_header(vec);
     assert(idx < header->len);

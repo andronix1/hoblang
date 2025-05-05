@@ -7,6 +7,7 @@ void *__vec_new(size_t esize);
 void *__vec_reserve(void *vec, size_t size);
 void *__vec_append(void *vec, const void *ptr);
 void *__vec_pop(void *vec);
+void *__vec_erase(void *vec);
 void *__vec_at(void *vec, size_t idx);
 size_t vec_len(const void *vec);
 size_t vec_esize(const void *vec);
@@ -34,6 +35,11 @@ void vec_free(void *vec);
 #define vec_pop(VEC) do { \
     typeof(VEC)* __vec = &(VEC); \
     *__vec = __vec_pop(*__vec); \
+} while (0)
+
+#define vec_erase(VEC) do { \
+    typeof(VEC)* __vec = &(VEC); \
+    *__vec = __vec_erase(*__vec); \
 } while (0)
 
 #define vec_at(VEC, IDX) ((typeof(VEC))__vec_at(VEC, IDX))
