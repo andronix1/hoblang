@@ -1,5 +1,6 @@
 #include "file_content.test.h"
 #include "core/file_content.h"
+#include "core/slice.h"
 #include <CUnit/CUnit.h>
 
 static void test_file_content_read() {
@@ -14,7 +15,49 @@ static void test_file_content_read() {
     file_content_free(content);
 }
 
+static inline void CU_assert_file_loc_eq(FileLoc a, FileLoc b) {
+    CU_ASSERT_EQUAL(a.begin.line, b.begin.line);
+    CU_ASSERT_EQUAL(a.begin.character, b.begin.character);
+    CU_ASSERT_EQUAL(a.end.line, b.end.line);
+    CU_ASSERT_EQUAL(a.end.character, b.end.character);
+}
+
+static void test_file_content_locate_multiline() {
+    FileContent *content = file_content_read("for_tests/test_multiline.txt");
+    CU_ASSERT_NOT_EQUAL_FATAL(content, NULL);
+
+    Slice slice = slice_new(&content->content.value[15], 6);
+    CU_ASSERT_NSTRING_EQUAL_FATAL(slice.value, "you?\ni", slice.length);
+
+    FileLoc loc = file_content_locate(content, slice);
+    FileLoc expects = {
+        .begin = { 1, 16 },
+        .end = { 2, 1 },
+    };
+    CU_assert_file_loc_eq(loc, expects);
+
+    file_content_free(content);
+}
+static void test_file_content_locate() {
+    FileContent *content = file_content_read("for_tests/test_multiline.txt");
+    CU_ASSERT_NOT_EQUAL_FATAL(content, NULL);
+
+    Slice slice = slice_new(&content->content.value[22], 4);
+    CU_ASSERT_NSTRING_EQUAL_FATAL(slice.value, "love", slice.length);
+
+    FileLoc loc = file_content_locate(content, slice);
+    FileLoc expects = {
+        .begin = { 2, 3 },
+        .end = { 2, 6 },
+    };
+    CU_assert_file_loc_eq(loc, expects);
+
+    file_content_free(content);
+}
+
 void test_file_content() {
-    CU_pSuite suite = CU_add_suite("test file content read", NULL, NULL);
+    CU_pSuite suite = CU_add_suite("test file content", NULL, NULL);
     CU_ADD_TEST(suite, test_file_content_read);
+    CU_ADD_TEST(suite, test_file_content_locate);
+    CU_ADD_TEST(suite, test_file_content_locate_multiline);
 }
