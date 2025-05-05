@@ -8,6 +8,10 @@ void test_mempool_alloc() {
     vec_new_in(mempool, void*);
     vec_new_in(mempool, char);
     vec_new_in(mempool, typeof(mempool));
+    keymap_new_in(mempool, int);
+    keymap_new_in(mempool, void*);
+    keymap_new_in(mempool, char);
+    keymap_new_in(mempool, typeof(mempool));
     mempool_alloc(mempool, int);
     mempool_alloc(mempool, void*);
     mempool_alloc(mempool, char);
