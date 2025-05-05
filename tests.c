@@ -2,11 +2,13 @@
 #include "core/file_content.test.h"
 #include "core/vec.test.h"
 #include "core/keymap.test.h"
+#include "lexer/api.test.h"
 
 static void setup_tests() {
     test_vec();
     test_keymap();
     test_file_content();
+    test_lexer();
 }
 
 int main() {
