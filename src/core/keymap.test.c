@@ -26,6 +26,6 @@ static void test_keymap_insert() {
 }
 
 void test_keymap() {
-    CU_pSuite suite = CU_add_suite("keymap tests", NULL, NULL);
+    CU_pSuite suite = CU_add_suite("keymap", NULL, NULL);
     CU_ADD_TEST(suite, test_keymap_insert);
 }

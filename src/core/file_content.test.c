@@ -56,7 +56,7 @@ static void test_file_content_locate() {
 }
 
 void test_file_content() {
-    CU_pSuite suite = CU_add_suite("test file content", NULL, NULL);
+    CU_pSuite suite = CU_add_suite("file content", NULL, NULL);
     CU_ADD_TEST(suite, test_file_content_read);
     CU_ADD_TEST(suite, test_file_content_locate);
     CU_ADD_TEST(suite, test_file_content_locate_multiline);
