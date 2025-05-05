@@ -1,4 +1,5 @@
 #include <CUnit/Basic.h>
+#include "core/arena.test.h"
 #include "core/buffer.test.h"
 #include "core/file_content.test.h"
 #include "core/vec.test.h"
@@ -9,6 +10,7 @@ static void setup_tests() {
     test_vec();
     test_keymap();
     test_buffer();
+    test_arena();
     test_file_content();
     test_lexer();
 }
