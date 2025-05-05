@@ -4,6 +4,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+static inline FileContent *file_content_new(const Path path, Slice data, bool allocated) {
+    FileContent *result = malloc(sizeof(FileContent));
+    *(Path*)&result->path = path;
+    *(Slice*)&result->data = data;
+    *(bool*)&result->allocated = allocated;
+    return result;
+}
+
+FileContent *file_content_new_in_memory(const char *data) {
+    return file_content_new("<memory>", slice_from_cstr(data), false);
+}
+
 FileContent *file_content_read(const Path path) {
     FILE *file = fopen(path, "r");
     if (!file) {
@@ -19,10 +31,7 @@ FileContent *file_content_read(const Path path) {
         return NULL;
     }
 
-    FileContent *result = malloc(sizeof(FileContent));
-    *(Path*)&result->path = path;
-    *(Slice*)&result->content = slice_new(content, size);
-    return result;
+    return file_content_new(path, slice_new(content, readed_bytes), true);
 }
 
 inline static void file_pos_putc(FilePos *pos, char c) {
@@ -35,14 +44,14 @@ inline static void file_pos_putc(FilePos *pos, char c) {
 }
 
 FileLoc file_content_locate(FileContent *content, Slice slice) {
-    assert(slice.value > content->content.value);
-    size_t position = slice.value - content->content.value;
-    assert(position < content->content.length);
+    assert(slice.value > content->data.value);
+    size_t position = slice.value - content->data.value;
+    assert(position < content->data.length);
     FileLoc result = {
         .begin = { .line = 1, .character = 0 }
     };
     for (size_t i = 0; i <= position; i++) {
-        file_pos_putc(&result.begin, content->content.value[i]);
+        file_pos_putc(&result.begin, content->data.value[i]);
     }
     result.end = result.begin;
     for (size_t i = 1; i < slice.length; i++) {
@@ -52,6 +61,8 @@ FileLoc file_content_locate(FileContent *content, Slice slice) {
 }
 
 void file_content_free(FileContent *content) {
-    free((void*)content->content.value);
+    if (content->allocated) {
+        free((void*)content->data.value);
+    }
     free(content);
 }

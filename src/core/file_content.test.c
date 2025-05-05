@@ -10,8 +10,18 @@ static void test_file_content_read() {
     CU_ASSERT_NOT_EQUAL_FATAL(content, NULL);
     CU_ASSERT_STRING_EQUAL(content->path, "for_tests/test.txt");
     const char* expects = "hello, how are you?\n";
-    CU_ASSERT_EQUAL_FATAL(content->content.length, strlen(expects));
-    CU_ASSERT_NSTRING_EQUAL(content->content.value, expects, content->content.length);
+    CU_ASSERT_EQUAL_FATAL(content->data.length, strlen(expects));
+    CU_ASSERT_NSTRING_EQUAL(content->data.value, expects, content->data.length);
+    file_content_free(content);
+}
+
+static void test_file_content_in_memory() {
+    FileContent *content = file_content_new_in_memory("hello, how are you?\n");
+    CU_ASSERT_NOT_EQUAL_FATAL(content, NULL);
+    CU_ASSERT_STRING_EQUAL(content->path, "<memory>");
+    const char* expects = "hello, how are you?\n";
+    CU_ASSERT_EQUAL_FATAL(content->data.length, strlen(expects));
+    CU_ASSERT_NSTRING_EQUAL(content->data.value, expects, content->data.length);
     file_content_free(content);
 }
 
@@ -23,10 +33,9 @@ static inline void CU_assert_file_loc_eq(FileLoc a, FileLoc b) {
 }
 
 static void test_file_content_locate_multiline() {
-    FileContent *content = file_content_read("for_tests/test_multiline.txt");
-    CU_ASSERT_NOT_EQUAL_FATAL(content, NULL);
+    FileContent *content = file_content_new_in_memory("hello, how are you?\ni love you)\n");
 
-    Slice slice = slice_new(&content->content.value[15], 6);
+    Slice slice = slice_new(&content->data.value[15], 6);
     CU_ASSERT_NSTRING_EQUAL_FATAL(slice.value, "you?\ni", slice.length);
 
     FileLoc loc = file_content_locate(content, slice);
@@ -39,10 +48,10 @@ static void test_file_content_locate_multiline() {
     file_content_free(content);
 }
 static void test_file_content_locate() {
-    FileContent *content = file_content_read("for_tests/test_multiline.txt");
+    FileContent *content = file_content_new_in_memory("hello, how are you?\ni love you)\n");
     CU_ASSERT_NOT_EQUAL_FATAL(content, NULL);
 
-    Slice slice = slice_new(&content->content.value[22], 4);
+    Slice slice = slice_new(&content->data.value[22], 4);
     CU_ASSERT_NSTRING_EQUAL_FATAL(slice.value, "love", slice.length);
 
     FileLoc loc = file_content_locate(content, slice);
@@ -58,6 +67,7 @@ static void test_file_content_locate() {
 void test_file_content() {
     CU_pSuite suite = CU_add_suite("file content", NULL, NULL);
     CU_ADD_TEST(suite, test_file_content_read);
+    CU_ADD_TEST(suite, test_file_content_in_memory);
     CU_ADD_TEST(suite, test_file_content_locate);
     CU_ADD_TEST(suite, test_file_content_locate_multiline);
 }
