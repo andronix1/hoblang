@@ -58,10 +58,11 @@ static inline void *__arena_take(Arena *arena, size_t size, size_t align) {
 }
 
 void *__arena_alloc(Arena *arena, size_t size, size_t align) {
+    size_t cap = arena->size;
     void *ptr;
     while (!(ptr = __arena_take(arena, size, align))) {
         if (!arena->next) {
-            (arena->next = __arena_new(size, align))->prev = arena;
+            (arena->next = __arena_new(cap > size ? cap : size, align))->prev = arena;
             ptr = __arena_take(arena->next, size, align);
             assert(ptr);
             return ptr;
