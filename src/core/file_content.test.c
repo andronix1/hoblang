@@ -64,10 +64,31 @@ static void test_file_content_locate() {
     file_content_free(content);
 }
 
+static void test_file_content_get_lines() {
+    FileContent *content = file_content_new_in_memory("hello, how are you?\ni love you)\nthis is line3\n");
+    CU_ASSERT_NOT_EQUAL_FATAL(content, NULL);
+
+    CU_ASSERT(slice_eq(
+        file_content_get_lines(content, 1, 1).content,
+        slice_from_cstr("hello, how are you?")
+    ));
+    CU_ASSERT(slice_eq(
+        file_content_get_lines(content, 1, 2).content,
+        slice_from_cstr("hello, how are you?\ni love you)")
+    ));
+    CU_ASSERT(slice_eq(
+        file_content_get_lines(content, 4, 4).content,
+        slice_from_cstr("")
+    ));
+
+    file_content_free(content);
+}
+
 void test_file_content() {
     CU_pSuite suite = CU_add_suite("file content", NULL, NULL);
     CU_ADD_TEST(suite, test_file_content_read);
     CU_ADD_TEST(suite, test_file_content_in_memory);
     CU_ADD_TEST(suite, test_file_content_locate);
     CU_ADD_TEST(suite, test_file_content_locate_multiline);
+    CU_ADD_TEST(suite, test_file_content_get_lines);
 }

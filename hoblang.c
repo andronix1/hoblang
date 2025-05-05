@@ -1,3 +1,4 @@
+#include "core/file_content.h"
 #include "core/log.h"
 #include "core/slice.h"
 #include <stdio.h>
@@ -11,11 +12,10 @@ static void hob_log_slice(va_list list) {
 }
 
 int main(int argc, const char **argv) {
-    log_register('i', sizeof(int), hob_log_int);
-    log_register('X', sizeof(long), hob_log_hex);
-    log_register('S', sizeof(Slice), hob_log_slice);
-    log_register('s', sizeof(const char*), hob_log_cstr);
-    long a = 0xffffCcba321;
-    logln("$$ $$1 $$2: $i, $X, '$S', '$s'", 123, a, slice_from_cstr("ASDSSDASAD"), "lol kek");
+    log_register('V', sizeof(const char*), file_in_lines_view_print);
+    const char *str = "hello, bro, how are you?\n    i am very cool, lol\nyes, very cool\n";
+    FileContent *content = file_content_new_in_memory(str);
+    logln("$V", file_content_get_in_lines_view(content, slice_new(&str[30], 25)));
+    file_content_free(content);
     return 0;
 }

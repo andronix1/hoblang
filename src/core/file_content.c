@@ -60,9 +60,81 @@ FileLoc file_content_locate(FileContent *content, Slice slice) {
     return result;
 }
 
+static inline FilePosLinesHandle file_pos_lines_handle(Slice content, size_t start, size_t end) {
+    FilePosLinesHandle handle = {
+        .content = content,
+        .start = start,
+        .end = end,
+    };
+    return handle;
+}
+
+FilePosLinesHandle file_content_get_lines(FileContent *content, size_t start, size_t end) {
+    assert(start <= end);
+    FilePos position = { 1, 0 };
+    size_t i = 0;
+
+    for (; i < content->data.length && position.line < start; i++) {
+        file_pos_putc(&position, content->data.value[i]);
+    }
+    assert(position.line == start);
+    size_t start_id = i;
+
+    for (; i < content->data.length && position.line <= end; i++) {
+        file_pos_putc(&position, content->data.value[i]);
+    }
+    if (position.line > end) {
+        position.line--;
+        i--;
+    }
+    assert(position.line == end);
+
+    return file_pos_lines_handle(
+        slice_new(&content->data.value[start_id], i - start_id),
+        start, end
+    );
+}
+
+static inline FileInLinesView file_in_lines_view(FilePosLinesHandle handle, Slice slice) {
+    FileInLinesView view = {
+        .handle = handle,
+        .slice = slice,
+    };
+    return view;
+}
+
+FileInLinesView file_content_get_in_lines_view(FileContent *content, Slice slice) {
+    FileLoc loc = file_content_locate(content, slice);
+    return file_in_lines_view(
+        file_content_get_lines(content, loc.begin.line, loc.end.line),
+        slice
+    );
+}
+
 void file_content_free(FileContent *content) {
     if (content->allocated) {
         free((void*)content->data.value);
     }
     free(content);
+}
+
+void file_in_lines_view_print(va_list list) {
+    FileInLinesView view = va_arg(list, FileInLinesView);
+    bool enabled = false;
+    size_t highlight_len = view.slice.length;
+    for (size_t i = 0; i < view.handle.content.length; i++) {
+        if (!enabled) {
+            if (&view.handle.content.value[i] == view.slice.value) {
+                printf("\033[31m");
+                enabled = true;
+            }
+        } else {
+            if (highlight_len > 0 && (--highlight_len == 0)) {
+                printf("\033[0m");
+            }
+        }
+        char c = view.handle.content.value[i];
+        putchar(c);
+    }
+    assert(enabled && highlight_len == 0);
 }
