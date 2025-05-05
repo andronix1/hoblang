@@ -18,7 +18,7 @@ void *__keymap_new(size_t size) {
 void *__keymap_get(void *keymap, Slice key) {
     for (size_t i = 0; i < vec_len(keymap); i++) {
         KeyMapElement *element = vec_at(keymap, i);
-        if (slice_eq(&key, &element->key)) {
+        if (slice_eq(key, element->key)) {
             return &element->data;
         }
     }

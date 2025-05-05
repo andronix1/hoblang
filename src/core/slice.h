@@ -9,5 +9,5 @@ typedef struct {
 } Slice;
 
 Slice slice_from_cstr(const char *value);
-bool slice_eq(const Slice *a, const Slice *b);
+bool slice_eq(const Slice a, const Slice b);
 Slice slice_new(const char *value, size_t length);
