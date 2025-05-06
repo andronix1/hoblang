@@ -3,6 +3,7 @@
 
 typedef struct Lexer {
     const FileContent *content;
+    bool content_ownership;
 
     Buffer buffer;
     size_t start_pos, pos;

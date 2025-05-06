@@ -18,11 +18,10 @@ int main(int argc, const char **argv) {
     log_register('S', hob_log_slice);
     log_register('L', file_pos_print);
     log_register('V', file_in_lines_view_print);
-    const char *str = "ads````+11+-``\n`````asd";
-    FileContent *content = file_content_new_in_memory(str);
-    Lexer *lexer = lexer_new(content);
+    Lexer *lexer = lexer_new(file_content_new_in_memory(
+        "ads````+11+-``\n`````asd"
+    ), true);
     while (lexer_next(lexer).kind != TOKEN_EOI);
     lexer_free(lexer);
-    file_content_free(content);
     return 0;
 }

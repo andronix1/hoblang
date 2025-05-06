@@ -11,8 +11,7 @@ static void CU_assert_tokens_eq(Token a, Token b) {
 }
 
 static void test_lexer_next_token() {
-    FileContent *content = file_content_new_in_memory("   \t \n +-+=-=hello");
-    Lexer *lexer = lexer_new(content);
+    Lexer *lexer = lexer_new(file_content_new_in_memory("   \t \n +-+=-=hello"), true);
 
     CU_assert_tokens_eq(lexer_next(lexer), token_simple(TOKEN_PLUS));
     CU_assert_tokens_eq(lexer_next(lexer), token_simple(TOKEN_MINUS));
@@ -27,7 +26,6 @@ static void test_lexer_next_token() {
     CU_assert_tokens_eq(lexer_next(lexer), token_simple(TOKEN_EOI));
 
     lexer_free(lexer);
-    file_content_free(content);
 }
 
 void test_lexer() {

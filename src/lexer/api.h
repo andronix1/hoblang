@@ -5,6 +5,6 @@
 
 typedef struct Lexer Lexer;
 
-Lexer *lexer_new(const FileContent *content);
+Lexer *lexer_new(const FileContent *content, bool content_ownership);
 Token lexer_next(Lexer *lexer);
 void lexer_free(Lexer *lexer);
