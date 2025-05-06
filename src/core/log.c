@@ -39,6 +39,14 @@ void logvln(const char *fmt, va_list list) {
     putchar('\n');
 }
 
+void logs(const char *fmt, ...) {
+    va_list list;
+    va_start(list, fmt);
+    logv(fmt, list);
+    va_end(list);
+}
+
+
 void logln(const char *fmt, ...) {
     va_list list;
     va_start(list, fmt);

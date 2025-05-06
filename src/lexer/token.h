@@ -2,6 +2,8 @@
 
 #include "core/slice.h"
 
+#define TOKEN_FAILED -2
+
 typedef enum {
     TOKEN_IDENT,
     TOKEN_MINUS, TOKEN_SUBTRACT,

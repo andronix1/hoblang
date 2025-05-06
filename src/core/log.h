@@ -9,4 +9,5 @@ void log_register(char id, HobLogHandleFunc func);
 void logv(const char *fmt, va_list list);
 void logvln(const char *fmt, va_list list);
 
+void logs(const char *fmt, ...);
 void logln(const char *fmt, ...);

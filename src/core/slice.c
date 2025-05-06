@@ -1,4 +1,5 @@
 #include "slice.h"
+#include <assert.h>
 #include <string.h>
 
 inline Slice slice_new(const char *value, size_t length) {
@@ -7,6 +8,13 @@ inline Slice slice_new(const char *value, size_t length) {
         .length = length,
     };
     return result;
+}
+
+Slice subslice(Slice source, size_t start, size_t end) {
+    assert(start <= end);
+    source.length = end - start;
+    source.value += start;
+    return source;
 }
 
 Slice slice_from_cstr(const char *value) {

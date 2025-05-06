@@ -1,6 +1,8 @@
 #include "core/file_content.h"
 #include "core/log.h"
 #include "core/slice.h"
+#include "lexer/api.h"
+#include "lexer/token.h"
 #include <stdio.h>
 
 static void hob_log_cstr(va_list list) { printf("%s", va_arg(list, char*)); }
@@ -13,13 +15,14 @@ static void hob_log_slice(va_list list) {
 
 int main(int argc, const char **argv) {
     log_register('s', hob_log_cstr);
+    log_register('S', hob_log_slice);
+    log_register('L', file_pos_print);
     log_register('V', file_in_lines_view_print);
-    const char *str = "hello, bro, how are you?\n    i am very cool, lol\nyes, very cool\n";
+    const char *str = "ads````+11+-``\n`````asd";
     FileContent *content = file_content_new_in_memory(str);
-    logln("error: $s\n$V",
-        "super strange error",
-        file_content_get_in_lines_view(content, slice_new(&str[30], 25))
-    );
+    Lexer *lexer = lexer_new(content);
+    while (lexer_next(lexer).kind != TOKEN_EOI);
+    lexer_free(lexer);
     file_content_free(content);
     return 0;
 }

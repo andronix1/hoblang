@@ -1,4 +1,5 @@
 #include "file_content.h"
+#include "core/ansi.h"
 #include "core/slice.h"
 #include <assert.h>
 #include <stdio.h>
@@ -43,7 +44,15 @@ inline static void file_pos_putc(FilePos *pos, char c) {
     }
 }
 
-FileLoc file_content_locate(FileContent *content, Slice slice) {
+FilePos file_content_locate_pos(const FileContent *content, size_t pos) {
+    FilePos result = { .line = 1, .character = 0 };
+    for (size_t i = 0; i <= pos; i++) {
+        file_pos_putc(&result, content->data.value[i]);
+    }
+    return result;
+}
+
+FileLoc file_content_locate(const FileContent *content, Slice slice) {
     assert(slice.value > content->data.value);
     size_t position = slice.value - content->data.value;
     assert(position < content->data.length);
@@ -69,7 +78,7 @@ static inline FilePosLinesHandle file_pos_lines_handle(Slice content, size_t sta
     return handle;
 }
 
-FilePosLinesHandle file_content_get_lines(FileContent *content, size_t start, size_t end) {
+FilePosLinesHandle file_content_get_lines(const FileContent *content, size_t start, size_t end) {
     assert(start <= end);
     FilePos position = { 1, 0 };
     size_t i = 0;
@@ -103,7 +112,7 @@ static inline FileInLinesView file_in_lines_view(FilePosLinesHandle handle, Slic
     return view;
 }
 
-FileInLinesView file_content_get_in_lines_view(FileContent *content, Slice slice) {
+FileInLinesView file_content_get_in_lines_view(const FileContent *content, Slice slice) {
     FileLoc loc = file_content_locate(content, slice);
     return file_in_lines_view(
         file_content_get_lines(content, loc.begin.line, loc.end.line),
@@ -118,23 +127,42 @@ void file_content_free(FileContent *content) {
     free(content);
 }
 
+#define PREFIX "  " ANSI_GRAY ">" ANSI_RESET " "
+
+void file_pos_print(va_list list) {
+    FilePos pos = va_arg(list, FilePos);
+    printf("%ld:%ld", pos.line, pos.character);
+}
+
 void file_in_lines_view_print(va_list list) {
     FileInLinesView view = va_arg(list, FileInLinesView);
     bool enabled = false;
     size_t highlight_len = view.slice.length;
+    printf(PREFIX);
     for (size_t i = 0; i < view.handle.content.length; i++) {
         if (!enabled) {
             if (&view.handle.content.value[i] == view.slice.value) {
-                printf("\033[31m");
+                printf(ANSI_RED);
                 enabled = true;
             }
         } else {
             if (highlight_len > 0 && (--highlight_len == 0)) {
-                printf("\033[0m");
+                printf(ANSI_RESET);
             }
         }
         char c = view.handle.content.value[i];
+        if (c == '\n') {
+            if (enabled) {
+                printf(ANSI_RESET);
+            }
+        }
         putchar(c);
+        if (c == '\n') {
+            printf(PREFIX);
+            if (enabled && highlight_len > 0) {
+                printf(ANSI_RED);
+            }
+        }
     }
     assert(enabled && highlight_len == 0);
 }

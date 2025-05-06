@@ -12,3 +12,4 @@ char lexer_next_char(Lexer *lexer);
 bool lexer_next_char_is(Lexer *lexer, char c);
 Slice lexer_slice(const Lexer *lexer);
 void lexer_mark_parsed(Lexer *lexer);
+void lexer_err(Lexer* lexer, size_t before, const char *fmt, ...);
