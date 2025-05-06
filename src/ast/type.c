@@ -8,6 +8,14 @@
     FIELDS; \
 })
 
+AstStructField ast_struct_field_new(Slice name, AstType *type) {
+    AstStructField field = {
+        .name = name,
+        .type = type,
+    };
+    return field;
+}
+
 AstType *ast_type_new_struct(Mempool *mempool, AstStructField *fields)
     CONSTRUCT(AST_TYPE_STRUCT, FIELD(structure.fields, fields))
 

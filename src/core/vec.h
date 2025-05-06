@@ -49,3 +49,12 @@ void vec_free(void *vec);
 } while (0)
 
 #define vec_at(VEC, IDX) ((typeof(VEC))__vec_at(VEC, IDX))
+
+#define vec_create(FIRST, ...) ({ \
+    typeof(FIRST) *__vec2 = vec_new(typeof(FIRST)); \
+    typeof(FIRST) __list[] = { FIRST, ##__VA_ARGS__ }; \
+    for (size_t __i = 0; __i < sizeof(__list) / sizeof(__list[0]); __i++) { \
+        vec_push(__vec2, __list[__i]); \
+    }; \
+    __vec2; \
+})

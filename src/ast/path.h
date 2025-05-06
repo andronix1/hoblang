@@ -20,4 +20,5 @@ typedef struct AstPath {
     AstPathSegment *segments;
 } AstPath;
 
+AstPathSegment ast_path_segment_new_ident(Slice ident);
 AstPath *ast_path_new(Mempool *mempool, AstPathSegment *segments);

@@ -28,5 +28,6 @@ typedef struct AstType {
     };
 } AstType;
 
+AstStructField ast_struct_field_new(Slice name, AstType *type);
 AstType *ast_type_new_struct(Mempool *pool, AstStructField *fields);
 AstType *ast_type_new_path(Mempool *pool, AstPath *path);

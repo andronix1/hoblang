@@ -19,6 +19,12 @@ void mempool_free(Mempool *mempool);
     __vec; \
 })
 
+#define vec_create_in(MEMPOOL, FIRST, ...) ({ \
+    typeof(FIRST) *__vec = vec_create(FIRST, ##__VA_ARGS__); \
+    mempool_add_vec(MEMPOOL, __vec); \
+    __vec; \
+})
+
 #define keymap_new_in(MEMPOOL, TYPE) ({ \
     TYPE *__keymap = keymap_new(TYPE); \
     mempool_add_keymap(MEMPOOL, __keymap); \
