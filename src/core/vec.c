@@ -3,6 +3,7 @@
 #include <malloc.h>
 
 typedef struct {
+    void **attachment;
     size_t esize;
     size_t len;
     size_t cap;
@@ -10,6 +11,7 @@ typedef struct {
 
 void *__vec_new(size_t esize) {
     VecHeader *result = malloc(sizeof(VecHeader));
+    result->attachment = NULL;
     result->esize = esize;
     result->len = 0;
     result->cap = 0;
@@ -25,6 +27,9 @@ inline void *__vec_reserve(void *vec, size_t size) {
     if (header->cap < size) {
         vec = &((VecHeader*)realloc(header, sizeof(VecHeader) + header->esize * size))[1];
         header = vec_header(vec);
+        if (header->attachment) {
+            *header->attachment = vec;
+        }
         header->cap = size;
     }
     return vec;
@@ -67,6 +72,11 @@ void *__vec_at(void *vec, size_t idx) {
     VecHeader *header = vec_header(vec);
     assert(idx < header->len);
     return &(((char*)vec)[header->esize * idx]);
+}
+
+void vec_attach_pos(void *vec, void **to) {
+    VecHeader *header = vec_header(vec);
+    header->attachment = to;
 }
 
 void vec_free(void *vec) {

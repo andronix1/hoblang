@@ -12,6 +12,7 @@ void *__vec_erase(void *vec);
 void *__vec_at(void *vec, size_t idx);
 size_t vec_len(const void *vec);
 size_t vec_esize(const void *vec);
+void vec_attach_pos(void *vec, void **to);
 void vec_free(void *vec);
 
 #define vec_new(TYPE) ((TYPE*)__vec_new(sizeof(TYPE)))
@@ -57,4 +58,9 @@ void vec_free(void *vec);
         vec_push(__vec2, __list[__i]); \
     }; \
     __vec2; \
+})
+
+#define vec_top(VEC) ({ \
+    typeof(VEC) *__vec = &(VEC); \
+    &((*__vec)[vec_len(*__vec) - 1]); \
 })
