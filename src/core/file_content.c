@@ -1,5 +1,6 @@
 #include "file_content.h"
 #include "core/ansi.h"
+#include "core/log.h"
 #include "core/slice.h"
 #include <assert.h>
 #include <stdio.h>
@@ -141,15 +142,9 @@ void file_in_lines_view_print(va_list list) {
     size_t highlight_len = view.slice.length;
     printf(PREFIX);
     for (size_t i = 0; i < view.handle.content.length; i++) {
-        if (!enabled) {
-            if (&view.handle.content.value[i] == view.slice.value) {
-                printf(ANSI_RED);
-                enabled = true;
-            }
-        } else {
-            if (highlight_len > 0 && (--highlight_len == 0)) {
-                printf(ANSI_RESET);
-            }
+        if (!enabled && &view.handle.content.value[i] == view.slice.value) {
+            printf(ANSI_RED);
+            enabled = true;
         }
         char c = view.handle.content.value[i];
         if (c == '\n') {
@@ -164,11 +159,9 @@ void file_in_lines_view_print(va_list list) {
                 printf(ANSI_RED);
             }
         }
+        if (enabled && highlight_len > 0 && (--highlight_len == 0)) {
+            printf(ANSI_RESET);
+        }
     }
-
-    assert(enabled);
-    if (highlight_len > 0) {
-        // TODO: move in assert
-        printf(ANSI_RESET);
-    }
+    assert(enabled && highlight_len == 0);
 }
