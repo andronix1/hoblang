@@ -2,12 +2,17 @@
 
 #include "core/slice.h"
 
-#define TOKEN_FAILED -2
-
 typedef enum {
+    // Keywords
+    TOKEN_TYPE,
+    TOKEN_STRUCT,
+    // Extended
     TOKEN_IDENT,
+    // Binops
     TOKEN_MINUS, TOKEN_SUBTRACT,
     TOKEN_PLUS, TOKEN_APPEND,
+    // Utility
+    TOKEN_FAILED,
     TOKEN_EOI,
 } TokenKind;
 

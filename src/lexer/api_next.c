@@ -1,4 +1,5 @@
 #include "api.h"
+#include "core/slice.h"
 #include "lexer/lexer.h"
 #include "lexer/token.h"
 #include <stdio.h>
@@ -35,7 +36,10 @@ static Token lexer_try_next(Lexer *lexer) {
             if (char_is_ident_start(c)) {
                 while (char_is_ident(lexer_next_char(lexer)));
                 lexer->pos--;
-                return token_simple(TOKEN_IDENT);
+                Slice slice = lexer_slice(lexer);
+                if (slice_eq(slice, slice_from_cstr("type"))) return token_simple(TOKEN_TYPE);
+                else if (slice_eq(slice, slice_from_cstr("struct"))) return token_simple(TOKEN_STRUCT);
+                else return token_simple(TOKEN_IDENT);
             }
             return token_simple(TOKEN_FAILED);
     }
