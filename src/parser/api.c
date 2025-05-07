@@ -10,6 +10,7 @@ Parser *parser_new(Lexer *lexer, bool lexer_ownership) {
     parser->lexer = lexer;
     parser->lexer_ownership = lexer_ownership;
     parser->mempool = mempool_new(1024);
+    parser->skip_next = false;
     return parser;
 }
 

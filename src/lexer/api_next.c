@@ -22,7 +22,10 @@ static inline bool char_is_whitespace(char c) {
 
 static Token lexer_try_next(Lexer *lexer) {
     char c;
-    while(char_is_whitespace(c = lexer_next_char(lexer)));
+    lexer_mark_parsed(lexer);
+    while(char_is_whitespace(c = lexer_next_char(lexer))) {
+        lexer_mark_parsed(lexer);
+    }
     switch (c) {
         case '+':
             if (lexer_next_char_is(lexer, '=')) return token_simple(TOKEN_APPEND);
@@ -49,11 +52,15 @@ static Token lexer_try_next(Lexer *lexer) {
 Token lexer_next(Lexer *lexer) {
     Token result = lexer_try_next(lexer);
     if (result.kind == TOKEN_FAILED) {
+        size_t sp = lexer->start_pos;
         size_t end = lexer->pos;
         while ((result = lexer_try_next(lexer)).kind == TOKEN_FAILED) {
             end = lexer->pos;
         }
+        size_t spn = lexer->start_pos;
+        lexer->start_pos = sp;
         lexer_err(lexer, end, "failed to recognize token");
+        lexer->start_pos = spn;
     }
     result.slice = lexer_slice(lexer);
     lexer_mark_parsed(lexer);

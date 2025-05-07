@@ -53,7 +53,7 @@ FilePos file_content_locate_pos(const FileContent *content, size_t pos) {
 }
 
 FileLoc file_content_locate(const FileContent *content, Slice slice) {
-    assert(slice.value > content->data.value);
+    assert(slice.value >= content->data.value);
     size_t position = slice.value - content->data.value;
     assert(position < content->data.length);
     FileLoc result = {
@@ -136,6 +136,7 @@ void file_pos_print(va_list list) {
 
 void file_in_lines_view_print(va_list list) {
     FileInLinesView view = va_arg(list, FileInLinesView);
+    assert(view.handle.content.value <= view.slice.value);
     bool enabled = false;
     size_t highlight_len = view.slice.length;
     printf(PREFIX);
@@ -164,5 +165,10 @@ void file_in_lines_view_print(va_list list) {
             }
         }
     }
-    assert(enabled && highlight_len == 0);
+
+    assert(enabled);
+    if (highlight_len > 0) {
+        // TODO: move in assert
+        printf(ANSI_RESET);
+    }
 }

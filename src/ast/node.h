@@ -21,4 +21,6 @@ typedef struct AstNode {
     };
 } AstNode;
 
+bool ast_node_eq(const AstNode *a, const AstNode *b);
+
 AstNode *ast_node_new_type_decl(Mempool *mempool, Slice name, AstType *type);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/slice.h"
+#include <stdarg.h>
 
 typedef enum {
     // Keywords
@@ -20,6 +21,8 @@ typedef struct {
     TokenKind kind;
     Slice slice;
 } Token;
+
+void token_print(va_list list);
 
 static inline Token token_simple(TokenKind kind) {
     Token token = { .kind = kind };

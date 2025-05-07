@@ -4,9 +4,11 @@
 #include "ast/type.h"
 #include "core/mempool.h"
 #include "core/slice.h"
+#include "core/vec.h"
 #include "lexer/api.h"
 #include "parser/api.h"
 #include <CUnit/Basic.h>
+#include <CUnit/CUnit.h>
 
 void test_parser_type() {
     Mempool *mempool = mempool_new(1024);
@@ -29,6 +31,10 @@ void test_parser_type() {
             ast_struct_field_new(slice_from_cstr("a"), i32),
             ast_struct_field_new(slice_from_cstr("b"), mod_i64)
         )));
+    AstNode **actual = parser_parse(parser);
+    CU_ASSERT_NOT_EQUAL_FATAL(actual, NULL);
+    CU_ASSERT_EQUAL_FATAL(vec_len(actual), 1);
+    CU_ASSERT(ast_node_eq(expects, *actual));
     parser_free(parser);
     mempool_free(mempool);
 }

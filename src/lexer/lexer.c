@@ -41,7 +41,7 @@ void lexer_err(Lexer* lexer, size_t before, const char *fmt, ...) {
     va_start(list, fmt);
     logs("$s:$L: error: ", lexer->content->path, file_content_locate_pos(lexer->content, lexer->start_pos));
     logvln(fmt, list);
-    logln("$V", file_content_get_in_lines_view(
+    logln("$V\n", file_content_get_in_lines_view(
         lexer->content, subslice(lexer->content->data, lexer->start_pos, before)));
     va_end(list);
 }

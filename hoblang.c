@@ -3,6 +3,7 @@
 #include "core/slice.h"
 #include "lexer/api.h"
 #include "lexer/token.h"
+#include "parser/api.h"
 #include <stdio.h>
 
 static void hob_log_cstr(va_list list) { printf("%s", va_arg(list, char*)); }
@@ -18,10 +19,14 @@ int main(int argc, const char **argv) {
     log_register('S', hob_log_slice);
     log_register('L', file_pos_print);
     log_register('V', file_in_lines_view_print);
-    Lexer *lexer = lexer_new(file_content_new_in_memory(
-        "ads````+11+-``\n`````asd"
-    ), true);
-    while (lexer_next(lexer).kind != TOKEN_EOI);
-    lexer_free(lexer);
+    log_register('T', token_print);
+    Parser *parser = parser_new(lexer_new(file_content_new_in_memory(
+        "type Super = struct {\n"
+        "    a: i32,\n"
+        "    b: mod.i32,\n"
+        "}\n"
+    ), true), true);
+    parser_parse(parser);
+    parser_free(parser);
     return 0;
 }
