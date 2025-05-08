@@ -35,6 +35,7 @@ static Token lexer_try_next(Lexer *lexer) {
             return token_simple(TOKEN_MINUS);
         case '=': return token_simple(TOKEN_ASSIGN);
         case ':': return token_simple(TOKEN_COLON);
+        case ';': return token_simple(TOKEN_SEMICOLON);
         case ',': return token_simple(TOKEN_COMMA);
         case '.': return token_simple(TOKEN_DOT);
         case '{': return token_simple(TOKEN_OPENING_FIGURE_BRACE);

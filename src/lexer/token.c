@@ -13,6 +13,7 @@ void token_print(va_list list) {
         case TOKEN_OPENING_FIGURE_BRACE: printf("`{`"); return;
         case TOKEN_CLOSING_FIGURE_BRACE: printf("`}`"); return;
         case TOKEN_COLON: printf("`:`"); return;
+        case TOKEN_SEMICOLON: printf("`;`"); return;
         case TOKEN_COMMA: printf("`,`"); return;
         case TOKEN_DOT: printf("`.`"); return;
         case TOKEN_IDENT: printf("<ident>"); return;

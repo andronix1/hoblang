@@ -17,7 +17,7 @@ typedef enum {
     TOKEN_OPENING_FIGURE_BRACE,
     TOKEN_CLOSING_FIGURE_BRACE,
     // Punctuation
-    TOKEN_COLON,
+    TOKEN_COLON, TOKEN_SEMICOLON,
     TOKEN_COMMA, TOKEN_DOT,
     // Utility
     TOKEN_FAILED,

@@ -50,7 +50,7 @@ static void test_parser_type_decl_ident() {
                     create_type("super")
                 )
             ),
-        "type MyCustomType = super"
+        "type MyCustomType = super;"
     );
 }
 
@@ -62,7 +62,7 @@ static void test_parser_type_decl_path() {
                     create_type("super.cool")
                 )
             ),
-        "type MyCustomType = super.cool"
+        "type MyCustomType = super.cool;"
     );
 }
 
@@ -79,7 +79,7 @@ static void test_parser_type_decl_struct_with_trailing_comma() {
         "type MyCustomType = struct {\n"
         "    a: i32,\n"
         "    b: mod.i64,\n"
-        "}"
+        "};"
     );
 }
 
@@ -96,7 +96,7 @@ static void test_parser_type_decl_struct() {
         "type MyCustomType = struct {\n"
         "    a: i32,\n"
         "    b: mod.i64\n"
-        "}"
+        "};"
     );
 }
 
@@ -112,8 +112,8 @@ static void test_parser_multiple_nodes() {
                     create_type("t2")
                 )
             ),
-        "type Type1 = t1\n"
-        "type Type2 = t2\n"
+        "type Type1 = t1;\n"
+        "type Type2 = t2;\n"
     );
 }
 
