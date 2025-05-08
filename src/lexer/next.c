@@ -49,6 +49,7 @@ static Token lexer_try_next(Lexer *lexer) {
                 Slice slice = lexer_slice(lexer);
                 if (slice_eq(slice, slice_from_cstr("type"))) return token_simple(TOKEN_TYPE);
                 else if (slice_eq(slice, slice_from_cstr("struct"))) return token_simple(TOKEN_STRUCT);
+                else if (slice_eq(slice, slice_from_cstr("local"))) return token_simple(TOKEN_LOCAL);
                 else return token_simple(TOKEN_IDENT);
             }
             return token_simple(TOKEN_FAILED);

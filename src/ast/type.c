@@ -7,8 +7,9 @@
 
 #define CONSTRUCT(KIND, FIELDS) MEMPOOL_CONSTRUCT(AstType, out->kind = KIND; FIELDS)
 
-AstStructField ast_struct_field_new(Slice name, AstType *type) {
+AstStructField ast_struct_field_new(bool is_local, Slice name, AstType *type) {
     AstStructField field = {
+        .is_local = is_local,
         .name = name,
         .type = type,
     };
@@ -28,6 +29,9 @@ bool ast_type_eq(const AstType *a, const AstType *b) {
             for (size_t i = 0; i < vec_len(a->structure.fields); i++) {
                 AstStructField *af = &a->structure.fields[i];
                 AstStructField *bf = &b->structure.fields[i];
+                if (af->is_local != bf->is_local) {
+                    return false;
+                }
                 if (!slice_eq(af->name, bf->name)) {
                     return false;
                 }

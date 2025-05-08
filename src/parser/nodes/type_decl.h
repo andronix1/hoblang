@@ -2,4 +2,4 @@
 
 #include "parser/api.h"
 
-AstNode *parse_type_decl_node(Parser *parser);
+AstNode *parse_type_decl_node(Parser *parser, bool is_local);

@@ -7,6 +7,7 @@ typedef enum {
     // Keywords
     TOKEN_TYPE,
     TOKEN_STRUCT,
+    TOKEN_LOCAL,
     // Extended
     TOKEN_IDENT,
     // Binops

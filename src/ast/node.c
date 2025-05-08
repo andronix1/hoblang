@@ -17,13 +17,16 @@ bool ast_node_eq(const AstNode *a, const AstNode *b) {
     }
     switch (a->kind) {
         case AST_NODE_TYPE_DECL:
-            return slice_eq(a->decl.name, b->decl.name) && ast_type_eq(a->decl.type, b->decl.type);
+            return a->type_decl.is_local == b->type_decl.is_local &&
+                slice_eq(a->type_decl.name, b->type_decl.name) &&
+                ast_type_eq(a->type_decl.type, b->type_decl.type);
     }
     UNREACHABLE;
 }
 
 
-AstNode *ast_node_new_type_decl(Mempool *mempool, Slice name, AstType *type)
+AstNode *ast_node_new_type_decl(Mempool *mempool, bool is_local, Slice name, AstType *type)
     CONSTRUCT(AST_NODE_TYPE_DECL,
-        FIELD(decl.name, name)
-        FIELD(decl.type, type))
+        FIELD(type_decl.name, name)
+        FIELD(type_decl.type, type)
+        FIELD(type_decl.is_local, is_local))

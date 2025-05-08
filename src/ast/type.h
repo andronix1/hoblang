@@ -4,6 +4,7 @@
 #include "core/mempool.h"
 #include "core/slice.h"
 #include "ast/api/type.h"
+#include <stdbool.h>
 
 typedef enum {
     AST_TYPE_STRUCT,
@@ -11,6 +12,7 @@ typedef enum {
 } AstTypeKind;
 
 typedef struct {
+    bool is_local;
     Slice name;
     AstType *type;
 } AstStructField;
@@ -30,6 +32,6 @@ typedef struct AstType {
 
 bool ast_type_eq(const AstType *a, const AstType *b);
 
-AstStructField ast_struct_field_new(Slice name, AstType *type);
+AstStructField ast_struct_field_new(bool is_local, Slice name, AstType *type);
 AstType *ast_type_new_struct(Mempool *pool, AstStructField *fields);
 AstType *ast_type_new_path(Mempool *pool, AstPath *path);

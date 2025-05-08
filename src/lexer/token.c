@@ -18,9 +18,10 @@ void token_print(va_list list) {
         case TOKEN_DOT: printf("`.`"); return;
         case TOKEN_IDENT: printf("<ident>"); return;
         case TOKEN_STRUCT: printf("`struct`"); return;
+        case TOKEN_LOCAL: printf("`local`"); return;
         case TOKEN_TYPE: printf("`type`"); return;
         case TOKEN_FAILED: printf("<fail>"); return;
         case TOKEN_EOI: printf("<end of input>"); return;
-        }
+    }
     UNREACHABLE;
 }

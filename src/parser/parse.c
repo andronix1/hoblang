@@ -5,15 +5,37 @@
 #include "parser/nodes/type_decl.h"
 #include "parser/parser.h"
 
+#define NOT_FOUND ((void*)-1)
+
+static AstNode *parser_next_maybe_local(Parser *parser, Token token, bool is_local) {
+    switch (token.kind) {
+        case TOKEN_TYPE: return parse_type_decl_node(parser, is_local);
+        default: return NOT_FOUND;
+    }
+}
+
+static AstNode *parser_next_full(Parser *parser, Token token) {
+    switch (token.kind) {
+        default: return parser_next_maybe_local(parser, token, false);
+    }
+}
+
 static AstNode *parser_next(Parser *parser) {
     while (true) {
+        bool is_local = parser_next_should_be(parser, TOKEN_LOCAL);
         Token token = parser_take(parser);
-        switch (token.kind) {
-            case TOKEN_TYPE: return parse_type_decl_node(parser);
-            case TOKEN_EOI: return NULL;
-            default:
-                parser_err(parser, token.slice, "unexpected token $T", token);
-                break;
+        if (token.kind == TOKEN_EOI) {
+            return NULL;
+        }
+        AstNode *try = is_local ?
+            parser_next_maybe_local(parser, token, true) :
+            parser_next_full(parser, token);
+        if (try == NOT_FOUND) {
+            parser_err(parser, token.slice, "unexpected token $T", token);
+            break;
+        }
+        if (try != NULL) {
+            return try;
         }
     }
 }

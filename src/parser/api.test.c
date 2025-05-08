@@ -45,7 +45,7 @@ static void check_parsing(AstNode **expects, const char *code) {
 static void test_parser_type_decl_ident() {
     check_parsing(
         vec_create_in(mempool,
-                ast_node_new_type_decl(mempool,
+                ast_node_new_type_decl(mempool, false,
                     slice_from_cstr("MyCustomType"),
                     create_type("super")
                 )
@@ -57,7 +57,7 @@ static void test_parser_type_decl_ident() {
 static void test_parser_type_decl_path() {
     check_parsing(
         vec_create_in(mempool,
-                ast_node_new_type_decl(mempool,
+                ast_node_new_type_decl(mempool, false,
                     slice_from_cstr("MyCustomType"),
                     create_type("super.cool")
                 )
@@ -69,11 +69,11 @@ static void test_parser_type_decl_path() {
 static void test_parser_type_decl_struct_with_trailing_comma() {
     check_parsing(
         vec_create_in(mempool,
-                ast_node_new_type_decl(mempool,
+                ast_node_new_type_decl(mempool, false,
                     slice_from_cstr("MyCustomType"),
                     ast_type_new_struct(mempool, vec_create_in(mempool,
-                        ast_struct_field_new(slice_from_cstr("a"), create_type("i32")),
-                        ast_struct_field_new(slice_from_cstr("b"), create_type("mod.i64"))
+                        ast_struct_field_new(false, slice_from_cstr("a"), create_type("i32")),
+                        ast_struct_field_new(false, slice_from_cstr("b"), create_type("mod.i64"))
                     )))
             ),
         "type MyCustomType = struct {\n"
@@ -86,11 +86,11 @@ static void test_parser_type_decl_struct_with_trailing_comma() {
 static void test_parser_type_decl_struct() {
     check_parsing(
         vec_create_in(mempool,
-                ast_node_new_type_decl(mempool,
+                ast_node_new_type_decl(mempool, false,
                     slice_from_cstr("MyCustomType"),
                     ast_type_new_struct(mempool, vec_create_in(mempool,
-                        ast_struct_field_new(slice_from_cstr("a"), create_type("i32")),
-                        ast_struct_field_new(slice_from_cstr("b"), create_type("mod.i64"))
+                        ast_struct_field_new(false, slice_from_cstr("a"), create_type("i32")),
+                        ast_struct_field_new(false, slice_from_cstr("b"), create_type("mod.i64"))
                     )))
             ),
         "type MyCustomType = struct {\n"
@@ -100,19 +100,53 @@ static void test_parser_type_decl_struct() {
     );
 }
 
+static void test_parser_type_decl_struct_with_local_fields() {
+    check_parsing(
+        vec_create_in(mempool,
+                ast_node_new_type_decl(mempool, false,
+                    slice_from_cstr("MyCustomType"),
+                    ast_type_new_struct(mempool, vec_create_in(mempool,
+                        ast_struct_field_new(true, slice_from_cstr("a"), create_type("i32")),
+                        ast_struct_field_new(false, slice_from_cstr("b"), create_type("mod.i64"))
+                    )))
+            ),
+        "type MyCustomType = struct {\n"
+        "    local a: i32,\n"
+        "    b: mod.i64\n"
+        "};"
+    );
+}
+
 static void test_parser_multiple_nodes() {
     check_parsing(
         vec_create_in(mempool,
-                ast_node_new_type_decl(mempool,
+                ast_node_new_type_decl(mempool, false,
                     slice_from_cstr("Type1"),
                     create_type("t1")
                 ),
-                ast_node_new_type_decl(mempool,
+                ast_node_new_type_decl(mempool, false,
                     slice_from_cstr("Type2"),
                     create_type("t2")
                 )
             ),
         "type Type1 = t1;\n"
+        "type Type2 = t2;\n"
+    );
+}
+
+static void test_parser_type_decl_local() {
+    check_parsing(
+        vec_create_in(mempool,
+                ast_node_new_type_decl(mempool, true,
+                    slice_from_cstr("Type1"),
+                    create_type("t1")
+                ),
+                ast_node_new_type_decl(mempool, false,
+                    slice_from_cstr("Type2"),
+                    create_type("t2")
+                )
+            ),
+        "local type Type1 = t1;\n"
         "type Type2 = t2;\n"
     );
 }
@@ -133,5 +167,7 @@ void test_parser() {
     CU_ADD_TEST(suite, test_parser_type_decl_path);
     CU_ADD_TEST(suite, test_parser_type_decl_struct);
     CU_ADD_TEST(suite, test_parser_type_decl_struct_with_trailing_comma);
+    CU_ADD_TEST(suite, test_parser_type_decl_struct_with_local_fields);
+    CU_ADD_TEST(suite, test_parser_type_decl_local);
     CU_ADD_TEST(suite, test_parser_multiple_nodes);
 }
