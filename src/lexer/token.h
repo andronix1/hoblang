@@ -10,6 +10,7 @@ typedef enum {
     TOKEN_LOCAL,
     TOKEN_FUN,
     TOKEN_VAR, TOKEN_FINAL, TOKEN_CONST,
+    TOKEN_GLOBAL, TOKEN_EXTERN,
     // Extended
     TOKEN_IDENT,
     // Binops

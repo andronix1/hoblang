@@ -8,17 +8,29 @@
 static void test_parser_value_decl_kind() {
     check_parsing(
         vec_create_in(mempool,
-            ast_node_new_value_decl(mempool, false,
-                AST_VALUE_DECL_VAR, slice_from_cstr("myVar"),
-                NULL, NULL
+            ast_node_new_value_decl(mempool,
+                NULL,
+                ast_value_info_new(mempool, false,
+                    AST_VALUE_DECL_VAR, slice_from_cstr("myVar"),
+                    NULL
+                ),
+                NULL
             ),
-            ast_node_new_value_decl(mempool, false,
-                AST_VALUE_DECL_FINAL, slice_from_cstr("myFinal"),
-                NULL, NULL
+            ast_node_new_value_decl(mempool,
+                NULL,
+                ast_value_info_new(mempool, false,
+                    AST_VALUE_DECL_FINAL, slice_from_cstr("myFinal"),
+                    NULL
+                ),
+                NULL
             ),
-            ast_node_new_value_decl(mempool, false,
-                AST_VALUE_DECL_CONST, slice_from_cstr("myConst"),
-                NULL, NULL
+            ast_node_new_value_decl(mempool,
+                NULL,
+                ast_value_info_new(mempool, false,
+                    AST_VALUE_DECL_CONST, slice_from_cstr("myConst"),
+                    NULL
+                ),
+                NULL
             ),
         ),
         "var myVar;\n"
@@ -30,9 +42,14 @@ static void test_parser_value_decl_kind() {
 static void test_parser_value_decl_explicit_type() {
     check_parsing(
         vec_create_in(mempool,
-            ast_node_new_value_decl(mempool, false,
-                AST_VALUE_DECL_CONST, slice_from_cstr("myConst"),
-                create_type("i32"), NULL
+            ast_node_new_value_decl(mempool,
+                NULL,
+                ast_value_info_new(mempool,
+                    false,
+                    AST_VALUE_DECL_CONST, slice_from_cstr("myConst"),
+                    create_type("i32")
+                ),
+                NULL
             ),
         ),
         "const myConst: i32;\n"
@@ -42,9 +59,14 @@ static void test_parser_value_decl_explicit_type() {
 static void test_parser_value_decl_initializer() {
     check_parsing(
         vec_create_in(mempool,
-            ast_node_new_value_decl(mempool, false,
-                AST_VALUE_DECL_CONST, slice_from_cstr("myConst"),
-                NULL, ast_expr_new_path(mempool, create_path("super"))
+            ast_node_new_value_decl(mempool,
+                NULL,
+                ast_value_info_new(mempool,
+                    false, AST_VALUE_DECL_CONST,
+                    slice_from_cstr("myConst"),
+                    NULL
+                ),
+                ast_expr_new_path(mempool, create_path("super"))
             ),
         ),
         "const myConst = super;\n"
@@ -54,9 +76,14 @@ static void test_parser_value_decl_initializer() {
 static void test_parser_value_decl_local() {
     check_parsing(
         vec_create_in(mempool,
-            ast_node_new_value_decl(mempool, true,
-                AST_VALUE_DECL_CONST, slice_from_cstr("myConst"),
-                create_type("i32"), ast_expr_new_path(mempool, create_path("super"))
+            ast_node_new_value_decl(mempool,
+                NULL,
+                ast_value_info_new(mempool,
+                    true,
+                    AST_VALUE_DECL_CONST, slice_from_cstr("myConst"),
+                    create_type("i32")
+                ),
+                ast_expr_new_path(mempool, create_path("super"))
             ),
         ),
         "local const myConst: i32 = super;\n"
@@ -66,9 +93,14 @@ static void test_parser_value_decl_local() {
 static void test_parser_value_decl_full() {
     check_parsing(
         vec_create_in(mempool,
-            ast_node_new_value_decl(mempool, false,
-                AST_VALUE_DECL_CONST, slice_from_cstr("myConst"),
-                create_type("i32"), ast_expr_new_path(mempool, create_path("super"))
+            ast_node_new_value_decl(mempool,
+                NULL,
+                ast_value_info_new(mempool,
+                    false,
+                    AST_VALUE_DECL_CONST, slice_from_cstr("myConst"),
+                    create_type("i32")
+                ),
+                ast_expr_new_path(mempool, create_path("super"))
             ),
         ),
         "const myConst: i32 = super;\n"

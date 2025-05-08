@@ -1,4 +1,5 @@
 #include "fun.h"
+#include "ast/api/body.h"
 #include "ast/api/type.h"
 #include "ast/node.h"
 #include "core/mempool.h"
@@ -9,18 +10,23 @@
 #include "parser/nodes/type.h"
 #include "parser/parser.h"
 
-AstNode *parse_fun_decl_node(Parser *parser, bool is_local) {
+AstFunInfo *parse_fun_info(Parser *parser, bool is_local) {
     Slice name = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
     PARSER_EXPECT_NEXT(parser, TOKEN_OPENING_CIRCLE_BRACE);
     AstFunArg *args = vec_new_in(parser->mempool, AstFunArg);
     while (!parser_next_should_be(parser, TOKEN_CLOSING_CIRCLE_BRACE)) {
         Slice arg_name = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
         PARSER_EXPECT_NEXT(parser, TOKEN_COLON);
-        vec_push(args, ast_node_fun_arg(arg_name, NOT_NULL(parse_type(parser))));
+        vec_push(args, ast_fun_arg_new(arg_name, NOT_NULL(parse_type(parser))));
         if (!parser_check_list_sep(parser, TOKEN_CLOSING_CIRCLE_BRACE)) return NULL;
     }
     AstType *returns = parser_next_should_be(parser, TOKEN_FUN_RETURNS) ?
         NOT_NULL(parse_type(parser)) : NULL;
+    return ast_fun_info_new(parser->mempool, is_local, name, args, returns);
+}
+
+AstNode *parse_fun_decl_node(Parser *parser, AstGlobal *global, bool is_local) {
+    AstFunInfo *info = NOT_NULL(parse_fun_info(parser, is_local));
     AstBody *body = NOT_NULL(parse_body(parser));
-    return ast_node_new_fun_decl(parser->mempool, is_local, name, args, returns, body);
+    return ast_node_new_fun_decl(parser->mempool, global, info, body);
 }

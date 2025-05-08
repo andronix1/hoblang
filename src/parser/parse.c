@@ -1,26 +1,44 @@
 #include "api.h"
 #include "ast/api/expr.h"
+#include "ast/global.h"
 #include "ast/node.h"
 #include "ast/stmt.h"
 #include "core/mempool.h"
+#include "core/null.h"
 #include "core/vec.h"
 #include "lexer/token.h"
 #include "parser/nodes/expr.h"
+#include "parser/nodes/extern.h"
 #include "parser/nodes/fun.h"
+#include "parser/nodes/global.h"
 #include "parser/nodes/type_decl.h"
 #include "parser/nodes/value.h"
 #include "parser/parser.h"
 
 #define NOT_FOUND ((void*)-1)
 
+static AstNode *parser_next_maybe_local_and_global(Parser *parser, AstGlobal *global, bool is_local) {
+    Token token = parser_take(parser);
+    switch (token.kind) {
+        case TOKEN_FUN: return parse_fun_decl_node(parser, global, is_local);
+        default: return NOT_FOUND;
+    }
+}
+
 static AstNode *parser_next_maybe_local(Parser *parser, Token token, bool is_local) {
     switch (token.kind) {
-        case TOKEN_TYPE: return parse_type_decl_node(parser, is_local);
-        case TOKEN_FUN: return parse_fun_decl_node(parser, is_local);
+        case TOKEN_TYPE:
+            return parse_type_decl_node(parser, is_local);
         case TOKEN_VAR: case TOKEN_FINAL: case TOKEN_CONST:
             parser_skip_next(parser);
             return parse_value_decl_node(parser, is_local);
-        default: return NOT_FOUND;
+        case TOKEN_GLOBAL:
+            return parser_next_maybe_local_and_global(parser, NOT_NULL(parse_global(parser)), is_local);
+        case TOKEN_EXTERN:
+            return parse_extern_node(parser, is_local);
+        default:
+            parser_skip_next(parser);
+            return parser_next_maybe_local_and_global(parser, NULL, is_local);
     }
 }
 

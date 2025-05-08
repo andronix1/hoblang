@@ -57,6 +57,8 @@ static Token lexer_try_next(Lexer *lexer) {
                 else if (slice_eq(slice, slice_from_cstr("var"))) return token_simple(TOKEN_VAR);
                 else if (slice_eq(slice, slice_from_cstr("final"))) return token_simple(TOKEN_FINAL);
                 else if (slice_eq(slice, slice_from_cstr("const"))) return token_simple(TOKEN_CONST);
+                else if (slice_eq(slice, slice_from_cstr("global"))) return token_simple(TOKEN_GLOBAL);
+                else if (slice_eq(slice, slice_from_cstr("extern"))) return token_simple(TOKEN_EXTERN);
                 else return token_simple(TOKEN_IDENT);
             }
             return token_simple(TOKEN_FAILED);
