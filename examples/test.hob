@@ -1,0 +1,5 @@
+local const super: i32;
+
+fun nestedEntry() -> i32
+
+fun entry() -> i32 {}

@@ -1,6 +1,5 @@
 #include "file_content.h"
 #include "core/ansi.h"
-#include "core/log.h"
 #include "core/slice.h"
 #include <assert.h>
 #include <stdio.h>
