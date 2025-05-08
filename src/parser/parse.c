@@ -32,9 +32,7 @@ static AstNode *parser_next(Parser *parser) {
             parser_next_full(parser, token);
         if (try == NOT_FOUND) {
             parser_err(parser, token.slice, "unexpected token $T", token);
-            break;
-        }
-        if (try != NULL) {
+        } else if (try != NULL) {
             return try;
         }
     }
