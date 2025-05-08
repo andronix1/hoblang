@@ -1,7 +1,11 @@
 #include "api.h"
+#include "ast/api/expr.h"
+#include "ast/node.h"
+#include "ast/stmt.h"
 #include "core/mempool.h"
 #include "core/vec.h"
 #include "lexer/token.h"
+#include "parser/nodes/expr.h"
 #include "parser/nodes/fun.h"
 #include "parser/nodes/type_decl.h"
 #include "parser/parser.h"
@@ -18,11 +22,16 @@ static AstNode *parser_next_maybe_local(Parser *parser, Token token, bool is_loc
 
 static AstNode *parser_next_full(Parser *parser, Token token) {
     switch (token.kind) {
+        case TOKEN_IDENT:
+            parser_skip_next(parser);
+            AstExpr *expr = parse_expr(parser);
+            PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
+            return ast_node_new_stmt(parser->mempool, ast_stmt_new_expr(parser->mempool, expr));
         default: return parser_next_maybe_local(parser, token, false);
     }
 }
 
-static AstNode *parser_next(Parser *parser) {
+AstNode *parser_next(Parser *parser) {
     while (true) {
         bool is_local = parser_next_should_be(parser, TOKEN_LOCAL);
         Token token = parser_take(parser);

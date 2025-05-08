@@ -5,6 +5,7 @@
 #include "core/null.h"
 #include "core/vec.h"
 #include "lexer/token.h"
+#include "parser/nodes/body.h"
 #include "parser/nodes/type.h"
 #include "parser/parser.h"
 
@@ -20,7 +21,6 @@ AstNode *parse_fun_decl_node(Parser *parser, bool is_local) {
     }
     AstType *returns = parser_next_should_be(parser, TOKEN_FUN_RETURNS) ?
         NOT_NULL(parse_type(parser)) : NULL;
-    PARSER_EXPECT_NEXT(parser, TOKEN_OPENING_FIGURE_BRACE);
-    PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_FIGURE_BRACE);
-    return ast_node_new_fun_decl(parser->mempool, is_local, name, args, returns);
+    AstBody *body = NOT_NULL(parse_body(parser));
+    return ast_node_new_fun_decl(parser->mempool, is_local, name, args, returns, body);
 }

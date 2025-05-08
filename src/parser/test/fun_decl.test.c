@@ -1,3 +1,4 @@
+#include "ast/body.h"
 #include "ast/node.h"
 #include "core/mempool.h"
 #include "core/slice.h"
@@ -10,7 +11,8 @@ static void test_parser_fun_decl_global() {
             ast_node_new_fun_decl(mempool, false,
                 slice_from_cstr("test"),
                 vec_new_in(mempool, AstFunArg),
-                NULL
+                NULL,
+                ast_body_new(mempool, vec_new_in(mempool, AstNode*))
             )
         ),
         "fun test() {}"
@@ -23,7 +25,8 @@ static void test_parser_fun_decl_returns() {
             ast_node_new_fun_decl(mempool, false,
                 slice_from_cstr("test"),
                 vec_new_in(mempool, AstFunArg),
-                create_type("t1.t2")
+                create_type("t1.t2"),
+                ast_body_new(mempool, vec_new_in(mempool, AstNode*))
             )
         ),
         "fun test() -> t1.t2 {}"
@@ -39,7 +42,8 @@ static void test_parser_fun_decl_args() {
                     ast_node_fun_arg(slice_from_cstr("a"), create_type("i32")),
                     ast_node_fun_arg(slice_from_cstr("b"), create_type("i64"))
                 ),
-                create_type("t1.t2")
+                create_type("t1.t2"),
+                ast_body_new(mempool, vec_new_in(mempool, AstNode*))
             )
         ),
         "fun test(a: i32, b: i64) -> t1.t2 {}"
@@ -55,7 +59,8 @@ static void test_parser_fun_decl_args_with_trailing_comma() {
                     ast_node_fun_arg(slice_from_cstr("a"), create_type("i32")),
                     ast_node_fun_arg(slice_from_cstr("b"), create_type("i64"))
                 ),
-                create_type("t1.t2")
+                create_type("t1.t2"),
+                ast_body_new(mempool, vec_new_in(mempool, AstNode*))
             )
         ),
         "fun test(\n"
@@ -71,7 +76,8 @@ static void test_parser_fun_decl_local() {
             ast_node_new_fun_decl(mempool, true,
                 slice_from_cstr("test"),
                 vec_new_in(mempool, AstFunArg),
-                NULL
+                NULL,
+                ast_body_new(mempool, vec_new_in(mempool, AstNode*))
             )
         ),
         "local fun test() {}"

@@ -1,5 +1,6 @@
 #include "common.test.h"
 #include "ast/api/node.h"
+#include "ast/api/path.h"
 #include "ast/api/type.h"
 #include "ast/node.h"
 #include "ast/path.h"
@@ -9,7 +10,7 @@
 
 Mempool *mempool;
 
-AstType *create_type(const char *str) {
+AstPath *create_path(const char *str) {
     AstPathSegment *segments = vec_new_in(mempool, AstPathSegment);
     size_t begin = 0;
     Slice slice = slice_from_cstr(str);
@@ -20,7 +21,11 @@ AstType *create_type(const char *str) {
         }
     }
     vec_push(segments, ast_path_segment_new_ident(subslice(slice, begin, slice.length)));
-    return ast_type_new_path(mempool, ast_path_new(mempool, segments));
+    return ast_path_new(mempool, segments);
+}
+
+AstType *create_type(const char *str) {
+    return ast_type_new_path(mempool, create_path(str));
 }
 
 void check_parsing(AstNode **expects, const char *code) {
