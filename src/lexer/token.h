@@ -12,6 +12,13 @@ typedef enum {
     // Binops
     TOKEN_MINUS, TOKEN_SUBTRACT,
     TOKEN_PLUS, TOKEN_APPEND,
+    TOKEN_ASSIGN,
+    // Braces
+    TOKEN_OPENING_FIGURE_BRACE,
+    TOKEN_CLOSING_FIGURE_BRACE,
+    // Punctuation
+    TOKEN_COLON,
+    TOKEN_COMMA, TOKEN_DOT,
     // Utility
     TOKEN_FAILED,
     TOKEN_EOI,

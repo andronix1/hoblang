@@ -56,7 +56,7 @@ FilePos file_content_locate_pos(const FileContent *content, size_t pos) {
 FileLoc file_content_locate(const FileContent *content, Slice slice) {
     assert(slice.value >= content->data.value);
     size_t position = slice.value - content->data.value;
-    assert(position < content->data.length);
+    assert(position <= content->data.length);
     FileLoc result = {
         .begin = { .line = 1, .character = 0 }
     };
@@ -163,5 +163,5 @@ void file_in_lines_view_print(va_list list) {
             printf(ANSI_RESET);
         }
     }
-    assert(enabled && highlight_len == 0);
+    assert(!enabled || highlight_len == 0);
 }

@@ -53,8 +53,9 @@ static inline void *__arena_take(Arena *arena, size_t size, size_t align) {
     if (final_top > arena->size) {
         return NULL;
     }
+    void *ptr = &arena->content[arena->top];
     arena->top = final_top;
-    return &arena->content[final_top];
+    return ptr;
 }
 
 void *__arena_alloc(Arena *arena, size_t size, size_t align) {

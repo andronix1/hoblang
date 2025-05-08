@@ -2,29 +2,64 @@
 #include "core/log.h"
 #include "lexer/api.h"
 #include "lexer/lexer.h"
-#include <stdio.h>
+#include "lexer/token.h"
 
 Token parser_take(Parser *parser) {
     if (parser->skip_next) {
         parser->skip_next = false;
         return parser->cache;
     }
-    return parser->cache = lexer_next(parser->lexer);
+    parser->cache = lexer_next(parser->lexer);
+    assert(parser->cache.kind != TOKEN_FAILED);
+    return parser->cache;
 }
 
-bool parser_next_is(Parser *parser, TokenKind kind) {
-    if (parser_take(parser).kind != kind) {
-        parser->skip_next = true;
+inline Token parser_peek(Parser *parser) {
+    Token token = parser_take(parser);
+    parser_skip_next(parser);
+    return token;
+}
+
+inline void parser_skip_next(Parser *parser) {
+    assert(!parser->skip_next);
+    parser->skip_next = true;
+}
+
+inline bool parser_next_is(Parser *parser, TokenKind kind) {
+    if (parser_peek(parser).kind != kind) {
         return false;
     }
     return true;
 }
 
 bool parser_next_is_not(Parser *parser, TokenKind kind) {
-    if (parser_take(parser).kind == kind) {
-        parser->skip_next = true;
+    if (parser_peek(parser).kind != kind) {
         return true;
     }
+    return false;
+}
+
+inline bool parser_next_should_be(Parser *parser, TokenKind kind) {
+    if (parser_next_is(parser, kind)) {
+        parser_take(parser);
+        return true;
+    }
+    return false;
+}
+
+inline bool parser_next_should_not_be(Parser *parser, TokenKind kind) {
+    if (parser_next_is_not(parser, kind)) {
+        parser_take(parser);
+        return true;
+    }
+    return false;
+}
+
+bool parser_check_list_sep(Parser *parser, TokenKind end) {
+    if (parser_next_should_be(parser, TOKEN_COMMA) || parser_next_is(parser, end)) {
+        return true;
+    }
+    parser_err(parser, parser->cache.slice, "expected separator");
     return false;
 }
 

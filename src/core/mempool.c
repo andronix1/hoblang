@@ -4,8 +4,6 @@
 #include <stdalign.h>
 #include <stdlib.h>
 
-#define DEFAULT_REGION_SIZE 1024
-
 typedef struct Mempool {
     void **vectors;
     void **keymaps;

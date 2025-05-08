@@ -16,7 +16,7 @@ bool ast_path_eq(const AstPath *a, const AstPath *b) {
         }
         switch (as->kind) {
             case AST_PATH_SEGMENT_IDENT:
-                if (slice_eq(as->ident, bs->ident)) return false;
+                if (!slice_eq(as->ident, bs->ident)) return false;
                 break;
         }
     }
@@ -31,5 +31,6 @@ AstPathSegment ast_path_segment_new_ident(Slice ident) {
     };
     return result;
 }
+
 AstPath *ast_path_new(Mempool *mempool, AstPathSegment *segments)
     MEMPOOL_CONSTRUCT(AstPath, out->segments = segments)

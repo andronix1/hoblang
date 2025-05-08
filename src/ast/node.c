@@ -1,4 +1,5 @@
 #include "node.h"
+#include "ast/type.h"
 #include "core/assert.h"
 #include "core/slice.h"
 #include "mempool.h"
@@ -16,7 +17,7 @@ bool ast_node_eq(const AstNode *a, const AstNode *b) {
     }
     switch (a->kind) {
         case AST_NODE_TYPE_DECL:
-            return slice_eq(a->decl.name, b->decl.name);
+            return slice_eq(a->decl.name, b->decl.name) && ast_type_eq(a->decl.type, b->decl.type);
     }
     UNREACHABLE;
 }

@@ -23,7 +23,7 @@ int main(int argc, const char **argv) {
     Parser *parser = parser_new(lexer_new(file_content_new_in_memory(
         "type Super = struct {\n"
         "    a: i32,\n"
-        "    b: mod.i32,\n"
+        "    b: mod.i32\n"
         "}\n"
     ), true), true);
     parser_parse(parser);

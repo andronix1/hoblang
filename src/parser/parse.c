@@ -2,19 +2,15 @@
 #include "core/mempool.h"
 #include "core/vec.h"
 #include "lexer/token.h"
+#include "parser/nodes/type_decl.h"
 #include "parser/parser.h"
 
 static AstNode *parser_next(Parser *parser) {
     while (true) {
         Token token = parser_take(parser);
         switch (token.kind) {
-            case TOKEN_TYPE: {
-                parser_err(parser, token.slice, "type parsing is NIY");
-                break;
-            }
-            case TOKEN_EOI: {
-                return NULL;
-            }
+            case TOKEN_TYPE: return parse_type_decl_node(parser);
+            case TOKEN_EOI: return NULL;
             default:
                 parser_err(parser, token.slice, "unexpected token $T", token);
                 break;
