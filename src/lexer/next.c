@@ -32,6 +32,7 @@ static Token lexer_try_next(Lexer *lexer) {
             return token_simple(TOKEN_PLUS);
         case '-':
             if (lexer_next_char_is(lexer, '=')) return token_simple(TOKEN_SUBTRACT);
+            else if (lexer_next_char_is(lexer, '>')) return token_simple(TOKEN_FUN_RETURNS);
             return token_simple(TOKEN_MINUS);
         case '=': return token_simple(TOKEN_ASSIGN);
         case ':': return token_simple(TOKEN_COLON);
@@ -40,6 +41,8 @@ static Token lexer_try_next(Lexer *lexer) {
         case '.': return token_simple(TOKEN_DOT);
         case '{': return token_simple(TOKEN_OPENING_FIGURE_BRACE);
         case '}': return token_simple(TOKEN_CLOSING_FIGURE_BRACE);
+        case '(': return token_simple(TOKEN_OPENING_CIRCLE_BRACE);
+        case ')': return token_simple(TOKEN_CLOSING_CIRCLE_BRACE);
         case EOF:
             return token_simple(TOKEN_EOI);
         default:
@@ -50,6 +53,7 @@ static Token lexer_try_next(Lexer *lexer) {
                 if (slice_eq(slice, slice_from_cstr("type"))) return token_simple(TOKEN_TYPE);
                 else if (slice_eq(slice, slice_from_cstr("struct"))) return token_simple(TOKEN_STRUCT);
                 else if (slice_eq(slice, slice_from_cstr("local"))) return token_simple(TOKEN_LOCAL);
+                else if (slice_eq(slice, slice_from_cstr("fun"))) return token_simple(TOKEN_FUN);
                 else return token_simple(TOKEN_IDENT);
             }
             return token_simple(TOKEN_FAILED);

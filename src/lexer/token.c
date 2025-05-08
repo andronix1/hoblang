@@ -9,9 +9,12 @@ void token_print(va_list list) {
         case TOKEN_PLUS: printf("`+`"); return;
         case TOKEN_APPEND: printf("`+=`"); return;
         case TOKEN_SUBTRACT: printf("`-=`"); return;
+        case TOKEN_FUN_RETURNS: printf("`->`"); return;
         case TOKEN_ASSIGN: printf("`=`"); return;
         case TOKEN_OPENING_FIGURE_BRACE: printf("`{`"); return;
         case TOKEN_CLOSING_FIGURE_BRACE: printf("`}`"); return;
+        case TOKEN_OPENING_CIRCLE_BRACE: printf("`(`"); return;
+        case TOKEN_CLOSING_CIRCLE_BRACE: printf("`)`"); return;
         case TOKEN_COLON: printf("`:`"); return;
         case TOKEN_SEMICOLON: printf("`;`"); return;
         case TOKEN_COMMA: printf("`,`"); return;
@@ -20,6 +23,7 @@ void token_print(va_list list) {
         case TOKEN_STRUCT: printf("`struct`"); return;
         case TOKEN_LOCAL: printf("`local`"); return;
         case TOKEN_TYPE: printf("`type`"); return;
+        case TOKEN_FUN: printf("`fun`"); return;
         case TOKEN_FAILED: printf("<fail>"); return;
         case TOKEN_EOI: printf("<end of input>"); return;
     }

@@ -2,6 +2,7 @@
 #include "core/mempool.h"
 #include "core/vec.h"
 #include "lexer/token.h"
+#include "parser/nodes/fun.h"
 #include "parser/nodes/type_decl.h"
 #include "parser/parser.h"
 
@@ -10,6 +11,7 @@
 static AstNode *parser_next_maybe_local(Parser *parser, Token token, bool is_local) {
     switch (token.kind) {
         case TOKEN_TYPE: return parse_type_decl_node(parser, is_local);
+        case TOKEN_FUN: return parse_fun_decl_node(parser, is_local);
         default: return NOT_FOUND;
     }
 }

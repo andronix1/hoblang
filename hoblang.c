@@ -24,7 +24,8 @@ int main(int argc, const char **argv) {
         "type Super = struct {\n"
         "    a: i32,\n"
         "    b: mod.i32\n"
-        "}\n"
+        "};\n"
+        "local fun test() -> i32 {}"
     ), true), true);
     parser_parse(parser);
     parser_free(parser);
