@@ -8,6 +8,7 @@
 #include "parser/nodes/expr.h"
 #include "parser/nodes/fun.h"
 #include "parser/nodes/type_decl.h"
+#include "parser/nodes/value.h"
 #include "parser/parser.h"
 
 #define NOT_FOUND ((void*)-1)
@@ -16,6 +17,9 @@ static AstNode *parser_next_maybe_local(Parser *parser, Token token, bool is_loc
     switch (token.kind) {
         case TOKEN_TYPE: return parse_type_decl_node(parser, is_local);
         case TOKEN_FUN: return parse_fun_decl_node(parser, is_local);
+        case TOKEN_VAR: case TOKEN_FINAL: case TOKEN_CONST:
+            parser_skip_next(parser);
+            return parse_value_decl_node(parser, is_local);
         default: return NOT_FOUND;
     }
 }

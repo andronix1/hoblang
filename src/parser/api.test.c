@@ -6,6 +6,7 @@
 #include "parser/test/stmt_decl.test.h"
 #include "parser/test/type_decl.test.h"
 #include "parser/test/fun_decl.test.h"
+#include "parser/test/value_decl.test.h"
 #include <CUnit/Basic.h>
 #include <CUnit/CUnit.h>
 
@@ -29,6 +30,7 @@ static void test_parser_multiple_nodes() {
 void test_parser() {
     test_parser_type_decl();
     test_parser_fun_decl();
+    test_parser_value_decl();
     test_parser_stmt();
 
     CU_pSuite suite = CU_add_suite("lexer", on_test_setup, on_test_end);
