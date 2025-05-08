@@ -11,6 +11,8 @@ AstExpr *parse_expr(Parser *parser) {
         case TOKEN_IDENT:
             parser_skip_next(parser);
             return ast_expr_new_path(parser->mempool, NOT_NULL(parse_path(parser)));
+        case TOKEN_INTEGER:
+            return ast_expr_new_integer(parser->mempool, token.integer);
         default:
             parser_err(parser, token.slice, "expected expression");
             return NULL;

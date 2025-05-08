@@ -45,6 +45,7 @@ static AstNode *parser_next_maybe_local(Parser *parser, Token token, bool is_loc
 static AstNode *parser_next_full(Parser *parser, Token token) {
     switch (token.kind) {
         case TOKEN_IDENT:
+        case TOKEN_INTEGER:
             parser_skip_next(parser);
             AstExpr *expr = parse_expr(parser);
             PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);

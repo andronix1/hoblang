@@ -46,6 +46,14 @@ static Token lexer_try_next(Lexer *lexer) {
         case EOF:
             return token_simple(TOKEN_EOI);
         default:
+            if (char_is_digit(c)) {
+                uint64_t value = c - '0';
+                while (char_is_digit(c = lexer_next_char(lexer))) {
+                    value = value * 10 + c - '0';
+                }
+                lexer->pos--;
+                return token_integer(value);
+            }
             if (char_is_ident_start(c)) {
                 while (char_is_ident(lexer_next_char(lexer)));
                 lexer->pos--;

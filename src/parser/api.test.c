@@ -3,6 +3,7 @@
 #include "core/mempool.h"
 #include "core/slice.h"
 #include "parser/test/common.test.h"
+#include "parser/test/expr.test.h"
 #include "parser/test/stmt_decl.test.h"
 #include "parser/test/type_decl.test.h"
 #include "parser/test/fun_decl.test.h"
@@ -32,6 +33,7 @@ void test_parser() {
     test_parser_fun_decl();
     test_parser_value_decl();
     test_parser_stmt();
+    test_parser_expr();
 
     CU_pSuite suite = CU_add_suite("lexer", on_test_setup, on_test_end);
     CU_ADD_TEST(suite, test_parser_multiple_nodes);

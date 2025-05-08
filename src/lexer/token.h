@@ -2,6 +2,7 @@
 
 #include "core/slice.h"
 #include <stdarg.h>
+#include <stdint.h>
 
 typedef enum {
     // Keywords
@@ -12,7 +13,7 @@ typedef enum {
     TOKEN_VAR, TOKEN_FINAL, TOKEN_CONST,
     TOKEN_GLOBAL, TOKEN_EXTERN,
     // Extended
-    TOKEN_IDENT,
+    TOKEN_IDENT, TOKEN_INTEGER,
     // Binops
     TOKEN_MINUS, TOKEN_SUBTRACT,
     TOKEN_PLUS, TOKEN_APPEND,
@@ -32,9 +33,18 @@ typedef enum {
 typedef struct {
     TokenKind kind;
     Slice slice;
+
+    union {
+        uint64_t integer;
+    };
 } Token;
 
 void token_print(va_list list);
+
+static inline Token token_integer(uint64_t integer) {
+    Token token = { .kind = TOKEN_INTEGER, .integer = integer };
+    return token;
+}
 
 static inline Token token_simple(TokenKind kind) {
     Token token = { .kind = kind };

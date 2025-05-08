@@ -1,5 +1,3 @@
-#pragma once
-
 #include "stmt.h"
 #include "ast/expr.h"
 #include "ast/mempool.h"
