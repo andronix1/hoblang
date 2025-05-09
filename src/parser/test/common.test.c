@@ -34,7 +34,7 @@ AstType *create_type(const char *str) {
 }
 
 void check_parsing(AstNode **expects, const char *code) {
-    Parser *parser = parser_new(lexer_new(file_content_new_in_memory(code), true), true);
+    Parser *parser = parser_new(lexer_new(file_content_new_in_memory(code)));
     AstNode **actual = parser_parse(parser);
     CU_ASSERT_NOT_EQUAL_FATAL(actual, NULL);
     CU_ASSERT_EQUAL(vec_len(actual), vec_len(expects));

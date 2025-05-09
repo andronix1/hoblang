@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
         logln("failed to read file content: $E");
         return 1;
     }
-    Parser *parser = parser_new(lexer_new(content, true), true);
+    Parser *parser = parser_new(lexer_new(content));
     parser_parse(parser);
     parser_free(parser);
     return 0;

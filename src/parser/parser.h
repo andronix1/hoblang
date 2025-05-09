@@ -7,7 +7,6 @@
 typedef struct Parser {
     Mempool *mempool;
     Lexer *lexer;
-    bool lexer_ownership;
 
     Token cache;
     bool skip_next;
