@@ -34,6 +34,8 @@ static Token lexer_try_next(Lexer *lexer) {
             if (lexer_next_char_is(lexer, '=')) return token_simple(TOKEN_SUBTRACT);
             else if (lexer_next_char_is(lexer, '>')) return token_simple(TOKEN_FUN_RETURNS);
             return token_simple(TOKEN_MINUS);
+        case '*': return token_simple(TOKEN_STAR);
+        case '/': return token_simple(TOKEN_SLASH);
         case '=': return token_simple(TOKEN_ASSIGN);
         case ':': return token_simple(TOKEN_COLON);
         case ';': return token_simple(TOKEN_SEMICOLON);

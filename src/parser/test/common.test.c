@@ -2,6 +2,7 @@
 #include "ast/api/node.h"
 #include "ast/api/path.h"
 #include "ast/api/type.h"
+#include "ast/expr.h"
 #include "ast/node.h"
 #include "ast/path.h"
 #include "ast/type.h"
@@ -22,6 +23,10 @@ AstPath *create_path(const char *str) {
     }
     vec_push(segments, ast_path_segment_new_ident(subslice(slice, begin, slice.length)));
     return ast_path_new(mempool, segments);
+}
+
+AstExpr *create_path_expr(const char *str) {
+    return ast_expr_new_path(mempool, create_path(str));
 }
 
 AstType *create_type(const char *str) {

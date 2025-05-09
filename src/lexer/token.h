@@ -16,6 +16,7 @@ typedef enum {
     TOKEN_IDENT, TOKEN_INTEGER,
     // Binops
     TOKEN_MINUS, TOKEN_SUBTRACT,
+    TOKEN_STAR, TOKEN_SLASH,
     TOKEN_PLUS, TOKEN_APPEND,
     TOKEN_ASSIGN,
     // Braces

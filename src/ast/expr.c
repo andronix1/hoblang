@@ -28,6 +28,11 @@ bool ast_expr_eq(const AstExpr *a, const AstExpr *b) {
             }
             return true;
         case AST_EXPR_INTEGER: return a->integer == b->integer;
+        case AST_EXPR_SCOPE: return ast_expr_eq(a->scope, b->scope);
+        case AST_EXPR_BINOP: return
+            a->binop.kind == b->binop.kind &&
+            ast_expr_eq(a->binop.left, b->binop.left) &&
+            ast_expr_eq(a->binop.right, b->binop.right);
     }
     UNREACHABLE;
 }
@@ -38,8 +43,18 @@ AstExpr *ast_expr_new_path(Mempool *mempool, AstPath *path)
 AstExpr *ast_expr_new_integer(Mempool *mempool, uint64_t integer)
     CONSTRUCT(AST_EXPR_INTEGER, out->integer = integer)
 
+AstExpr *ast_expr_new_scope(Mempool *mempool, AstExpr *inner)
+    CONSTRUCT(AST_EXPR_SCOPE, out->scope = inner)
+
 AstExpr *ast_expr_new_callable(Mempool *mempool, AstExpr *inner, AstExpr **args)
     CONSTRUCT(AST_EXPR_CALL,
         out->call.inner = inner;
         out->call.args = args;
+    )
+
+AstExpr *ast_expr_new_binop(Mempool *mempool, AstBinopKind kind, AstExpr *left, AstExpr *right)
+    CONSTRUCT(AST_EXPR_BINOP,
+        out->binop.kind = kind;
+        out->binop.left = left;
+        out->binop.right = right;
     )

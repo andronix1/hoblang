@@ -1,12 +1,15 @@
 #include "expr.h"
 #include "ast/api/expr.h"
 #include "ast/expr.h"
+#include "core/assert.h"
+#include "core/math.h"
 #include "core/mempool.h"
 #include "core/null.h"
 #include "core/vec.h"
 #include "lexer/token.h"
 #include "parser/nodes/path.h"
 #include "parser/parser.h"
+#include <stdio.h>
 
 static inline AstExpr *parse_middle_expr(Parser *parser) {
     Token token = parser_take(parser);
@@ -14,7 +17,7 @@ static inline AstExpr *parse_middle_expr(Parser *parser) {
         case TOKEN_OPENING_CIRCLE_BRACE: {
             AstExpr *expr = parse_expr(parser);
             PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_CIRCLE_BRACE);
-            return expr;
+            return ast_expr_new_scope(parser->mempool, expr);
         }
         case TOKEN_IDENT:
             parser_skip_next(parser);
@@ -25,6 +28,45 @@ static inline AstExpr *parse_middle_expr(Parser *parser) {
             parser_err(parser, token.slice, "expected expression");
             return NULL;
     }
+}
+
+static int get_binop_kind_priority(AstBinopKind kind) {
+    switch (kind) {
+        case AST_BINOP_ADD: return 10;
+        case AST_BINOP_SUBTRACT: return 10;
+        case AST_BINOP_MULTIPLY: return 100;
+        case AST_BINOP_DIVIDE: return 100;
+    }
+    UNREACHABLE;
+}
+
+static inline void swap_binop_prioritized(AstExpr *expr) {
+    assert(expr->kind == AST_EXPR_BINOP);
+    AstExpr *left = expr->binop.left;
+    if (left->kind != AST_EXPR_BINOP) {
+        return;
+    }
+    int root_priority = get_binop_kind_priority(expr->binop.kind);
+    int left_priority = get_binop_kind_priority(left->binop.kind);
+    if (left_priority >= root_priority) {
+        return;
+    }
+    swap(expr->binop.kind, left->binop.kind);
+    AstExpr *ll = left->binop.left;
+    AstExpr *lr = left->binop.right;
+    AstExpr *r = expr->binop.right;
+    expr->binop.left = ll;
+    left->binop.left = lr;
+    left->binop.right = r;
+    expr->binop.right = left;
+    swap_binop_prioritized(left);
+}
+
+static inline AstExpr *create_expr_lprioritized(Parser *parser, AstBinopKind kind, AstExpr *left) {
+    AstExpr *right = NOT_NULL(parse_middle_expr(parser));
+    AstExpr *result = ast_expr_new_binop(parser->mempool, kind, left, right);
+    swap_binop_prioritized(result);
+    return result;
 }
 
 static inline AstExpr *parse_post_expr(Parser *parser, AstExpr *expr) {
@@ -43,6 +85,18 @@ static inline AstExpr *parse_post_expr(Parser *parser, AstExpr *expr) {
                 expr = ast_expr_new_callable(parser->mempool, expr, args);
                 break;
             }
+            case TOKEN_PLUS:
+                expr = NOT_NULL(create_expr_lprioritized(parser, AST_BINOP_ADD, expr));
+                break;
+            case TOKEN_MINUS:
+                expr = NOT_NULL(create_expr_lprioritized(parser, AST_BINOP_SUBTRACT, expr));
+                break;
+            case TOKEN_STAR:
+                expr = NOT_NULL(create_expr_lprioritized(parser, AST_BINOP_MULTIPLY, expr));
+                break;
+            case TOKEN_SLASH:
+                expr = NOT_NULL(create_expr_lprioritized(parser, AST_BINOP_DIVIDE, expr));
+                break;
             default:
                 parser_skip_next(parser);
                 reading = false;
