@@ -51,6 +51,12 @@ static AstNode *parser_next_full(Parser *parser, Token token) {
             AstExpr *expr = parse_expr(parser);
             PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
             return ast_node_new_stmt(parser->mempool, ast_stmt_new_expr(parser->mempool, expr));
+        case TOKEN_RETURN: {
+            AstExpr *value = parser_next_is(parser, TOKEN_SEMICOLON) ?
+                NULL : NOT_NULL(parse_expr(parser));
+            PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
+            return ast_node_new_stmt(parser->mempool, ast_stmt_new_return(parser->mempool, value));
+        }
         default: return parser_next_maybe_local(parser, token, false);
     }
 }

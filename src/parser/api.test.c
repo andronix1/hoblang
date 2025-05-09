@@ -4,7 +4,7 @@
 #include "core/slice.h"
 #include "parser/test/common.test.h"
 #include "parser/test/expr.test.h"
-#include "parser/test/stmt_decl.test.h"
+#include "parser/test/stmt.test.h"
 #include "parser/test/type_decl.test.h"
 #include "parser/test/fun_decl.test.h"
 #include "parser/test/value_decl.test.h"

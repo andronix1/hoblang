@@ -1,3 +1,7 @@
 local const super: i32;
 
-fun entry() -> i32 {}
+extern fun entry() -> i32;
+
+global(main) fun entry() -> i32 {
+    return 2 + super * duper();
+}

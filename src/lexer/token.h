@@ -12,6 +12,7 @@ typedef enum {
     TOKEN_FUN,
     TOKEN_VAR, TOKEN_FINAL, TOKEN_CONST,
     TOKEN_GLOBAL, TOKEN_EXTERN,
+    TOKEN_RETURN,
     // Extended
     TOKEN_IDENT, TOKEN_INTEGER,
     // Binops

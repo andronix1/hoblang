@@ -6,6 +6,7 @@
 #include "ast/type.h"
 #include "core/assert.h"
 #include "core/mempool.h"
+#include "core/null.h"
 #include "core/slice.h"
 #include "core/vec.h"
 #include "mempool.h"
@@ -14,18 +15,6 @@
     out->kind = KIND; \
     FIELDS; \
 })
-
-typedef bool (*EqFunc)(const void *a, const void *b);
-static bool equals_nullable(const void *a, const void *b, EqFunc eq) {
-    if (a == NULL || a == NULL) {
-        if (a != b) {
-            return false;
-        }
-    } else if (!eq(a, b)) {
-        return false;
-    }
-    return true;
-}
 
 bool ast_global_eq(const AstGlobal *a, const AstGlobal *b) {
     return
