@@ -1,5 +1,5 @@
 #include "expr.h"
-#include "ast/mempool.h"
+#include "core/mempool.h"
 #include "ast/path.h"
 #include "core/assert.h"
 #include "core/vec.h"

@@ -1,6 +1,6 @@
 #include "stmt.h"
 #include "ast/expr.h"
-#include "ast/mempool.h"
+#include "core/mempool.h"
 #include "core/assert.h"
 #include "core/null.h"
 

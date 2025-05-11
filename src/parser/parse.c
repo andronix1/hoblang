@@ -5,6 +5,7 @@
 #include "ast/stmt.h"
 #include "core/mempool.h"
 #include "core/null.h"
+#include "core/slice.h"
 #include "core/vec.h"
 #include "lexer/token.h"
 #include "parser/nodes/expr.h"
@@ -74,6 +75,7 @@ AstNode *parser_next(Parser *parser) {
         if (try == NOT_FOUND) {
             parser_err(parser, token.slice, "unexpected token $T", token);
         } else if (try != NULL) {
+            try->slice = slice_union(token.slice, parser->cache.slice);
             return try;
         }
     }

@@ -1,6 +1,6 @@
 #include "path.h"
 #include "ast/api/path.h"
-#include "ast/mempool.h"
+#include "core/mempool.h"
 #include "core/slice.h"
 #include "core/vec.h"
 
@@ -27,10 +27,23 @@ bool ast_path_eq(const AstPath *a, const AstPath *b) {
 AstPathSegment ast_path_segment_new_ident(Slice ident) {
     AstPathSegment result = {
         .kind = AST_PATH_SEGMENT_IDENT,
+        .slice = ident,
         .ident = ident
     };
     return result;
 }
 
 AstPath *ast_path_new(Mempool *mempool, AstPathSegment *segments)
-    MEMPOOL_CONSTRUCT(AstPath, out->segments = segments)
+    MEMPOOL_CONSTRUCT(AstPath,
+        assert(vec_len(segments) > 0);
+        out->segments = segments;
+    )
+
+Slice ast_path_slice(AstPath *path) {
+    assert(vec_len(path->segments) > 0);
+    Slice slice = path->segments->slice;
+    for (size_t i = 1; i < vec_len(path->segments); i++) {
+        slice = slice_union(slice, path->segments[i].slice);
+    }
+    return slice;
+}

@@ -29,6 +29,7 @@ typedef struct {
 } AstFunArg;
 
 typedef struct AstFunInfo {
+    Slice extension_of;
     bool is_local;
     Slice name;
     AstFunArg *args;
@@ -80,6 +81,7 @@ typedef struct {
 
 typedef struct AstNode {
     AstNodeKind kind;
+    Slice slice;
 
     union {
         AstTypeDecl type_decl;

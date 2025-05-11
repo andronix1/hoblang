@@ -1,5 +1,5 @@
 #include "global.h"
-#include "ast/mempool.h"
+#include "core/mempool.h"
 
 AstGlobal *ast_global_new(Mempool *mempool)
     MEMPOOL_CONSTRUCT(AstGlobal, out->has_alias = false)

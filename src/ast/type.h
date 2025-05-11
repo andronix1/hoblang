@@ -13,16 +13,16 @@ typedef enum {
 
 typedef struct {
     bool is_local;
-    Slice name;
     AstType *type;
 } AstStructField;
 
 typedef struct {
-    AstStructField *fields;
+    AstStructField *fields_map;
 } AstStruct;
 
 typedef struct AstType {
     AstTypeKind kind;
+    Slice slice;
 
     union {
         AstStruct structure;
@@ -32,6 +32,6 @@ typedef struct AstType {
 
 bool ast_type_eq(const AstType *a, const AstType *b);
 
-AstStructField ast_struct_field_new(bool is_local, Slice name, AstType *type);
-AstType *ast_type_new_struct(Mempool *pool, AstStructField *fields);
+AstStructField ast_struct_field_new(bool is_local, AstType *type);
+AstType *ast_type_new_struct(Mempool *pool, AstStructField *fields_map);
 AstType *ast_type_new_path(Mempool *pool, AstPath *path);

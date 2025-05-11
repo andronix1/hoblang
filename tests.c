@@ -7,6 +7,7 @@
 #include "core/keymap.test.h"
 #include "lexer/api.test.h"
 #include "parser/api.test.h"
+#include "sema/module/api.test.h"
 
 static void setup_tests() {
     test_vec();
@@ -17,6 +18,7 @@ static void setup_tests() {
     test_file_content();
     test_lexer();
     test_parser();
+    test_sema();
 }
 
 int main() {

@@ -9,7 +9,7 @@
 #include "core/null.h"
 #include "core/slice.h"
 #include "core/vec.h"
-#include "mempool.h"
+#include "core/mempool.h"
 
 #define CONSTRUCT(KIND, FIELDS) MEMPOOL_CONSTRUCT(AstNode, { \
     out->kind = KIND; \

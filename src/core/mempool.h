@@ -32,3 +32,9 @@ void mempool_free(Mempool *mempool);
 })
 
 #define mempool_alloc(MEMPOOL, TYPE) ((TYPE*)__mempool_alloc(MEMPOOL, sizeof(TYPE), alignof(TYPE)))
+
+#define MEMPOOL_CONSTRUCT(TYPE, FIELDS) { \
+    TYPE *out = mempool_alloc(mempool, TYPE); \
+    FIELDS; \
+    return out; \
+}

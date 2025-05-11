@@ -1,5 +1,5 @@
 #include "body.h"
-#include "ast/mempool.h"
+#include "core/mempool.h"
 #include "ast/node.h"
 #include "core/vec.h"
 

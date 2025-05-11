@@ -1,0 +1,122 @@
+#include "node.h"
+#include "ast/node.h"
+#include "core/assert.h"
+#include "core/mempool.h"
+#include "core/null.h"
+#include "core/vec.h"
+#include "sema/module/module.h"
+#include "sema/module/nodes/body.h"
+#include "sema/module/nodes/expr.h"
+#include "sema/module/nodes/type.h"
+#include "sema/module/type.h"
+#include "sema/module/value.h"
+
+static inline void sema_module_push_fun_info(SemaModule *module, AstFunInfo *info) {
+    SemaType *returns = info->returns ?
+       RET_ON_NULL(sema_module_analyze_type(module, info->returns)) :
+       sema_type_new_primitive_void(module->mempool);
+    SemaType **args = vec_new_in(module->mempool, SemaType*);
+    for (size_t i = 0; i < vec_len(info->args); i++) {
+        vec_push(args, RET_ON_NULL(sema_module_analyze_type(module, info->args[i].type)));
+    }
+    SemaDecl decl = sema_decl_new(module, info->is_local, sema_value_new_final(module->mempool,
+        sema_type_new_function(module->mempool, args, returns)));
+    sema_module_push_decl(module, info->name, decl);
+}
+
+void sema_module_read_node(SemaModule *module, AstNode *node) {
+    switch (node->kind) {
+        case AST_NODE_TYPE_DECL: {
+            SemaType *type = sema_type_new_alias(module->mempool, module,
+                RET_ON_NULL(sema_module_analyze_type(module, node->type_decl.type)));
+            sema_module_push_decl(module, node->type_decl.name, sema_decl_new(module, node->type_decl.is_local,
+                sema_value_new_type(module->mempool, type)));
+            return;
+        }
+        case AST_NODE_FUN_DECL: {
+            sema_module_push_fun_info(module, node->fun_decl.info);
+            return;
+        }
+        case AST_NODE_VALUE_DECL:
+            if (!node->value_decl.info->explicit_type) {
+                sema_module_err(module, node->value_decl.info->name, "type of declaration must be specified (TODO)");
+                return;
+            }
+            SemaType *type = RET_ON_NULL(sema_module_analyze_type(module, node->value_decl.info->explicit_type));
+            switch (node->value_decl.info->kind) {
+                case AST_VALUE_DECL_VAR:
+                    sema_module_push_decl(module, node->value_decl.info->name,
+                        sema_decl_new(module, node->value_decl.info->is_local,
+                            sema_value_new_var(module->mempool, type)
+                        ));
+                    return;
+                case AST_VALUE_DECL_FINAL:
+                    sema_module_push_decl(module, node->value_decl.info->name,
+                        sema_decl_new(module, node->value_decl.info->is_local,
+                            sema_value_new_final(module->mempool, type)
+                        ));
+                    return;
+                case AST_VALUE_DECL_CONST:
+                    TODO;
+            }
+            UNREACHABLE;
+        case AST_NODE_EXTERNAL_DECL: {
+            switch (node->external_decl.kind) {
+                case AST_EXTERNAL_DECL_VALUE: {
+                    AstValueInfo *info = node->external_decl.value;
+                    if (!info->explicit_type) {
+                        sema_module_err(module, info->name, "type of external declarations must be specified");
+                        return;
+                    }
+                    SemaType *type = RET_ON_NULL(sema_module_analyze_type(module, info->explicit_type));
+                    switch (info->kind) {
+                        case AST_VALUE_DECL_VAR:
+                            sema_module_push_decl(module, info->name, sema_decl_new(module, info->is_local,
+                                sema_value_new_var(module->mempool, type)));
+                            return;
+                        case AST_VALUE_DECL_FINAL:
+                            sema_module_push_decl(module, info->name, sema_decl_new(module, info->is_local,
+                                sema_value_new_final(module->mempool, type)));
+                            return;
+                        case AST_VALUE_DECL_CONST:
+                            sema_module_err(module, info->name, "constant cannot be external");
+                            return;
+                    }
+                    UNREACHABLE;
+                }
+                case AST_EXTERNAL_DECL_FUN:
+                    sema_module_push_fun_info(module, node->external_decl.fun);
+                    return;
+            }
+            UNREACHABLE;
+        }
+        case AST_NODE_STMT:
+            return;
+    }
+    UNREACHABLE;
+}
+
+bool sema_module_analyze_node(SemaModule *module, AstNode *node) {
+    switch (node->kind) {
+        case AST_NODE_TYPE_DECL:
+        case AST_NODE_VALUE_DECL:
+        case AST_NODE_EXTERNAL_DECL:
+            return false;
+        case AST_NODE_FUN_DECL:
+            return sema_module_analyze_body(module, node->fun_decl.body);
+        case AST_NODE_STMT:
+            if (sema_module_is_global_scope(module)) {
+                sema_module_err(module, node->slice, "cannot use statements in global scope");
+                return false;
+            }
+            switch (node->stmt->kind) {
+                case AST_STMT_EXPR:
+                    NOT_NULL(sema_module_analyze_expr(module, node->stmt->expr, sema_expr_ctx_new()));
+                    return false;
+                case AST_STMT_RETURN:
+                    return true;
+            }
+            UNREACHABLE;
+    }
+    UNREACHABLE;
+}

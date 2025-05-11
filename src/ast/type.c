@@ -1,16 +1,16 @@
 #include "type.h"
 #include "ast/path.h"
 #include "core/assert.h"
+#include "core/keymap.h"
 #include "core/slice.h"
 #include "core/vec.h"
-#include "mempool.h"
+#include "core/mempool.h"
 
 #define CONSTRUCT(KIND, FIELDS) MEMPOOL_CONSTRUCT(AstType, out->kind = KIND; FIELDS)
 
-AstStructField ast_struct_field_new(bool is_local, Slice name, AstType *type) {
+AstStructField ast_struct_field_new(bool is_local, AstType *type) {
     AstStructField field = {
         .is_local = is_local,
-        .name = name,
         .type = type,
     };
     return field;
@@ -23,19 +23,19 @@ bool ast_type_eq(const AstType *a, const AstType *b) {
     switch (a->kind) {
         case AST_TYPE_PATH: return ast_path_eq(a->path, b->path);
         case AST_TYPE_STRUCT: {
-            if (vec_len(a->structure.fields) != vec_len(b->structure.fields)) {
+            if (vec_len(a->structure.fields_map) != vec_len(b->structure.fields_map)) {
                 return false;
             }
-            for (size_t i = 0; i < vec_len(a->structure.fields); i++) {
-                AstStructField *af = &a->structure.fields[i];
-                AstStructField *bf = &b->structure.fields[i];
-                if (af->is_local != bf->is_local) {
+            for (size_t i = 0; i < vec_len(a->structure.fields_map); i++) {
+                keymap_at(a->structure.fields_map, i, af);
+                keymap_at(a->structure.fields_map, i, bf);
+                if (af->value.is_local != bf->value.is_local) {
                     return false;
                 }
-                if (!slice_eq(af->name, bf->name)) {
+                if (!slice_eq(af->key, bf->key)) {
                     return false;
                 }
-                if (!ast_type_eq(af->type, bf->type)) {
+                if (!ast_type_eq(af->value.type, bf->value.type)) {
                     return false;
                 }
             }
@@ -45,8 +45,8 @@ bool ast_type_eq(const AstType *a, const AstType *b) {
     UNREACHABLE;
 }
 
-AstType *ast_type_new_struct(Mempool *mempool, AstStructField *fields)
-    CONSTRUCT(AST_TYPE_STRUCT, out->structure.fields = fields)
+AstType *ast_type_new_struct(Mempool *mempool, AstStructField *fields_map)
+    CONSTRUCT(AST_TYPE_STRUCT, out->structure.fields_map = fields_map;)
 
 AstType *ast_type_new_path(Mempool *mempool, AstPath *path)
-    CONSTRUCT(AST_TYPE_PATH, out->path = path)
+    CONSTRUCT(AST_TYPE_PATH, out->path = path;)

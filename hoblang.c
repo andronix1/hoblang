@@ -4,6 +4,7 @@
 #include "lexer/api.h"
 #include "lexer/token.h"
 #include "parser/api.h"
+#include "sema/module/api.h"
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
@@ -33,8 +34,9 @@ int main(int argc, char **argv) {
         logln("failed to read file content: $E");
         return 1;
     }
-    Parser *parser = parser_new(lexer_new(content));
-    parser_parse(parser);
-    parser_free(parser);
+    SemaModule *module = sema_module_new(parser_new(lexer_new(content)));
+    sema_module_read(module);
+    sema_module_analyze(module);
+    sema_module_free(module);
     return 0;
 }

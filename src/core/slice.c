@@ -27,3 +27,9 @@ bool slice_eq(const Slice a, const Slice b) {
     }
     return memcmp(a.value, b.value, a.length) == 0;
 }
+
+Slice slice_union(Slice a, Slice b) {
+    assert(a.value <= b.value);
+    a.length = b.value - a.value + b.length;
+    return a;
+}

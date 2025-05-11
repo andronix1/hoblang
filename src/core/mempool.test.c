@@ -1,5 +1,5 @@
 #include "mempool.test.h"
-#include "mempool.h"
+#include "core/mempool.h"
 #include <CUnit/Basic.h>
 
 void test_mempool_alloc() {
