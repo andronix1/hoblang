@@ -9,7 +9,7 @@
 #include "sema/module/type.h"
 #include "sema/module/value.h"
 
-SemaValue *sema_module_analyze_expr(SemaModule *module, AstExpr *expr, SemaExprCtx ctx) {
+static inline SemaValue *_sema_module_analyze_expr(SemaModule *module, AstExpr *expr, SemaExprCtx ctx) {
     switch (expr->kind) {
         case AST_EXPR_PATH:
             return sema_module_resolve_path(module, expr->path);
@@ -64,6 +64,10 @@ SemaValue *sema_module_analyze_expr(SemaModule *module, AstExpr *expr, SemaExprC
             TODO;
     }
     return NULL;
+}
+
+SemaValue *sema_module_analyze_expr(SemaModule *module, AstExpr *expr, SemaExprCtx ctx) {
+    return expr->sema.value = _sema_module_analyze_expr(module, expr, ctx);
 }
 
 SemaExprCtx sema_expr_ctx_new(SemaType *expecting) {

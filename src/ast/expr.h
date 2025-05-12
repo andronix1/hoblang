@@ -3,6 +3,7 @@
 #include "ast/api/path.h"
 #include "ast/api/expr.h"
 #include "core/mempool.h"
+#include "sema/module/api/value.h"
 #include <stdint.h>
 
 typedef enum {
@@ -39,6 +40,10 @@ typedef struct AstExpr {
         AstCall call;
         AstBinop binop;
     };
+
+    struct {
+        SemaValue *value;
+    } sema;
 } AstExpr;
 
 bool ast_expr_eq(const AstExpr *a, const AstExpr *b);

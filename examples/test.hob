@@ -19,9 +19,6 @@ global fun main() -> i32 {
     putCharacter(32);
     putCharacter(87);
     putCharacter(111);
-    fun test(a: i32, b: i64) {}
-    return test;
-    return;
     putCharacter(114);
     putCharacter(108);
     putCharacter(100);

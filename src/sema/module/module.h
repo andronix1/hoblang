@@ -37,9 +37,8 @@ typedef struct SemaModule {
 SemaModule *sema_module_new(Parser *parser);
 void sema_module_push_primitives(SemaModule *module);
 SemaScopeStack *sema_module_ss_swap(SemaModule *module, SemaScopeStack *ss);
-void sema_module_push_decl(SemaModule *module, Slice name, SemaDecl decl);
-const SemaDecl *sema_module_resolve_decl(const SemaModule *module, Slice name);
-const SemaDecl *sema_module_resolve_decl_from(const SemaModule *module, const SemaModule *from, Slice name);
+SemaDeclHandle *sema_module_push_decl(SemaModule *module, Slice name, SemaDecl decl);
+SemaDeclHandle *sema_module_resolve_decl(const SemaModule *module, Slice name);
 void sema_module_push_scope(SemaModule *module);
 void sema_module_pop_scope(SemaModule *module);
 SemaType *sema_module_returns(const SemaModule *module);

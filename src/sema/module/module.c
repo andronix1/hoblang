@@ -2,6 +2,7 @@
 #include "core/keymap.h"
 #include "core/log.h"
 #include "core/mempool.h"
+#include "core/null.h"
 #include "core/vec.h"
 #include "parser/api.h"
 #include "parser/parser.h"
@@ -25,7 +26,7 @@ SemaScopeStack *sema_module_ss_swap(SemaModule *module, SemaScopeStack *ss) {
     return old_ss;
 }
 
-void sema_module_push_decl(SemaModule *module, Slice name, SemaDecl decl) {
+SemaDeclHandle *sema_module_push_decl(SemaModule *module, Slice name, SemaDecl decl) {
     bool succeed;
     if (module->ss) {
         if (decl.is_local) {
@@ -38,26 +39,19 @@ void sema_module_push_decl(SemaModule *module, Slice name, SemaDecl decl) {
     if (!succeed) {
         sema_module_err(module, name, "`$S` already declared", name);
     }
+    return decl.handle;
 }
 
-const SemaDecl *sema_module_resolve_decl(const SemaModule *module, Slice name) {
+SemaDeclHandle *sema_module_resolve_decl(const SemaModule *module, Slice name) {
     if (module->ss) {
         for (ssize_t i = (ssize_t)vec_len(module->ss->scopes) - 1; i >= 0; i--) {
             SemaDecl *decl = keymap_rev_get(module->ss->scopes[i].decls_map, name);
             if (decl) {
-                return decl;
+                return decl->handle;
             }
         }
     }
-    return keymap_rev_get(module->decls_map, name);
-}
-
-const SemaDecl *sema_module_resolve_decl_from(const SemaModule *module, const SemaModule *from, Slice name) {
-    const SemaDecl *decl = sema_module_resolve_decl(from, name);
-    if (!decl->is_local || module == from) {
-        return NULL;
-    }
-    return decl;
+    return NOT_NULL(keymap_rev_get(module->decls_map, name))->handle;
 }
 
 void sema_module_push_scope(SemaModule *module) {

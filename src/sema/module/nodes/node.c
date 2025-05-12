@@ -15,7 +15,7 @@
 #include "sema/module/value.h"
 
 static inline void sema_module_push_fun_info(SemaModule *module, AstFunInfo *info) {
-    info->sema.type = NULL;
+    info->sema.decl = NULL;
     SemaType *returns = info->returns ?
        RET_ON_NULL(sema_module_analyze_type(module, info->returns)) :
        sema_type_new_primitive_void(module->mempool);
@@ -25,8 +25,7 @@ static inline void sema_module_push_fun_info(SemaModule *module, AstFunInfo *inf
     }
     SemaType *type = sema_type_new_function(module->mempool, args, returns);
     SemaDecl decl = sema_decl_new(module, info->is_local, sema_value_new_final(module->mempool, type));
-    info->sema.type = type;
-    sema_module_push_decl(module, info->name, decl);
+    info->sema.decl = sema_module_push_decl(module, info->name, decl);
 }
 
 void sema_module_read_node(SemaModule *module, AstNode *node) {
@@ -108,8 +107,10 @@ bool sema_module_analyze_node(SemaModule *module, AstNode *node) {
         case AST_NODE_EXTERNAL_DECL:
             return false;
         case AST_NODE_FUN_DECL: {
-            if (!node->fun_decl.info->sema.type) return false;
-            SemaScopeStack ss = sema_ss_new(module, node->fun_decl.info->sema.type->function.returns);
+            if (!node->fun_decl.info->sema.decl) return false;
+            SemaType *type = sema_value_is_runtime(node->fun_decl.info->sema.decl->value);
+            assert(type);
+            SemaScopeStack ss = sema_ss_new(module, type->function.returns);
             SemaScopeStack *old_ss = sema_module_ss_swap(module, &ss);
             bool breaks = sema_module_analyze_body(module, node->fun_decl.body);
             sema_module_ss_swap(module, old_ss);

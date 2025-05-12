@@ -8,7 +8,7 @@
 #include "ast/type.h"
 #include "core/mempool.h"
 #include "core/slice.h"
-#include "sema/module/api/type.h"
+#include "sema/module/api/decl_handle.h"
 
 typedef enum {
     AST_NODE_TYPE_DECL,
@@ -37,7 +37,7 @@ typedef struct AstFunInfo {
     AstType *returns;
 
     struct {
-        SemaType *type;
+        SemaDeclHandle *decl;
     } sema;
 } AstFunInfo;
 
