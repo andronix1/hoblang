@@ -1,10 +1,12 @@
 #include "expr.h"
 #include "ast/api/expr.h"
 #include "ast/expr.h"
+#include "ast/path.h"
 #include "core/assert.h"
 #include "core/math.h"
 #include "core/mempool.h"
 #include "core/null.h"
+#include "core/slice.h"
 #include "core/vec.h"
 #include "lexer/token.h"
 #include "parser/nodes/path.h"
@@ -16,14 +18,16 @@ static inline AstExpr *parse_middle_expr(Parser *parser) {
     switch (token.kind) {
         case TOKEN_OPENING_CIRCLE_BRACE: {
             AstExpr *expr = parse_expr(parser);
-            PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_CIRCLE_BRACE);
-            return ast_expr_new_scope(parser->mempool, expr);
+            Slice slice = PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_CIRCLE_BRACE).slice;
+            return ast_expr_new_scope(parser->mempool, slice_union(token.slice, slice), expr);
         }
-        case TOKEN_IDENT:
+        case TOKEN_IDENT: {
             parser_skip_next(parser);
-            return ast_expr_new_path(parser->mempool, NOT_NULL(parse_path(parser)));
+            AstPath *path = NOT_NULL(parse_path(parser));
+            return ast_expr_new_path(parser->mempool, ast_path_slice(path), path);
+        }
         case TOKEN_INTEGER:
-            return ast_expr_new_integer(parser->mempool, token.integer);
+            return ast_expr_new_integer(parser->mempool, token.slice, token.integer);
         default:
             parser_err(parser, token.slice, "expected expression");
             return NULL;
@@ -64,7 +68,7 @@ static inline void swap_binop_prioritized(AstExpr *expr) {
 
 static inline AstExpr *create_expr_lprioritized(Parser *parser, AstBinopKind kind, AstExpr *left) {
     AstExpr *right = NOT_NULL(parse_middle_expr(parser));
-    AstExpr *result = ast_expr_new_binop(parser->mempool, kind, left, right);
+    AstExpr *result = ast_expr_new_binop(parser->mempool, slice_union(left->slice, right->slice), kind, left, right);
     swap_binop_prioritized(result);
     return result;
 }
@@ -76,13 +80,14 @@ static inline AstExpr *parse_post_expr(Parser *parser, AstExpr *expr) {
         switch (token.kind) {
             case TOKEN_OPENING_CIRCLE_BRACE: {
                 AstExpr **args = vec_new_in(parser->mempool, AstExpr*);
-                while (!parser_next_should_be(parser, TOKEN_CLOSING_CIRCLE_BRACE)) {
+                while (parser_next_is_not(parser, TOKEN_CLOSING_CIRCLE_BRACE)) {
                     vec_push(args, parse_expr(parser));
                     if (!parser_check_list_sep(parser, TOKEN_CLOSING_CIRCLE_BRACE)) {
                         return NULL;
                     }
                 }
-                expr = ast_expr_new_callable(parser->mempool, expr, args);
+                Slice slice = PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_CIRCLE_BRACE).slice;
+                expr = ast_expr_new_callable(parser->mempool, slice_union(expr->slice, slice), expr, args);
                 break;
             }
             case TOKEN_PLUS:

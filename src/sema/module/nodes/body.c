@@ -7,8 +7,6 @@
 #include "sema/module/nodes/node.h"
 
 bool sema_module_analyze_body(SemaModule *module, AstBody *body) {
-    SemaScopeStack ss = sema_ss_new(module);
-    SemaScopeStack *old_ss = sema_module_ss_swap(module, &ss);
     sema_module_push_scope(module);
     bool is_unreachable = false;
     Slice unreachable;
@@ -30,6 +28,6 @@ bool sema_module_analyze_body(SemaModule *module, AstBody *body) {
     if (is_unreachable) {
         sema_module_err(module, unreachable, "unreachable code");
     }
-    sema_module_ss_swap(module, old_ss);
+    sema_module_pop_scope(module);
     return finished;
 }

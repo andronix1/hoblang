@@ -23,5 +23,5 @@ bool ast_stmt_eq(const AstStmt *a, const AstStmt *b) {
 AstStmt *ast_stmt_new_expr(Mempool *mempool, AstExpr *expr)
     CONSTRUCT(AST_STMT_EXPR, out->expr = expr)
 
-AstStmt *ast_stmt_new_return(Mempool *mempool, AstExpr *value)
-    CONSTRUCT(AST_STMT_RETURN, out->ret.value = value)
+AstStmt *ast_stmt_new_return(Mempool *mempool, Slice slice, AstExpr *value)
+    CONSTRUCT(AST_STMT_RETURN, out->ret.value = value; out->ret.slice = slice;)

@@ -2,11 +2,11 @@
 
 #include "ast/api/expr.h"
 #include "sema/module/api.h"
-#include "sema/module/api/type.h"
+#include "sema/module/api/value.h"
 
 typedef struct {
-
+    SemaType *expecting;
 } SemaExprCtx;
 
-SemaType *sema_module_analyze_expr(SemaModule *module, AstExpr *expr, SemaExprCtx ctx);
-SemaExprCtx sema_expr_ctx_new();
+SemaValue *sema_module_analyze_expr(SemaModule *module, AstExpr *expr, SemaExprCtx ctx);
+SemaExprCtx sema_expr_ctx_new(SemaType *expecting);

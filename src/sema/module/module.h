@@ -4,6 +4,7 @@
 #include "parser/api.h"
 #include "sema/module/api.h"
 #include "sema/module/api/decl_handle.h"
+#include "sema/module/api/type.h"
 #include "sema/module/api/value.h"
 
 typedef struct SemaDeclHandle {
@@ -22,6 +23,7 @@ typedef struct {
 
 typedef struct {
     SemaScope *scopes;
+    SemaType *returns;
 } SemaScopeStack;
 
 typedef struct SemaModule {
@@ -39,11 +41,13 @@ void sema_module_push_decl(SemaModule *module, Slice name, SemaDecl decl);
 const SemaDecl *sema_module_resolve_decl(const SemaModule *module, Slice name);
 const SemaDecl *sema_module_resolve_decl_from(const SemaModule *module, const SemaModule *from, Slice name);
 void sema_module_push_scope(SemaModule *module);
-bool sema_module_is_global_scope(SemaModule *module);
+void sema_module_pop_scope(SemaModule *module);
+SemaType *sema_module_returns(const SemaModule *module);
+bool sema_module_is_global_scope(const SemaModule *module);
 void sema_module_free(SemaModule *module);
 
 SemaDecl sema_decl_new(SemaModule *module, bool is_local, SemaValue *value);
 
-SemaScopeStack sema_ss_new(SemaModule *module);
+SemaScopeStack sema_ss_new(SemaModule *module, SemaType *returns);
 
 void sema_module_err(SemaModule *module, Slice at, const char *fmt, ...);

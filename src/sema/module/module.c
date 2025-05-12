@@ -73,7 +73,12 @@ void sema_module_pop_scope(SemaModule *module) {
     vec_pop(module->ss->scopes);
 }
 
-bool sema_module_is_global_scope(SemaModule *module) {
+SemaType *sema_module_returns(const SemaModule *module) {
+    assert(module->ss);
+    return module->ss->returns;
+}
+
+bool sema_module_is_global_scope(const SemaModule *module) {
     return module->ss == NULL;
 }
 
@@ -103,9 +108,10 @@ void sema_module_push_primitives(SemaModule *module) {
     PUSHPF(32); PUSHPF(64);
 }
 
-SemaScopeStack sema_ss_new(SemaModule *module) {
+SemaScopeStack sema_ss_new(SemaModule *module, SemaType *returns) {
     SemaScopeStack ss = {
         .scopes = vec_new_in(module->mempool, SemaScope),
+        .returns = returns,
     };
     return ss;
 }

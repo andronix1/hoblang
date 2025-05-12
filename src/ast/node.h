@@ -8,6 +8,7 @@
 #include "ast/type.h"
 #include "core/mempool.h"
 #include "core/slice.h"
+#include "sema/module/api/type.h"
 
 typedef enum {
     AST_NODE_TYPE_DECL,
@@ -34,6 +35,10 @@ typedef struct AstFunInfo {
     Slice name;
     AstFunArg *args;
     AstType *returns;
+
+    struct {
+        SemaType *type;
+    } sema;
 } AstFunInfo;
 
 typedef struct {

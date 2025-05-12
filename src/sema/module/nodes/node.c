@@ -1,9 +1,12 @@
 #include "node.h"
 #include "ast/node.h"
+#include "ast/expr.h"
 #include "core/assert.h"
 #include "core/mempool.h"
 #include "core/null.h"
 #include "core/vec.h"
+#include "sema/module/api/type.h"
+#include "sema/module/api/value.h"
 #include "sema/module/module.h"
 #include "sema/module/nodes/body.h"
 #include "sema/module/nodes/expr.h"
@@ -12,6 +15,7 @@
 #include "sema/module/value.h"
 
 static inline void sema_module_push_fun_info(SemaModule *module, AstFunInfo *info) {
+    info->sema.type = NULL;
     SemaType *returns = info->returns ?
        RET_ON_NULL(sema_module_analyze_type(module, info->returns)) :
        sema_type_new_primitive_void(module->mempool);
@@ -19,8 +23,9 @@ static inline void sema_module_push_fun_info(SemaModule *module, AstFunInfo *inf
     for (size_t i = 0; i < vec_len(info->args); i++) {
         vec_push(args, RET_ON_NULL(sema_module_analyze_type(module, info->args[i].type)));
     }
-    SemaDecl decl = sema_decl_new(module, info->is_local, sema_value_new_final(module->mempool,
-        sema_type_new_function(module->mempool, args, returns)));
+    SemaType *type = sema_type_new_function(module->mempool, args, returns);
+    SemaDecl decl = sema_decl_new(module, info->is_local, sema_value_new_final(module->mempool, type));
+    info->sema.type = type;
     sema_module_push_decl(module, info->name, decl);
 }
 
@@ -102,8 +107,14 @@ bool sema_module_analyze_node(SemaModule *module, AstNode *node) {
         case AST_NODE_VALUE_DECL:
         case AST_NODE_EXTERNAL_DECL:
             return false;
-        case AST_NODE_FUN_DECL:
-            return sema_module_analyze_body(module, node->fun_decl.body);
+        case AST_NODE_FUN_DECL: {
+            if (!node->fun_decl.info->sema.type) return false;
+            SemaScopeStack ss = sema_ss_new(module, node->fun_decl.info->sema.type->function.returns);
+            SemaScopeStack *old_ss = sema_module_ss_swap(module, &ss);
+            bool breaks = sema_module_analyze_body(module, node->fun_decl.body);
+            sema_module_ss_swap(module, old_ss);
+            return breaks;
+        }
         case AST_NODE_STMT:
             if (sema_module_is_global_scope(module)) {
                 sema_module_err(module, node->slice, "cannot use statements in global scope");
@@ -111,10 +122,26 @@ bool sema_module_analyze_node(SemaModule *module, AstNode *node) {
             }
             switch (node->stmt->kind) {
                 case AST_STMT_EXPR:
-                    NOT_NULL(sema_module_analyze_expr(module, node->stmt->expr, sema_expr_ctx_new()));
+                    NOT_NULL(sema_module_analyze_expr(module, node->stmt->expr, sema_expr_ctx_new(NULL)));
                     return false;
-                case AST_STMT_RETURN:
+                case AST_STMT_RETURN: {
+                    SemaType *returns = sema_module_returns(module);
+                    SemaType *type = node->stmt->ret.value ?
+                        sema_value_is_runtime(NOT_NULL(
+                            sema_module_analyze_expr(module, node->stmt->ret.value, sema_expr_ctx_new(returns)))) :
+                        sema_type_new_primitive_void(module->mempool);
+                    if (!type) {
+                        sema_module_err(module, node->stmt->ret.value->slice, "cannot return non-runtime value");
+                        return true;
+                    }
+                    if (!sema_type_eq(type, returns)) {
+                        sema_module_err(module, node->stmt->ret.value ?
+                            node->stmt->ret.value->slice :
+                            node->stmt->ret.slice, "expected to return $t but returns $t",
+                            returns, type);
+                    }
                     return true;
+                }
             }
             UNREACHABLE;
     }

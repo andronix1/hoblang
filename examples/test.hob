@@ -9,11 +9,7 @@ type Test = struct {
 
 extern(putchar) fun putCharacter(c: u8);
 
-return
-    0
-       ;
-
-global fun main() -> i3233 {
+global fun main() -> i32 {
     putCharacter(72);
     putCharacter(101);
     putCharacter(108);
@@ -23,9 +19,10 @@ global fun main() -> i3233 {
     putCharacter(32);
     putCharacter(87);
     putCharacter(111);
-    return 0;
+    fun test(a: i32, b: i64) {}
+    return test;
+    return;
     putCharacter(114);
-    fun test() {}
     putCharacter(108);
     putCharacter(100);
     putCharacter(10);

@@ -4,4 +4,5 @@
 
 typedef struct SemaValue SemaValue;
 
+SemaType *sema_value_is_runtime(SemaValue *value);
 SemaType *sema_value_is_type(SemaValue *value);

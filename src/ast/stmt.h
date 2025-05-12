@@ -9,6 +9,7 @@ typedef enum {
 } AstStmtKind;
 
 typedef struct {
+    Slice slice;
     AstExpr *value;
 } AstReturn;
 
@@ -24,4 +25,4 @@ typedef struct AstStmt {
 bool ast_stmt_eq(const AstStmt *a, const AstStmt *b);
 
 AstStmt *ast_stmt_new_expr(Mempool *mempool, AstExpr *expr);
-AstStmt *ast_stmt_new_return(Mempool *mempool, AstExpr *value);
+AstStmt *ast_stmt_new_return(Mempool *mempool, Slice slice, AstExpr *value);

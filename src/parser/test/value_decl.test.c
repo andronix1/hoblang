@@ -5,6 +5,8 @@
 #include <CUnit/Basic.h>
 #include <CUnit/CUnit.h>
 
+static Slice $;
+
 static void test_parser_value_decl_kind() {
     check_parsing(
         vec_create_in(mempool,
@@ -66,7 +68,7 @@ static void test_parser_value_decl_initializer() {
                     slice_from_cstr("myConst"),
                     NULL
                 ),
-                ast_expr_new_path(mempool, create_path("super"))
+                ast_expr_new_path(mempool, $, create_path("super"))
             ),
         ),
         "const myConst = super;\n"
@@ -83,7 +85,7 @@ static void test_parser_value_decl_local() {
                     AST_VALUE_DECL_CONST, slice_from_cstr("myConst"),
                     create_type("i32")
                 ),
-                ast_expr_new_path(mempool, create_path("super"))
+                ast_expr_new_path(mempool, $, create_path("super"))
             ),
         ),
         "local const myConst: i32 = super;\n"
@@ -100,7 +102,7 @@ static void test_parser_value_decl_full() {
                     AST_VALUE_DECL_CONST, slice_from_cstr("myConst"),
                     create_type("i32")
                 ),
-                ast_expr_new_path(mempool, create_path("super"))
+                ast_expr_new_path(mempool, $, create_path("super"))
             ),
         ),
         "const myConst: i32 = super;\n"

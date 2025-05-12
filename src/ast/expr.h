@@ -30,6 +30,7 @@ typedef struct {
 
 typedef struct AstExpr {
     AstExprKind kind;
+    Slice slice;
 
     union {
         AstPath *path;
@@ -42,8 +43,8 @@ typedef struct AstExpr {
 
 bool ast_expr_eq(const AstExpr *a, const AstExpr *b);
 
-AstExpr *ast_expr_new_path(Mempool *mempool, AstPath *path);
-AstExpr *ast_expr_new_integer(Mempool *mempool, uint64_t integer);
-AstExpr *ast_expr_new_callable(Mempool *mempool, AstExpr *inner, AstExpr **args);
-AstExpr *ast_expr_new_scope(Mempool *mempool, AstExpr *inner);
-AstExpr *ast_expr_new_binop(Mempool *mempool, AstBinopKind kind, AstExpr *left, AstExpr *right);
+AstExpr *ast_expr_new_path(Mempool *mempool, Slice slice, AstPath *path);
+AstExpr *ast_expr_new_integer(Mempool *mempool, Slice slice, uint64_t integer);
+AstExpr *ast_expr_new_callable(Mempool *mempool, Slice slice, AstExpr *inner, AstExpr **args);
+AstExpr *ast_expr_new_scope(Mempool *mempool, Slice slice, AstExpr *inner);
+AstExpr *ast_expr_new_binop(Mempool *mempool, Slice slice, AstBinopKind kind, AstExpr *left, AstExpr *right);

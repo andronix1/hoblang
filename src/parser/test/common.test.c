@@ -25,8 +25,10 @@ AstPath *create_path(const char *str) {
     return ast_path_new(mempool, segments);
 }
 
+static Slice $;
+
 AstExpr *create_path_expr(const char *str) {
-    return ast_expr_new_path(mempool, create_path(str));
+    return ast_expr_new_path(mempool, $, create_path(str));
 }
 
 AstType *create_type(const char *str) {
