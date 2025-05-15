@@ -70,6 +70,15 @@ bool llvm_module_write_obj(LlvmModule *module, const char *output) {
 	return true;
 }
 
+bool llvm_module_write_ir(LlvmModule *module, const char *output) {
+	char *error;
+	if (LLVMPrintModuleToFile(module->module, output, &error) == 1) {
+		logln("error: failed to emit to file: %s", error);
+		return false;
+	}
+	return true;
+}
+
 void llvm_module_free(LlvmModule *module) {
     LLVMDisposeBuilder(module->builder);
     LLVMDisposeTargetMachine(module->machine);

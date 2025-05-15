@@ -1,6 +1,6 @@
 #include "expr.h"
 #include "ast/expr.h"
-#include "core/assert.h"
+#include "core/log.h"
 #include "core/null.h"
 #include "sema/module/api/type.h"
 #include "sema/module/api/value.h"
@@ -60,8 +60,28 @@ static inline SemaValue *_sema_module_analyze_expr(SemaModule *module, AstExpr *
         }
         case AST_EXPR_SCOPE:
             return sema_module_analyze_expr(module, expr->scope, ctx);
-        case AST_EXPR_BINOP:
-            TODO;
+        case AST_EXPR_BINOP: {
+            SemaType *left = sema_value_is_runtime(NOT_NULL(sema_module_analyze_expr(module, expr->binop.left, ctx)));
+            if (!left) {
+                sema_module_err(module, expr->binop.left->slice, "binop side expression must be runtime value");
+                return NULL;
+            }
+            SemaType *right = sema_value_is_runtime(NOT_NULL(sema_module_analyze_expr(module, expr->binop.right, ctx)));
+            if (!right) {
+                sema_module_err(module, expr->binop.right->slice, "binop side expression must be runtime value");
+                return NULL;
+            }
+            if (!sema_type_eq(left, right)) {
+                sema_module_err(module, expr->slice, "binop can operate only expressions with equal type");
+                return NULL;
+            }
+            static bool logged = false;
+            if (!logged) {
+                logln("WARNING: binops are unstable! use them carefully!");
+                logged = true;
+            }
+            return sema_value_new_final(module->mempool, left);
+        }
     }
     return NULL;
 }

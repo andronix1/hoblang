@@ -42,6 +42,7 @@ int main(int argc, char **argv) {
     LlvmModule *module = llvm_module_new(sema_module_new(parser_new(lexer_new(content))));
     llvm_module_read(module);
     llvm_module_emit(module);
+    llvm_module_write_ir(module, "test.ll");
     if (!llvm_module_write_obj(module, "test.o")) {
         logln("failed to write module");
         return 1;

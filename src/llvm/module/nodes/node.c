@@ -4,6 +4,7 @@
 #include "core/mempool.h"
 #include "llvm/module/module.h"
 #include "llvm/module/nodes/body.h"
+#include "llvm/module/nodes/expr.h"
 #include "llvm/module/nodes/stmt.h"
 #include "llvm/module/nodes/type.h"
 #include "sema/module/module.h"
@@ -41,7 +42,16 @@ void llvm_module_read_node(LlvmModule *module, AstNode *node) {
             }
             UNREACHABLE;
         case AST_NODE_VALUE_DECL:
-            TODO;
+            if (node->value_decl.sema.is_global) {
+                node->value_decl.sema.decl->llvm.value = LLVMAddGlobal(module->module,
+                    llvm_decl_type(module, node->value_decl.sema.decl), "");
+            } else {
+                if (node->value_decl.info->kind == AST_VALUE_DECL_VAR) {
+                    node->value_decl.sema.decl->llvm.value = LLVMBuildAlloca(module->builder,
+                        llvm_decl_type(module, node->value_decl.sema.decl), "");
+                }
+            }
+            return;
     }
     UNREACHABLE;
 }
@@ -63,8 +73,22 @@ void llvm_module_emit_node(LlvmModule *module, AstNode *node) {
         case AST_NODE_STMT:
             llvm_emit_stmt(module, node->stmt);
             return;
-        case AST_NODE_VALUE_DECL:
-            TODO;
+        case AST_NODE_VALUE_DECL: {
+            AstExpr *init = node->value_decl.initializer;
+            if (!init) return;
+            LLVMValueRef value = node->value_decl.sema.decl->llvm.value;
+            LLVMValueRef init_val = llvm_emit_expr_get(module, init);
+            if (node->value_decl.sema.is_global) {
+                LLVMSetInitializer(value, init_val);
+            } else {
+                if (node->value_decl.info->kind == AST_VALUE_DECL_VAR) {
+                    LLVMBuildStore(module->builder, init_val, value);
+                } else {
+                    node->value_decl.sema.decl->llvm.value = init_val;
+                }
+            }
+            return;
+        }
     }
     UNREACHABLE;
 }

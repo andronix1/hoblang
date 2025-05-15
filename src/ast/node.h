@@ -64,6 +64,11 @@ typedef struct {
     AstGlobal *global;
     AstValueInfo *info;
     AstExpr *initializer;
+
+    struct {
+        bool is_global;
+        SemaDeclHandle *decl;
+    } sema;
 } AstValueDecl;
 
 typedef enum {

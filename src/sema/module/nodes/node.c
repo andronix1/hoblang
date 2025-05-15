@@ -47,15 +47,29 @@ void sema_module_read_node(SemaModule *module, AstNode *node) {
                 return;
             }
             SemaType *type = RET_ON_NULL(sema_module_analyze_type(module, node->value_decl.info->explicit_type));
+            AstExpr *init = node->value_decl.initializer;
+            if (init) {
+                SemaType *init_type = sema_value_is_runtime(RET_ON_NULL(sema_module_analyze_expr(module,
+                    init, sema_expr_ctx_new(type))));
+                if (!init_type) {
+                    sema_module_err(module, init->slice, "initializer must be a runtime value");
+                    return;
+                }
+                if (!sema_type_eq(init_type, type)) {
+                    sema_module_err(module, init->slice, "cannot assign $T to value with explicit type $T", init_type, type);
+                    return;
+                }
+            }
+            node->value_decl.sema.is_global = sema_module_is_global_scope(module);
             switch (node->value_decl.info->kind) {
                 case AST_VALUE_DECL_VAR:
-                    sema_module_push_decl(module, node->value_decl.info->name,
+                    node->value_decl.sema.decl = sema_module_push_decl(module, node->value_decl.info->name,
                         sema_decl_new(module, node->value_decl.info->is_local,
                             sema_value_new_var(module->mempool, type)
                         ));
                     return;
                 case AST_VALUE_DECL_FINAL:
-                    sema_module_push_decl(module, node->value_decl.info->name,
+                    node->value_decl.sema.decl = sema_module_push_decl(module, node->value_decl.info->name,
                         sema_decl_new(module, node->value_decl.info->is_local,
                             sema_value_new_final(module->mempool, type)
                         ));

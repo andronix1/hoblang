@@ -3,13 +3,15 @@
 #include "core/assert.h"
 #include "sema/module/api/value.h"
 #include "llvm/module/module.h"
+#include "llvm/module/nodes/path.h"
 #include "llvm/module/nodes/type.h"
 #include <llvm-c/Core.h>
 #include <llvm-c/Types.h>
 
 LLVMValueRef llvm_emit_expr(LlvmModule *module, AstExpr *expr) {
     switch (expr->kind) {
-        case AST_EXPR_PATH: TODO;
+        case AST_EXPR_PATH:
+            return llvm_emit_path(module, expr->path);
         case AST_EXPR_INTEGER: {
             SemaType *type = sema_value_is_runtime(expr->sema.value);
             return LLVMConstInt(llvm_type(module, type), expr->integer, false);
