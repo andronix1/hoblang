@@ -5,6 +5,7 @@
 #include "llvm/module/module.h"
 #include "llvm/module/nodes/path.h"
 #include "llvm/module/nodes/type.h"
+#include <alloca.h>
 #include <llvm-c/Core.h>
 #include <llvm-c/Types.h>
 
@@ -16,7 +17,17 @@ LLVMValueRef llvm_emit_expr(LlvmModule *module, AstExpr *expr) {
             SemaType *type = sema_value_is_runtime(expr->sema.value);
             return LLVMConstInt(llvm_type(module, type), expr->integer, false);
         }
-        case AST_EXPR_CALL: TODO;
+        case AST_EXPR_CALL: {
+            size_t count = vec_len(expr->call.args);
+            LLVMValueRef *args = alloca(sizeof(LLVMValueRef) * count);
+            for (size_t i = 0; i < count; i++) {
+                args[i] = llvm_emit_expr_get(module, expr->call.args[i]);
+            }
+            LLVMValueRef callable = llvm_emit_expr_get(module, expr->call.inner);
+            return LLVMBuildCall2(module->builder,
+                llvm_type(module, sema_value_is_runtime(expr->call.inner->sema.value)),
+                callable, args, count, "");
+        }
         case AST_EXPR_SCOPE: return llvm_emit_expr(module, expr);
         case AST_EXPR_BINOP: {
             LLVMValueRef left = llvm_emit_expr_get(module, expr->binop.left);
