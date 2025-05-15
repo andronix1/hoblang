@@ -1,9 +1,11 @@
 #include "core/buffer.h"
 #include "core/file_content.h"
+#include "core/mempool.h"
 
 typedef struct Lexer {
     const FileContent *content;
 
+    Mempool *mempool;
     Buffer buffer;
     size_t start_pos, pos;
 } Lexer;

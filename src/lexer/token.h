@@ -14,7 +14,8 @@ typedef enum {
     TOKEN_GLOBAL, TOKEN_EXTERN,
     TOKEN_RETURN,
     // Extended
-    TOKEN_IDENT, TOKEN_INTEGER,
+    TOKEN_IDENT,
+    TOKEN_INTEGER, TOKEN_STRING,
     // Binops
     TOKEN_MINUS, TOKEN_SUBTRACT,
     TOKEN_STAR, TOKEN_SLASH,
@@ -23,6 +24,7 @@ typedef enum {
     // Braces
     TOKEN_OPENING_FIGURE_BRACE, TOKEN_CLOSING_FIGURE_BRACE,
     TOKEN_OPENING_CIRCLE_BRACE, TOKEN_CLOSING_CIRCLE_BRACE,
+    TOKEN_OPENING_SQUARE_BRACE, TOKEN_CLOSING_SQUARE_BRACE,
     // Punctuation
     TOKEN_COLON, TOKEN_SEMICOLON,
     TOKEN_COMMA, TOKEN_DOT,
@@ -37,6 +39,7 @@ typedef struct {
     Slice slice;
 
     union {
+        Slice string;
         uint64_t integer;
     };
 } Token;
@@ -45,6 +48,11 @@ void token_print(va_list list);
 
 static inline Token token_integer(uint64_t integer) {
     Token token = { .kind = TOKEN_INTEGER, .integer = integer };
+    return token;
+}
+
+static inline Token token_string(Slice string) {
+    Token token = { .kind = TOKEN_STRING, .string = string };
     return token;
 }
 

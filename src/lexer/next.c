@@ -1,4 +1,5 @@
 #include "api.h"
+#include "core/mempool.h"
 #include "core/slice.h"
 #include "lexer/lexer.h"
 #include "lexer/token.h"
@@ -45,6 +46,35 @@ static Token lexer_try_next(Lexer *lexer) {
         case '}': return token_simple(TOKEN_CLOSING_FIGURE_BRACE);
         case '(': return token_simple(TOKEN_OPENING_CIRCLE_BRACE);
         case ')': return token_simple(TOKEN_CLOSING_CIRCLE_BRACE);
+        case '[': return token_simple(TOKEN_OPENING_SQUARE_BRACE);
+        case ']': return token_simple(TOKEN_CLOSING_SQUARE_BRACE);
+        case '\"': {
+            char *string = vec_new_in(lexer->mempool, char);
+            for (char c = lexer_next_char(lexer); c != '\"'; c = lexer_next_char(lexer)) {
+                if (c == EOF) {
+                    lexer_err(lexer, lexer->pos, "EOF while parsing string");
+                    return token_simple(TOKEN_FAILED);
+                }
+                if (c == '\\') {
+                    c = lexer_next_char(lexer);
+                    switch (c) {
+                        case '0': vec_push(string, '\0'); break;
+                        case 'n': vec_push(string, '\n'); break;
+                        case 't': vec_push(string, '\t'); break;
+                        case '\"': vec_push(string, '\"'); break;
+                        case '\\': vec_push(string, '\\'); break;
+                        default: {
+                            size_t old = lexer->start_pos;
+                            lexer->start_pos = lexer->pos - 1;
+                            lexer_err(lexer, lexer->pos, "invalid escape character");
+                            lexer->start_pos = old;
+                            break;
+                        }
+                    }
+                } else vec_push(string, c);
+            }
+            return token_string(slice_new(string, vec_len(string)));
+        }
         case EOF:
             return token_simple(TOKEN_EOI);
         default:
