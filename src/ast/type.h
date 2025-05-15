@@ -9,6 +9,7 @@
 typedef enum {
     AST_TYPE_STRUCT,
     AST_TYPE_PATH,
+    AST_TYPE_POINTER,
 } AstTypeKind;
 
 typedef struct {
@@ -27,6 +28,7 @@ typedef struct AstType {
     union {
         AstStruct structure;
         AstPath *path;
+        AstType *pointer_to;
     };
 } AstType;
 
@@ -35,3 +37,4 @@ bool ast_type_eq(const AstType *a, const AstType *b);
 AstStructField ast_struct_field_new(bool is_local, AstType *type);
 AstType *ast_type_new_struct(Mempool *pool, AstStructField *fields_map);
 AstType *ast_type_new_path(Mempool *pool, AstPath *path);
+AstType *ast_type_new_pointer(Mempool *pool, AstType *of);

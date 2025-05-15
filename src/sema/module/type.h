@@ -41,6 +41,7 @@ typedef struct {
 typedef enum {
     SEMA_TYPE_PRIMITIVE,
     SEMA_TYPE_FUNCTION,
+    SEMA_TYPE_POINTER,
     SEMA_TYPE_STRUCT,
 } SemaTypeKind;
 
@@ -69,6 +70,7 @@ typedef struct SemaType {
         SemaTypePrimitive primitive;
         SemaTypeFunction function;
         SemaTypeStruct structure;
+        SemaType *pointer_to;
     };
 } SemaType;
 
@@ -81,5 +83,6 @@ SemaTypeStructField sema_type_struct_field_new(bool is_local, SemaType *type);
 SemaType *sema_type_new_struct(Mempool *mempool, SemaTypeStructField *fields_map);
 
 SemaType *sema_type_new_function(Mempool *mempool, SemaType **args, SemaType *returns);
+SemaType *sema_type_new_pointer(Mempool *mempool, SemaType *to);
 
 SemaType *sema_type_new_alias(Mempool *mempool, const SemaModule *in, const SemaType *type);

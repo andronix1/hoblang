@@ -46,6 +46,11 @@ SemaType *sema_type_new_function(Mempool *mempool, SemaType **args, SemaType *re
         out->function.returns = returns;
     )
 
+SemaType *sema_type_new_pointer(Mempool *mempool, SemaType *to)
+    CONSTRUCT(SEMA_TYPE_POINTER,
+        out->pointer_to = to;
+    )
+
 SemaType *sema_type_new_alias(Mempool *mempool, const SemaModule *in, const SemaType *type) {
     SemaType *result = mempool_alloc(mempool, SemaType);
     memcpy(result, type, sizeof(SemaType));

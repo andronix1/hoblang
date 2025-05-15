@@ -38,6 +38,8 @@ LLVMTypeRef llvm_type(LlvmModule *module, SemaType *type) {
             return LLVMFunctionType(llvm_type(module, type->function.returns), params, count, false);
         }
         case SEMA_TYPE_STRUCT: TODO;
+        case SEMA_TYPE_POINTER:
+            return LLVMPointerType(llvm_type(module, type->pointer_to), 0);
     }
     UNREACHABLE;
 }

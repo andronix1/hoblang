@@ -8,10 +8,9 @@
 #include "parser/parser.h"
 
 AstType *parse_type(Parser *parser) {
-    Token token = parser_peek(parser);
+    Token token = parser_take(parser);
     switch (token.kind) {
         case TOKEN_STRUCT: {
-            parser_take(parser);
             PARSER_EXPECT_NEXT(parser, TOKEN_OPENING_FIGURE_BRACE);
             AstStructField *fields = keymap_new_in(parser->mempool, AstStructField);
             while (!parser_next_should_be(parser, TOKEN_CLOSING_FIGURE_BRACE)) {
@@ -26,7 +25,10 @@ AstType *parse_type(Parser *parser) {
             return ast_type_new_struct(parser->mempool, fields);
         }
         case TOKEN_IDENT:
+            parser_skip_next(parser);
             return ast_type_new_path(parser->mempool, NOT_NULL(parse_path(parser)));
+        case TOKEN_STAR:
+            return ast_type_new_pointer(parser->mempool, NOT_NULL(parse_type(parser)));
         default:
             parser_err(parser, token.slice, "expected type");
             return NULL;

@@ -41,6 +41,7 @@ bool ast_type_eq(const AstType *a, const AstType *b) {
             }
             return true;
         }
+        case AST_TYPE_POINTER: return ast_type_eq(a->pointer_to, b->pointer_to);
     }
     UNREACHABLE;
 }
@@ -50,3 +51,6 @@ AstType *ast_type_new_struct(Mempool *mempool, AstStructField *fields_map)
 
 AstType *ast_type_new_path(Mempool *mempool, AstPath *path)
     CONSTRUCT(AST_TYPE_PATH, out->path = path;)
+
+AstType *ast_type_new_pointer(Mempool *mempool, AstType *to)
+    CONSTRUCT(AST_TYPE_POINTER, out->pointer_to = to;)
