@@ -40,6 +40,14 @@ LLVMValueRef llvm_emit_expr(LlvmModule *module, AstExpr *expr) {
             }
             UNREACHABLE;
         }
+        case AST_EXPR_STRING: {
+            // TODO: slice
+            LLVMValueRef value = LLVMAddGlobal(module->module, LLVMArrayType2(LLVMInt8Type(),
+                expr->string.length), "");
+            LLVMSetInitializer(value, LLVMConstString(expr->string.value,
+                expr->string.length, true));
+            return value;
+        }
     }
     UNREACHABLE;
 }

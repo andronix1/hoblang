@@ -1,5 +1,6 @@
 #include "expr.h"
 #include "ast/expr.h"
+#include "core/assert.h"
 #include "core/log.h"
 #include "core/null.h"
 #include "sema/module/api/type.h"
@@ -82,8 +83,11 @@ static inline SemaValue *_sema_module_analyze_expr(SemaModule *module, AstExpr *
             }
             return sema_value_new_final(module->mempool, left);
         }
+        case AST_EXPR_STRING:
+            return sema_value_new_final(module->mempool, sema_type_new_slice(module->mempool,
+                sema_type_new_primitive_int(module->mempool, SEMA_PRIMITIVE_INT8, false)));
     }
-    return NULL;
+    UNREACHABLE;
 }
 
 SemaValue *sema_module_analyze_expr(SemaModule *module, AstExpr *expr, SemaExprCtx ctx) {

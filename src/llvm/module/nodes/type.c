@@ -3,6 +3,7 @@
 #include "core/vec.h"
 #include "sema/module/api/value.h"
 #include "sema/module/module.h"
+#include "sema/module/type.h"
 #include <alloca.h>
 #include <llvm-c/Core.h>
 #include <llvm-c/Types.h>
@@ -40,6 +41,9 @@ LLVMTypeRef llvm_type(LlvmModule *module, SemaType *type) {
         case SEMA_TYPE_STRUCT: TODO;
         case SEMA_TYPE_POINTER:
             return LLVMPointerType(llvm_type(module, type->pointer_to), 0);
+        case SEMA_TYPE_SLICE:
+            // TODO: struct
+            return LLVMPointerType(llvm_type(module, type->slice_of), 0);
     }
     UNREACHABLE;
 }

@@ -33,8 +33,11 @@ SemaType *sema_module_analyze_type(SemaModule *module, AstType *type) {
             return sema_type;
         }
         case AST_TYPE_POINTER:
-            return sema_type_new_pointer(module->mempool,
-                NOT_NULL(sema_module_analyze_type(module, type->pointer_to)));
+            return sema_type_new_pointer(module->mempool, NOT_NULL(sema_module_analyze_type(module,
+                type->pointer_to)));
+        case AST_TYPE_SLICE:
+            return sema_type_new_slice(module->mempool, NOT_NULL(sema_module_analyze_type(module,
+                type->slice_of)));
     }
     UNREACHABLE;
 }

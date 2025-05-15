@@ -2,6 +2,7 @@
 #include "core/mempool.h"
 #include "ast/path.h"
 #include "core/assert.h"
+#include "core/slice.h"
 #include "core/vec.h"
 
 #define CONSTRUCT(KIND, FIELDS) MEMPOOL_CONSTRUCT(AstExpr, { \
@@ -34,6 +35,7 @@ bool ast_expr_eq(const AstExpr *a, const AstExpr *b) {
             a->binop.kind == b->binop.kind &&
             ast_expr_eq(a->binop.left, b->binop.left) &&
             ast_expr_eq(a->binop.right, b->binop.right);
+        case AST_EXPR_STRING: return slice_eq(a->string, b->string);
     }
     UNREACHABLE;
 }
@@ -43,6 +45,9 @@ AstExpr *ast_expr_new_path(Mempool *mempool, Slice slice, AstPath *path)
 
 AstExpr *ast_expr_new_integer(Mempool *mempool, Slice slice, uint64_t integer)
     CONSTRUCT(AST_EXPR_INTEGER, out->integer = integer)
+
+AstExpr *ast_expr_new_string(Mempool *mempool, Slice slice, Slice string)
+    CONSTRUCT(AST_EXPR_STRING, out->string = string)
 
 AstExpr *ast_expr_new_scope(Mempool *mempool, Slice slice, AstExpr *inner)
     CONSTRUCT(AST_EXPR_SCOPE, out->scope = inner)

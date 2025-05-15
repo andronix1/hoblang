@@ -56,7 +56,7 @@ void sema_module_read_node(SemaModule *module, AstNode *node) {
                     return;
                 }
                 if (!sema_type_eq(init_type, type)) {
-                    sema_module_err(module, init->slice, "cannot assign $T to value with explicit type $T", init_type, type);
+                    sema_module_err(module, init->slice, "cannot assign $t to value with explicit type $t", init_type, type);
                     return;
                 }
             }

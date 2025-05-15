@@ -1,6 +1,6 @@
-local extern(puts) fun print_raw_str(str: *u8);
+local extern(puts) fun print_raw_str(str: []u8);
 
 local global fun main() -> i32 {
-    var s: []u8 = "superDuper\0";
+    print_raw_str("hello, world!\0");
     return 0;
 }

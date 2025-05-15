@@ -57,4 +57,4 @@ AstType *ast_type_new_pointer(Mempool *mempool, AstType *to)
     CONSTRUCT(AST_TYPE_POINTER, out->pointer_to = to;)
 
 AstType *ast_type_new_slice(Mempool *mempool, AstType *of)
-    CONSTRUCT(AST_TYPE_POINTER, out->slice_of = of;)
+    CONSTRUCT(AST_TYPE_SLICE, out->slice_of = of;)
