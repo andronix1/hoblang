@@ -7,9 +7,9 @@
 #include "parser/parser.h"
 
 AstNode *parse_extern_node(Parser *parser, bool is_local) {
-    bool has_alias = false;
     Slice alias;
-    if (parser_next_should_be(parser, TOKEN_OPENING_CIRCLE_BRACE)) {
+    bool has_alias = has_alias = parser_next_should_be(parser, TOKEN_OPENING_CIRCLE_BRACE);
+    if (has_alias) {
         alias = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
         PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_CIRCLE_BRACE);
     }
