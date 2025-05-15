@@ -6,6 +6,7 @@
 #include "parser/api.h"
 #include "sema/module/api.h"
 #include "sema/module/api/type.h"
+#include "llvm/module/api.h"
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
@@ -38,9 +39,13 @@ int main(int argc, char **argv) {
         logln("failed to read file content: $E");
         return 1;
     }
-    SemaModule *module = sema_module_new(parser_new(lexer_new(content)));
-    sema_module_read(module);
-    sema_module_analyze(module);
-    sema_module_free(module);
+    LlvmModule *module = llvm_module_new(sema_module_new(parser_new(lexer_new(content))));
+    llvm_module_read(module);
+    llvm_module_emit(module);
+    if (!llvm_module_write_obj(module, "test.o")) {
+        logln("failed to write module");
+        return 1;
+    }
+    llvm_module_free(module);
     return 0;
 }

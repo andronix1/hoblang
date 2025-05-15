@@ -9,6 +9,10 @@
 
 typedef struct SemaDeclHandle {
     SemaValue *value;
+
+    struct {
+        void *value;
+    } llvm;
 } SemaDeclHandle;
 
 typedef struct {

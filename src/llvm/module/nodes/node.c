@@ -1,0 +1,70 @@
+#include "node.h"
+#include "ast/node.h"
+#include "core/assert.h"
+#include "core/mempool.h"
+#include "llvm/module/module.h"
+#include "llvm/module/nodes/body.h"
+#include "llvm/module/nodes/stmt.h"
+#include "llvm/module/nodes/type.h"
+#include "sema/module/module.h"
+#include <llvm-c/Core.h>
+#include <llvm-c/Types.h>
+
+static void llvm_add_function(LlvmModule *module, AstFunInfo *info, Slice *name) {
+    const char *function_name = "";
+    if (name) {
+        function_name = mempool_slice_to_cstr(module->mempool, *name);
+    }
+    info->sema.decl->llvm.value = LLVMAddFunction(module->module, function_name, llvm_decl_type(module, info->sema.decl));
+}
+
+void llvm_module_read_node(LlvmModule *module, AstNode *node) {
+    switch (node->kind) {
+        case AST_NODE_STMT:
+        case AST_NODE_TYPE_DECL:
+            return;
+        case AST_NODE_FUN_DECL:
+            llvm_add_function(module, node->fun_decl.info, node->fun_decl.global ?
+                (node->fun_decl.global->has_alias ? &node->fun_decl.global->alias :
+                    &node->fun_decl.info->name) : NULL);
+            return;
+        return;
+        case AST_NODE_EXTERNAL_DECL:
+            switch (node->external_decl.kind) {
+                case AST_EXTERNAL_DECL_VALUE:
+                    TODO;
+                case AST_EXTERNAL_DECL_FUN:
+                    llvm_add_function(module, node->external_decl.fun,
+                        node->external_decl.has_alias ? &node->external_decl.alias :
+                            &node->external_decl.fun->name);
+                    return;
+            }
+            UNREACHABLE;
+        case AST_NODE_VALUE_DECL:
+            TODO;
+    }
+    UNREACHABLE;
+}
+
+void llvm_module_emit_node(LlvmModule *module, AstNode *node) {
+    switch (node->kind) {
+        case AST_NODE_FUN_DECL: {
+            LLVMValueRef func = node->fun_decl.info->sema.decl->llvm.value;
+            LLVMBasicBlockRef entry = LLVMAppendBasicBlockInContext(module->context, func, "");
+            LLVMPositionBuilderAtEnd(module->builder, entry);
+            LlvmState old_state = llvm_switch_state(module, llvm_state_new(func, entry, entry));
+            llvm_emit_body(module, node->fun_decl.body);
+            llvm_switch_state(module, old_state);
+            return;
+        }
+        case AST_NODE_TYPE_DECL:
+        case AST_NODE_EXTERNAL_DECL:
+            return;
+        case AST_NODE_STMT:
+            llvm_emit_stmt(module, node->stmt);
+            return;
+        case AST_NODE_VALUE_DECL:
+            TODO;
+    }
+    UNREACHABLE;
+}

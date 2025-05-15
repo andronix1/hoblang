@@ -1,6 +1,13 @@
 #include "value.h"
 #include "sema/module/value.h"
 
+SemaType *sema_value_is_var(SemaValue *value) {
+    if (value->kind != SEMA_VALUE_RUNTIME || value->runtime.kind != SEMA_VALUE_RUNTIME_VAR) {
+        return NULL;
+    }
+    return value->runtime.type;
+}
+
 SemaType *sema_value_is_runtime(SemaValue *value) {
     if (value->kind != SEMA_VALUE_RUNTIME) {
         return NULL;

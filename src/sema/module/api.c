@@ -33,6 +33,11 @@ bool sema_module_read(SemaModule *module) {
     return true;
 }
 
+AstNode **sema_module_nodes(SemaModule *module) {
+    assert(module->nodes);
+    return module->nodes;
+}
+
 void sema_module_analyze(SemaModule *module) {
     for (size_t i = 0; i < vec_len(module->nodes); i++) {
         sema_module_analyze_node(module, module->nodes[i]);
