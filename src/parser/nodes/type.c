@@ -29,6 +29,9 @@ AstType *parse_type(Parser *parser) {
             return ast_type_new_path(parser->mempool, NOT_NULL(parse_path(parser)));
         case TOKEN_STAR:
             return ast_type_new_pointer(parser->mempool, NOT_NULL(parse_type(parser)));
+        case TOKEN_OPENING_SQUARE_BRACE:
+            PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_SQUARE_BRACE);
+            return ast_type_new_slice(parser->mempool, NOT_NULL(parse_type(parser)));
         default:
             parser_err(parser, token.slice, "expected type");
             return NULL;
