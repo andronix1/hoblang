@@ -1,5 +1,5 @@
-extern(puts) fun print_raw_str(c: *u8);
+local extern(puts) fun print_raw_str(c: *u8);
 
-global fun main() -> i32 {
+local global fun main() -> i32 {
     return 0;
 }
