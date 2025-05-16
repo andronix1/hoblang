@@ -18,9 +18,10 @@ SemaValue *sema_path_resolve_ident(SemaModule *module, SemaValue *value, AstPath
     if (type->kind == SEMA_TYPE_STRUCT) {
         size_t idx = keymap_get_idx(type->structure.fields_map, segment->ident);
         if (idx != -1) {
+            keymap_at(type->structure.fields_map, idx, field);
             segment->sema.kind = SEMA_PATH_SEGMENT_STRUCT_FIELD;
             segment->sema.struct_field_idx = idx;
-            return sema_value_new_nested(module->mempool, value, type);
+            return sema_value_new_nested(module->mempool, value, field->value.type);
         }
     }
     sema_module_err(module, segment->ident, "there is not `$S` in $t", segment->ident, type);
