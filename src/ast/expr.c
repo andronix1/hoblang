@@ -1,4 +1,6 @@
 #include "expr.h"
+#include "ast/type.h"
+#include "core/keymap.h"
 #include "core/mempool.h"
 #include "ast/path.h"
 #include "core/assert.h"
@@ -19,10 +21,7 @@ bool ast_expr_eq(const AstExpr *a, const AstExpr *b) {
         case AST_EXPR_PATH: return ast_path_eq(a->path, b->path);
         case AST_EXPR_CALL:
             if (!ast_expr_eq(a->call.inner, b->call.inner) ||
-                vec_len(a->call.args) != vec_len(b->call.args)
-            ) {
-                return false;
-            }
+                vec_len(a->call.args) != vec_len(b->call.args)) return false;
             for (size_t i = 0; i < vec_len(a->call.args); i++) {
                 if (!ast_expr_eq(a->call.args[i], b->call.args[i])) {
                     return false;
@@ -36,6 +35,15 @@ bool ast_expr_eq(const AstExpr *a, const AstExpr *b) {
             ast_expr_eq(a->binop.left, b->binop.left) &&
             ast_expr_eq(a->binop.right, b->binop.right);
         case AST_EXPR_STRING: return slice_eq(a->string, b->string);
+        case AST_EXPR_STRUCT:
+            if (!ast_type_eq(a->structure.type, b->structure.type)) return false;
+            if (vec_len(a->structure.fields_map) != vec_len(b->structure.fields_map)) return false;
+            for (size_t i = 0; i < vec_len(a->structure.fields_map); i++) {
+                keymap_at(a->structure.fields_map, i, af);
+                keymap_at(b->structure.fields_map, i, bf);
+                if (!slice_eq(af->key, bf->key) || !ast_expr_eq(af->value.expr, bf->value.expr)) return false;
+            }
+            return true;
     }
     UNREACHABLE;
 }
@@ -63,4 +71,10 @@ AstExpr *ast_expr_new_binop(Mempool *mempool, Slice slice, AstBinopKind kind, As
         out->binop.kind = kind;
         out->binop.left = left;
         out->binop.right = right;
+    )
+
+AstExpr *ast_expr_new_struct(Mempool *mempool, Slice slice, AstType *type, AstExprStructField *fields_map)
+    CONSTRUCT(AST_EXPR_STRUCT,
+        out->structure.type = type;
+        out->structure.fields_map = fields_map;
     )

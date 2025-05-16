@@ -1,25 +1,20 @@
+local type usize = u32;
+
 local type Slice<T> = struct {
     pointer: *T,
-    length: u32
+    length: usize
 };
 
-local extern(putchar) fun putCharacter(c: u8);
+local extern(write) fun write(fd: i32, ptr: *u8, count: usize);
+
+local fun print(slice: Slice.<u8>) {
+    write(1, slice.pointer, slice.length);
+}
 
 local global fun main() -> i32 {
-    var slice: Slice.<i32>;
-    slice.length;
-    putCharacter(72);
-    putCharacter(101);
-    putCharacter(108);
-    putCharacter(108);
-    putCharacter(111);
-    putCharacter(44);
-    putCharacter(32);
-    putCharacter(87);
-    putCharacter(111);
-    putCharacter(114);
-    putCharacter(108);
-    putCharacter(100);
-    putCharacter(10);
+    print(<Slice.<u8>>{
+        pointer: "super duper\n",
+        length: 12
+    });
     return 0;
 }

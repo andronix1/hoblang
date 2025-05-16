@@ -1,6 +1,7 @@
 #include "expr.h"
 #include "ast/expr.h"
 #include "core/assert.h"
+#include "core/keymap.h"
 #include "sema/module/api/value.h"
 #include "llvm/module/module.h"
 #include "llvm/module/nodes/path.h"
@@ -47,6 +48,21 @@ LLVMValueRef llvm_emit_expr(LlvmModule *module, AstExpr *expr) {
             LLVMSetInitializer(value, LLVMConstString(expr->string.value,
                 expr->string.length, true));
             return value;
+        }
+        case AST_EXPR_STRUCT: {
+            // TODO: move in defs block
+            LLVMTypeRef type = llvm_type(module,  sema_value_is_runtime(expr->sema.value));
+            LLVMValueRef value = LLVMBuildAlloca(module->builder, type, "");
+            for (size_t i = 0; i < vec_len(expr->structure.fields_map); i++) {
+                keymap_at(expr->structure.fields_map, i, field);
+                LLVMValueRef indices[2] = {
+                    LLVMConstInt(LLVMInt32Type(), 0, false),
+                    LLVMConstInt(LLVMInt32Type(), field->value.sema.field_idx, false),
+                };
+                LLVMBuildStore(module->builder, llvm_emit_expr_get(module, field->value.expr),
+                    LLVMBuildGEP2(module->builder, type, value, indices, 2, ""));
+            }
+            return LLVMBuildLoad2(module->builder, type, value, "");
         }
     }
     UNREACHABLE;

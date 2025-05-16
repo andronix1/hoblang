@@ -3,6 +3,7 @@
 #include "ast/expr.h"
 #include "ast/path.h"
 #include "core/assert.h"
+#include "core/keymap.h"
 #include "core/math.h"
 #include "core/mempool.h"
 #include "core/null.h"
@@ -10,6 +11,7 @@
 #include "core/vec.h"
 #include "lexer/token.h"
 #include "parser/nodes/path.h"
+#include "parser/nodes/type.h"
 #include "parser/parser.h"
 #include <stdio.h>
 
@@ -30,6 +32,32 @@ static inline AstExpr *parse_middle_expr(Parser *parser) {
             return ast_expr_new_string(parser->mempool, token.slice, token.string);
         case TOKEN_INTEGER:
             return ast_expr_new_integer(parser->mempool, token.slice, token.integer);
+        case TOKEN_OPENING_ANGLE_BRACE: {
+            AstType *type = NOT_NULL(parse_type(parser));
+            PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_ANGLE_BRACE);
+            Token begin_token = parser_take(parser);
+            switch (begin_token.kind) {
+                case TOKEN_OPENING_FIGURE_BRACE: {
+                    AstExprStructField *fields_map = keymap_new_in(parser->mempool, AstExprStructField);
+                    while (parser_next_is_not(parser, TOKEN_CLOSING_FIGURE_BRACE)) {
+                        Slice name = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
+                        PARSER_EXPECT_NEXT(parser, TOKEN_COLON);
+                        AstExpr *expr = NOT_NULL(parse_expr(parser));
+                        if (keymap_insert(fields_map, name, ast_expr_struct_field_new(expr))) {
+                            parser_err(parser, name, "duplication of field `$S`", name);
+                        }
+                        if (!parser_check_list_sep(parser, TOKEN_CLOSING_FIGURE_BRACE)) return false;
+                    }
+                    Token closing = PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_FIGURE_BRACE);
+                    return ast_expr_new_struct(parser->mempool,
+                        slice_union(token.slice, closing.slice), type, fields_map);
+                }
+                default:
+                    parser_err(parser, begin_token.slice, "expected `{`");
+                    return NULL;
+            }
+            return ast_expr_new_integer(parser->mempool, token.slice, token.integer);
+        }
         default:
             parser_err(parser, token.slice, "expected expression");
             return NULL;

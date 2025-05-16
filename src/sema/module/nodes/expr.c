@@ -1,12 +1,15 @@
 #include "expr.h"
 #include "ast/expr.h"
+#include "ast/type.h"
 #include "core/assert.h"
+#include "core/keymap.h"
 #include "core/log.h"
 #include "core/null.h"
 #include "sema/module/api/type.h"
 #include "sema/module/api/value.h"
 #include "sema/module/module.h"
 #include "sema/module/nodes/path.h"
+#include "sema/module/nodes/type.h"
 #include "sema/module/type.h"
 #include "sema/module/value.h"
 
@@ -84,8 +87,42 @@ static inline SemaValue *_sema_module_analyze_expr(SemaModule *module, AstExpr *
             return sema_value_new_final(module->mempool, left);
         }
         case AST_EXPR_STRING:
-            return sema_value_new_final(module->mempool, sema_type_new_slice(module->mempool,
+            // TODO: std.Slice.<u8>
+            return sema_value_new_final(module->mempool, sema_type_new_pointer(module->mempool,
                 sema_type_new_primitive_int(module->mempool, SEMA_PRIMITIVE_INT8, false)));
+        case AST_EXPR_STRUCT: {
+            SemaType *type = NOT_NULL(sema_module_analyze_type(module, expr->structure.type));
+            if (type->kind != SEMA_TYPE_STRUCT) {
+                sema_module_err(module, expr->structure.type->slice, "type must be struct");
+            } else {
+                for (size_t i = 0; i < vec_len(expr->structure.fields_map); i++) {
+                    keymap_at(expr->structure.fields_map, i, field);
+                    size_t idx = keymap_get_idx(type->structure.fields_map, field->key);
+                    if (idx == -1) {
+                        sema_module_err(module, field->key, "there is no field `$S` in structure $t",
+                            field->key, type);
+                        continue;
+                    }
+                    field->value.sema.field_idx = idx;
+                    keymap_at(type->structure.fields_map, idx, real_field);
+                    SemaType *real_type = real_field->value.type;
+                    SemaType *got_type = sema_value_is_runtime(NOT_NULL(
+                        sema_module_analyze_expr(module, field->value.expr,
+                            sema_expr_ctx_new(real_type))));
+                    if (!got_type) {
+                        sema_module_err(module, field->value.expr->slice,
+                            "struct field initializer must be runtime value");
+                        continue;
+                    }
+                    if (!sema_type_eq(real_type, got_type)) {
+                        sema_module_err(module, field->value.expr->slice,
+                            "type of struct field is $t bot expression has type $t",
+                                real_type, got_type);
+                    }
+                }
+            }
+            return sema_value_new_final(module->mempool, type);
+        }
     }
     UNREACHABLE;
 }
