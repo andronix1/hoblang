@@ -138,6 +138,12 @@ bool sema_module_analyze_node(SemaModule *module, AstNode *node) {
             assert(type);
             SemaScopeStack ss = sema_ss_new(module, type->function.returns);
             SemaScopeStack *old_ss = sema_module_ss_swap(module, &ss);
+            sema_module_push_scope(module);
+            for (size_t i = 0; i < vec_len(type->function.args); i++) {
+                node->fun_decl.info->args[i].sema.decl = sema_module_push_decl(module,
+                    node->fun_decl.info->args[i].name, sema_decl_new(module, false,
+                        sema_value_new_var(module->mempool, type->function.args[i])));
+            }
             bool breaks = sema_module_analyze_body(module, node->fun_decl.body);
             sema_module_ss_swap(module, old_ss);
             return breaks;

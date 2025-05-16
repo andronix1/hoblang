@@ -63,6 +63,12 @@ void llvm_module_emit_node(LlvmModule *module, AstNode *node) {
             LLVMBasicBlockRef entry = LLVMAppendBasicBlockInContext(module->context, func, "");
             LLVMPositionBuilderAtEnd(module->builder, entry);
             LlvmState old_state = llvm_switch_state(module, llvm_state_new(func, entry, entry));
+            for (size_t i = 0; i < vec_len(node->fun_decl.info->args); i++) {
+                LLVMValueRef value = node->fun_decl.info->args[i].sema.decl->llvm.value =
+                    LLVMBuildAlloca(module->builder, llvm_decl_type(module,
+                        node->fun_decl.info->args->sema.decl), "");
+                LLVMBuildStore(module->builder, LLVMGetParam(func, i), value);
+            }
             llvm_emit_body(module, node->fun_decl.body);
             llvm_switch_state(module, old_state);
             return;

@@ -9,6 +9,7 @@ local extern(write) fun write(fd: i32, ptr: *u8, count: usize);
 
 local fun print(slice: Slice.<u8>) {
     write(1, slice.pointer, slice.length);
+    return;
 }
 
 local global fun main() -> i32 {

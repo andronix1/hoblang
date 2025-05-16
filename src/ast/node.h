@@ -29,6 +29,10 @@ typedef struct {
 typedef struct {
     Slice name;
     AstType *type;
+
+    struct {
+        SemaDeclHandle *decl;
+    } sema;
 } AstFunArg;
 
 typedef struct AstFunInfo {
