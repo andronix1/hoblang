@@ -2,8 +2,12 @@
 
 #include <assert.h>
 
+#define MEMFAIL *((char*)NULL) = 0
+// #define MEMFAIL
+
 #define UNREACHABLE do { \
-    *((char*)NULL) = 0; \
+    MEMFAIL; \
     assert(0 && "unreachable"); \
 } while (0)
+
 #define TODO assert(0 && "TODO")

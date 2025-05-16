@@ -11,7 +11,7 @@ static void test_parser_type_decl_ident() {
     check_parsing(
         vec_create_in(mempool,
                 ast_node_new_type_decl(mempool, false,
-                    slice_from_cstr("MyCustomType"),
+                    slice_from_cstr("MyCustomType"), NULL,
                     create_type("super")
                 )
             ),
@@ -23,7 +23,7 @@ static void test_parser_type_decl_path() {
     check_parsing(
         vec_create_in(mempool,
                 ast_node_new_type_decl(mempool, false,
-                    slice_from_cstr("MyCustomType"),
+                    slice_from_cstr("MyCustomType"), NULL,
                     create_type("super.cool")
                 )
             ),
@@ -38,7 +38,7 @@ static void test_parser_type_decl_struct_with_trailing_comma() {
     check_parsing(
         vec_create_in(mempool,
                 ast_node_new_type_decl(mempool, false,
-                    slice_from_cstr("MyCustomType"),
+                    slice_from_cstr("MyCustomType"), NULL,
                     ast_type_new_struct(mempool, fields))
             ),
         "type MyCustomType = struct {\n"
@@ -55,7 +55,7 @@ static void test_parser_type_decl_struct() {
     check_parsing(
         vec_create_in(mempool,
                 ast_node_new_type_decl(mempool, false,
-                    slice_from_cstr("MyCustomType"),
+                    slice_from_cstr("MyCustomType"), NULL,
                     ast_type_new_struct(mempool, fields))
             ),
         "type MyCustomType = struct {\n"
@@ -72,7 +72,7 @@ static void test_parser_type_decl_struct_with_local_fields() {
     check_parsing(
         vec_create_in(mempool,
                 ast_node_new_type_decl(mempool, false,
-                    slice_from_cstr("MyCustomType"),
+                    slice_from_cstr("MyCustomType"), NULL,
                     ast_type_new_struct(mempool, fields))
             ),
         "type MyCustomType = struct {\n"
@@ -86,7 +86,7 @@ static void test_parser_type_decl_local() {
     check_parsing(
         vec_create_in(mempool,
                 ast_node_new_type_decl(mempool, true,
-                    slice_from_cstr("Type1"),
+                    slice_from_cstr("Type1"), NULL,
                     create_type("t1")
                 ),
             ),

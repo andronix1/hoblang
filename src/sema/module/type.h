@@ -44,6 +44,7 @@ typedef enum {
     SEMA_TYPE_POINTER,
     SEMA_TYPE_STRUCT,
     SEMA_TYPE_SLICE,
+    SEMA_TYPE_GENERIC,
 } SemaTypeKind;
 
 typedef struct {
@@ -87,5 +88,6 @@ SemaType *sema_type_new_struct(Mempool *mempool, SemaTypeStructField *fields_map
 SemaType *sema_type_new_function(Mempool *mempool, SemaType **args, SemaType *returns);
 SemaType *sema_type_new_pointer(Mempool *mempool, SemaType *to);
 SemaType *sema_type_new_slice(Mempool *mempool, SemaType *of);
+SemaType *sema_type_new_generic(Mempool *mempool);
 
 SemaType *sema_type_new_alias(Mempool *mempool, const SemaModule *in, const SemaType *type);

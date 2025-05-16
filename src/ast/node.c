@@ -1,6 +1,7 @@
 #include "node.h"
 #include "ast/body.h"
 #include "ast/expr.h"
+#include "ast/generic.h"
 #include "ast/global.h"
 #include "ast/stmt.h"
 #include "ast/type.h"
@@ -20,6 +21,16 @@ bool ast_global_eq(const AstGlobal *a, const AstGlobal *b) {
     return
         a->has_alias == b->has_alias &&
         (!a->has_alias || slice_eq(a->alias, b->alias));
+}
+
+bool ast_generic_eq(const AstGeneric *a, const AstGeneric *b) {
+    if (vec_len(a->params) != vec_len(b->params)) return false;
+    for (size_t i = 0; i < vec_len(a->params); i++) {
+        AstGenericParam *ap = &a->params[i];
+        AstGenericParam *bp = &b->params[i];
+        if (!slice_eq(ap->name, bp->name)) return false;
+    }
+    return true;
 }
 
 bool ast_value_info_eq(const AstValueInfo *a, const AstValueInfo *b) {
@@ -55,6 +66,7 @@ bool ast_node_eq(const AstNode *a, const AstNode *b) {
     switch (a->kind) {
         case AST_NODE_TYPE_DECL:
             return a->type_decl.is_local == b->type_decl.is_local &&
+                equals_nullable(a->type_decl.generics, b->type_decl.generics, (EqFunc)ast_generic_eq) &&
                 slice_eq(a->type_decl.name, b->type_decl.name) &&
                 ast_type_eq(a->type_decl.type, b->type_decl.type);
         case AST_NODE_FUN_DECL: {
@@ -109,10 +121,11 @@ AstValueInfo *ast_value_info_new(Mempool *mempool,
     out->explicit_type = explicit_type;
 )
 
-AstNode *ast_node_new_type_decl(Mempool *mempool, bool is_local, Slice name, AstType *type)
+AstNode *ast_node_new_type_decl(Mempool *mempool, bool is_local, Slice name, AstGeneric *generics, AstType *type)
     CONSTRUCT(AST_NODE_TYPE_DECL,
         out->type_decl.name = name;
         out->type_decl.type = type;
+        out->type_decl.generics = generics;
         out->type_decl.is_local = is_local;
     )
 

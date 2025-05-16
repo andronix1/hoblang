@@ -8,6 +8,13 @@ SemaType *sema_value_is_var(SemaValue *value) {
     return value->runtime.type;
 }
 
+SemaGeneric *sema_value_is_generic(SemaValue *value) {
+    if (value->kind != SEMA_VALUE_GENERIC) {
+        return NULL;
+    }
+    return value->generic;
+}
+
 SemaType *sema_value_is_runtime(SemaValue *value) {
     if (value->kind != SEMA_VALUE_RUNTIME) {
         return NULL;

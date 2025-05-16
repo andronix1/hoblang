@@ -56,6 +56,9 @@ SemaType *sema_type_new_slice(Mempool *mempool, SemaType *of)
         out->slice_of = of;
     )
 
+SemaType *sema_type_new_generic(Mempool *mempool)
+    CONSTRUCT(SEMA_TYPE_GENERIC,)
+
 SemaType *sema_type_new_alias(Mempool *mempool, const SemaModule *in, const SemaType *type) {
     SemaType *result = mempool_alloc(mempool, SemaType);
     memcpy(result, type, sizeof(SemaType));

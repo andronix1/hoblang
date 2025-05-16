@@ -48,6 +48,8 @@ static Token lexer_try_next(Lexer *lexer) {
         case ')': return token_simple(TOKEN_CLOSING_CIRCLE_BRACE);
         case '[': return token_simple(TOKEN_OPENING_SQUARE_BRACE);
         case ']': return token_simple(TOKEN_CLOSING_SQUARE_BRACE);
+        case '<': return token_simple(TOKEN_OPENING_ANGLE_BRACE);
+        case '>': return token_simple(TOKEN_CLOSING_ANGLE_BRACE);
         case '\"': {
             char *string = vec_new_in(lexer->mempool, char);
             for (char c = lexer_next_char(lexer); c != '\"'; c = lexer_next_char(lexer)) {

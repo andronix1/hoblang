@@ -1,4 +1,5 @@
 #include "path.h"
+#include "ast/api/generic.h"
 #include "ast/api/path.h"
 #include "core/mempool.h"
 #include "core/slice.h"
@@ -18,11 +19,23 @@ bool ast_path_eq(const AstPath *a, const AstPath *b) {
             case AST_PATH_SEGMENT_IDENT:
                 if (!slice_eq(as->ident, bs->ident)) return false;
                 break;
+            case AST_PATH_SEGMENT_GENERIC_BUILD:
+                if (!ast_generic_builder_eq(as->generic, bs->generic)) return false;
+                break;
         }
     }
     return true;
 }
 
+
+AstPathSegment ast_path_segment_new_generic_build(Slice slice, AstGenericBuilder *builder) {
+    AstPathSegment result = {
+        .kind = AST_PATH_SEGMENT_GENERIC_BUILD,
+        .slice = slice,
+        .generic = builder,
+    };
+    return result;
+}
 
 AstPathSegment ast_path_segment_new_ident(Slice ident) {
     AstPathSegment result = {

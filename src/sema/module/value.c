@@ -1,4 +1,5 @@
 #include "value.h"
+#include "sema/module/api/generic.h"
 
 #define CONSTRUCT(KIND, FIELDS) MEMPOOL_CONSTRUCT(SemaValue, { out->kind = KIND; FIELDS })
 
@@ -12,6 +13,11 @@ SemaValue *sema_value_new_final(Mempool *mempool, SemaType *type)
     CONSTRUCT(SEMA_VALUE_RUNTIME,
         out->runtime.kind = SEMA_VALUE_RUNTIME_FINAL;
         out->runtime.type = type;
+    )
+
+SemaValue *sema_value_new_generic(Mempool *mempool, SemaGeneric *generic)
+    CONSTRUCT(SEMA_VALUE_GENERIC,
+        out->generic = generic;
     )
 
 SemaValue *sema_value_new_type(Mempool *mempool, SemaType *type)

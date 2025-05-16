@@ -3,6 +3,7 @@
 #include "ast/api/expr.h"
 #include "ast/api/type.h"
 #include "ast/body.h"
+#include "ast/api/generic.h"
 #include "ast/global.h"
 #include "ast/stmt.h"
 #include "ast/type.h"
@@ -22,6 +23,7 @@ typedef struct {
     bool is_local;
     Slice name;
     AstType *type;
+    AstGeneric *generics;
 } AstTypeDecl;
 
 typedef struct {
@@ -114,7 +116,7 @@ AstValueInfo *ast_value_info_new(Mempool *mempool,
     AstType *explicit_type
 );
 
-AstNode *ast_node_new_type_decl(Mempool *mempool, bool is_local, Slice name, AstType *type);
+AstNode *ast_node_new_type_decl(Mempool *mempool, bool is_local, Slice name, AstGeneric *generics, AstType *type);
 AstNode *ast_node_new_fun_decl(Mempool *mempool, AstGlobal *global, AstFunInfo *info, AstBody *body);
 AstNode *ast_node_new_value_decl(Mempool *mempool, AstGlobal *global, AstValueInfo *info, AstExpr *initializer);
 AstNode *ast_node_new_external_value(Mempool *mempool, AstValueInfo *info, bool has_alias, Slice alias);

@@ -10,9 +10,11 @@
 #include "sema/module/module.h"
 #include "sema/module/nodes/body.h"
 #include "sema/module/nodes/expr.h"
+#include "sema/module/nodes/generic.h"
 #include "sema/module/nodes/type.h"
 #include "sema/module/type.h"
 #include "sema/module/value.h"
+#include <stdio.h>
 
 static inline void sema_module_push_fun_info(SemaModule *module, AstFunInfo *info) {
     info->sema.decl = NULL;
@@ -31,10 +33,20 @@ static inline void sema_module_push_fun_info(SemaModule *module, AstFunInfo *inf
 void sema_module_read_node(SemaModule *module, AstNode *node) {
     switch (node->kind) {
         case AST_NODE_TYPE_DECL: {
-            SemaType *type = sema_type_new_alias(module->mempool, module,
-                RET_ON_NULL(sema_module_analyze_type(module, node->type_decl.type)));
-            sema_module_push_decl(module, node->type_decl.name, sema_decl_new(module, node->type_decl.is_local,
-                sema_value_new_type(module->mempool, type)));
+            if (node->type_decl.generics) {
+                SemaGenericScopeHandle ghandle;
+                sema_module_generic_setup(module, node->type_decl.generics, &ghandle);
+                SemaType *type = sema_module_analyze_type(module, node->type_decl.type);
+                sema_module_generic_clean(module, type, &ghandle);
+                type = sema_type_new_alias(module->mempool, module, RET_ON_NULL(type));
+                sema_module_push_decl(module, node->type_decl.name, sema_decl_new(module, node->type_decl.is_local,
+                    sema_value_new_generic(module->mempool, ghandle.generic)));
+            } else {
+                SemaType *type =  sema_type_new_alias(module->mempool, module,
+                    RET_ON_NULL(sema_module_analyze_type(module, node->type_decl.type)));
+                sema_module_push_decl(module, node->type_decl.name, sema_decl_new(module, node->type_decl.is_local,
+                    sema_value_new_type(module->mempool, type)));
+            }
             return;
         }
         case AST_NODE_FUN_DECL: {

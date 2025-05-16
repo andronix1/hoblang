@@ -53,6 +53,7 @@ bool sema_type_eq(const SemaType *a, const SemaType *b) {
             return true;
         case SEMA_TYPE_POINTER: return sema_type_eq(a->pointer_to, b->pointer_to);
         case SEMA_TYPE_SLICE: return sema_type_eq(a->slice_of, b->slice_of);
+        case SEMA_TYPE_GENERIC: return a == b;
     }
     UNREACHABLE;
 }
@@ -93,12 +94,24 @@ void sema_type_print(va_list list) {
             logs(") -> $t", type->function.returns);
             return;
         case SEMA_TYPE_STRUCT:
-            TODO;
+            printf("struct {");
+            for (size_t i = 0; i < vec_len(type->structure.fields_map); i++) {
+                keymap_at(type->structure.fields_map, i, field);
+                if (i != 0) {
+                    printf(",");
+                }
+                logs(" $t", field->value.type);
+            }
+            logs(" }");
+            return;
         case SEMA_TYPE_POINTER:
             logs("*$t", type->pointer_to);
             return;
         case SEMA_TYPE_SLICE:
             logs("[]$t", type->slice_of);
+            return;
+        case SEMA_TYPE_GENERIC:
+            logs("<generic>");
             return;
     }
     UNREACHABLE;

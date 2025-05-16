@@ -15,11 +15,11 @@ static void test_parser_multiple_nodes() {
     check_parsing(
         vec_create_in(mempool,
                 ast_node_new_type_decl(mempool, false,
-                    slice_from_cstr("Type1"),
+                    slice_from_cstr("Type1"), NULL,
                     create_type("t1")
                 ),
                 ast_node_new_type_decl(mempool, false,
-                    slice_from_cstr("Type2"),
+                    slice_from_cstr("Type2"), NULL,
                     create_type("t2")
                 )
             ),

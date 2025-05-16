@@ -19,6 +19,8 @@ void token_print(va_list list) {
         case TOKEN_CLOSING_CIRCLE_BRACE: printf("`)`"); return;
         case TOKEN_OPENING_SQUARE_BRACE: printf("`[`"); return;
         case TOKEN_CLOSING_SQUARE_BRACE: printf("`]`"); return;
+        case TOKEN_OPENING_ANGLE_BRACE: printf("`<`"); return;
+        case TOKEN_CLOSING_ANGLE_BRACE: printf("`>`"); return;
         case TOKEN_COLON: printf("`:`"); return;
         case TOKEN_SEMICOLON: printf("`;`"); return;
         case TOKEN_COMMA: printf("`,`"); return;

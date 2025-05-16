@@ -1,0 +1,24 @@
+local type Slice<T> = struct {
+    ptr: *T,
+    len: u32
+};
+
+local extern(putchar) fun putCharacter(c: u8);
+
+local global fun main() -> i32 {
+    var slice: Slice.<i32>;
+    putCharacter(72);
+    putCharacter(101);
+    putCharacter(108);
+    putCharacter(108);
+    putCharacter(111);
+    putCharacter(44);
+    putCharacter(32);
+    putCharacter(87);
+    putCharacter(111);
+    putCharacter(114);
+    putCharacter(108);
+    putCharacter(100);
+    putCharacter(10);
+    return 0;
+}
