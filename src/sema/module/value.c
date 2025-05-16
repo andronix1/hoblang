@@ -1,7 +1,18 @@
 #include "value.h"
+#include "core/assert.h"
 #include "sema/module/api/generic.h"
+#include "sema/module/api/value.h"
 
 #define CONSTRUCT(KIND, FIELDS) MEMPOOL_CONSTRUCT(SemaValue, { out->kind = KIND; FIELDS })
+
+SemaValue *sema_value_new_nested(Mempool *mempool, SemaValue *base, SemaType *type) {
+    assert(sema_value_is_runtime(base));
+    switch (base->runtime.kind) {
+        case SEMA_VALUE_RUNTIME_VAR: return sema_value_new_var(mempool, type);
+        case SEMA_VALUE_RUNTIME_FINAL: return sema_value_new_final(mempool, type);
+    }
+    UNREACHABLE;
+}
 
 SemaValue *sema_value_new_var(Mempool *mempool, SemaType *type)
     CONSTRUCT(SEMA_VALUE_RUNTIME,

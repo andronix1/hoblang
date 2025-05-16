@@ -30,6 +30,7 @@ typedef struct SemaValue {
     };
 } SemaValue;
 
+SemaValue *sema_value_new_nested(Mempool *mempool, SemaValue *base, SemaType *type);
 SemaValue *sema_value_new_var(Mempool *mempool, SemaType *type);
 SemaValue *sema_value_new_final(Mempool *mempool, SemaType *type);
 SemaValue *sema_value_new_type(Mempool *mempool, SemaType *type);

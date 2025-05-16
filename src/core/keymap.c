@@ -25,14 +25,20 @@ void *__keymap_rev_get(void *keymap, Slice key) {
     return NULL;
 }
 
-void *__keymap_get(void *keymap, Slice key) {
+inline size_t __keymap_get_idx(void *keymap, Slice key) {
     for (size_t i = 0; i < vec_len(keymap); i++) {
         KeyMapElement *element = vec_at(keymap, i);
         if (slice_eq(key, element->key)) {
-            return &element->data;
+            return i;
         }
     }
-    return NULL;
+    return -1;
+}
+
+void *__keymap_get(void *keymap, Slice key) {
+    size_t idx = __keymap_get_idx(keymap, key);
+    if (idx == -1) return NULL;
+    return ((KeyMapElement*)vec_at(keymap, idx))->data;
 }
 
 void *__keymap_try_insert(void **keymap_ptr, Slice key, void *value) {

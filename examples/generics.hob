@@ -1,12 +1,13 @@
 local type Slice<T> = struct {
-    ptr: *T,
-    len: u32
+    pointer: *T,
+    length: u32
 };
 
 local extern(putchar) fun putCharacter(c: u8);
 
 local global fun main() -> i32 {
     var slice: Slice.<i32>;
+    slice.length;
     putCharacter(72);
     putCharacter(101);
     putCharacter(108);
