@@ -74,6 +74,9 @@ void llvm_module_emit_node(LlvmModule *module, AstNode *node) {
                 LLVMBuildStore(module->builder, LLVMGetParam(func, i + offset), value);
             }
             llvm_emit_body(module, node->fun_decl.body);
+            if (!node->fun_decl.body->sema.finished) {
+                LLVMBuildRetVoid(module->builder);
+            }
             llvm_switch_state(module, old_state);
             return;
         }

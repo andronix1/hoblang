@@ -29,5 +29,5 @@ bool sema_module_analyze_body(SemaModule *module, AstBody *body) {
         sema_module_err(module, unreachable, "unreachable code");
     }
     sema_module_pop_scope(module);
-    return finished;
+    return body->sema.finished = finished;
 }

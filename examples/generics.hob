@@ -11,14 +11,12 @@ local extern(write) fun Fd.write(self, ptr: *u8, count: usize);
 
 local fun Fd.increment(&self) {
     self.* += 1;
-    return;
 }
 
 local fun print(slice: Slice.<u8>) {
     var stdout: Fd = 0;
     stdout.increment();
     stdout.write(slice.pointer, slice.length);
-    return;
 }
 
 local global fun main() -> i32 {

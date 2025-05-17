@@ -6,6 +6,10 @@
 
 typedef struct AstBody {
     AstNode **nodes;
+
+    struct {
+        bool finished;
+    } sema;
 } AstBody;
 
 bool ast_body_eq(const AstBody *a, const AstBody *b);

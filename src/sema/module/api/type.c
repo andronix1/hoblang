@@ -58,6 +58,10 @@ bool sema_type_eq(const SemaType *a, const SemaType *b) {
     UNREACHABLE;
 }
 
+bool sema_type_is_void(const SemaType *type) {
+    return type->kind == SEMA_TYPE_PRIMITIVE && type->primitive.kind == SEMA_PRIMITIVE_VOID;
+}
+
 void sema_type_print(va_list list) {
     SemaType *type = va_arg(list, SemaType*);
     switch (type->kind) {

@@ -179,6 +179,10 @@ bool sema_module_analyze_node(SemaModule *module, AstNode *node) {
                         sema_value_new_var(module->mempool, type->function.args[i])));
             }
             bool breaks = sema_module_analyze_body(module, node->fun_decl.body);
+            if (!breaks && !sema_type_is_void(type->function.returns)) {
+                sema_module_err(module, node->fun_decl.info->name, "body was not broke but $t expected to return",
+                    type->function.returns);
+            }
             sema_module_ss_swap(module, old_ss);
             return breaks;
         }
