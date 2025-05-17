@@ -10,8 +10,12 @@ typedef enum {
 typedef struct {
     SemaTypeAliasExtKind kind;
 
+    SemaDecl decl;
+
     union {
-        SemaDecl decl;
+        struct {
+            bool by_ref;
+        } fun;
     };
 } SemaTypeAliasExt;
 
@@ -20,12 +24,15 @@ typedef struct SemaTypeAlias {
 } SemaTypeAlias;
 
 SemaTypeAlias *sema_type_alias_new(Mempool *mempool);
-SemaDeclHandle *sema_type_alias_try_resolve(SemaTypeAlias *alias, Slice name);
+SemaTypeAliasExt *sema_type_alias_try_resolve(SemaTypeAlias *alias, Slice name);
 
-static inline SemaTypeAliasExt sema_type_alias_ext_new_fun(SemaDecl decl) {
+static inline SemaTypeAliasExt sema_type_alias_ext_new_fun(SemaDecl decl, bool by_ref) {
     SemaTypeAliasExt ext = {
         .kind = SEMA_TYPE_ALIAS_EXT_FUN,
         .decl = decl,
+        .fun = {
+            .by_ref = by_ref
+        }
     };
     return ext;
 }

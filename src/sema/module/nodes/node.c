@@ -32,7 +32,9 @@ static inline void sema_module_push_fun_info(SemaModule *module, AstFunInfo *inf
             sema_module_err(module, info->ext.of, "$S is not a type", info->ext.of);
             return;
         }
-        vec_push(args, ext_type);
+        vec_push(args, info->ext.by_ref ?
+            sema_type_new_pointer(module->mempool, ext_type) :
+            ext_type);
     }
     for (size_t i = 0; i < vec_len(info->args); i++) {
         vec_push(args, RET_ON_NULL(sema_module_analyze_type(module, info->args[i].type)));
@@ -48,7 +50,7 @@ static inline void sema_module_push_fun_info(SemaModule *module, AstFunInfo *inf
         sema_module_err(module, info->ext.of, "$S is not alias, only aliases can be extended", info->ext.of);
         return;
     }
-    if (keymap_insert(ext_type->alias->ext_map, info->name, sema_type_alias_ext_new_fun(decl))) {
+    if (keymap_insert(ext_type->alias->ext_map, info->name, sema_type_alias_ext_new_fun(decl, info->ext.by_ref))) {
         sema_module_err(module, info->name, "redeclaration of `%S`", info->name);
         return;
     }

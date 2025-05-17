@@ -33,7 +33,7 @@ LLVMValueRef llvm_emit_expr(LlvmModule *module, AstExpr *expr) {
             }
             return LLVMBuildCall2(module->builder,
                 llvm_type(module, sema_value_is_runtime(expr->call.inner->sema.value)),
-                callable, args, count, "");
+                callable, args, count + offset, "");
         }
         case AST_EXPR_SCOPE: return llvm_emit_expr(module, expr);
         case AST_EXPR_BINOP: {

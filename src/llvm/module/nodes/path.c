@@ -19,6 +19,10 @@ static LLVMValueRef llvm_emit_path_from(LlvmModule *module, AstPath *path, LLVMV
                 break;
             case SEMA_PATH_SEGMENT_EXT_DIRECT:
                 // TODO: optional load
+                segment->ext.handle->llvm.value = llvm_opt_load(module, value, segment->from_value);
+                value = segment->ext.decl->llvm.value;
+                break;
+            case SEMA_PATH_SEGMENT_EXT_REF:
                 segment->ext.handle->llvm.value = value;
                 value = segment->ext.decl->llvm.value;
                 break;

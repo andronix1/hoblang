@@ -9,6 +9,7 @@ typedef enum {
     SEMA_PATH_SEGMENT_DECL,
     SEMA_PATH_SEGMENT_STRUCT_FIELD,
     SEMA_PATH_SEGMENT_EXT_DIRECT,
+    SEMA_PATH_SEGMENT_EXT_REF,
 } SemaPathSegmentExtKind;
 
 typedef struct {

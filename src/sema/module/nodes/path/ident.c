@@ -26,12 +26,22 @@ SemaValue *sema_path_resolve_ident(SemaModule *module, SemaValue *value, AstPath
         }
     }
     if (type->alias) {
-        SemaDeclHandle *handle = sema_type_alias_try_resolve(type->alias, segment->ident);
-        if (handle) {
+        SemaTypeAliasExt *type_ext = sema_type_alias_try_resolve(type->alias, segment->ident);
+        if (type_ext) {
+            SemaDeclHandle *handle = type_ext->decl.handle;
             SemaDeclHandle *ext = sema_decl_handle_new(module->mempool, handle->value);
-            segment->sema.kind = SEMA_PATH_SEGMENT_EXT_DIRECT;
-            segment->sema.ext.decl = handle;
-            segment->sema.ext.handle = ext;
+            if (type_ext->fun.by_ref) {
+                if (!sema_value_is_var(value)) {
+                    sema_module_err(module, segment->slice, "extension function is taking reference");
+                }
+                segment->sema.kind = SEMA_PATH_SEGMENT_EXT_REF;
+                segment->sema.ext.decl = handle;
+                segment->sema.ext.handle = ext;
+            } else {
+                segment->sema.kind = SEMA_PATH_SEGMENT_EXT_DIRECT;
+                segment->sema.ext.decl = handle;
+                segment->sema.ext.handle = ext;
+            }
             return sema_value_new_ext(module->mempool, handle->value, ext);
         }
     }

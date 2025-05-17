@@ -11,6 +11,7 @@
 #include "core/slice.h"
 #include "core/vec.h"
 #include "core/mempool.h"
+#include <stdio.h>
 
 #define CONSTRUCT(KIND, FIELDS) MEMPOOL_CONSTRUCT(AstNode, { \
     out->kind = KIND; \
@@ -121,7 +122,7 @@ AstFunInfo *ast_ext_fun_info_new(Mempool *mempool,
     out->ext.is = true;
     out->ext.of = of;
     out->ext.self_name = self_name;
-    out->ext.self_name = self_name;
+    out->ext.by_ref = by_ref;
     out->name = name;
     out->args = args;
     out->returns = returns;

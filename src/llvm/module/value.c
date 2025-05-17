@@ -15,6 +15,13 @@ LLVMValueRef llvm_get_value(LlvmModule *module, LLVMValueRef source, size_t idx,
         return LLVMBuildGEP2(module->builder, llvm_type(module, type), source, indices, 2, "");
     } else {
         return LLVMBuildExtractValue(module->builder, source, idx, "");
-
     }
+}
+
+LLVMValueRef llvm_opt_load(LlvmModule *module, LLVMValueRef source, SemaValue *value) {
+    if (sema_value_is_var(value)) {
+        return LLVMBuildLoad2(module->builder, llvm_type(module, sema_value_is_runtime(value)),
+            source, "");
+    }
+    return source;
 }

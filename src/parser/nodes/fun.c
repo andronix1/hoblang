@@ -9,6 +9,7 @@
 #include "parser/nodes/body.h"
 #include "parser/nodes/type.h"
 #include "parser/parser.h"
+#include <stdio.h>
 
 AstFunInfo *parse_fun_info(Parser *parser, bool is_local) {
     Slice name = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
