@@ -22,6 +22,7 @@ bool ast_path_eq(const AstPath *a, const AstPath *b) {
             case AST_PATH_SEGMENT_GENERIC_BUILD:
                 if (!ast_generic_builder_eq(as->generic, bs->generic)) return false;
                 break;
+            case AST_PATH_SEGMENT_DEREF: break;
         }
     }
     return true;
@@ -33,6 +34,14 @@ AstPathSegment ast_path_segment_new_generic_build(Slice slice, AstGenericBuilder
         .kind = AST_PATH_SEGMENT_GENERIC_BUILD,
         .slice = slice,
         .generic = builder,
+    };
+    return result;
+}
+
+AstPathSegment ast_path_segment_new_deref(Slice slice) {
+    AstPathSegment result = {
+        .kind = AST_PATH_SEGMENT_DEREF,
+        .slice = slice,
     };
     return result;
 }

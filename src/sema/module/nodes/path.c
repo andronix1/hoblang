@@ -7,6 +7,8 @@
 #include "sema/module/nodes/path/generic.h"
 #include "sema/module/nodes/path/ident.h"
 #include "sema/module/nodes/path_ext.h"
+#include "sema/module/type.h"
+#include "sema/module/value.h"
 
 void sema_path_ignore_before(AstPath *path, size_t before) {
     for (size_t i = 0; i < before; i++) {
@@ -21,6 +23,20 @@ static SemaValue *_sema_module_resolve_path_in(SemaModule *module, SemaValue *va
         switch (segment->kind) {
             case AST_PATH_SEGMENT_IDENT: {
                 value = NOT_NULL(sema_path_resolve_ident(module, value, path, i));
+                break;
+            }
+            case AST_PATH_SEGMENT_DEREF: {
+                SemaType *type = sema_value_is_runtime(value);
+                if (!type) {
+                    sema_module_err(module, segment->slice, "cannot deref non-runtime value");
+                    return NULL;
+                }
+                if (type->kind != SEMA_TYPE_POINTER) {
+                    sema_module_err(module, segment->slice, "ony pointers can be dereferenced, not $t", type);
+                    return NULL;
+                }
+                segment->sema.kind = SEMA_PATH_SEGMENT_DEREF;
+                value = NOT_NULL(sema_value_new_var(module->mempool, type->pointer_to));
                 break;
             }
             case AST_PATH_SEGMENT_GENERIC_BUILD: {

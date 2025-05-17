@@ -2,7 +2,9 @@
 #include "ast/path.h"
 #include "sema/module/nodes/path_ext.h"
 #include "sema/module/module.h"
+#include "llvm/module/module.h"
 #include "llvm/module/value.h"
+#include <llvm-c/Core.h>
 #include <stdio.h>
 
 static LLVMValueRef llvm_emit_path_from(LlvmModule *module, AstPath *path, LLVMValueRef value) {
@@ -26,6 +28,7 @@ static LLVMValueRef llvm_emit_path_from(LlvmModule *module, AstPath *path, LLVMV
                 segment->ext.handle->llvm.value = value;
                 value = segment->ext.decl->llvm.value;
                 break;
+            case SEMA_PATH_SEGMENT_DEREF: break;
         }
     }
     assert(value);

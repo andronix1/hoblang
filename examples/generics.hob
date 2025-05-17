@@ -9,14 +9,14 @@ type Fd = i32;
 
 local extern(write) fun Fd.write(self, ptr: *u8, count: usize);
 
-local fun Fd.take_ref(&self) -> *Fd {
-    return self;
+local fun Fd.increment(&self) {
+    self.* += 1;
+    return;
 }
 
 local fun print(slice: Slice.<u8>) {
     var stdout: Fd = 0;
-    stdout += 1;
-    final cool: *Fd = stdout.take_ref();
+    stdout.increment();
     stdout.write(slice.pointer, slice.length);
     return;
 }
