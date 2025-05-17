@@ -165,9 +165,15 @@ bool sema_module_analyze_node(SemaModule *module, AstNode *node) {
             SemaScopeStack ss = sema_ss_new(module, type->function.returns);
             SemaScopeStack *old_ss = sema_module_ss_swap(module, &ss);
             sema_module_push_scope(module);
-            for (size_t i = 0; i < vec_len(type->function.args); i++) {
-                node->fun_decl.info->args[i].sema.decl = sema_module_push_decl(module,
-                    node->fun_decl.info->args[i].name, sema_decl_new(module, false,
+            size_t offset = node->fun_decl.info->ext.is;
+            if (node->fun_decl.info->ext.is) {
+                node->fun_decl.info->ext.sema.self = sema_module_push_decl(module,
+                    node->fun_decl.info->ext.self_name, sema_decl_new(module, false,
+                        sema_value_new_final(module->mempool, type->function.args[0])));
+            }
+            for (size_t i = offset; i < vec_len(type->function.args); i++) {
+                node->fun_decl.info->args[i - offset].sema.decl = sema_module_push_decl(module,
+                    node->fun_decl.info->args[i - offset].name, sema_decl_new(module, false,
                         sema_value_new_var(module->mempool, type->function.args[i])));
             }
             bool breaks = sema_module_analyze_body(module, node->fun_decl.body);

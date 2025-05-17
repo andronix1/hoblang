@@ -9,8 +9,12 @@ type Fd = i32;
 
 local extern(write) fun Fd.write(self, ptr: *u8, count: usize);
 
+local fun Fd.increment(&self) -> Fd {
+    return self + 1;
+}
+
 local fun print(slice: Slice.<u8>) {
-    final stdout: Fd = 1;
+    final stdout: Fd = 0;
     stdout.write(slice.pointer, slice.length);
     return;
 }
