@@ -11,6 +11,17 @@
 #include <llvm-c/Core.h>
 #include <llvm-c/Types.h>
 
+LLVMValueRef llvm_emit_binop(LlvmModule *module, LLVMValueRef left, LLVMValueRef right, AstBinopKind binop) {
+    switch (binop) {
+        case AST_BINOP_ADD: return LLVMBuildAdd(module->builder, left, right, "");
+        case AST_BINOP_SUBTRACT: return LLVMBuildSub(module->builder, left, right, "");
+        case AST_BINOP_MULTIPLY: return LLVMBuildMul(module->builder, left, right, "");
+        case AST_BINOP_DIVIDE: return LLVMBuildUDiv(module->builder, left, right, "");
+    }
+    UNREACHABLE;
+
+}
+
 LLVMValueRef llvm_emit_expr(LlvmModule *module, AstExpr *expr) {
     switch (expr->kind) {
         case AST_EXPR_PATH:
@@ -39,13 +50,7 @@ LLVMValueRef llvm_emit_expr(LlvmModule *module, AstExpr *expr) {
         case AST_EXPR_BINOP: {
             LLVMValueRef left = llvm_emit_expr_get(module, expr->binop.left);
             LLVMValueRef right = llvm_emit_expr_get(module, expr->binop.right);
-            switch (expr->binop.kind) {
-                case AST_BINOP_ADD: return LLVMBuildAdd(module->builder, left, right, "");
-                case AST_BINOP_SUBTRACT: return LLVMBuildSub(module->builder, left, right, "");
-                case AST_BINOP_MULTIPLY: return LLVMBuildMul(module->builder, left, right, "");
-                case AST_BINOP_DIVIDE: return LLVMBuildUDiv(module->builder, left, right, "");
-            }
-            UNREACHABLE;
+            return llvm_emit_binop(module, left, right, expr->binop.kind);
         }
         case AST_EXPR_STRING: {
             // TODO: slice

@@ -15,6 +15,7 @@ local fun Fd.take_ref(&self) -> *Fd {
 
 local fun print(slice: Slice.<u8>) {
     var stdout: Fd = 0;
+    stdout += 1;
     final cool: *Fd = stdout.take_ref();
     stdout.write(slice.pointer, slice.length);
     return;

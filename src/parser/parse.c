@@ -1,5 +1,6 @@
 #include "api.h"
 #include "ast/api/expr.h"
+#include "ast/expr.h"
 #include "ast/global.h"
 #include "ast/node.h"
 #include "ast/stmt.h"
@@ -48,10 +49,29 @@ static AstNode *parser_next_full(Parser *parser, Token token) {
         case TOKEN_IDENT:
         case TOKEN_INTEGER:
         case TOKEN_OPENING_CIRCLE_BRACE:
+        case TOKEN_STRING:
+        case TOKEN_OPENING_ANGLE_BRACE:
             parser_skip_next(parser);
             AstExpr *expr = parse_expr(parser);
+            Token next = parser_take(parser);
+            AstStmt *stmt = NULL;
+            #define SASSIGN(kind) ast_stmt_new_short_assign(parser->mempool, expr, NOT_NULL(parse_expr(parser)), kind)
+            switch (next.kind) {
+                case TOKEN_SEMICOLON:
+                    return ast_node_new_stmt(parser->mempool, ast_stmt_new_expr(parser->mempool, expr));
+                case TOKEN_APPEND: stmt = SASSIGN(AST_BINOP_ADD); break;
+                case TOKEN_SUBTRACT: stmt = SASSIGN(AST_BINOP_SUBTRACT); break;
+                case TOKEN_ASSIGN:
+                    stmt = ast_stmt_new_assign(parser->mempool, expr, NOT_NULL(parse_expr(parser)));
+                    break;
+                default:
+                    parser_skip_next(parser);
+                    parser_err(parser, token.slice, "expected ';` or assign token");
+                    return NULL;
+            }
+            assert(stmt);
             PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
-            return ast_node_new_stmt(parser->mempool, ast_stmt_new_expr(parser->mempool, expr));
+            return ast_node_new_stmt(parser->mempool, stmt);
         case TOKEN_RETURN: {
             AstExpr *value = parser_next_is(parser, TOKEN_SEMICOLON) ?
                 NULL : NOT_NULL(parse_expr(parser));

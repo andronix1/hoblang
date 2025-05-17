@@ -209,6 +209,31 @@ bool sema_module_analyze_node(SemaModule *module, AstNode *node) {
                     }
                     return true;
                 }
+                case AST_STMT_ASSIGN: {
+                    SemaType *dst_type = sema_value_is_var(NOT_NULL(sema_module_analyze_expr(module,
+                        node->stmt->assign.dst, sema_expr_ctx_new(NULL))));
+                    if (!dst_type) {
+                        sema_module_err(module, node->stmt->assign.dst->slice, "cannot assign to non-var expression");
+                    }
+                    SemaType *what_type = sema_value_is_runtime(NOT_NULL(sema_module_analyze_expr(module,
+                        node->stmt->assign.what, sema_expr_ctx_new(dst_type))));
+                    if (!what_type) {
+                        sema_module_err(module, node->stmt->assign.what->slice,
+                            "cannot assign non-runtime expression");
+                        return false;
+                    }
+                    if (!dst_type) return false;
+                    if (!sema_type_eq(dst_type, what_type)) {
+                        sema_module_err(module, node->stmt->assign.what->slice,
+                            "cannot assign $t value to $t variable", what_type, dst_type);
+                        return false;
+                    }
+                    if (node->stmt->assign.short_assign.is) {
+                        sema_module_analyze_binop(module, what_type, dst_type,
+                            node->stmt->assign.short_assign.kind);
+                    }
+                    return false;
+                }
             }
             UNREACHABLE;
     }
