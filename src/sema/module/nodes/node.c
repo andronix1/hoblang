@@ -2,9 +2,11 @@
 #include "ast/node.h"
 #include "ast/expr.h"
 #include "core/assert.h"
+#include "core/keymap.h"
 #include "core/mempool.h"
 #include "core/null.h"
 #include "core/vec.h"
+#include "sema/module/alias.h"
 #include "sema/module/api/type.h"
 #include "sema/module/api/value.h"
 #include "sema/module/module.h"
@@ -22,31 +24,55 @@ static inline void sema_module_push_fun_info(SemaModule *module, AstFunInfo *inf
        RET_ON_NULL(sema_module_analyze_type(module, info->returns)) :
        sema_type_new_primitive_void(module->mempool);
     SemaType **args = vec_new_in(module->mempool, SemaType*);
+    size_t offset = info->ext.is;
+    SemaType *ext_type = NULL;
+    if (info->ext.is) {
+        ext_type = sema_value_is_type(RET_ON_NULL(sema_module_resolve_required_decl(module, info->ext.of))->value);
+        if (!ext_type) {
+            sema_module_err(module, info->ext.of, "$S is not a type", info->ext.of);
+            return;
+        }
+        vec_push(args, ext_type);
+    }
     for (size_t i = 0; i < vec_len(info->args); i++) {
         vec_push(args, RET_ON_NULL(sema_module_analyze_type(module, info->args[i].type)));
     }
     SemaType *type = sema_type_new_function(module->mempool, args, returns);
     SemaDecl decl = sema_decl_new(module, info->is_local, sema_value_new_final(module->mempool, type));
-    info->sema.decl = sema_module_push_decl(module, info->name, decl);
+    info->sema.decl = decl.handle;
+    if (!info->ext.is) {
+        sema_module_push_decl(module, info->name, decl);
+        return;
+    }
+    if (!ext_type->alias) {
+        sema_module_err(module, info->ext.of, "$S is not alias, only aliases can be extended", info->ext.of);
+        return;
+    }
+    if (keymap_insert(ext_type->alias->ext_map, info->name, sema_type_alias_ext_new_fun(decl))) {
+        sema_module_err(module, info->name, "redeclaration of `%S`", info->name);
+        return;
+    }
 }
 
 void sema_module_read_node(SemaModule *module, AstNode *node) {
     switch (node->kind) {
         case AST_NODE_TYPE_DECL: {
+            SemaTypeAlias *alias = sema_type_alias_new(module->mempool);
             if (node->type_decl.generics) {
                 SemaGenericScopeHandle ghandle;
                 sema_module_generic_setup(module, node->type_decl.generics, &ghandle);
                 SemaType *type = sema_module_analyze_type(module, node->type_decl.type);
                 sema_module_generic_clean(module, type, &ghandle);
-                type = sema_type_new_alias(module->mempool, module, RET_ON_NULL(type));
+                type = sema_type_new_alias(module->mempool, alias, RET_ON_NULL(type));
                 sema_module_push_decl(module, node->type_decl.name, sema_decl_new(module, node->type_decl.is_local,
                     sema_value_new_generic(module->mempool, ghandle.generic)));
             } else {
-                SemaType *type =  sema_type_new_alias(module->mempool, module,
+                SemaType *type =  sema_type_new_alias(module->mempool, alias,
                     RET_ON_NULL(sema_module_analyze_type(module, node->type_decl.type)));
                 sema_module_push_decl(module, node->type_decl.name, sema_decl_new(module, node->type_decl.is_local,
                     sema_value_new_type(module->mempool, type)));
             }
+            node->type_decl.sema.alias = alias;
             return;
         }
         case AST_NODE_FUN_DECL: {

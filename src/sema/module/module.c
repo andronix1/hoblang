@@ -54,6 +54,14 @@ SemaDeclHandle *sema_module_resolve_decl(const SemaModule *module, Slice name) {
     return NOT_NULL(keymap_rev_get(module->decls_map, name))->handle;
 }
 
+SemaDeclHandle *sema_module_resolve_required_decl(SemaModule *module, Slice name) {
+    SemaDeclHandle *handle = sema_module_resolve_decl(module, name);
+    if (!handle) {
+        sema_module_err(module, name, "`$S` was not found");
+    }
+    return handle;
+}
+
 void sema_module_push_scope(SemaModule *module) {
     assert(module->ss);
     SemaScope scope = {
@@ -76,7 +84,7 @@ bool sema_module_is_global_scope(const SemaModule *module) {
     return module->ss == NULL;
 }
 
-static inline SemaDeclHandle *sema_decl_handle_new(Mempool *mempool, SemaValue *value)
+SemaDeclHandle *sema_decl_handle_new(Mempool *mempool, SemaValue *value)
     MEMPOOL_CONSTRUCT(SemaDeclHandle, out->value = value;)
 
 SemaDecl sema_decl_new(SemaModule *module, bool is_local, SemaValue *value) {

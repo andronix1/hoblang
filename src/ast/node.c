@@ -106,6 +106,22 @@ AstFunInfo *ast_fun_info_new(Mempool *mempool,
     AstFunArg *args, AstType *returns
 ) MEMPOOL_CONSTRUCT(AstFunInfo,
     out->is_local = is_local;
+    out->ext.is = false;
+    out->name = name;
+    out->args = args;
+    out->returns = returns;
+)
+
+AstFunInfo *ast_ext_fun_info_new(Mempool *mempool,
+    bool is_local, Slice name,
+    AstFunArg *args, AstType *returns,
+    Slice of, bool by_ref, Slice self_name
+) MEMPOOL_CONSTRUCT(AstFunInfo,
+    out->is_local = is_local;
+    out->ext.is = true;
+    out->ext.of = of;
+    out->ext.self_name = self_name;
+    out->ext.self_name = self_name;
     out->name = name;
     out->args = args;
     out->returns = returns;

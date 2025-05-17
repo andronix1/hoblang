@@ -17,6 +17,11 @@ static LLVMValueRef llvm_emit_path_from(LlvmModule *module, AstPath *path, LLVMV
             case SEMA_PATH_SEGMENT_STRUCT_FIELD:
                 value = llvm_get_value(module, value, segment->struct_field_idx, segment->from_value);
                 break;
+            case SEMA_PATH_SEGMENT_EXT_DIRECT:
+                // TODO: optional load
+                segment->ext.handle->llvm.value = value;
+                value = segment->ext.decl->llvm.value;
+                break;
         }
     }
     assert(value);

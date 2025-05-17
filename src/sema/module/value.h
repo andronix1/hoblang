@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/mempool.h"
+#include "sema/module/api/decl_handle.h"
 #include "sema/module/api/generic.h"
 #include "sema/module/api/type.h"
 
@@ -12,6 +13,7 @@ typedef enum {
 typedef struct {
     SemaValueRuntimeKind kind;
     SemaType *type;
+    SemaDeclHandle *ext;
 } SemaValueRuntime;
 
 typedef enum {
@@ -31,6 +33,8 @@ typedef struct SemaValue {
 } SemaValue;
 
 SemaValue *sema_value_new_nested(Mempool *mempool, SemaValue *base, SemaType *type);
+SemaValue *sema_value_new_ext(Mempool *mempool, SemaValue *base, SemaDeclHandle *handle);
+
 SemaValue *sema_value_new_var(Mempool *mempool, SemaType *type);
 SemaValue *sema_value_new_final(Mempool *mempool, SemaType *type);
 SemaValue *sema_value_new_type(Mempool *mempool, SemaType *type);

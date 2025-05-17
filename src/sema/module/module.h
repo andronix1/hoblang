@@ -43,12 +43,14 @@ void sema_module_push_primitives(SemaModule *module);
 SemaScopeStack *sema_module_ss_swap(SemaModule *module, SemaScopeStack *ss);
 SemaDeclHandle *sema_module_push_decl(SemaModule *module, Slice name, SemaDecl decl);
 SemaDeclHandle *sema_module_resolve_decl(const SemaModule *module, Slice name);
+SemaDeclHandle *sema_module_resolve_required_decl(SemaModule *module, Slice name);
 void sema_module_push_scope(SemaModule *module);
 void sema_module_pop_scope(SemaModule *module);
 SemaType *sema_module_returns(const SemaModule *module);
 bool sema_module_is_global_scope(const SemaModule *module);
 void sema_module_free(SemaModule *module);
 
+SemaDeclHandle *sema_decl_handle_new(Mempool *mempool, SemaValue *value);
 SemaDecl sema_decl_new(SemaModule *module, bool is_local, SemaValue *value);
 
 SemaScopeStack sema_ss_new(SemaModule *module, SemaType *returns);

@@ -12,9 +12,27 @@
 
 AstFunInfo *parse_fun_info(Parser *parser, bool is_local) {
     Slice name = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
+    Slice ext_of;
+    bool is_ext;
+    if ((is_ext = parser_next_should_be(parser, TOKEN_DOT))) {
+        ext_of = name;
+        name = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
+    }
     PARSER_EXPECT_NEXT(parser, TOKEN_OPENING_CIRCLE_BRACE);
+    bool by_ref;
+    Slice self_name;
+    bool was_arg = false;
+    if (is_ext) {
+        by_ref = parser_next_should_be(parser, TOKEN_AND);
+        self_name = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
+        was_arg = true;
+    }
     AstFunArg *args = vec_new_in(parser->mempool, AstFunArg);
     while (!parser_next_should_be(parser, TOKEN_CLOSING_CIRCLE_BRACE)) {
+        if (was_arg) {
+            PARSER_EXPECT_NEXT(parser, TOKEN_COMMA);
+            was_arg = false;
+        }
         Slice arg_name = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
         PARSER_EXPECT_NEXT(parser, TOKEN_COLON);
         vec_push(args, ast_fun_arg_new(arg_name, NOT_NULL(parse_type(parser))));
@@ -22,7 +40,10 @@ AstFunInfo *parse_fun_info(Parser *parser, bool is_local) {
     }
     AstType *returns = parser_next_should_be(parser, TOKEN_FUN_RETURNS) ?
         NOT_NULL(parse_type(parser)) : NULL;
-    return ast_fun_info_new(parser->mempool, is_local, name, args, returns);
+    return is_ext ?
+        ast_ext_fun_info_new(parser->mempool, is_local, name, args, returns,
+            ext_of, by_ref, self_name):
+        ast_fun_info_new(parser->mempool, is_local, name, args, returns);
 }
 
 AstNode *parse_fun_decl_node(Parser *parser, AstGlobal *global, bool is_local) {

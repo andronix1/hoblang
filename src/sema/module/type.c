@@ -2,7 +2,7 @@
 #include "core/mempool.h"
 #include <string.h>
 
-#define CONSTRUCT(KIND, FIELDS) MEMPOOL_CONSTRUCT(SemaType, { out->kind = KIND; out->in = NULL; FIELDS })
+#define CONSTRUCT(KIND, FIELDS) MEMPOOL_CONSTRUCT(SemaType, { out->kind = KIND; out->alias = NULL; FIELDS })
 
 SemaType *sema_type_new_primitive_int(Mempool *mempool, SemaPrimitiveIntSize size, bool is_signed)
     CONSTRUCT(SEMA_TYPE_PRIMITIVE,
@@ -59,9 +59,9 @@ SemaType *sema_type_new_slice(Mempool *mempool, SemaType *of)
 SemaType *sema_type_new_generic(Mempool *mempool)
     CONSTRUCT(SEMA_TYPE_GENERIC,)
 
-SemaType *sema_type_new_alias(Mempool *mempool, const SemaModule *in, const SemaType *type) {
+SemaType *sema_type_new_alias(Mempool *mempool, SemaTypeAlias *alias, const SemaType *type) {
     SemaType *result = mempool_alloc(mempool, SemaType);
     memcpy(result, type, sizeof(SemaType));
-    result->in = in;
+    result->alias = alias;
     return result;
 }

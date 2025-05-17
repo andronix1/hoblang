@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ast/api/alias.h"
 #include "ast/api/expr.h"
 #include "ast/api/type.h"
 #include "ast/body.h"
@@ -24,6 +25,10 @@ typedef struct {
     Slice name;
     AstType *type;
     AstGeneric *generics;
+
+    struct {
+        SemaTypeAlias *alias;
+    } sema;
 } AstTypeDecl;
 
 typedef struct {
@@ -36,11 +41,17 @@ typedef struct {
 } AstFunArg;
 
 typedef struct AstFunInfo {
-    Slice extension_of;
     bool is_local;
     Slice name;
     AstFunArg *args;
     AstType *returns;
+
+    struct {
+        bool is;
+        Slice of;
+        bool by_ref;
+        Slice self_name;
+    } ext;
 
     struct {
         SemaDeclHandle *decl;
@@ -114,6 +125,11 @@ AstFunArg ast_fun_arg_new(Slice name, AstType *type);
 AstFunInfo *ast_fun_info_new(Mempool *mempool,
     bool is_local, Slice name,
     AstFunArg *args, AstType *returns
+);
+AstFunInfo *ast_ext_fun_info_new(Mempool *mempool,
+    bool is_local, Slice name,
+    AstFunArg *args, AstType *returns,
+    Slice of, bool by_ref, Slice self_name
 );
 AstValueInfo *ast_value_info_new(Mempool *mempool,
     bool is_local, AstValueDeclKind kind, Slice name,

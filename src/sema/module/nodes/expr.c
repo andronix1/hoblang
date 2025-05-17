@@ -25,8 +25,9 @@ static inline SemaValue *_sema_module_analyze_expr(SemaModule *module, AstExpr *
             return sema_value_new_final(module->mempool,
                 sema_type_new_primitive_int(module->mempool, SEMA_PRIMITIVE_INT32, true));
         case AST_EXPR_CALL: {
-            SemaType *type = sema_value_is_runtime(NOT_NULL(
-                sema_module_analyze_expr(module, expr->call.inner, sema_expr_ctx_new(NULL))));
+            SemaValue *value = NOT_NULL(sema_module_analyze_expr(module, expr->call.inner,
+                sema_expr_ctx_new(NULL)));
+            SemaType *type = sema_value_is_runtime(value);
             if (!type) {
                 sema_module_err(module, expr->slice, "this is not runtime value");
                 return NULL;
@@ -35,7 +36,8 @@ static inline SemaValue *_sema_module_analyze_expr(SemaModule *module, AstExpr *
                 sema_module_err(module, expr->slice, "this is not function");
                 return NULL;
             }
-            size_t len = vec_len(type->function.args);
+            bool offset = value->runtime.ext != NULL;
+            size_t len = vec_len(type->function.args) - offset;
             size_t passed = vec_len(expr->call.args);
             if (passed != len) {
                 if (passed < len) {
@@ -44,7 +46,7 @@ static inline SemaValue *_sema_module_analyze_expr(SemaModule *module, AstExpr *
                 sema_module_err(module, expr->slice, "expected $l arguments but passed $l", len, passed);
             }
             for (size_t i = 0; i < len; i++) {
-                SemaType *expects = type->function.args[i];
+                SemaType *expects = type->function.args[i + offset];
                 AstExpr *arg = expr->call.args[i];
                 SemaValue *value = sema_module_analyze_expr(module, arg, sema_expr_ctx_new(expects));
                 if (!value) {

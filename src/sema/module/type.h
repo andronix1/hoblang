@@ -1,8 +1,8 @@
 #pragma once
 
 #include <stdbool.h>
+#include "ast/api/alias.h"
 #include "core/mempool.h"
-#include "sema/module/api.h"
 #include "sema/module/api/type.h"
 
 typedef enum {
@@ -61,12 +61,9 @@ typedef struct {
     SemaTypeStructField *fields_map;
 } SemaTypeStruct;
 
-typedef struct {
-} SemaTypeAlias;
-
 typedef struct SemaType {
     SemaTypeKind kind;
-    const SemaModule *in;
+    SemaTypeAlias *alias;
 
     union {
         SemaTypePrimitive primitive;
@@ -90,4 +87,4 @@ SemaType *sema_type_new_pointer(Mempool *mempool, SemaType *to);
 SemaType *sema_type_new_slice(Mempool *mempool, SemaType *of);
 SemaType *sema_type_new_generic(Mempool *mempool);
 
-SemaType *sema_type_new_alias(Mempool *mempool, const SemaModule *in, const SemaType *type);
+SemaType *sema_type_new_alias(Mempool *mempool, SemaTypeAlias *alias, const SemaType *type);

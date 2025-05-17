@@ -8,6 +8,7 @@ typedef enum {
     SEMA_PATH_SEGMENT_IGNORE,
     SEMA_PATH_SEGMENT_DECL,
     SEMA_PATH_SEGMENT_STRUCT_FIELD,
+    SEMA_PATH_SEGMENT_EXT_DIRECT,
 } SemaPathSegmentExtKind;
 
 typedef struct {
@@ -16,6 +17,9 @@ typedef struct {
 
     union {
         SemaDeclHandle *decl;
+        struct {
+            SemaDeclHandle *handle, *decl;
+        } ext;
         size_t struct_field_idx;
     };
 } SemaPathSegmentExt;

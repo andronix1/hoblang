@@ -1,4 +1,5 @@
 #include "value.h"
+#include "sema/module/api/decl_handle.h"
 #include "sema/module/value.h"
 
 SemaType *sema_value_is_var(SemaValue *value) {
@@ -13,6 +14,13 @@ SemaGeneric *sema_value_is_generic(SemaValue *value) {
         return NULL;
     }
     return value->generic;
+}
+
+SemaDeclHandle *sema_value_is_ext(SemaValue *value) {
+    if (value->kind != SEMA_VALUE_RUNTIME) {
+        return NULL;
+    }
+    return value->runtime.ext;
 }
 
 SemaType *sema_value_is_runtime(SemaValue *value) {

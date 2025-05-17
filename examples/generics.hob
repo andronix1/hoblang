@@ -5,10 +5,13 @@ local type Slice<T> = struct {
     length: usize
 };
 
-local extern(write) fun write(fd: i32, ptr: *u8, count: usize);
+type Fd = i32;
+
+local extern(write) fun Fd.write(self, ptr: *u8, count: usize);
 
 local fun print(slice: Slice.<u8>) {
-    write(1, slice.pointer, slice.length);
+    final stdout: Fd = 1;
+    stdout.write(slice.pointer, slice.length);
     return;
 }
 

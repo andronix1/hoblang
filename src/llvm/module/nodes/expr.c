@@ -3,6 +3,7 @@
 #include "core/assert.h"
 #include "core/keymap.h"
 #include "sema/module/api/value.h"
+#include "sema/module/module.h"
 #include "llvm/module/module.h"
 #include "llvm/module/nodes/path.h"
 #include "llvm/module/nodes/type.h"
@@ -20,11 +21,16 @@ LLVMValueRef llvm_emit_expr(LlvmModule *module, AstExpr *expr) {
         }
         case AST_EXPR_CALL: {
             size_t count = vec_len(expr->call.args);
-            LLVMValueRef *args = alloca(sizeof(LLVMValueRef) * count);
-            for (size_t i = 0; i < count; i++) {
-                args[i] = llvm_emit_expr_get(module, expr->call.args[i]);
-            }
             LLVMValueRef callable = llvm_emit_expr_get(module, expr->call.inner);
+            SemaDeclHandle *ext = sema_value_is_ext(expr->call.inner->sema.value);
+            size_t offset = ext != NULL;
+            LLVMValueRef *args = alloca(sizeof(LLVMValueRef) * (count + offset));
+            if (ext) {
+                args[0] = ext->llvm.value;
+            }
+            for (size_t i = 0; i < count; i++) {
+                args[i + offset] = llvm_emit_expr_get(module, expr->call.args[i]);
+            }
             return LLVMBuildCall2(module->builder,
                 llvm_type(module, sema_value_is_runtime(expr->call.inner->sema.value)),
                 callable, args, count, "");
