@@ -10,5 +10,4 @@ typedef struct {
 } SemaExprCtx;
 
 SemaValue *sema_module_analyze_expr(SemaModule *module, AstExpr *expr, SemaExprCtx ctx);
-SemaValue *sema_module_analyze_binop(SemaModule *module, SemaType *a, SemaType *b, AstBinopKind binop);
 SemaExprCtx sema_expr_ctx_new(SemaType *expecting);

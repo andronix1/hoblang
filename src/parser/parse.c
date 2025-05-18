@@ -13,6 +13,7 @@
 #include "parser/nodes/extern.h"
 #include "parser/nodes/fun.h"
 #include "parser/nodes/global.h"
+#include "parser/nodes/stmts/if.h"
 #include "parser/nodes/type_decl.h"
 #include "parser/nodes/value.h"
 #include "parser/parser.h"
@@ -55,7 +56,8 @@ static AstNode *parser_next_full(Parser *parser, Token token) {
             AstExpr *expr = parse_expr(parser);
             Token next = parser_take(parser);
             AstStmt *stmt = NULL;
-            #define SASSIGN(kind) ast_stmt_new_short_assign(parser->mempool, expr, NOT_NULL(parse_expr(parser)), kind)
+            #define SASSIGN(kind) ast_stmt_new_short_assign(parser->mempool, expr, \
+                NOT_NULL(parse_expr(parser)), ast_binop_kind_new(kind, next.slice))
             switch (next.kind) {
                 case TOKEN_SEMICOLON:
                     return ast_node_new_stmt(parser->mempool, ast_stmt_new_expr(parser->mempool, expr));
@@ -78,6 +80,7 @@ static AstNode *parser_next_full(Parser *parser, Token token) {
             PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
             return ast_node_new_stmt(parser->mempool, ast_stmt_new_return(parser->mempool, token.slice, value));
         }
+        case TOKEN_IF: return parse_if(parser);
         default: return parser_next_maybe_local(parser, token, false);
     }
 }

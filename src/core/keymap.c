@@ -37,7 +37,7 @@ inline size_t __keymap_get_idx(void *keymap, Slice key) {
 
 void *__keymap_get(void *keymap, Slice key) {
     size_t idx = __keymap_get_idx(keymap, key);
-    if (idx == -1) return NULL;
+    if (idx == (size_t)-1) return NULL;
     return ((KeyMapElement*)vec_at(keymap, idx))->data;
 }
 

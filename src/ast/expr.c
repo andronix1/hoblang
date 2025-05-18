@@ -31,7 +31,7 @@ bool ast_expr_eq(const AstExpr *a, const AstExpr *b) {
         case AST_EXPR_INTEGER: return a->integer == b->integer;
         case AST_EXPR_SCOPE: return ast_expr_eq(a->scope, b->scope);
         case AST_EXPR_BINOP: return
-            a->binop.kind == b->binop.kind &&
+            a->binop.kind.kind == b->binop.kind.kind &&
             ast_expr_eq(a->binop.left, b->binop.left) &&
             ast_expr_eq(a->binop.right, b->binop.right);
         case AST_EXPR_STRING: return slice_eq(a->string, b->string);
@@ -66,9 +66,9 @@ AstExpr *ast_expr_new_callable(Mempool *mempool, Slice slice, AstExpr *inner, As
         out->call.args = args;
     )
 
-AstExpr *ast_expr_new_binop(Mempool *mempool, Slice slice, AstBinopKind kind, AstExpr *left, AstExpr *right)
+AstExpr *ast_expr_new_binop(Mempool *mempool, Slice slice, AstBinopKind binop, AstExpr *left, AstExpr *right)
     CONSTRUCT(AST_EXPR_BINOP,
-        out->binop.kind = kind;
+        out->binop.kind = binop;
         out->binop.left = left;
         out->binop.right = right;
     )

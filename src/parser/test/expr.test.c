@@ -105,16 +105,16 @@ void test_parser_expr_binop_simple() {
     check_parsing(
         vec_create_in(mempool,
             ast_node_new_stmt(mempool, ast_stmt_new_expr(mempool,
-                ast_expr_new_binop(mempool, $, AST_BINOP_ADD, create_path_expr("a"), create_path_expr("b"))
+                ast_expr_new_binop(mempool, $, ast_binop_kind_new(AST_BINOP_ADD, $), create_path_expr("a"), create_path_expr("b"))
             )),
             ast_node_new_stmt(mempool, ast_stmt_new_expr(mempool,
-                ast_expr_new_binop(mempool, $, AST_BINOP_SUBTRACT, create_path_expr("a"), create_path_expr("b"))
+                ast_expr_new_binop(mempool, $, ast_binop_kind_new(AST_BINOP_SUBTRACT, $), create_path_expr("a"), create_path_expr("b"))
             )),
             ast_node_new_stmt(mempool, ast_stmt_new_expr(mempool,
-                ast_expr_new_binop(mempool, $, AST_BINOP_DIVIDE, create_path_expr("a"), create_path_expr("b"))
+                ast_expr_new_binop(mempool, $, ast_binop_kind_new(AST_BINOP_DIVIDE, $), create_path_expr("a"), create_path_expr("b"))
             )),
             ast_node_new_stmt(mempool, ast_stmt_new_expr(mempool,
-                ast_expr_new_binop(mempool, $, AST_BINOP_MULTIPLY, create_path_expr("a"), create_path_expr("b"))
+                ast_expr_new_binop(mempool, $, ast_binop_kind_new(AST_BINOP_MULTIPLY, $), create_path_expr("a"), create_path_expr("b"))
             ))
         ),
         "a + b;\n"
@@ -128,8 +128,8 @@ void test_parser_expr_binop_non_prioritized() {
     check_parsing(
         vec_create_in(mempool,
             ast_node_new_stmt(mempool, ast_stmt_new_expr(mempool,
-                ast_expr_new_binop(mempool, $, AST_BINOP_SUBTRACT,
-                    ast_expr_new_binop(mempool, $, AST_BINOP_ADD,
+                ast_expr_new_binop(mempool, $, ast_binop_kind_new(AST_BINOP_SUBTRACT, $),
+                    ast_expr_new_binop(mempool, $, ast_binop_kind_new(AST_BINOP_ADD, $),
                         create_path_expr("a"),
                         create_path_expr("b")
                     ),
@@ -145,16 +145,16 @@ void test_parser_expr_binop_prioritized() {
     check_parsing(
         vec_create_in(mempool,
             ast_node_new_stmt(mempool, ast_stmt_new_expr(mempool,
-                ast_expr_new_binop(mempool, $, AST_BINOP_SUBTRACT,
-                    ast_expr_new_binop(mempool, $, AST_BINOP_ADD,
+                ast_expr_new_binop(mempool, $, ast_binop_kind_new(AST_BINOP_SUBTRACT, $),
+                    ast_expr_new_binop(mempool, $, ast_binop_kind_new(AST_BINOP_ADD, $),
                         create_path_expr("a"),
-                        ast_expr_new_binop(mempool, $, AST_BINOP_MULTIPLY,
+                        ast_expr_new_binop(mempool, $, ast_binop_kind_new(AST_BINOP_MULTIPLY, $),
                             create_path_expr("b"),
                             create_path_expr("c")
                         )
                     ),
-                    ast_expr_new_binop(mempool, $, AST_BINOP_DIVIDE,
-                        ast_expr_new_binop(mempool, $, AST_BINOP_MULTIPLY,
+                    ast_expr_new_binop(mempool, $, ast_binop_kind_new(AST_BINOP_DIVIDE, $),
+                        ast_expr_new_binop(mempool, $, ast_binop_kind_new(AST_BINOP_MULTIPLY, $),
                             create_path_expr("d"),
                             create_path_expr("e")
                         ),

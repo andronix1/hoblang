@@ -1,6 +1,7 @@
 #include "node.h"
 #include "ast/node.h"
 #include "ast/expr.h"
+#include "ast/stmt.h"
 #include "core/assert.h"
 #include "core/keymap.h"
 #include "core/mempool.h"
@@ -12,7 +13,9 @@
 #include "sema/module/module.h"
 #include "sema/module/nodes/body.h"
 #include "sema/module/nodes/expr.h"
+#include "sema/module/nodes/exprs/binop.h"
 #include "sema/module/nodes/generic.h"
+#include "sema/module/nodes/stmts/if.h"
 #include "sema/module/nodes/type.h"
 #include "sema/module/type.h"
 #include "sema/module/value.h"
@@ -24,7 +27,6 @@ static inline void sema_module_push_fun_info(SemaModule *module, AstFunInfo *inf
        RET_ON_NULL(sema_module_analyze_type(module, info->returns)) :
        sema_type_new_primitive_void(module->mempool);
     SemaType **args = vec_new_in(module->mempool, SemaType*);
-    size_t offset = info->ext.is;
     SemaType *ext_type = NULL;
     if (info->ext.is) {
         ext_type = sema_value_is_type(RET_ON_NULL(sema_module_resolve_required_decl(module, info->ext.of))->value);
@@ -233,11 +235,11 @@ bool sema_module_analyze_node(SemaModule *module, AstNode *node) {
                         return false;
                     }
                     if (node->stmt->assign.short_assign.is) {
-                        sema_module_analyze_binop(module, what_type, dst_type,
-                            node->stmt->assign.short_assign.kind);
+                        sema_module_analyze_binop(module, what_type, dst_type, &node->stmt->assign.short_assign.kind);
                     }
                     return false;
                 }
+                case AST_STMT_IF: return sema_module_analyze_if(module, &node->stmt->if_else);
             }
             UNREACHABLE;
     }

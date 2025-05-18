@@ -3,24 +3,15 @@
 #include "ast/type.h"
 #include "core/assert.h"
 #include "core/keymap.h"
-#include "core/log.h"
 #include "core/null.h"
 #include "sema/module/api/type.h"
 #include "sema/module/api/value.h"
 #include "sema/module/module.h"
+#include "sema/module/nodes/exprs/binop.h"
 #include "sema/module/nodes/path.h"
 #include "sema/module/nodes/type.h"
 #include "sema/module/type.h"
 #include "sema/module/value.h"
-
-SemaValue *sema_module_analyze_binop(SemaModule *module, SemaType *a, SemaType *b, AstBinopKind binop) {
-    static bool logged = false;
-    if (!logged) {
-        logln("WARNING: binops are unstable! use them carefully!");
-        logged = true;
-    }
-    return sema_value_new_final(module->mempool, a);
-}
 
 static inline SemaValue *_sema_module_analyze_expr(SemaModule *module, AstExpr *expr, SemaExprCtx ctx) {
     switch (expr->kind) {
@@ -90,7 +81,7 @@ static inline SemaValue *_sema_module_analyze_expr(SemaModule *module, AstExpr *
                 sema_module_err(module, expr->slice, "binop can operate only expressions with equal type");
                 return NULL;
             }
-            return sema_module_analyze_binop(module, left, right, expr->binop.kind);
+            return sema_module_analyze_binop(module, left, right, &expr->binop.kind);
         }
         case AST_EXPR_STRING:
             // TODO: std.Slice.<u8>
@@ -104,7 +95,7 @@ static inline SemaValue *_sema_module_analyze_expr(SemaModule *module, AstExpr *
                 for (size_t i = 0; i < vec_len(expr->structure.fields_map); i++) {
                     keymap_at(expr->structure.fields_map, i, field);
                     size_t idx = keymap_get_idx(type->structure.fields_map, field->key);
-                    if (idx == -1) {
+                    if (idx == (size_t)-1) {
                         sema_module_err(module, field->key, "there is no field `$S` in structure $t",
                             field->key, type);
                         continue;

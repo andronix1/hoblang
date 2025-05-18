@@ -12,11 +12,30 @@
 #include <llvm-c/Types.h>
 
 LLVMValueRef llvm_emit_binop(LlvmModule *module, LLVMValueRef left, LLVMValueRef right, AstBinopKind binop) {
-    switch (binop) {
+    switch (binop.kind) {
         case AST_BINOP_ADD: return LLVMBuildAdd(module->builder, left, right, "");
         case AST_BINOP_SUBTRACT: return LLVMBuildSub(module->builder, left, right, "");
         case AST_BINOP_MULTIPLY: return LLVMBuildMul(module->builder, left, right, "");
-        case AST_BINOP_DIVIDE: return LLVMBuildUDiv(module->builder, left, right, "");
+        case AST_BINOP_DIVIDE:
+            switch (binop.sema.arithmetic) {
+                case SEMA_BINOP_ARITHMETIC_INT: return LLVMBuildSDiv(module->builder, left, right, "");
+                case SEMA_BINOP_ARITHMETIC_UINT: return LLVMBuildUDiv(module->builder, left, right, "");
+            }
+            UNREACHABLE;
+
+        #define BUILD_ANY_CMP(EINT, CMPINT, EUINT, CMPUINT) \
+            switch (binop.sema.compare) { \
+                case SEMA_BINOP_COMPARE_INT: return EINT(module->builder, CMPINT, left, right, ""); \
+                case SEMA_BINOP_COMPARE_UINT: return EUINT(module->builder, CMPUINT, left, right, ""); \
+            } \
+            UNREACHABLE;
+
+        case AST_BINOP_EQUALS: return LLVMBuildICmp(module->builder, LLVMIntEQ, left, right, "");
+        case AST_BINOP_NOT_EQUALS: return LLVMBuildICmp(module->builder, LLVMIntNE, left, right, "");
+        case AST_BINOP_LESS: BUILD_ANY_CMP(LLVMBuildICmp, LLVMIntSLT, LLVMBuildICmp, LLVMIntULT);
+        case AST_BINOP_GREATER: BUILD_ANY_CMP(LLVMBuildICmp, LLVMIntSGT, LLVMBuildICmp, LLVMIntUGT);
+        case AST_BINOP_LESS_EQ: BUILD_ANY_CMP(LLVMBuildICmp, LLVMIntSLE, LLVMBuildICmp, LLVMIntULE);
+        case AST_BINOP_GREATER_EQ: BUILD_ANY_CMP(LLVMBuildICmp, LLVMIntSGE, LLVMBuildICmp, LLVMIntUGE);
     }
     UNREACHABLE;
 
@@ -63,7 +82,7 @@ LLVMValueRef llvm_emit_expr(LlvmModule *module, AstExpr *expr) {
         case AST_EXPR_STRUCT: {
             // TODO: move in defs block
             LLVMTypeRef type = llvm_type(module,  sema_value_is_runtime(expr->sema.value));
-            LLVMValueRef value = LLVMBuildAlloca(module->builder, type, "");
+            LLVMValueRef value = llvm_alloca(module, type);
             for (size_t i = 0; i < vec_len(expr->structure.fields_map); i++) {
                 keymap_at(expr->structure.fields_map, i, field);
                 LLVMValueRef indices[2] = {

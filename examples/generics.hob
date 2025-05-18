@@ -10,7 +10,11 @@ type Fd = i32;
 local extern(write) fun Fd.write(self, ptr: *u8, count: usize);
 
 local fun Fd.increment(&self) {
-    self.* += 1;
+    if self.* == 0 {
+        self.* = 1;
+    } else {
+        self.* += 2;
+    }
 }
 
 local fun print(slice: Slice.<u8>) {

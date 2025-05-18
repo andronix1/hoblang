@@ -10,11 +10,12 @@ set(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
 find_package(LLVM REQUIRED)
 message(STATUS "LLVM version: ${LLVM_PACKAGE_VERSION}")
 
+add_compile_options(-O3 -g -fsanitize=address -Wall -Wextra -Werror)
+add_link_options(-fsanitize=address)
+
 file(GLOB_RECURSE sources src/*.c)
 list(FILTER sources EXCLUDE REGEX "\\.test\\.")
 add_executable(hoblang ${sources} hoblang.c)
-set_target_properties(hoblang PROPERTIES LINK_FLAGS -fsanitize=address)
-set_target_properties(hoblang PROPERTIES COMPILE_FLAGS "-g -fsanitize=address")
 target_link_libraries(hoblang PRIVATE LLVM)
 include_directories(hoblang src)
 
@@ -28,8 +29,6 @@ if (NOT DISABLE_TESTS)
 
     file(GLOB_RECURSE test_sources src/*.c)
     add_executable(hoblang-tests ${test_sources} tests.c)
-    set_target_properties(hoblang-tests PROPERTIES LINK_FLAGS -fsanitize=address)
-    set_target_properties(hoblang-tests PROPERTIES COMPILE_FLAGS "-g -fsanitize=address")
     include_directories(hoblang-tests src)
     target_link_libraries(hoblang-tests ${CUNIT_LIBRARY} LLVM)
     file(COPY for_tests DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

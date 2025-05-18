@@ -26,6 +26,7 @@ bool sema_type_eq(const SemaType *a, const SemaType *b) {
                 case SEMA_PRIMITIVE_BOOL:
                     return true;
             }
+            UNREACHABLE;
         case SEMA_TYPE_FUNCTION:
             if (vec_len(a->function.args) != vec_len(b->function.args)) {
                 return false;
@@ -56,6 +57,19 @@ bool sema_type_eq(const SemaType *a, const SemaType *b) {
         case SEMA_TYPE_GENERIC: return a == b;
     }
     UNREACHABLE;
+}
+
+bool sema_type_is_uint(const SemaType *type) {
+    return type->kind == SEMA_TYPE_PRIMITIVE && type->primitive.kind == SEMA_PRIMITIVE_INT
+        && !type->primitive.integer.is_signed;
+}
+
+bool sema_type_is_bool(const SemaType *type) {
+    return type->kind == SEMA_TYPE_PRIMITIVE && type->primitive.kind == SEMA_PRIMITIVE_BOOL;
+}
+
+bool sema_type_is_any_int(const SemaType *type) {
+    return type->kind == SEMA_TYPE_PRIMITIVE && type->primitive.kind == SEMA_PRIMITIVE_INT;
 }
 
 bool sema_type_is_void(const SemaType *type) {

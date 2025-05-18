@@ -47,8 +47,8 @@ void llvm_module_read_node(LlvmModule *module, AstNode *node) {
                     llvm_decl_type(module, node->value_decl.sema.decl), "");
             } else {
                 if (node->value_decl.info->kind == AST_VALUE_DECL_VAR) {
-                    node->value_decl.sema.decl->llvm.value = LLVMBuildAlloca(module->builder,
-                        llvm_decl_type(module, node->value_decl.sema.decl), "");
+                    node->value_decl.sema.decl->llvm.value = llvm_alloca(module,
+                        llvm_decl_type(module, node->value_decl.sema.decl));
                 }
             }
             return;
@@ -69,8 +69,7 @@ void llvm_module_emit_node(LlvmModule *module, AstNode *node) {
             }
             for (size_t i = 0; i < vec_len(node->fun_decl.info->args); i++) {
                 LLVMValueRef value = node->fun_decl.info->args[i].sema.decl->llvm.value =
-                    LLVMBuildAlloca(module->builder, llvm_decl_type(module,
-                        node->fun_decl.info->args->sema.decl), "");
+                    llvm_alloca(module, llvm_decl_type(module, node->fun_decl.info->args->sema.decl));
                 LLVMBuildStore(module->builder, LLVMGetParam(func, i + offset), value);
             }
             llvm_emit_body(module, node->fun_decl.body);

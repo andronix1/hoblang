@@ -1,3 +1,4 @@
+#include "core/attributes.h"
 #include "core/file_content.h"
 #include "core/log.h"
 #include "core/slice.h"
@@ -12,10 +13,10 @@
 #include <string.h>
 
 static void hob_log_cstr(va_list list) { printf("%s", va_arg(list, char*)); }
-static void hob_log_int(va_list list) { printf("%d", va_arg(list, int)); }
+static void UNUSED hob_log_int(va_list list UNUSED) { printf("%d", va_arg(list, int)); }
 static void hob_log_size(va_list list) { printf("%lu", va_arg(list, size_t)); }
-static void hob_log_hex(va_list list) { printf("%lx", va_arg(list, long)); }
-static void log_errno(va_list list) { printf("%s", strerror(errno)); }
+static void UNUSED hob_log_hex(va_list list UNUSED) { printf("%lx", va_arg(list, long)); }
+static void log_errno(va_list list UNUSED) { printf("%s", strerror(errno)); }
 static void hob_log_slice(va_list list) {
     Slice arg = va_arg(list, Slice);
     fwrite(arg.value, 1, arg.length, stdout);

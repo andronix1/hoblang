@@ -37,7 +37,12 @@ static Token lexer_try_next(Lexer *lexer) {
             return token_simple(TOKEN_MINUS);
         case '*': return token_simple(TOKEN_STAR);
         case '/': return token_simple(TOKEN_SLASH);
-        case '=': return token_simple(TOKEN_ASSIGN);
+        case '=':
+            if (lexer_next_char_is(lexer, '=')) return token_simple(TOKEN_EQUALS);
+            return token_simple(TOKEN_ASSIGN);
+        case '!':
+            if (lexer_next_char_is(lexer, '=')) return token_simple(TOKEN_NOT_EQUALS);
+            return token_simple(TOKEN_NOT);
         case ':': return token_simple(TOKEN_COLON);
         case ';': return token_simple(TOKEN_SEMICOLON);
         case '&': return token_simple(TOKEN_AND);
@@ -49,8 +54,12 @@ static Token lexer_try_next(Lexer *lexer) {
         case ')': return token_simple(TOKEN_CLOSING_CIRCLE_BRACE);
         case '[': return token_simple(TOKEN_OPENING_SQUARE_BRACE);
         case ']': return token_simple(TOKEN_CLOSING_SQUARE_BRACE);
-        case '<': return token_simple(TOKEN_OPENING_ANGLE_BRACE);
-        case '>': return token_simple(TOKEN_CLOSING_ANGLE_BRACE);
+        case '<':
+            if (lexer_next_char_is(lexer, '=')) return token_simple(TOKEN_LESS_EQ);
+            return token_simple(TOKEN_OPENING_ANGLE_BRACE);
+        case '>':
+            if (lexer_next_char_is(lexer, '=')) return token_simple(TOKEN_GREATER_EQ);
+            return token_simple(TOKEN_CLOSING_ANGLE_BRACE);
         case '\"': {
             char *string = vec_new_in(lexer->mempool, char);
             for (char c = lexer_next_char(lexer); c != '\"'; c = lexer_next_char(lexer)) {
@@ -103,6 +112,8 @@ static Token lexer_try_next(Lexer *lexer) {
                 else if (slice_eq(slice, slice_from_cstr("global"))) return token_simple(TOKEN_GLOBAL);
                 else if (slice_eq(slice, slice_from_cstr("extern"))) return token_simple(TOKEN_EXTERN);
                 else if (slice_eq(slice, slice_from_cstr("return"))) return token_simple(TOKEN_RETURN);
+                else if (slice_eq(slice, slice_from_cstr("if"))) return token_simple(TOKEN_IF);
+                else if (slice_eq(slice, slice_from_cstr("else"))) return token_simple(TOKEN_ELSE);
                 else return token_simple(TOKEN_IDENT);
             }
             return token_simple(TOKEN_FAILED);

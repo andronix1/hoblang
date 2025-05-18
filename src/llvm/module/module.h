@@ -23,6 +23,7 @@ typedef struct LlvmModule {
 } LlvmModule;
 
 LlvmState llvm_switch_state(LlvmModule *module, LlvmState state);
+LLVMValueRef llvm_alloca(LlvmModule *module, LLVMTypeRef type);
 
 static inline LlvmState llvm_state_new(LLVMValueRef func, LLVMBasicBlockRef code, LLVMBasicBlockRef defs) {
     LlvmState result = {

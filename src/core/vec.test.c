@@ -41,4 +41,5 @@ static void test_vec_at() {
 void test_vec() {
     CU_pSuite suite = CU_add_suite("vec", NULL, NULL);
     CU_ADD_TEST(suite, test_vec_push_pop);
+    CU_ADD_TEST(suite, test_vec_at);
 }

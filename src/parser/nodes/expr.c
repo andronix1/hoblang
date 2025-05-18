@@ -64,8 +64,14 @@ static inline AstExpr *parse_middle_expr(Parser *parser) {
     }
 }
 
-static int get_binop_kind_priority(AstBinopKind kind) {
+static int get_binop_kind_priority(AstBinopKindKind kind) {
     switch (kind) {
+        case AST_BINOP_EQUALS: return -10;
+        case AST_BINOP_NOT_EQUALS: return -10;
+        case AST_BINOP_LESS: return 0;
+        case AST_BINOP_GREATER: return 0;
+        case AST_BINOP_LESS_EQ: return 0;
+        case AST_BINOP_GREATER_EQ: return 0;
         case AST_BINOP_ADD: return 10;
         case AST_BINOP_SUBTRACT: return 10;
         case AST_BINOP_MULTIPLY: return 100;
@@ -80,8 +86,8 @@ static inline void swap_binop_prioritized(AstExpr *expr) {
     if (left->kind != AST_EXPR_BINOP) {
         return;
     }
-    int root_priority = get_binop_kind_priority(expr->binop.kind);
-    int left_priority = get_binop_kind_priority(left->binop.kind);
+    int root_priority = get_binop_kind_priority(expr->binop.kind.kind);
+    int left_priority = get_binop_kind_priority(left->binop.kind.kind);
     if (left_priority >= root_priority) {
         return;
     }
@@ -96,9 +102,10 @@ static inline void swap_binop_prioritized(AstExpr *expr) {
     swap_binop_prioritized(left);
 }
 
-static inline AstExpr *create_expr_lprioritized(Parser *parser, AstBinopKind kind, AstExpr *left) {
+static inline AstExpr *create_expr_lprioritized(Parser *parser, Slice slice, AstBinopKindKind kind, AstExpr *left) {
     AstExpr *right = NOT_NULL(parse_middle_expr(parser));
-    AstExpr *result = ast_expr_new_binop(parser->mempool, slice_union(left->slice, right->slice), kind, left, right);
+    AstExpr *result = ast_expr_new_binop(parser->mempool, slice_union(left->slice, right->slice),
+        ast_binop_kind_new(kind, slice), left, right);
     swap_binop_prioritized(result);
     return result;
 }
@@ -120,18 +127,16 @@ static inline AstExpr *parse_post_expr(Parser *parser, AstExpr *expr) {
                 expr = ast_expr_new_callable(parser->mempool, slice_union(expr->slice, slice), expr, args);
                 break;
             }
-            case TOKEN_PLUS:
-                expr = NOT_NULL(create_expr_lprioritized(parser, AST_BINOP_ADD, expr));
-                break;
-            case TOKEN_MINUS:
-                expr = NOT_NULL(create_expr_lprioritized(parser, AST_BINOP_SUBTRACT, expr));
-                break;
-            case TOKEN_STAR:
-                expr = NOT_NULL(create_expr_lprioritized(parser, AST_BINOP_MULTIPLY, expr));
-                break;
-            case TOKEN_SLASH:
-                expr = NOT_NULL(create_expr_lprioritized(parser, AST_BINOP_DIVIDE, expr));
-                break;
+            case TOKEN_PLUS: expr = NOT_NULL(create_expr_lprioritized(parser, token.slice, AST_BINOP_ADD, expr)); break;
+            case TOKEN_MINUS: expr = NOT_NULL(create_expr_lprioritized(parser, token.slice, AST_BINOP_SUBTRACT, expr)); break;
+            case TOKEN_STAR: expr = NOT_NULL(create_expr_lprioritized(parser, token.slice, AST_BINOP_MULTIPLY, expr)); break;
+            case TOKEN_SLASH: expr = NOT_NULL(create_expr_lprioritized(parser, token.slice, AST_BINOP_DIVIDE, expr)); break;
+            case TOKEN_EQUALS: expr = NOT_NULL(create_expr_lprioritized(parser, token.slice, AST_BINOP_EQUALS, expr)); break;
+            case TOKEN_NOT_EQUALS: expr = NOT_NULL(create_expr_lprioritized(parser, token.slice, AST_BINOP_NOT_EQUALS, expr)); break;
+            case TOKEN_OPENING_ANGLE_BRACE: expr = NOT_NULL(create_expr_lprioritized(parser, token.slice, AST_BINOP_LESS, expr)); break;
+            case TOKEN_CLOSING_ANGLE_BRACE: expr = NOT_NULL(create_expr_lprioritized(parser, token.slice, AST_BINOP_GREATER, expr)); break;
+            case TOKEN_LESS_EQ: expr = NOT_NULL(create_expr_lprioritized(parser, token.slice, AST_BINOP_LESS_EQ, expr)); break;
+            case TOKEN_GREATER_EQ: expr = NOT_NULL(create_expr_lprioritized(parser, token.slice, AST_BINOP_GREATER_EQ, expr)); break;
             default:
                 parser_skip_next(parser);
                 reading = false;

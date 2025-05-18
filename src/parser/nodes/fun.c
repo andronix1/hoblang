@@ -4,6 +4,7 @@
 #include "ast/node.h"
 #include "core/mempool.h"
 #include "core/null.h"
+#include "core/slice.h"
 #include "core/vec.h"
 #include "lexer/token.h"
 #include "parser/nodes/body.h"
@@ -20,8 +21,8 @@ AstFunInfo *parse_fun_info(Parser *parser, bool is_local) {
         name = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
     }
     PARSER_EXPECT_NEXT(parser, TOKEN_OPENING_CIRCLE_BRACE);
-    bool by_ref;
-    Slice self_name;
+    bool by_ref = false;
+    Slice self_name = slice_new(NULL, 0);
     bool was_arg = false;
     if (is_ext) {
         by_ref = parser_next_should_be(parser, TOKEN_AND);

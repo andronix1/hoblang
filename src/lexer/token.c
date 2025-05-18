@@ -39,8 +39,15 @@ void token_print(va_list list) {
         case TOKEN_VAR: printf("`var`"); return;
         case TOKEN_FINAL: printf("`final`"); return;
         case TOKEN_CONST: printf("`const`"); return;
+        case TOKEN_IF: printf("`if`"); return;
+        case TOKEN_ELSE: printf("`else`"); return;
         case TOKEN_FAILED: printf("<fail>"); return;
         case TOKEN_EOI: printf("<end of input>"); return;
+        case TOKEN_EQUALS: printf("`==`"); return;
+        case TOKEN_NOT_EQUALS: printf("`!=`"); return;
+        case TOKEN_GREATER_EQ: printf("`>=`"); return;
+        case TOKEN_LESS_EQ: printf("`<=`"); return;
+        case TOKEN_NOT: printf("`!`"); return;
     }
     UNREACHABLE;
 }

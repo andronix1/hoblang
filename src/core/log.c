@@ -7,8 +7,8 @@
 static HobLogHandleFunc print_handles[1 << (sizeof(char) * 8)] = { NULL };
 
 void log_register(char id, HobLogHandleFunc func) {
-    assert(print_handles[id] == NULL);
-    print_handles[id] = func;
+    assert(print_handles[(size_t)id] == NULL);
+    print_handles[(size_t)id] = func;
 }
 
 void logv(const char *fmt, va_list list) {
@@ -21,7 +21,7 @@ void logv(const char *fmt, va_list list) {
                 i++;
                 continue;
             }
-            HobLogHandleFunc handle = print_handles[id];
+            HobLogHandleFunc handle = print_handles[(size_t)id];
             if (!handle) {
                 printf("$%c", id);
             } else {
