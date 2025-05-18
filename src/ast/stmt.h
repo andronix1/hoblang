@@ -10,6 +10,7 @@ typedef enum {
     AST_STMT_ASSIGN,
     AST_STMT_RETURN,
     AST_STMT_IF,
+    AST_STMT_WHILE,
 } AstStmtKind;
 
 typedef struct {
@@ -35,6 +36,11 @@ typedef struct {
 } AstAssign;
 
 typedef struct {
+    AstExpr *cond;
+    AstBody *body;
+} AstWhile;
+
+typedef struct {
     Slice slice;
     AstExpr *value;
 } AstReturn;
@@ -47,6 +53,7 @@ typedef struct AstStmt {
         AstReturn ret;
         AstAssign assign;
         AstIf if_else;
+        AstWhile while_loop;
     };
 } AstStmt;
 
@@ -65,3 +72,4 @@ AstStmt *ast_stmt_new_assign(Mempool *mempool, AstExpr *dst, AstExpr *what);
 AstStmt *ast_stmt_new_short_assign(Mempool *mempool, AstExpr *dst, AstExpr *what, AstBinopKind binop);
 AstStmt *ast_stmt_new_return(Mempool *mempool, Slice slice, AstExpr *value);
 AstStmt *ast_stmt_new_if(Mempool *mempool, AstCondBlock *conds, AstBody *else_body);
+AstStmt *ast_stmt_new_while(Mempool *mempool, AstExpr *expr, AstBody *body);

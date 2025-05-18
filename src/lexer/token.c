@@ -41,6 +41,7 @@ void token_print(va_list list) {
         case TOKEN_CONST: printf("`const`"); return;
         case TOKEN_IF: printf("`if`"); return;
         case TOKEN_ELSE: printf("`else`"); return;
+        case TOKEN_WHILE: printf("`while`"); return;
         case TOKEN_FAILED: printf("<fail>"); return;
         case TOKEN_EOI: printf("<end of input>"); return;
         case TOKEN_EQUALS: printf("`==`"); return;

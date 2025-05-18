@@ -14,6 +14,7 @@ typedef enum {
     TOKEN_GLOBAL, TOKEN_EXTERN,
     TOKEN_RETURN,
     TOKEN_IF, TOKEN_ELSE,
+    TOKEN_WHILE,
     // Extended
     TOKEN_IDENT,
     TOKEN_INTEGER, TOKEN_STRING,

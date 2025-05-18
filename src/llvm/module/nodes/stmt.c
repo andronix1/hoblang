@@ -61,5 +61,20 @@ void llvm_emit_stmt(LlvmModule *module, AstStmt *stmt) {
             }
             break;
         }
+        case AST_STMT_WHILE: {
+            LLVMBasicBlockRef cond_block = LLVMAppendBasicBlock(module->state.func, "");
+            LLVMBasicBlockRef body_block = LLVMAppendBasicBlock(module->state.func, "");
+            LLVMBasicBlockRef end_block = LLVMAppendBasicBlock(module->state.func, "");
+            LLVMBuildBr(module->builder, cond_block);
+            LLVMPositionBuilderAtEnd(module->builder, cond_block);
+            LLVMBuildCondBr(module->builder, llvm_emit_expr_get(module, stmt->expr), body_block, end_block);
+            LLVMPositionBuilderAtEnd(module->builder, body_block);
+            llvm_emit_body(module, stmt->while_loop.body);
+            if (!stmt->while_loop.body->sema.finished) {
+                LLVMBuildBr(module->builder, cond_block);
+            }
+            LLVMPositionBuilderAtEnd(module->builder, end_block);
+            break;
+        }
     }
 }

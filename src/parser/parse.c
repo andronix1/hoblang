@@ -1,5 +1,6 @@
 #include "api.h"
 #include "ast/api/expr.h"
+#include "ast/body.h"
 #include "ast/expr.h"
 #include "ast/global.h"
 #include "ast/node.h"
@@ -9,6 +10,7 @@
 #include "core/slice.h"
 #include "core/vec.h"
 #include "lexer/token.h"
+#include "parser/nodes/body.h"
 #include "parser/nodes/expr.h"
 #include "parser/nodes/extern.h"
 #include "parser/nodes/fun.h"
@@ -78,9 +80,15 @@ static AstNode *parser_next_full(Parser *parser, Token token) {
             AstExpr *value = parser_next_is(parser, TOKEN_SEMICOLON) ?
                 NULL : NOT_NULL(parse_expr(parser));
             PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
-            return ast_node_new_stmt(parser->mempool, ast_stmt_new_return(parser->mempool, token.slice, value));
+            return ast_node_new_stmt(parser->mempool, ast_stmt_new_return(parser->mempool,
+                token.slice, value));
         }
         case TOKEN_IF: return parse_if(parser);
+        case TOKEN_WHILE: {
+            AstExpr *cond = NOT_NULL(parse_expr(parser));
+            AstBody *body = NOT_NULL(parse_body(parser));
+            return ast_node_new_stmt(parser->mempool, ast_stmt_new_while(parser->mempool, cond, body));
+        }
         default: return parser_next_maybe_local(parser, token, false);
     }
 }

@@ -37,6 +37,9 @@ bool ast_stmt_eq(const AstStmt *a, const AstStmt *b) {
                 }
             }
             return equals_nullable(a->if_else.else_body, b->if_else.else_body, (EqFunc)ast_body_eq);
+        case AST_STMT_WHILE:
+            return ast_expr_eq(a->while_loop.cond, b->while_loop.cond) &&
+                ast_body_eq(a->while_loop.body, b->while_loop.body);
     }
     UNREACHABLE;
 }
@@ -61,6 +64,9 @@ AstStmt *ast_stmt_new_expr(Mempool *mempool, AstExpr *expr)
 
 AstStmt *ast_stmt_new_return(Mempool *mempool, Slice slice, AstExpr *value)
     CONSTRUCT(AST_STMT_RETURN, out->ret.value = value; out->ret.slice = slice;)
+
+AstStmt *ast_stmt_new_while(Mempool *mempool, AstExpr *expr, AstBody *body)
+    CONSTRUCT(AST_STMT_WHILE, out->while_loop.cond = expr; out->while_loop.body = body;)
 
 AstStmt *ast_stmt_new_if(Mempool *mempool, AstCondBlock *conds, AstBody *else_body)
     CONSTRUCT(AST_STMT_IF, out->if_else.conds = conds; out->if_else.else_body = else_body;)

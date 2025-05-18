@@ -16,6 +16,7 @@
 #include "sema/module/nodes/exprs/binop.h"
 #include "sema/module/nodes/generic.h"
 #include "sema/module/nodes/stmts/if.h"
+#include "sema/module/nodes/stmts/while.h"
 #include "sema/module/nodes/type.h"
 #include "sema/module/type.h"
 #include "sema/module/value.h"
@@ -240,6 +241,7 @@ bool sema_module_analyze_node(SemaModule *module, AstNode *node) {
                     return false;
                 }
                 case AST_STMT_IF: return sema_module_analyze_if(module, &node->stmt->if_else);
+                case AST_STMT_WHILE: return sema_module_analyze_while(module, &node->stmt->while_loop);
             }
             UNREACHABLE;
     }

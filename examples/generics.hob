@@ -28,5 +28,9 @@ local global fun main() -> i32 {
         pointer: "super duper\n",
         length: 12
     });
-    return 0;
+    var i: i32 = 10;
+    while i > 0 {
+        i -= 1;
+    }
+    return i;
 }
