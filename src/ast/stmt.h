@@ -20,6 +20,10 @@ typedef struct {
 typedef struct AstIf {
     AstCondBlock *conds;
     AstBody *else_body;
+
+    struct {
+        bool breaks;
+    } sema;
 } AstIf;
 
 typedef struct {

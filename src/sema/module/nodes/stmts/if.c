@@ -22,18 +22,18 @@ static bool sema_module_analyze_cond_block(SemaModule *module, AstCondBlock *con
 
 bool sema_module_analyze_if(SemaModule *module, AstIf *if_else) {
     assert(vec_len(if_else->conds) > 0);
-    bool breaks = false;
+    bool breaks = true;
     for (size_t i = 0; i < vec_len(if_else->conds); i++) {
-        if (sema_module_analyze_cond_block(module, &if_else->conds[i])) {
-            breaks = true;
+        if (!sema_module_analyze_cond_block(module, &if_else->conds[i])) {
+            breaks = false;
         }
     }
     if (if_else->else_body) {
-        if (sema_module_analyze_body(module, if_else->else_body)) {
-            breaks = true;
+        if (!sema_module_analyze_body(module, if_else->else_body)) {
+            breaks = false;
         }
     } else {
-        breaks = true;
+        breaks = false;
     }
-    return breaks;
+    return if_else->sema.breaks = breaks;
 }

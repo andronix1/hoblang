@@ -45,7 +45,8 @@ void llvm_emit_stmt(LlvmModule *module, AstStmt *stmt) {
                 LLVMBuildRetVoid(module->builder);
             break;
         case AST_STMT_IF: {
-            LLVMBasicBlockRef end_block = LLVMAppendBasicBlock(module->state.func, "");
+            LLVMBasicBlockRef end_block = stmt->if_else.sema.breaks ?
+                NULL : LLVMAppendBasicBlock(module->state.func, "");
             for (size_t i = 0; i < vec_len(stmt->if_else.conds); i++) {
                 llvm_cond_block(module, &stmt->if_else.conds[i], end_block);
             }
@@ -55,7 +56,9 @@ void llvm_emit_stmt(LlvmModule *module, AstStmt *stmt) {
                     LLVMBuildBr(module->builder, end_block);
                 }
             }
-            LLVMPositionBuilderAtEnd(module->builder, end_block);
+            if (end_block) {
+                LLVMPositionBuilderAtEnd(module->builder, end_block);
+            }
             break;
         }
     }
