@@ -4,6 +4,7 @@
 #include "ast/stmt.h"
 #include "core/assert.h"
 #include "core/keymap.h"
+#include "core/log.h"
 #include "core/mempool.h"
 #include "core/null.h"
 #include "core/path.h"

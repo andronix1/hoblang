@@ -42,20 +42,22 @@ SemaDeclHandle *sema_module_push_decl(SemaModule *module, Slice name, SemaDecl d
     return decl.handle;
 }
 
-SemaDeclHandle *sema_module_resolve_decl_in(SemaModule *module, const SemaModule *in, Slice name) {
-    if (in->ss) {
-        for (ssize_t i = (ssize_t)vec_len(in->ss->scopes) - 1; i >= 0; i--) {
-            SemaDecl *decl = keymap_rev_get(in->ss->scopes[i].decls_map, name);
-            if (decl) {
-                if (decl->is_local && (module != in)) {
-                    sema_module_err(module, name, "`$S` is local");
-                    return NULL;
-                }
-                return decl->handle;
-            }
+static inline SemaDecl *_sema_module_resolve_decl(const SemaModule *module, Slice name) {
+    if (module->ss) {
+        for (ssize_t i = (ssize_t)vec_len(module->ss->scopes) - 1; i >= 0; i--) {
+            SemaDecl *decl = keymap_rev_get(module->ss->scopes[i].decls_map, name);
+            if (decl) return decl;
         }
     }
-    return NOT_NULL(keymap_rev_get(in->decls_map, name))->handle;
+    return NOT_NULL(keymap_rev_get(module->decls_map, name));
+}
+
+SemaDeclHandle *sema_module_resolve_decl_in(SemaModule *module, const SemaModule *in, Slice name) {
+    SemaDecl *decl = NOT_NULL(_sema_module_resolve_decl(in, name));
+    if (decl->is_local && (module != in)) {
+        sema_module_err(module, name, "`$S` is local", name);
+    }
+    return decl->handle;
 }
 
 SemaDeclHandle *sema_module_resolve_decl(SemaModule *module, Slice name) {

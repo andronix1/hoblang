@@ -7,7 +7,7 @@ local type Fd = i32;
 
 local extern(write) fun Fd.write(self, ptr: *u8, count: u32);
 
-local fun print(slice: Slice.<u8>) {
+fun print(slice: Slice.<u8>) {
     var stdout: Fd = 0;
     stdout.write(slice.pointer, slice.length);
 }
