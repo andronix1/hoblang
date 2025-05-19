@@ -89,6 +89,13 @@ static AstNode *parser_next_full(Parser *parser, Token token) {
             AstBody *body = NOT_NULL(parse_body(parser));
             return ast_node_new_stmt(parser->mempool, ast_stmt_new_while(parser->mempool, cond, body));
         }
+        case TOKEN_IMPORT: {
+            Token path_token = PARSER_EXPECT_NEXT(parser, TOKEN_STRING);
+            PARSER_EXPECT_NEXT(parser, TOKEN_AS);
+            Slice alias = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
+            PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
+            return ast_node_new_import(parser->mempool, path_token.slice, path_token.string, alias);
+        }
         default: return parser_next_maybe_local(parser, token, false);
     }
 }

@@ -10,6 +10,7 @@
 #include <alloca.h>
 #include <llvm-c/Core.h>
 #include <llvm-c/Types.h>
+#include <stdio.h>
 
 LLVMValueRef llvm_emit_binop(LlvmModule *module, LLVMValueRef left, LLVMValueRef right, AstBinopKind binop) {
     switch (binop.kind) {

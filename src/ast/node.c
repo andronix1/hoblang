@@ -91,6 +91,8 @@ bool ast_node_eq(const AstNode *a, const AstNode *b) {
                 case AST_EXTERNAL_DECL_VALUE: return ast_value_info_eq(a->external_decl.value, b->external_decl.value);
             }
             UNREACHABLE;
+        case AST_NODE_IMPORT:
+            return slice_eq(a->import.path, b->import.path) && slice_eq(a->import.alias, b->import.alias);
     }
     UNREACHABLE;
 }
@@ -155,6 +157,13 @@ AstNode *ast_node_new_fun_decl(Mempool *mempool,
         out->fun_decl.global = global;
         out->fun_decl.info = info;
         out->fun_decl.body = body;
+    )
+
+AstNode *ast_node_new_import(Mempool *mempool, Slice path_slice, Slice path, Slice alias)
+    CONSTRUCT(AST_NODE_IMPORT,
+        out->import.path_slice = path_slice;
+        out->import.path = path;
+        out->import.alias = alias;
     )
 
 AstNode *ast_node_new_stmt(Mempool *mempool, AstStmt *stmt)

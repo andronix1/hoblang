@@ -17,6 +17,7 @@ typedef enum {
     AST_NODE_FUN_DECL,
     AST_NODE_VALUE_DECL,
     AST_NODE_EXTERNAL_DECL,
+    AST_NODE_IMPORT,
     AST_NODE_STMT,
 } AstNodeKind;
 
@@ -110,11 +111,18 @@ typedef struct {
     };
 } AstExternalDecl;
 
+typedef struct {
+    Slice path;
+    Slice path_slice;
+    Slice alias;
+} AstImport;
+
 typedef struct AstNode {
     AstNodeKind kind;
     Slice slice;
 
     union {
+        AstImport import;
         AstTypeDecl type_decl;
         AstFunDecl fun_decl;
         AstValueDecl value_decl;
@@ -145,4 +153,5 @@ AstNode *ast_node_new_fun_decl(Mempool *mempool, AstGlobal *global, AstFunInfo *
 AstNode *ast_node_new_value_decl(Mempool *mempool, AstGlobal *global, AstValueInfo *info, AstExpr *initializer);
 AstNode *ast_node_new_external_value(Mempool *mempool, AstValueInfo *info, bool has_alias, Slice alias);
 AstNode *ast_node_new_external_fun(Mempool *mempool, AstFunInfo *info, bool has_alias, Slice alias);
+AstNode *ast_node_new_import(Mempool *mempool, Slice path_slice, Slice path, Slice alias);
 AstNode *ast_node_new_stmt(Mempool *mempool, AstStmt *stmt);

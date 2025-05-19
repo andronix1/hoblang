@@ -22,6 +22,7 @@ static void llvm_add_function(LlvmModule *module, AstFunInfo *info, Slice *name)
 void llvm_module_read_node(LlvmModule *module, AstNode *node) {
     switch (node->kind) {
         case AST_NODE_STMT:
+        case AST_NODE_IMPORT:
         case AST_NODE_TYPE_DECL:
             return;
         case AST_NODE_FUN_DECL:
@@ -79,6 +80,7 @@ void llvm_module_emit_node(LlvmModule *module, AstNode *node) {
             llvm_switch_state(module, old_state);
             return;
         }
+        case AST_NODE_IMPORT:
         case AST_NODE_TYPE_DECL:
         case AST_NODE_EXTERNAL_DECL:
             return;

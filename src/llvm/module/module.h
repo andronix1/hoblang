@@ -1,7 +1,6 @@
 #pragma once
 
 #include "core/mempool.h"
-#include "sema/module/api.h"
 #include "llvm/module/api.h"
 #include <llvm-c/TargetMachine.h>
 #include <llvm-c/Types.h>
@@ -12,7 +11,6 @@ typedef struct {
 } LlvmState;
 
 typedef struct LlvmModule {
-    SemaModule *sema;
     Mempool *mempool;
 
     LLVMTargetMachineRef machine;

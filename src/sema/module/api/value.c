@@ -23,6 +23,13 @@ SemaDeclHandle *sema_value_is_ext(SemaValue *value) {
     return value->runtime.ext;
 }
 
+SemaModule *sema_value_is_module(SemaValue *value) {
+    if (value->kind != SEMA_VALUE_MODULE) {
+        return NULL;
+    }
+    return value->module;
+}
+
 SemaType *sema_value_is_runtime(SemaValue *value) {
     if (value->kind != SEMA_VALUE_RUNTIME) {
         return NULL;

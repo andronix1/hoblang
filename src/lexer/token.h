@@ -15,6 +15,8 @@ typedef enum {
     TOKEN_RETURN,
     TOKEN_IF, TOKEN_ELSE,
     TOKEN_WHILE,
+    TOKEN_IMPORT,
+    TOKEN_AS,
     // Extended
     TOKEN_IDENT,
     TOKEN_INTEGER, TOKEN_STRING,

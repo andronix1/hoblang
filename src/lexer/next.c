@@ -115,6 +115,8 @@ static Token lexer_try_next(Lexer *lexer) {
                 else if (slice_eq(slice, slice_from_cstr("if"))) return token_simple(TOKEN_IF);
                 else if (slice_eq(slice, slice_from_cstr("else"))) return token_simple(TOKEN_ELSE);
                 else if (slice_eq(slice, slice_from_cstr("while"))) return token_simple(TOKEN_WHILE);
+                else if (slice_eq(slice, slice_from_cstr("import"))) return token_simple(TOKEN_IMPORT);
+                else if (slice_eq(slice, slice_from_cstr("as"))) return token_simple(TOKEN_AS);
                 else return token_simple(TOKEN_IDENT);
             }
             return token_simple(TOKEN_FAILED);

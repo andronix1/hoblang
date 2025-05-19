@@ -1,11 +1,14 @@
 #include "api.h"
 #include "parser/api.h"
+#include "sema/api.h"
 #include "sema/module/module.h"
 #include "sema/module/nodes/node.h"
+#include <stdio.h>
 #include <stdlib.h>
 
-SemaModule *sema_module_new(Parser *parser) {
+SemaModule *sema_module_new(Parser *parser, SemaProject *project) {
     SemaModule *module = malloc(sizeof(SemaModule));
+    module->project = project;
     module->parser = parser;
     module->nodes = NULL;
     module->mempool = mempool_new(1024);

@@ -1,6 +1,7 @@
 #include "ident.h"
 #include "ast/path.h"
 #include "core/keymap.h"
+#include "core/null.h"
 #include "sema/module/api/value.h"
 #include "sema/module/module.h"
 #include "sema/module/nodes/path_ext.h"
@@ -10,8 +11,16 @@
 #include <stdio.h>
 
 SemaValue *sema_path_resolve_ident(SemaModule *module, SemaValue *value, AstPath *path, size_t idx) {
-    SemaType *type = sema_value_is_runtime(value);
     AstPathSegment *segment = &path->segments[idx];
+    {
+        SemaModule *in_module = sema_value_is_module(value);
+        if (in_module) {
+            segment->sema.kind = SEMA_PATH_SEGMENT_DECL;
+            segment->sema.decl = NOT_NULL(sema_module_resolve_required_decl_in(module, in_module, segment->ident));
+            return segment->sema.decl->value;
+        }
+    }
+    SemaType *type = sema_value_is_runtime(value);
     if (!type) {
         sema_module_err(module, segment->ident, "cannot get `$S` from non-runtime value", segment->ident);
         return NULL;

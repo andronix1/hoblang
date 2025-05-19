@@ -42,24 +42,36 @@ SemaDeclHandle *sema_module_push_decl(SemaModule *module, Slice name, SemaDecl d
     return decl.handle;
 }
 
-SemaDeclHandle *sema_module_resolve_decl(const SemaModule *module, Slice name) {
-    if (module->ss) {
-        for (ssize_t i = (ssize_t)vec_len(module->ss->scopes) - 1; i >= 0; i--) {
-            SemaDecl *decl = keymap_rev_get(module->ss->scopes[i].decls_map, name);
+SemaDeclHandle *sema_module_resolve_decl_in(SemaModule *module, const SemaModule *in, Slice name) {
+    if (in->ss) {
+        for (ssize_t i = (ssize_t)vec_len(in->ss->scopes) - 1; i >= 0; i--) {
+            SemaDecl *decl = keymap_rev_get(in->ss->scopes[i].decls_map, name);
             if (decl) {
+                if (decl->is_local && (module != in)) {
+                    sema_module_err(module, name, "`$S` is local");
+                    return NULL;
+                }
                 return decl->handle;
             }
         }
     }
-    return NOT_NULL(keymap_rev_get(module->decls_map, name))->handle;
+    return NOT_NULL(keymap_rev_get(in->decls_map, name))->handle;
 }
 
-SemaDeclHandle *sema_module_resolve_required_decl(SemaModule *module, Slice name) {
-    SemaDeclHandle *handle = sema_module_resolve_decl(module, name);
+SemaDeclHandle *sema_module_resolve_decl(SemaModule *module, Slice name) {
+    return sema_module_resolve_decl_in(module, module, name);
+}
+
+SemaDeclHandle *sema_module_resolve_required_decl_in(SemaModule *module, SemaModule *in, Slice name) {
+    SemaDeclHandle *handle = sema_module_resolve_decl_in(module, in, name);
     if (!handle) {
         sema_module_err(module, name, "`$S` was not found");
     }
     return handle;
+}
+
+SemaDeclHandle *sema_module_resolve_required_decl(SemaModule *module, Slice name) {
+    return sema_module_resolve_required_decl_in(module, module, name);
 }
 
 void sema_module_push_scope(SemaModule *module) {
@@ -127,4 +139,8 @@ void sema_module_err(SemaModule *module, Slice at, const char *fmt, ...) {
     logvln(fmt, list);
     logln("$V\n", file_content_get_in_lines_view(module->parser->lexer->content, at));
     va_end(list);
+}
+
+Path sema_module_path(SemaModule *module) {
+    return module->parser->lexer->content->path;
 }

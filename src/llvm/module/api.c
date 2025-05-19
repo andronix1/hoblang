@@ -33,9 +33,8 @@ static bool llvm_setup(LlvmModule *module) {
     return true;
 }
 
-LlvmModule *llvm_module_new(SemaModule *sema) {
+LlvmModule *llvm_module_new() {
     LlvmModule *result = malloc(sizeof(LlvmModule));
-    result->sema = sema;
     result->state = llvm_state_new(NULL, NULL, NULL);
     result->mempool = mempool_new(1024);
     if (!llvm_setup(result)) {
@@ -45,17 +44,15 @@ LlvmModule *llvm_module_new(SemaModule *sema) {
     return result;
 }
 
-void llvm_module_read(LlvmModule *module) {
-    sema_module_read(module->sema);
-    sema_module_analyze(module->sema);
-    AstNode **nodes = sema_module_nodes(module->sema);
+void llvm_module_read(LlvmModule *module, SemaModule *sema) {
+    AstNode **nodes = sema_module_nodes(sema);
     for (size_t i = 0; i < vec_len(nodes); i++) {
         llvm_module_read_node(module, nodes[i]);
     }
 }
 
-void llvm_module_emit(LlvmModule *module) {
-    AstNode **nodes = sema_module_nodes(module->sema);
+void llvm_module_emit(LlvmModule *module, SemaModule *sema) {
+    AstNode **nodes = sema_module_nodes(sema);
     for (size_t i = 0; i < vec_len(nodes); i++) {
         llvm_module_emit_node(module, nodes[i]);
     }
@@ -85,6 +82,5 @@ void llvm_module_free(LlvmModule *module) {
     LLVMContextDispose(module->context);
     LLVMShutdown();
     mempool_free(module->mempool);
-    sema_module_free(module->sema);
     free(module);
 }

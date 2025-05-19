@@ -44,3 +44,8 @@ SemaValue *sema_value_new_type(Mempool *mempool, SemaType *type)
     CONSTRUCT(SEMA_VALUE_TYPE,
         out->type = type;
     )
+
+SemaValue *sema_value_new_module(Mempool *mempool, SemaModule *module)
+    CONSTRUCT(SEMA_VALUE_MODULE,
+        out->module = module;
+    )

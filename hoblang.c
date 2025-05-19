@@ -2,11 +2,11 @@
 #include "core/file_content.h"
 #include "core/log.h"
 #include "core/slice.h"
-#include "lexer/api.h"
 #include "lexer/token.h"
-#include "parser/api.h"
+#include "sema/api.h"
 #include "sema/module/api.h"
 #include "sema/module/api/type.h"
+#include "sema/project.h"
 #include "llvm/module/api.h"
 #include <errno.h>
 #include <stdio.h>
@@ -35,19 +35,23 @@ int main(int argc, char **argv) {
         logln("usage: $s <path>", argv[0]);
         return 1;
     }
-    FileContent *content = file_content_read(argv[1]);
-    if (!content) {
-        logln("failed to read file content: $E");
-        return 1;
-    }
-    LlvmModule *module = llvm_module_new(sema_module_new(parser_new(lexer_new(content))));
-    llvm_module_read(module);
-    llvm_module_emit(module);
-    llvm_module_write_ir(module, "test.ll");
-    if (!llvm_module_write_obj(module, "test.o")) {
+
+    SemaProject *project = sema_project_new(argv[1]);
+    if (!project) return 1;
+    if (!sema_project_analyze(project)) return 1;
+
+    SemaModule **modules = sema_project_modules(project);
+    LlvmModule *llvm = llvm_module_new();
+    logln("emitting $l modules...", vec_len(modules));
+    for (size_t i = 0; i < vec_len(modules); i++) llvm_module_read(llvm, modules[i]);
+    for (size_t i = 0; i < vec_len(modules); i++) llvm_module_emit(llvm, modules[i]);
+    llvm_module_write_ir(llvm, "test.ll");
+    if (!llvm_module_write_obj(llvm, "test.o")) {
         logln("failed to write module");
         return 1;
     }
-    llvm_module_free(module);
+
+    sema_project_free(project);
+    llvm_module_free(llvm);
     return 0;
 }

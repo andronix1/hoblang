@@ -6,6 +6,7 @@
 #include "core/keymap.h"
 #include "core/mempool.h"
 #include "core/null.h"
+#include "core/path.h"
 #include "core/vec.h"
 #include "sema/module/alias.h"
 #include "sema/module/api/type.h"
@@ -20,6 +21,7 @@
 #include "sema/module/nodes/type.h"
 #include "sema/module/type.h"
 #include "sema/module/value.h"
+#include "sema/project.h"
 #include <stdio.h>
 
 static inline void sema_module_push_fun_info(SemaModule *module, AstFunInfo *info) {
@@ -153,12 +155,21 @@ void sema_module_read_node(SemaModule *module, AstNode *node) {
         }
         case AST_NODE_STMT:
             return;
+        case AST_NODE_IMPORT: {
+            SemaModule *import_module = RET_ON_NULL(sema_project_read(module->project,
+                path_join_in(module->mempool, path_dirname_in(module->mempool, sema_module_path(module)),
+                    mempool_slice_to_cstr(module->mempool, node->import.path))));
+            sema_module_push_decl(module, node->import.alias, sema_decl_new(module,
+                false, sema_value_new_module(module->mempool, import_module)));
+            return;
+        }
     }
     UNREACHABLE;
 }
 
 bool sema_module_analyze_node(SemaModule *module, AstNode *node) {
     switch (node->kind) {
+        case AST_NODE_IMPORT:
         case AST_NODE_TYPE_DECL:
         case AST_NODE_VALUE_DECL:
         case AST_NODE_EXTERNAL_DECL:
