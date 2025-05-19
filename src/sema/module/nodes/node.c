@@ -4,14 +4,15 @@
 #include "ast/stmt.h"
 #include "core/assert.h"
 #include "core/keymap.h"
-#include "core/log.h"
 #include "core/mempool.h"
 #include "core/null.h"
 #include "core/path.h"
 #include "core/vec.h"
 #include "sema/module/alias.h"
+#include "sema/module/api/generic.h"
 #include "sema/module/api/type.h"
 #include "sema/module/api/value.h"
+#include "sema/module/generic.h"
 #include "sema/module/module.h"
 #include "sema/module/nodes/body.h"
 #include "sema/module/nodes/expr.h"
@@ -27,24 +28,41 @@
 
 static inline void sema_module_push_fun_info(SemaModule *module, AstFunInfo *info) {
     info->sema.decl = NULL;
-    SemaType *returns = info->returns ?
-       RET_ON_NULL(sema_module_analyze_type(module, info->returns)) :
-       sema_type_new_primitive_void(module->mempool);
+    info->sema.generic = NULL;
     SemaType **args = vec_new_in(module->mempool, SemaType*);
     SemaType *ext_type = NULL;
+    SemaGeneric *generic = NULL;
     if (info->ext.is) {
-        ext_type = sema_value_is_type(RET_ON_NULL(sema_module_resolve_required_decl(module, info->ext.of))->value);
+        SemaValue *value = RET_ON_NULL(sema_module_resolve_required_decl(module, info->ext.of))->value;
+        ext_type = sema_value_is_type(value);
         if (!ext_type) {
-            sema_module_err(module, info->ext.of, "$S is not a type", info->ext.of);
+            generic = sema_value_is_generic(value);
+            if (generic) {
+                ext_type = sema_generic_is_type(generic);
+                info->sema.generic = generic;
+            }
+        }
+        if (!ext_type) {
+            sema_module_err(module, info->ext.of, "$S is not a type or generic type", info->ext.of);
             return;
         }
         vec_push(args, info->ext.by_ref ?
             sema_type_new_pointer(module->mempool, ext_type) :
             ext_type);
     }
+    if (generic) {
+        for (size_t i = 0; i < vec_len(generic->params); i++) {
+            SemaGenericParam *param = &generic->params[i];
+            sema_module_push_decl(module, param->name, sema_decl_new(module, false,
+                sema_value_new_type(module->mempool, param->type)));
+        }
+    }
     for (size_t i = 0; i < vec_len(info->args); i++) {
         vec_push(args, RET_ON_NULL(sema_module_analyze_type(module, info->args[i].type)));
     }
+    SemaType *returns = info->returns ?
+       RET_ON_NULL(sema_module_analyze_type(module, info->returns)) :
+       sema_type_new_primitive_void(module->mempool);
     SemaType *type = sema_type_new_function(module->mempool, args, returns);
     SemaDecl decl = sema_decl_new(module, info->is_local, sema_value_new_final(module->mempool, type));
     info->sema.decl = decl.handle;
@@ -69,13 +87,14 @@ void sema_module_read_node(SemaModule *module, AstNode *node) {
             if (node->type_decl.generics) {
                 SemaGenericScopeHandle ghandle;
                 sema_module_generic_setup(module, node->type_decl.generics, &ghandle);
-                SemaType *type = sema_module_analyze_type(module, node->type_decl.type);
+                SemaType *type =  sema_type_new_alias(module->mempool, alias,
+                    sema_module_analyze_type(module, node->type_decl.type));
                 sema_module_generic_clean(module, type, &ghandle);
                 type = sema_type_new_alias(module->mempool, alias, RET_ON_NULL(type));
-                sema_module_push_decl(module, node->type_decl.name, sema_decl_new(module, node->type_decl.is_local,
-                    sema_value_new_generic(module->mempool, ghandle.generic)));
+                sema_module_push_decl(module, node->type_decl.name, sema_decl_new(module,
+                    node->type_decl.is_local, sema_value_new_generic(module->mempool, ghandle.generic)));
             } else {
-                SemaType *type =  sema_type_new_alias(module->mempool, alias,
+                SemaType *type = sema_type_new_alias(module->mempool, alias,
                     RET_ON_NULL(sema_module_analyze_type(module, node->type_decl.type)));
                 sema_module_push_decl(module, node->type_decl.name, sema_decl_new(module, node->type_decl.is_local,
                     sema_value_new_type(module->mempool, type)));

@@ -6,7 +6,9 @@
 #include "ast/generic.h"
 #include "core/vec.h"
 #include "sema/module/nodes/type.h"
+#include "sema/module/type.h"
 #include "sema/module/value.h"
+#include <stdio.h>
 
 void sema_module_generic_setup(SemaModule *module, AstGeneric *generic, SemaGenericScopeHandle *handle) {
     if ((handle->is_global = sema_module_is_global_scope(module))) {
@@ -20,7 +22,7 @@ void sema_module_generic_setup(SemaModule *module, AstGeneric *generic, SemaGene
         SemaType *type = sema_type_new_generic(module->mempool);
         sema_module_push_decl(module, generic->params[i].name, sema_decl_new(module, false,
             sema_value_new_type(module->mempool, type)));
-        vec_push(params, sema_generic_param_new(type));
+        vec_push(params, sema_generic_param_new(generic->params[i].name, type));
     }
     handle->generic = sema_generic_new(module->mempool, NULL, params);
 }

@@ -11,3 +11,12 @@ fun print(slice: Slice.<u8>) {
     var stdout: Fd = 0;
     stdout.write(slice.pointer, slice.length);
 }
+
+fun Slice.cut(self, length: u32) -> Slice.<T> {
+    if self.length <= length {
+        return self;
+    }
+    var result: Slice.<T> = self;
+    result.length = length;
+    return result;
+}

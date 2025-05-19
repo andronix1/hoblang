@@ -10,11 +10,20 @@
 #include "sema/module/module.h"
 #include <llvm-c/Core.h>
 #include <llvm-c/Types.h>
+#include <stdio.h>
 
 static void llvm_add_function(LlvmModule *module, AstFunInfo *info, Slice *name) {
     const char *function_name = "";
     if (name) {
         function_name = mempool_slice_to_cstr(module->mempool, *name);
+    }
+    if (info->sema.generic) {
+        static bool logged = false;
+        if (!logged) {
+            printf("WARNING: generic functions are not emittable now!\n");
+            logged = true;
+        }
+        return;
     }
     info->sema.decl->llvm.value = LLVMAddFunction(module->module, function_name, llvm_decl_type(module, info->sema.decl));
 }
@@ -60,6 +69,9 @@ void llvm_module_read_node(LlvmModule *module, AstNode *node) {
 void llvm_module_emit_node(LlvmModule *module, AstNode *node) {
     switch (node->kind) {
         case AST_NODE_FUN_DECL: {
+            if (node->fun_decl.info->sema.generic) {
+                return;
+            }
             LLVMValueRef func = node->fun_decl.info->sema.decl->llvm.value;
             LLVMBasicBlockRef entry = LLVMAppendBasicBlockInContext(module->context, func, "");
             LLVMPositionBuilderAtEnd(module->builder, entry);

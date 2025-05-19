@@ -4,6 +4,7 @@
 #include "sema/module/type.h"
 
 typedef struct {
+    Slice name;
     SemaType *type;
 } SemaGenericParam;
 
@@ -19,8 +20,9 @@ typedef struct SemaGeneric {
 
 SemaGeneric *sema_generic_new(Mempool *mempool, SemaType *type, SemaGenericParam *params);
 
-static inline SemaGenericParam sema_generic_param_new(SemaType *type) {
+static inline SemaGenericParam sema_generic_param_new(Slice name, SemaType *type) {
     SemaGenericParam param = {
+        .name = name,
         .type = type
     };
     return param;

@@ -53,3 +53,10 @@ SemaValue *sema_value_generate(Mempool *mempool, SemaGeneric *generic, SemaType 
     }
     UNREACHABLE;
 }
+
+SemaType *sema_generic_is_type(SemaGeneric *generic) {
+    if (generic->kind != SEMA_GENERIC_TYPE) {
+        return NULL;
+    }
+    return generic->type;
+}

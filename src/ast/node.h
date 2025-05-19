@@ -11,6 +11,7 @@
 #include "core/mempool.h"
 #include "core/slice.h"
 #include "sema/module/api/decl_handle.h"
+#include "sema/module/api/generic.h"
 
 typedef enum {
     AST_NODE_TYPE_DECL,
@@ -60,6 +61,7 @@ typedef struct AstFunInfo {
 
     struct {
         SemaDeclHandle *decl;
+        SemaGeneric *generic;
     } sema;
 } AstFunInfo;
 
