@@ -90,7 +90,7 @@ void vec_remove_at(void *vec, size_t idx) {
     assert(idx < header->len);
     if (idx + 1 != header->len) {
         for (size_t i = idx + 1; i < header->len; i++) {
-            memcpy(__vec_at(vec, idx), __vec_at(vec, idx + 1), header->esize);
+            memcpy(__vec_at(vec, i - 1), __vec_at(vec, i), header->esize);
         }
     }
     header->len--;

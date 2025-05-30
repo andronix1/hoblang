@@ -41,6 +41,13 @@ static void test_vec_remove_at() {
     CU_ASSERT_EQUAL(test[0], 0);
     CU_ASSERT_EQUAL(test[1], 1);
     CU_ASSERT_EQUAL(test[2], 3);
+    vec_remove_at(test, 2);
+    CU_ASSERT_EQUAL_FATAL(vec_len(test), 2);
+    CU_ASSERT_EQUAL(test[0], 0);
+    CU_ASSERT_EQUAL(test[1], 1);
+    vec_remove_at(test, 0);
+    CU_ASSERT_EQUAL_FATAL(vec_len(test), 1);
+    CU_ASSERT_EQUAL(test[1], 1);
     vec_free(test);
 }
 

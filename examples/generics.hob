@@ -6,6 +6,13 @@ type Test<T> = struct {
 
 type Asd = Test.<i32>;
 
+type Test2<T> = struct {
+    slice: Test.<T>
+};
+
+type Asd2 = Test2.<i16>;
+
+
 local global fun main() -> i32 {
     slice.print(<slice.Slice.<u8>>{
         pointer: "super duper\n",
