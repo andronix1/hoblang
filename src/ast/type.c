@@ -51,7 +51,7 @@ AstType *ast_type_new_struct(Mempool *mempool, AstStructField *fields_map)
     CONSTRUCT(AST_TYPE_STRUCT, out->structure.fields_map = fields_map;)
 
 AstType *ast_type_new_path(Mempool *mempool, AstPath *path)
-    CONSTRUCT(AST_TYPE_PATH, out->path = path;)
+    CONSTRUCT(AST_TYPE_PATH, out->path = path; out->slice = ast_path_slice(path))
 
 AstType *ast_type_new_pointer(Mempool *mempool, AstType *to)
     CONSTRUCT(AST_TYPE_POINTER, out->pointer_to = to;)

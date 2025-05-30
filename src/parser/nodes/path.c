@@ -4,6 +4,7 @@
 #include "ast/type.h"
 #include "core/mempool.h"
 #include "core/null.h"
+#include "core/slice.h"
 #include "lexer/token.h"
 #include "parser/nodes/type.h"
 #include "parser/parser.h"
@@ -18,10 +19,11 @@ AstPath *parse_path(Parser *parser) {
             case TOKEN_OPENING_ANGLE_BRACE: {
                 AstType **params = vec_new_in(parser->mempool, AstType*);
                 Slice slice = token.slice;
-                while (!parser_next_should_be(parser, TOKEN_CLOSING_ANGLE_BRACE)) {
+                while (parser_next_is_not(parser, TOKEN_CLOSING_ANGLE_BRACE)) {
                     vec_push(params, NOT_NULL(parse_type(parser)));
                     if (!parser_check_list_sep(parser, TOKEN_CLOSING_ANGLE_BRACE)) return NULL;
                 }
+                slice = slice_union(slice, parser_take(parser).slice);
                 vec_push(segments, ast_path_segment_new_generic_build(slice,
                     ast_generic_builder_new(parser->mempool, params))); break;
             }

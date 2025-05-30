@@ -87,7 +87,7 @@ void sema_module_read_node(SemaModule *module, AstNode *node) {
             if (node->type_decl.generics) {
                 SemaGenericScopeHandle ghandle;
                 sema_module_generic_setup(module, node->type_decl.generics, &ghandle);
-                SemaType *type =  sema_type_new_alias(module->mempool, alias,
+                SemaType *type = sema_type_new_alias(module->mempool, alias,
                     sema_module_analyze_type(module, node->type_decl.type));
                 sema_module_generic_clean(module, type, &ghandle);
                 type = sema_type_new_alias(module->mempool, alias, RET_ON_NULL(type));

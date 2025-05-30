@@ -57,7 +57,9 @@ SemaType *sema_type_new_slice(Mempool *mempool, SemaType *of)
     )
 
 SemaType *sema_type_new_generic(Mempool *mempool)
-    CONSTRUCT(SEMA_TYPE_GENERIC,)
+    CONSTRUCT(SEMA_TYPE_GENERIC,
+        out->generic.variants = vec_new_in(mempool, SemaType*);
+    )
 
 SemaType *sema_type_new_alias(Mempool *mempool, SemaTypeAlias *alias, const SemaType *type) {
     SemaType *result = mempool_alloc(mempool, SemaType);

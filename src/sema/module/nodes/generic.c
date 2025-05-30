@@ -24,18 +24,19 @@ void sema_module_generic_setup(SemaModule *module, AstGeneric *generic, SemaGene
             sema_value_new_type(module->mempool, type)));
         vec_push(params, sema_generic_param_new(generic->params[i].name, type));
     }
-    handle->generic = sema_generic_new(module->mempool, NULL, params);
+    handle->generic = sema_generic_new(module, NULL, params);
 }
 
 void sema_module_generic_clean(SemaModule *module, SemaType *type, SemaGenericScopeHandle *handle) {
-    handle->generic->type = type;
+    // TODO: redo
+    handle->generic->type.type = type;
     sema_module_pop_scope(module);
     if (handle->is_global) {
         sema_module_ss_swap(module, handle->old);
     }
 }
 
-SemaValue *sema_generic_generate(SemaModule *module, SemaGeneric *generic, AstGenericBuilder *builder) {
+SemaValue *sema_generic_generate(SemaModule *module, Slice where, SemaGeneric *generic, AstGenericBuilder *builder) {
     SemaType **types = vec_new_in(module->mempool, SemaType*);
     bool skip = false;
     for (size_t i = 0; i < vec_len(builder->params); i++) {
@@ -54,5 +55,5 @@ SemaValue *sema_generic_generate(SemaModule *module, SemaGeneric *generic, AstGe
             "expected $l arguments, got $l", vec_len(generic->params), vec_len(types));
         return NULL;
     }
-    return sema_value_generate(module->mempool, generic, types);
+    return sema_value_generate(module, where, generic, types);
 }

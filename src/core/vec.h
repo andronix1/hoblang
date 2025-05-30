@@ -10,6 +10,7 @@ void *__vec_append(void *vec, const void *ptr);
 void *__vec_pop(void *vec);
 void *__vec_erase(void *vec);
 void *__vec_at(void *vec, size_t idx);
+void vec_remove_at(void *vec, size_t idx);
 size_t vec_len(const void *vec);
 size_t vec_esize(const void *vec);
 void vec_attach_pos(void *vec, void **to);

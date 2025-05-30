@@ -1,13 +1,18 @@
 #include "node.h"
 #include "ast/node.h"
 #include "core/assert.h"
+#include "core/log.h"
 #include "core/mempool.h"
 #include "llvm/module/module.h"
 #include "llvm/module/nodes/body.h"
 #include "llvm/module/nodes/expr.h"
 #include "llvm/module/nodes/stmt.h"
 #include "llvm/module/nodes/type.h"
+#include "core/vec.h"
+#include "sema/module/generic.h"
+#include "sema/module/generics/type.h"
 #include "sema/module/module.h"
+#include "sema/module/type.h"
 #include <llvm-c/Core.h>
 #include <llvm-c/Types.h>
 #include <stdio.h>
@@ -21,6 +26,29 @@ static void llvm_add_function(LlvmModule *module, AstFunInfo *info, Slice *name)
         static bool logged = false;
         if (!logged) {
             printf("WARNING: generic functions are not emittable now!\n");
+            sema_generic_type_expand_usages(module->mempool, &info->sema.generic->type);
+            for (size_t i = 0; i < vec_len(info->sema.generic->type.usages); i++) {
+                logs("<");
+                for (size_t j = 0; j < vec_len(info->sema.generic->type.usages[i].params); j++) {
+                    SemaType *type = info->sema.generic->type.usages[i].params[j];
+                    if (j != 0) {
+                        logs(", ");
+                    }
+                    if (type->kind == SEMA_TYPE_GENERIC) {
+                        logs("[");
+                        for (size_t k = 0; k < vec_len(type->generic.variants); k++) {
+                            if (k != 0) {
+                                logs(", ");
+                            }
+                            logs("$t", type->generic.variants[k]);
+                        }
+                        logs("]");
+                    } else {
+                        logs("$t", type);
+                    }
+                }
+                logln(">: $t", info->sema.generic->type.usages[i].type);
+            }
             logged = true;
         }
         return;

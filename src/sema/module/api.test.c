@@ -7,7 +7,7 @@
 #include <CUnit/Basic.h>
 
 static void test_sema_create() {
-    SemaModule *module = sema_module_new(parser_new(lexer_new(file_content_new_in_memory(""))));
+    SemaModule *module = sema_module_new(parser_new(lexer_new(file_content_new_in_memory(""))), NULL);
     sema_module_free(module);
 }
 

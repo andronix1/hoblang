@@ -30,11 +30,27 @@ static void test_vec_push_pop() {
     vec_free(test);
 }
 
+static void test_vec_remove_at() {
+    char *test = vec_new(char);
+    vec_push(test, 0);
+    vec_push(test, 1);
+    vec_push(test, 2);
+    vec_push(test, 3);
+    vec_remove_at(test, 2);
+    CU_ASSERT_EQUAL_FATAL(vec_len(test), 3);
+    CU_ASSERT_EQUAL(test[0], 0);
+    CU_ASSERT_EQUAL(test[1], 1);
+    CU_ASSERT_EQUAL(test[2], 3);
+    vec_free(test);
+}
+
 static void test_vec_at() {
     char *test = vec_new(char);
+    vec_push(test, 0);
+    vec_push(test, 0);
+    vec_push(test, 0);
     CU_ASSERT_EQUAL(vec_at(test, 0), &test[0]);
-    CU_ASSERT_EQUAL(vec_at(test, 123), &test[123]);
-    CU_ASSERT_EQUAL(vec_at(test, 2), &test[2]);
+    CU_ASSERT_EQUAL(vec_at(test, 1), &test[1]);
     vec_free(test);
 }
 
@@ -42,4 +58,5 @@ void test_vec() {
     CU_pSuite suite = CU_add_suite("vec", NULL, NULL);
     CU_ADD_TEST(suite, test_vec_push_pop);
     CU_ADD_TEST(suite, test_vec_at);
+    CU_ADD_TEST(suite, test_vec_remove_at);
 }

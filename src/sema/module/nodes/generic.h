@@ -13,7 +13,7 @@ typedef struct SemaGenericScopeHandle {
     SemaGeneric *generic;
 } SemaGenericScopeHandle;
 
-SemaValue *sema_value_generate(Mempool *mempool, SemaGeneric *generic, SemaType **params);
+SemaValue *sema_value_generate(SemaModule *module, Slice where, SemaGeneric *generic, SemaType **params);
 void sema_module_generic_setup(SemaModule *module, AstGeneric *generic, SemaGenericScopeHandle *handle);
 void sema_module_generic_clean(SemaModule *module, SemaType *type, SemaGenericScopeHandle *handle);
-SemaValue *sema_generic_generate(SemaModule *module, SemaGeneric *generic, AstGenericBuilder *builder);
+SemaValue *sema_generic_generate(SemaModule *module, Slice where, SemaGeneric *generic, AstGenericBuilder *builder);

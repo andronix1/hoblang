@@ -90,7 +90,7 @@ static inline SemaValue *_sema_module_analyze_expr(SemaModule *module, AstExpr *
         case AST_EXPR_STRUCT: {
             SemaType *type = NOT_NULL(sema_module_analyze_type(module, expr->structure.type));
             if (type->kind != SEMA_TYPE_STRUCT) {
-                sema_module_err(module, expr->structure.type->slice, "type must be struct");
+                sema_module_err(module, expr->structure.type->slice, "type must be a struct, not $t", type);
             } else {
                 for (size_t i = 0; i < vec_len(expr->structure.fields_map); i++) {
                     keymap_at(expr->structure.fields_map, i, field);

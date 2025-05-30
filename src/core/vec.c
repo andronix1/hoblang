@@ -1,4 +1,6 @@
 #include "vec.h"
+#include <assert.h>
+#include <stdio.h>
 #include <string.h>
 #include <malloc.h>
 
@@ -81,4 +83,15 @@ void vec_attach_pos(void *vec, void **to) {
 
 void vec_free(void *vec) {
     free(vec_header(vec));
+}
+
+void vec_remove_at(void *vec, size_t idx) {
+    VecHeader *header = vec_header(vec);
+    assert(idx < header->len);
+    if (idx + 1 != header->len) {
+        for (size_t i = idx + 1; i < header->len; i++) {
+            memcpy(__vec_at(vec, idx), __vec_at(vec, idx + 1), header->esize);
+        }
+    }
+    header->len--;
 }

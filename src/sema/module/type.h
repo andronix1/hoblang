@@ -61,6 +61,10 @@ typedef struct {
     SemaTypeStructField *fields_map;
 } SemaTypeStruct;
 
+typedef struct {
+    SemaType **variants;
+} SemaTypeGeneric;
+
 typedef struct SemaType {
     SemaTypeKind kind;
     SemaTypeAlias *alias;
@@ -71,6 +75,7 @@ typedef struct SemaType {
         SemaTypeStruct structure;
         SemaType *pointer_to;
         SemaType *slice_of;
+        SemaTypeGeneric generic;
     };
 } SemaType;
 
