@@ -1,51 +1,15 @@
 #pragma once
 
 #include "core/mempool.h"
-#include "ir/type/type.h"
-#include <stdbool.h>
-
-typedef struct {
-    IrTypeId *deps;
-} IrTypeDeps;
-
-typedef enum {
-    IR_TYPE_INFO_SIMPLE,
-    IR_TYPE_INFO_RECORD,
-} IrTypeInfoKind;
-
-typedef struct {
-    IrTypeInfoKind kind;
-
-    union {
-        IrType simple;
-        struct {
-            bool filled;
-            IrTypeId id;
-        } record;
-    };
-} IrTypeInfo;
-
-static inline IrTypeInfo ir_type_info_new_record() {
-    IrTypeInfo info = {
-        .kind = IR_TYPE_INFO_RECORD,
-        .record = {
-            .filled = false
-        },
-    };
-    return info;
-}
-
-static inline IrTypeInfo ir_type_info_new_simple(IrType type) {
-    IrTypeInfo info = {
-        .kind = IR_TYPE_INFO_SIMPLE,
-        .simple = type,
-    };
-    return info;
-}
+#include "ir/func.h"
+#include "ir/type/info.h"
+#include "ir/decls.h"
 
 typedef struct Ir {
     Mempool *mempool;
     IrTypeInfo *types;
+    IrDecl *decls;
+    IrFunc *funcs;
 } Ir;
 
 IrTypeId ir_type_record_resolve_simple(const Ir *ir, IrTypeId id);

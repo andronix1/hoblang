@@ -4,6 +4,10 @@
 #include <assert.h>
 #include <stddef.h>
 
+typedef struct {
+    IrTypeId *deps;
+} IrTypeDeps;
+
 static IrTypeDeps *ir_type_build_deps(const Ir *ir) {
     size_t count = vec_len(ir->types);
 
