@@ -25,6 +25,7 @@ AST_EXPR_STRUCT,
 */
 
 #include "ir/type/type.h"
+#include "ir/api/local.h"
 #include <stdint.h>
 #include "expr/binop.h"
 
@@ -33,6 +34,7 @@ typedef enum {
     IR_EXPR_STEP_REAL,
     IR_EXPR_STEP_BINOP,
     IR_EXPR_STEP_STRUCT_FIELD,
+    IR_EXPR_STEP_GET_LOCAL,
     /*
     IR_EXPR_STEP_CALL,
     SEMA_PATH_SEGMENT_DECL,
@@ -60,8 +62,18 @@ typedef struct {
             size_t idx;
             size_t step;
         } struct_field;
+
+        IrLocalId local_id;
     };
 } IrExprStep;
+
+static inline IrExprStep ir_expr_step_new_get_local(IrLocalId id) {
+    IrExprStep step = {
+        .kind = IR_EXPR_STEP_GET_LOCAL,
+        .local_id = id
+    };
+    return step;
+}
 
 static inline IrExprStep ir_expr_step_new_struct_field(size_t idx, size_t step_id) {
     IrExprStep step = {

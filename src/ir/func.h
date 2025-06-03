@@ -1,5 +1,7 @@
 #pragma once
 
+#include "core/mempool.h"
+#include "ir/api/local.h"
 #include "ir/api/stmt/code.h"
 #include "ir/api/type.h"
 #include "ir/mut.h"
@@ -8,6 +10,19 @@ typedef struct {
     IrMutability mutability;
     IrTypeId type;
 } IrFuncArg;
+
+typedef struct {
+    IrMutability mutability;
+    IrTypeId type;
+} IrFuncLocal;
+
+static inline IrFuncLocal ir_func_local_new(IrMutability mutability, IrTypeId type) {
+    IrFuncLocal arg = {
+        .mutability = mutability,
+        .type = type,
+    };
+    return arg;
+}
 
 typedef struct {
     IrFuncArg *args;
@@ -31,3 +46,11 @@ static inline IrFunc ir_func_new(IrFuncArg *args, IrTypeId returns) {
     };
     return func;
 }
+
+typedef struct {
+    IrFunc func;
+    IrFuncLocal *locals;
+    IrLocalId *args;
+} IrFuncInfo;
+
+IrFuncInfo ir_func_info_new(Mempool *mempool, IrFunc func);

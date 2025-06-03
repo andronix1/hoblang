@@ -12,7 +12,7 @@ static void ir_check_types(const Ir *ir) {
 
 static void ir_check_funcs(const Ir *ir) {
     for (size_t i = 0; i < vec_len(ir->funcs); i++) {
-        assert(ir->funcs[i].code);
+        assert(ir->funcs[i].func.code);
     }
 }
 

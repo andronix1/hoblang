@@ -5,6 +5,8 @@
 #include "ir/stages/checks.h"
 #include "ir/stages/type_tree.h"
 #include "ir/stmt/code.h"
+#include "ir/stmt/code.h"
+#include "ir/stmt/stmt.h"
 #include <CUnit/Basic.h>
 
 static inline bool ir_type_cross_referenced_in(IrTypeCrossReference *cr, IrTypeId *ids, size_t len) {
@@ -30,7 +32,10 @@ static inline bool ir_type_cross_referenced_in(IrTypeCrossReference *cr, IrTypeI
 
 static void test_ir_check_decls_consistency() {
     /*
-        fun hello(a: i32) -> i32 {}
+        fun hello(a: i32) -> i32 {
+            final ac: i32 = a;
+            var v = ac;
+        }
         fun world() {}
     */
     Mempool *mempool = mempool_new(1024);
@@ -44,7 +49,24 @@ static void test_ir_check_decls_consistency() {
         ir_func_arg_new(IR_MUTABLE, t_i32),
     ), t_i32));
     IrFuncId f_world = ir_init_func(ir, d_world, ir_func_new(vec_new_in(mempool, IrFuncArg), t_void));
-    ir_init_func_body(ir, f_hello, ir_code_new(mempool, vec_new_in(mempool, IrStmt*)));
+    IrLocalId f_a_a = ir_func_arg_local_id(ir, d_hello, 0);
+    IrLocalId f_a_ac = ir_func_add_local(ir, d_hello, ir_func_local_new(IR_IMMUTABLE, t_i32));
+    IrLocalId f_a_v = ir_func_add_local(ir, d_hello, ir_func_local_new(IR_MUTABLE, t_i32));
+    IrStmt *store_stmt = 
+        ir_stmt_new_store(mempool,
+            ir_expr_new(vec_create_in(mempool,
+                ir_expr_step_new_get_local(f_a_v))),
+            ir_expr_new(vec_create_in(mempool,
+                ir_expr_step_new_get_local(f_a_ac)))
+        );
+    ir_init_func_body(ir, f_hello, ir_code_new(mempool, vec_create_in(mempool, 
+        ir_stmt_new_init_final(mempool,
+            f_a_ac,
+            ir_expr_new(vec_create_in(mempool,
+                ir_expr_step_new_get_local(f_a_a)
+            ))),
+        store_stmt
+    )));
     ir_init_func_body(ir, f_world, ir_code_new(mempool, vec_new_in(mempool, IrStmt*)));
     ir_check_cosistency(ir);
     ir_free(ir);

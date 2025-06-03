@@ -1,6 +1,7 @@
 #include "ir.h"
 #include "core/vec.h"
 #include "ir/decls.h"
+#include "ir/func.h"
 #include "ir/ir.h"
 #include "core/mempool.h"
 #include "ir/type/type.h"
@@ -12,7 +13,7 @@ Ir *ir_new() {
     Mempool *mempool = ir->mempool = mempool_new(1024);
     ir->types = vec_new_in(mempool, IrTypeInfo);
     ir->decls = vec_new_in(mempool, IrDecl);
-    ir->funcs = vec_new_in(mempool, IrFunc);
+    ir->funcs = vec_new_in(mempool, IrFuncInfo);
     return ir;
 }
 
@@ -62,14 +63,24 @@ IrFuncId ir_init_func(Ir *ir, IrDeclId id, IrFunc func) {
         args[i] = func.args[i].type;
     }
     ir_init_decl(ir, id, ir_add_simple_type(ir, ir_type_new_function(args, func.returns)));
-    vec_push(ir->funcs, func);
+    vec_push(ir->funcs, ir_func_info_new(ir->mempool, func));
     return vec_len(ir->funcs) - 1;
 }
 
 void ir_init_func_body(Ir *ir, IrFuncId id, IrCode *code) {
-    IrFunc *func = &ir->funcs[id];
+    IrFunc *func = &ir->funcs[id].func;
     assert(!func->code);
     func->code = code;
+}
+
+IrLocalId ir_func_add_local(Ir *ir, IrFuncId id, IrFuncLocal local) {
+    IrFuncInfo *info = &ir->funcs[id];
+    vec_push(info->locals, local);
+    return vec_len(info->locals) - 1;
+}
+
+IrLocalId ir_func_arg_local_id(Ir *ir, IrFuncId id, size_t arg_id) {
+    return ir->funcs[id].args[arg_id];
 }
 
 void ir_free(Ir *ir) {

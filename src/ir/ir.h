@@ -9,7 +9,7 @@ typedef struct Ir {
     Mempool *mempool;
     IrTypeInfo *types;
     IrDecl *decls;
-    IrFunc *funcs;
+    IrFuncInfo *funcs;
 } Ir;
 
 IrTypeId ir_type_record_resolve_simple(const Ir *ir, IrTypeId id);
