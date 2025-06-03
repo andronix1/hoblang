@@ -5,6 +5,7 @@
 #include "core/mempool.test.h"
 #include "core/vec.test.h"
 #include "core/keymap.test.h"
+#include "ir/ir.test.h"
 #include "lexer/api.test.h"
 #include "parser/api.test.h"
 #include "sema/module/api.test.h"
@@ -19,6 +20,7 @@ static void setup_tests() {
     test_lexer();
     test_parser();
     test_sema();
+    test_ir();
 }
 
 int main() {

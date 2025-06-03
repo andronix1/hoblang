@@ -59,6 +59,18 @@ void *__vec_append(void *vec, const void *ptr) {
     return vec;
 }
 
+void *__vec_extend(void *vec, void *other) {
+    assert(vec_esize(vec) == vec_esize(other));
+    size_t vecl = vec_len(vec);
+    size_t otherl = vec_len(other);
+    if (otherl == 0) {
+        return vec;
+    }
+    vec_resize(vec, vecl + otherl);
+    memcpy(vec_at(vec, vecl), other, otherl * vec_esize(other));
+    return vec;
+}
+
 void *__vec_pop(void *vec) {
     assert(vec_len(vec) > 0);
     vec_header(vec)->len--;

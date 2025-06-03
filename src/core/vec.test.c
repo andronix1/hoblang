@@ -51,6 +51,23 @@ static void test_vec_remove_at() {
     vec_free(test);
 }
 
+static void test_vec_extends() {
+    char *test1 = vec_new(char);
+    vec_push(test1, 0);
+    vec_push(test1, 1);
+    vec_push(test1, 2);
+    char *test2 = vec_new(char);
+    vec_push(test2, 3);
+    vec_push(test2, 4);
+    vec_extend(test1, test2);
+    CU_ASSERT_EQUAL_FATAL(vec_len(test1), 5);
+    for (char i = 0; i < 5; i++) {
+        CU_ASSERT_EQUAL(test1[(size_t)i], i);
+    }
+    vec_free(test1);
+    vec_free(test2);
+}
+
 static void test_vec_at() {
     char *test = vec_new(char);
     vec_push(test, 0);
@@ -66,4 +83,5 @@ void test_vec() {
     CU_ADD_TEST(suite, test_vec_push_pop);
     CU_ADD_TEST(suite, test_vec_at);
     CU_ADD_TEST(suite, test_vec_remove_at);
+    CU_ADD_TEST(suite, test_vec_extends);
 }
