@@ -24,6 +24,7 @@ AST_EXPR_BINOP,
 AST_EXPR_STRUCT,
 */
 
+#include "ir/api/type.h"
 #include "ir/type/type.h"
 #include "ir/api/local.h"
 #include <stdint.h>
@@ -47,7 +48,7 @@ typedef struct {
 
     union {
         struct {
-            IrTypeInt type;
+            IrTypeId type;
             uint64_t value;
         } integer;
 
@@ -105,21 +106,18 @@ static inline IrExprStep ir_expr_step_new_real(IrTypeFloatSize size, long double
     return step;
 }
 
-static inline IrExprStep ir_expr_step_new_int(IrTypeIntSize size, bool is_signed, uint64_t value) {
+static inline IrExprStep ir_expr_step_new_int(IrTypeId type_id, uint64_t value) {
     IrExprStep step = {
         .kind = IR_EXPR_STEP_INT,
         .integer = {
-            .type = {
-                .size = size,
-                .is_signed = is_signed
-            },
+            .type = type_id,
             .value = value
         }
     };
     return step;
 }
 
-typedef struct {
+typedef struct IrExpr {
     IrExprStep *steps;
 } IrExpr;
 

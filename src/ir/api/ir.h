@@ -20,4 +20,9 @@ IrFuncId ir_init_func(Ir *ir, IrDeclId id, IrFunc func);
 IrLocalId ir_func_add_local(Ir *ir, IrFuncId id, IrFuncLocal local);
 void ir_init_func_body(Ir *ir, IrFuncId id, IrCode *code);
 
+bool ir_type_int_is_signed(Ir *ir, IrTypeId id);
+IrDeclId ir_func_decl_id(Ir *ir, IrFuncId id);
+
+Mempool *ir_mempool(Ir *ir);
+
 void ir_free(Ir *ir);

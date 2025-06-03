@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/mempool.h"
+#include "ir/api/ir.h"
 #include "llvm/module/api.h"
 #include <llvm-c/TargetMachine.h>
 #include <llvm-c/Types.h>
@@ -12,6 +13,10 @@ typedef struct {
 
 typedef struct LlvmModule {
     Mempool *mempool;
+
+    Ir *ir;
+    LLVMValueRef *decls;
+    LLVMTypeRef *types;
 
     LLVMTargetMachineRef machine;
     LLVMModuleRef module;

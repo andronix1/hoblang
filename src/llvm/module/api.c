@@ -1,11 +1,11 @@
 #include "api.h"
-#include "ast/api/node.h"
 #include "core/log.h"
 #include "core/mempool.h"
-#include "core/vec.h"
-#include "sema/module/api.h"
+#include "ir/ir.h"
 #include "module.h"
-#include "llvm/module/nodes/node.h"
+#include "llvm/module/stages/decls.h"
+#include "llvm/module/stages/funcs.h"
+#include "llvm/module/stages/types.h"
 #include <llvm-c/Analysis.h>
 #include <llvm-c/Core.h>
 #include <llvm-c/Target.h>
@@ -44,18 +44,11 @@ LlvmModule *llvm_module_new() {
     return result;
 }
 
-void llvm_module_read(LlvmModule *module, SemaModule *sema) {
-    AstNode **nodes = sema_module_nodes(sema);
-    for (size_t i = 0; i < vec_len(nodes); i++) {
-        llvm_module_read_node(module, nodes[i]);
-    }
-}
-
-void llvm_module_emit(LlvmModule *module, SemaModule *sema) {
-    AstNode **nodes = sema_module_nodes(sema);
-    for (size_t i = 0; i < vec_len(nodes); i++) {
-        llvm_module_emit_node(module, nodes[i]);
-    }
+void llvm_module_emit(LlvmModule *module, Ir *ir) {
+    module->ir = ir;
+    llvm_module_setup_types(module);
+    llvm_module_setup_decls(module);
+    llvm_module_setup_funcs(module);
 }
 
 bool llvm_module_write_obj(LlvmModule *module, const char *output) {

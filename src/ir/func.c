@@ -1,7 +1,7 @@
 #include "func.h"
 #include "core/vec.h"
 
-IrFuncInfo ir_func_info_new(Mempool *mempool, IrFunc func) {
+IrFuncInfo ir_func_info_new(Mempool *mempool, IrFunc func, IrDeclId id, IrTypeId type_id) {
     IrLocalId *args = vec_new_in(mempool, IrLocalId);
     vec_resize(args, vec_len(func.args));
     IrFuncLocal *locals = vec_new_in(mempool, IrFuncLocal);
@@ -14,6 +14,8 @@ IrFuncInfo ir_func_info_new(Mempool *mempool, IrFunc func) {
         .func = func,
         .args = args,
         .locals = locals,
+        .decl_id = id,
+        .type_id = type_id,
     };
     return info;
 }

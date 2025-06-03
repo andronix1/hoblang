@@ -62,8 +62,9 @@ IrFuncId ir_init_func(Ir *ir, IrDeclId id, IrFunc func) {
     for (size_t i = 0; i < vec_len(func.args); i++) {
         args[i] = func.args[i].type;
     }
-    ir_init_decl(ir, id, ir_add_simple_type(ir, ir_type_new_function(args, func.returns)));
-    vec_push(ir->funcs, ir_func_info_new(ir->mempool, func));
+    IrTypeId type_id = ir_add_simple_type(ir, ir_type_new_function(args, func.returns));
+    ir_init_decl(ir, id, type_id);
+    vec_push(ir->funcs, ir_func_info_new(ir->mempool, func, id, type_id));
     return vec_len(ir->funcs) - 1;
 }
 
@@ -81,6 +82,26 @@ IrLocalId ir_func_add_local(Ir *ir, IrFuncId id, IrFuncLocal local) {
 
 IrLocalId ir_func_arg_local_id(Ir *ir, IrFuncId id, size_t arg_id) {
     return ir->funcs[id].args[arg_id];
+}
+
+static inline IrType *ir_type_is_simple(Ir *ir, IrTypeId id) {
+    IrTypeInfo *info = &ir->types[id];
+    assert(info->kind == IR_TYPE_INFO_SIMPLE);
+    return &info->simple;
+}
+
+bool ir_type_int_is_signed(Ir *ir, IrTypeId id) {
+    IrType *type = ir_type_is_simple(ir, id);
+    assert(type->kind == IR_TYPE_INT);
+    return type->integer.is_signed;
+}
+
+IrDeclId ir_func_decl_id(Ir *ir, IrFuncId id) {
+    return ir->funcs[id].decl_id;
+}
+
+Mempool *ir_mempool(Ir *ir) {
+    return ir->mempool;
 }
 
 void ir_free(Ir *ir) {
