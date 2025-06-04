@@ -11,6 +11,7 @@ typedef enum {
     IR_STMT_RET,
     IR_STMT_RET_VOID,
     IR_STMT_INIT_FINAL,
+    IR_STMT_DECL_VAR,
 } IrStmtKind;
 
 typedef struct {
@@ -53,11 +54,13 @@ typedef struct IrStmt {
         IrStmtCondJmp cond_jmp;
         IrStmtRet ret;
         IrStmtInitFinal init_final;
+        IrLocalId var_id;
     };
 } IrStmt;
 
 IrStmt *ir_stmt_new_expr(Mempool *mempool, IrExpr expr);
 IrStmt *ir_stmt_new_store(Mempool *mempool, IrExpr lvalue, IrExpr rvalue);
+IrStmt *ir_stmt_new_decl_var(Mempool *mempool, IrLocalId id);
 IrStmt *ir_stmt_new_cond_jmp(Mempool *mempool, IrStmtCondJmpBlock *conds, IrCode *else_code);
 IrStmt *ir_stmt_new_ret(Mempool *mempool, IrExpr value);
 IrStmt *ir_stmt_new_ret_void(Mempool *mempool);

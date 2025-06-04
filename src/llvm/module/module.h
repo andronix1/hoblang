@@ -11,12 +11,20 @@ typedef struct {
     LLVMBasicBlockRef code, defs;
 } LlvmState;
 
+typedef struct {
+    IrFuncId id;
+    LLVMValueRef *locals;
+} LlvmFuncCtx;
+
+void llvm_func_ctx_set(LlvmModule *module, IrFuncId id);
+
 typedef struct LlvmModule {
     Mempool *mempool;
 
     Ir *ir;
     LLVMValueRef *decls;
     LLVMTypeRef *types;
+    LlvmFuncCtx func;
 
     LLVMTargetMachineRef machine;
     LLVMModuleRef module;

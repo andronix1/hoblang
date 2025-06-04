@@ -11,6 +11,11 @@ IrStmt *ir_stmt_new_store(Mempool *mempool, IrExpr lvalue, IrExpr rvalue)
         out->store.rvalue = rvalue;
     )
 
+IrStmt *ir_stmt_new_decl_var(Mempool *mempool, IrLocalId id)
+    STMT_CONSTRUCT(IR_STMT_DECL_VAR,
+        out->var_id = id;
+    )
+
 IrStmt *ir_stmt_new_cond_jmp(Mempool *mempool, IrStmtCondJmpBlock *conds, IrCode *else_code) 
     STMT_CONSTRUCT(IR_STMT_COND_JMP,
         out->cond_jmp.conds = conds;

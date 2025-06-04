@@ -3,6 +3,7 @@
 #include "core/slice.h"
 #include "core/vec.h"
 #include "ir/api/ir.h"
+#include "ir/func.h"
 #include "ir/stages/stmts.h"
 #include "ir/stages/type_tree.h"
 #include "ir/stmt/code.h"
@@ -53,9 +54,16 @@ static Ir *build_ir() {
     ));
 
     // Code
-    IrExpr exit_code = ir_expr_new(vec_create_in(irm,
+    IrLocalId l_exit_code = ir_func_add_local(ir, d_main,
+        ir_func_local_new(IR_MUTABLE, t_i32));
+    IrExpr exit_code_set = ir_expr_new(vec_create_in(irm,
         ir_expr_step_new_int(t_i32, 123),
     ));
+
+    IrExpr exit_code = ir_expr_new(vec_create_in(irm,
+        ir_expr_step_new_get_local(l_exit_code),
+    ));
+
 
     ir_init_func_body(ir, f_main, ir_code_new(irm, vec_create_in(irm,
         ir_stmt_new_expr(irm, call_put_char(irm, t_u8, d_put_char, 'h')),
@@ -65,6 +73,8 @@ static Ir *build_ir() {
         ir_stmt_new_expr(irm, call_put_char(irm, t_u8, d_put_char, 'o')),
         ir_stmt_new_expr(irm, call_put_char(irm, t_u8, d_put_char, '!')),
         ir_stmt_new_expr(irm, call_put_char(irm, t_u8, d_put_char, '\n')),
+        ir_stmt_new_decl_var(irm, l_exit_code),
+        ir_stmt_new_store(irm, exit_code, exit_code_set),
         ir_stmt_new_ret(irm, exit_code)
     )));
 

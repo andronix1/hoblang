@@ -2,6 +2,7 @@
 #include "core/assert.h"
 #include "ir/stmt/code.h"
 #include "ir/stmt/stmt.h"
+#include "ir/ir.h"
 #include "llvm/module/emit/expr.h"
 #include "llvm/module/module.h"
 #include <llvm-c/Core.h>
@@ -17,8 +18,17 @@ static void llvm_emit_stmt(LlvmModule *module, IrStmt *stmt) {
         case IR_STMT_RET_VOID:
             LLVMBuildRetVoid(module->builder);
             break;
-        case IR_STMT_COND_JMP:
         case IR_STMT_STORE:
+            LLVMBuildStore(module->builder,
+                llvm_emit_expr(module, &stmt->store.rvalue, true),
+                llvm_emit_expr(module, &stmt->store.lvalue, false)
+            );
+            break;
+        case IR_STMT_DECL_VAR:
+            module->func.locals[stmt->var_id] = llvm_alloca(module, module->types[
+                module->ir->funcs[module->func.id].locals[stmt->var_id].type]);
+            break;
+        case IR_STMT_COND_JMP:
         case IR_STMT_INIT_FINAL:
             TODO;
     }

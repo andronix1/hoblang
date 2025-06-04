@@ -41,10 +41,18 @@ static LLVMValueRef llvm_emit_expr_step(LlvmModule *module, LLVMValueRef *values
                 module->decls[step->decl_id]
             ) : module->decls[step->decl_id];
         }
+        case IR_EXPR_STEP_GET_LOCAL: {
+            IrFuncLocal *local = &module->ir->funcs[module->func.id].locals[step->local_id];
+            return load ? llvm_value_get(
+                module,
+                local->mutability,
+                module->types[local->type],
+                module->func.locals[step->local_id]
+            ) : module->func.locals[step->local_id];
+        }
         case IR_EXPR_STEP_REAL:
         case IR_EXPR_STEP_BINOP:
         case IR_EXPR_STEP_STRUCT_FIELD:
-        case IR_EXPR_STEP_GET_LOCAL:
             TODO;
     }
     UNREACHABLE;
