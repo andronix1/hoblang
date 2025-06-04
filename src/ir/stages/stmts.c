@@ -15,6 +15,8 @@ typedef struct {
     IrFuncId func;
 } IrStmtCtx;
 
+static void ir_fill_stmts_code(IrStmtCtx *ctx, IrCode *code);
+
 static inline IrStmtCtx ir_stmt_ctx_new(Ir *ir, IrFuncId func) {
     IrStmtCtx ctx = {
         .ir = ir,
@@ -71,30 +73,88 @@ static void ir_fill_stmts_expr(IrStmtCtx *ctx, IrExpr *expr) {
     }
 }
 
-static void ir_fill_stmts_code(IrStmtCtx *ctx, IrCode *code) {
-    for (size_t i = 0; i < vec_len(code->stmts); i++) {
-        IrStmt *stmt = code->stmts[i];
-        switch (stmt->kind) {
-            case IR_STMT_EXPR:
-                ir_fill_stmts_expr(ctx, &stmt->expr);
-                break;
-            case IR_STMT_RET:
-                ir_fill_stmts_expr(ctx, &stmt->ret.value);
-                break;
-            case IR_STMT_STORE:
-                ir_fill_stmts_expr(ctx, &stmt->store.lvalue);
-                ir_fill_stmts_expr(ctx, &stmt->store.rvalue);
-                break;
-            case IR_STMT_INIT_FINAL:
-                ir_fill_stmts_expr(ctx, &stmt->init_final.value);
-                break;
-            case IR_STMT_DECL_VAR:
-                break;
-            case IR_STMT_COND_JMP:
-            case IR_STMT_RET_VOID:
-                TODO;
+static inline IrCodeFlow _ir_fill_stmt_cond_jmp(IrStmtCtx *ctx, IrStmtCondJmp *cond_jmp) {
+    bool passed = cond_jmp->else_code == NULL;
+    size_t count = vec_len(cond_jmp->conds) + 1;
+    IrCodeFlow *flows = passed ? NULL : alloca(sizeof(IrCodeFlow) * count);
+    for (size_t i = 0; i < vec_len(cond_jmp->conds); i++) {
+        IrStmtCondJmpBlock *block = &cond_jmp->conds[i];
+        ir_fill_stmts_expr(ctx, &block->cond);
+        ir_fill_stmts_code(ctx, block->code);
+        if (!passed) {
+            flows[i] = block->code->flow;
         }
     }
+    if (cond_jmp->else_code) {
+        ir_fill_stmts_code(ctx, cond_jmp->else_code);
+        flows[count - 1] = cond_jmp->else_code->flow;
+    }
+    if (passed) {
+        return IR_CODE_FLOW_PASSED;
+    }
+    bool was_return = false;
+    bool was_break = false;
+    bool was_unreachable = false;
+    for (size_t i = 0; i < count; i++) {
+        switch (flows[i]) {
+            case IR_CODE_FLOW_PASSED: return IR_CODE_FLOW_PASSED;
+            case IR_CODE_FLOW_LOOP_BREAK:
+                was_break = true;
+                break;
+            case IR_CODE_FLOW_RETURN:
+                was_return = true;
+                break;
+            case IR_CODE_FLOW_UNREACHABLE:
+                was_unreachable = true;
+                break;
+        }
+    }
+    if (was_unreachable || (was_break && was_return)) {
+        return IR_CODE_FLOW_UNREACHABLE;
+    } else if (was_break) {
+        return IR_CODE_FLOW_LOOP_BREAK;
+    } else if (was_return) {
+        return IR_CODE_FLOW_RETURN;
+    }
+    UNREACHABLE;
+}
+
+static IrCodeFlow ir_fill_stmt_cond_jmp(IrStmtCtx *ctx, IrStmtCondJmp *cond_jmp) {
+    return cond_jmp->flow = _ir_fill_stmt_cond_jmp(ctx, cond_jmp);
+}
+
+static inline IrCodeFlow ir_fill_stmt(IrStmtCtx *ctx, IrStmt *stmt) {
+    switch (stmt->kind) {
+        case IR_STMT_EXPR:
+            ir_fill_stmts_expr(ctx, &stmt->expr);
+            return IR_CODE_FLOW_PASSED;
+        case IR_STMT_RET:
+            ir_fill_stmts_expr(ctx, &stmt->ret.value);
+            return IR_CODE_FLOW_RETURN;
+        case IR_STMT_STORE:
+            ir_fill_stmts_expr(ctx, &stmt->store.lvalue);
+            ir_fill_stmts_expr(ctx, &stmt->store.rvalue);
+            return IR_CODE_FLOW_PASSED;
+        case IR_STMT_INIT_FINAL:
+            ir_fill_stmts_expr(ctx, &stmt->init_final.value);
+            return IR_CODE_FLOW_PASSED;
+        case IR_STMT_DECL_VAR:
+            return IR_CODE_FLOW_PASSED;
+        case IR_STMT_RET_VOID:
+            return IR_CODE_FLOW_RETURN;
+        case IR_STMT_COND_JMP:
+            return ir_fill_stmt_cond_jmp(ctx, &stmt->cond_jmp);
+    }
+    UNREACHABLE;
+}
+
+static void ir_fill_stmts_code(IrStmtCtx *ctx, IrCode *code) {
+    IrCodeFlow flow = IR_CODE_FLOW_PASSED;
+    for (size_t i = 0; i < vec_len(code->stmts); i++) {
+        flow = ir_fill_stmt(ctx, code->stmts[i]);
+        assert(i == vec_len(code->stmts) - 1 || flow == IR_CODE_FLOW_PASSED);
+    }
+    code->flow = flow;
 }
 
 void ir_fill_stmts(Ir *ir) {

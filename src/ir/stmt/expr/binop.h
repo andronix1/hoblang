@@ -18,6 +18,22 @@ typedef struct {
     };
 } IrNumberInfo;
 
+static inline IrNumberInfo ir_number_info_new_float(IrTypeFloatSize size) {
+    IrNumberInfo info = {
+        .kind = IR_NUMBER_FLOAT,
+        .float_size = size
+    };
+    return info;
+}
+
+static inline IrNumberInfo ir_number_info_new_int(bool is_signed, IrTypeIntSize size) {
+    IrNumberInfo info = {
+        .kind = is_signed ? IR_NUMBER_INT : IR_NUMBER_UINT,
+        .int_size = size
+    };
+    return info;
+}
+
 typedef enum {
     IR_BINOP_ARITHM_ADD,
     IR_BINOP_ARITHM_SUB,

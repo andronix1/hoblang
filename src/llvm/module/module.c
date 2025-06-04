@@ -3,8 +3,9 @@
 #include "core/mempool.h"
 #include "ir/ir.h"
 
-void llvm_func_ctx_set(LlvmModule *module, IrFuncId id) {
+void llvm_func_ctx_set(LlvmModule *module, IrFuncId id, LLVMValueRef value) {
     module->func.id = id;
+    module->func.value = value;
     module->func.locals = __mempool_alloc(module->mempool,
         sizeof(LLVMValueRef) * vec_len(module->ir->funcs[id].locals),
         alignof(LLVMValueRef)

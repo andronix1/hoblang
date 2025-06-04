@@ -14,9 +14,10 @@ typedef struct {
 typedef struct {
     IrFuncId id;
     LLVMValueRef *locals;
+    LLVMValueRef value;
 } LlvmFuncCtx;
 
-void llvm_func_ctx_set(LlvmModule *module, IrFuncId id);
+void llvm_func_ctx_set(LlvmModule *module, IrFuncId id, LLVMValueRef value);
 
 typedef struct LlvmModule {
     Mempool *mempool;

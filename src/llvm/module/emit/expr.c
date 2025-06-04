@@ -10,6 +10,35 @@
 #include <llvm-c/Core.h>
 #include <stdio.h>
 
+static LLVMValueRef llvm_emit_expr_binop(LlvmModule *module, LLVMValueRef *values, IrBinop *binop) {
+    switch (binop->kind) {
+        case IR_BINOP_COMPARE:
+            switch (binop->compare.kind) {
+                case IR_COMPARE_EQ:
+                    switch (binop->compare.val_kind) {
+                        case IR_COMPARE_NUMBER:
+                        case IR_COMPARE_BOOL:
+                            return LLVMBuildICmp(module->builder, LLVMIntEQ,
+                                values[binop->ls], values[binop->rs], "");
+                    }
+                    UNREACHABLE;
+                case IR_COMPARE_NE:
+                    switch (binop->compare.val_kind) {
+                        case IR_COMPARE_NUMBER:
+                        case IR_COMPARE_BOOL:
+                            return LLVMBuildICmp(module->builder, LLVMIntNE,
+                                values[binop->ls], values[binop->rs], "");
+                    }
+                    UNREACHABLE;
+            }
+            UNREACHABLE;
+        case IR_BINOP_ARITHMETIC:
+        case IR_BINOP_ORDER:
+            TODO;
+    }
+    UNREACHABLE;
+}
+
 static LLVMValueRef llvm_emit_expr_step(LlvmModule *module, LLVMValueRef *values, IrExprStep *steps, size_t step_id, bool load) {
     IrExprStep *step = &steps[step_id];
     switch (step->kind) {
@@ -50,8 +79,9 @@ static LLVMValueRef llvm_emit_expr_step(LlvmModule *module, LLVMValueRef *values
                 module->func.locals[step->local_id]
             ) : module->func.locals[step->local_id];
         }
-        case IR_EXPR_STEP_REAL:
         case IR_EXPR_STEP_BINOP:
+            return llvm_emit_expr_binop(module, values, &step->binop);
+        case IR_EXPR_STEP_REAL:
         case IR_EXPR_STEP_STRUCT_FIELD:
             TODO;
     }

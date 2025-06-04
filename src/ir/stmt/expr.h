@@ -26,7 +26,6 @@ AST_EXPR_STRUCT,
 
 #include "ir/api/decl.h"
 #include "ir/api/type.h"
-#include "ir/type/type.h"
 #include "ir/api/local.h"
 #include <stdint.h>
 #include "expr/binop.h"

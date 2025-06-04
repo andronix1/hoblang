@@ -7,7 +7,7 @@
 
 void llvm_emit_func_body(LlvmModule *module, IrFuncId id) {
     LLVMValueRef func = module->decls[ir_func_decl_id(module->ir, id)];
-    llvm_func_ctx_set(module, id);
+    llvm_func_ctx_set(module, id, func);
     IrFuncInfo *info = &module->ir->funcs[id];
     for (size_t i = 0; i < vec_len(info->args); i++) {
         LLVMValueRef value = LLVMGetParam(func, i);

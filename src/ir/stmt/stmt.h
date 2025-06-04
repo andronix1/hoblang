@@ -43,6 +43,8 @@ static inline IrStmtCondJmpBlock ir_stmt_cond_jmp_block(IrExpr cond, IrCode *cod
 typedef struct {
     IrStmtCondJmpBlock *conds;
     IrCode *else_code;
+
+    IrCodeFlow flow;
 } IrStmtCondJmp;
 
 typedef struct IrStmt {

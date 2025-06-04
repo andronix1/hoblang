@@ -27,16 +27,15 @@ static Ir *build_ir() {
         extern(putchar) fun putChar(c: u8); 
 
         global fun main() -> i32 {
-            putChar('h');
-            putChar('e');
-            putChar('l');
-            putChar('l');
-            putChar('o');
-            putChar('!');
-            putChar('\n');
-            final exitCodeVal = 123;
-            var exitCode = exitCodeVal;
-            return exitCode;
+            final c = getChar();
+            if c == 'a' {
+                putChar('a');
+                putChar('!');
+                putChar('\n');
+                return 0;
+            } else {
+                return 1;
+            }
         }
     */
 
@@ -51,12 +50,17 @@ static Ir *build_ir() {
         vec_create_in(irm, t_u8),
         t_void
     ));
+    IrTypeId t_get_char_func = ir_add_simple_type(ir, ir_type_new_function(
+        vec_new_in(irm, IrTypeId),
+        t_u8
+    ));
     IrTypeCrossReference *crs = ir_type_check_tree(ir);
     assert(vec_len(crs) == 0);
 
     // Decls
     IrDeclId d_main = ir_add_decl(ir);
     IrDeclId d_put_char = ir_add_decl(ir);
+    IrDeclId d_get_char = ir_add_decl(ir);
 
     // Funcs
     IrFuncId f_main = ir_init_func(ir, d_main, ir_func_new_global(
@@ -69,36 +73,61 @@ static Ir *build_ir() {
         slice_from_cstr("putchar"),
         t_put_char_func
     ));
+    ir_init_extern(ir, d_get_char, ir_extern_new(
+        IR_EXTERN_FUNC,
+        slice_from_cstr("getchar"),
+        t_get_char_func
+    ));
 
     // Code
-    IrLocalId l_exit_code = ir_func_add_local(ir, d_main,
-        ir_func_local_new(IR_MUTABLE, t_i32));
-    IrLocalId l_exit_code_val = ir_func_add_local(ir, d_main,
-        ir_func_local_new(IR_IMMUTABLE, t_i32));
-    IrExpr exit_code_set = ir_expr_new(vec_create_in(irm,
+    IrLocalId l_c = ir_func_add_local(ir, d_main, ir_func_local_new(IR_IMMUTABLE, t_u8));
+
+    IrExpr exit_code_0 = ir_expr_new(vec_create_in(irm,
+        ir_expr_step_new_int(t_i32, 0),
+    ));
+
+    IrExpr exit_code_123 = ir_expr_new(vec_create_in(irm,
         ir_expr_step_new_int(t_i32, 123),
     ));
 
-    IrExpr exit_code_val = ir_expr_new(vec_create_in(irm,
-        ir_expr_step_new_get_local(l_exit_code_val),
-    ));
-    IrExpr exit_code = ir_expr_new(vec_create_in(irm,
-        ir_expr_step_new_get_local(l_exit_code),
+    IrExpr get_char_call = ir_expr_new(vec_create_in(irm,
+        ir_expr_step_new_get_decl(d_get_char),
+        ir_expr_step_new_call(vec_new_in(irm, size_t), 0)
     ));
 
+    IrExpr equals = ir_expr_new(vec_create_in(irm,
+        ir_expr_step_new_get_local(l_c),
+        ir_expr_step_new_int(t_i32, 'a'),
+        ir_expr_step_new_binop(ir_expr_binop_new_compare_number(
+            0, 1,
+            IR_COMPARE_EQ,
+            ir_number_info_new_int(true, IR_TYPE_INT_8)
+        )),
+    ));
+
+    IrCode *if_body = ir_code_new(irm, vec_create_in(irm,
+        ir_stmt_new_expr(irm, call_put_char(irm, t_u8, d_put_char, ':')),
+        ir_stmt_new_expr(irm, call_put_char(irm, t_u8, d_put_char, 'P')),
+        ir_stmt_new_expr(irm, call_put_char(irm, t_u8, d_put_char, '\n')),
+        ir_stmt_new_ret(irm, exit_code_0)
+    ));
+
+    IrStmtCondJmpBlock *conds = vec_create_in(irm, 
+        ir_stmt_cond_jmp_block(equals, if_body)
+    );
+
+    IrCode *else_body = ir_code_new(irm, vec_create_in(irm,
+        ir_stmt_new_expr(irm, call_put_char(irm, t_u8, d_put_char, ':')),
+        ir_stmt_new_expr(irm, call_put_char(irm, t_u8, d_put_char, '(')),
+        ir_stmt_new_expr(irm, call_put_char(irm, t_u8, d_put_char, '\n')),
+        ir_stmt_new_ret(irm, exit_code_123)
+    ));
 
     ir_init_func_body(ir, f_main, ir_code_new(irm, vec_create_in(irm,
-        ir_stmt_new_expr(irm, call_put_char(irm, t_u8, d_put_char, 'h')),
-        ir_stmt_new_expr(irm, call_put_char(irm, t_u8, d_put_char, 'e')),
-        ir_stmt_new_expr(irm, call_put_char(irm, t_u8, d_put_char, 'l')),
-        ir_stmt_new_expr(irm, call_put_char(irm, t_u8, d_put_char, 'l')),
-        ir_stmt_new_expr(irm, call_put_char(irm, t_u8, d_put_char, 'o')),
-        ir_stmt_new_expr(irm, call_put_char(irm, t_u8, d_put_char, '!')),
+        ir_stmt_new_expr(irm, call_put_char(irm, t_u8, d_put_char, '.')),
         ir_stmt_new_expr(irm, call_put_char(irm, t_u8, d_put_char, '\n')),
-        ir_stmt_new_init_final(irm, l_exit_code_val, exit_code_set),
-        ir_stmt_new_decl_var(irm, l_exit_code),
-        ir_stmt_new_store(irm, exit_code, exit_code_val),
-        ir_stmt_new_ret(irm, exit_code)
+        ir_stmt_new_init_final(irm, l_c, get_char_call),
+        ir_stmt_new_cond_jmp(irm, conds, else_body)
     )));
 
     ir_fill_stmts(ir);

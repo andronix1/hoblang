@@ -7,6 +7,47 @@
 #include "llvm/module/module.h"
 #include <llvm-c/Core.h>
 
+static void llvm_emit_cond_jmp(LlvmModule *module, IrStmtCondJmp *cond_jmp) {
+    /*
+        .c1:
+            cjmp a .b1, .c2
+        .b1:
+            ...
+            jmp .e
+        .c2:
+            cjmp a .b2, .ce
+        .b2:
+            ...
+            jmp .e
+        .ce:
+            ...
+            jmp .e
+        .e:
+            ...
+    */
+    LLVMBasicBlockRef final_end = cond_jmp->flow == IR_CODE_FLOW_PASSED ?
+        LLVMAppendBasicBlock(module->func.value, "") : NULL;
+    LLVMBasicBlockRef end = LLVMAppendBasicBlock(module->func.value, "");
+    for (size_t i = 0; i < vec_len(cond_jmp->conds); i++) {
+        IrStmtCondJmpBlock *block = &cond_jmp->conds[i];
+        LLVMBasicBlockRef body = LLVMAppendBasicBlock(module->func.value, "");
+        LLVMValueRef value = llvm_emit_expr(module, &block->cond, true);
+        LLVMBuildCondBr(module->builder, value, body, end);
+        LLVMPositionBuilderAtEnd(module->builder, body);
+        llvm_emit_code(module, block->code);
+        if (block->code->flow == IR_CODE_FLOW_PASSED) {
+            LLVMBuildBr(module->builder, final_end);
+        }
+        LLVMPositionBuilderAtEnd(module->builder, end);
+    }
+    if (cond_jmp->else_code) {
+        llvm_emit_code(module, cond_jmp->else_code);
+        if (cond_jmp->else_code->flow == IR_CODE_FLOW_PASSED) {
+            LLVMBuildBr(module->builder, final_end);
+        }
+    }
+}
+
 static void llvm_emit_stmt(LlvmModule *module, IrStmt *stmt) {
     switch (stmt->kind) {
         case IR_STMT_EXPR:
@@ -33,7 +74,8 @@ static void llvm_emit_stmt(LlvmModule *module, IrStmt *stmt) {
                 &stmt->init_final.value, true);
             break;
         case IR_STMT_COND_JMP:
-            TODO;
+            llvm_emit_cond_jmp(module, &stmt->cond_jmp);
+            break;
     }
 }
 
