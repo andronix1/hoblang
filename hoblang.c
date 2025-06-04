@@ -23,6 +23,23 @@ IrExpr call_put_char(Mempool *mempool, IrTypeId t_u8, IrDeclId d_put_char, char 
 }
 
 static Ir *build_ir() {
+    /*
+        extern(putchar) fun putChar(c: u8); 
+
+        global fun main() -> i32 {
+            putChar('h');
+            putChar('e');
+            putChar('l');
+            putChar('l');
+            putChar('o');
+            putChar('!');
+            putChar('\n');
+            final exitCodeVal = 123;
+            var exitCode = exitCodeVal;
+            return exitCode;
+        }
+    */
+
     Ir *ir = ir_new();
     Mempool *irm = ir_mempool(ir);
 
@@ -56,10 +73,15 @@ static Ir *build_ir() {
     // Code
     IrLocalId l_exit_code = ir_func_add_local(ir, d_main,
         ir_func_local_new(IR_MUTABLE, t_i32));
+    IrLocalId l_exit_code_val = ir_func_add_local(ir, d_main,
+        ir_func_local_new(IR_IMMUTABLE, t_i32));
     IrExpr exit_code_set = ir_expr_new(vec_create_in(irm,
         ir_expr_step_new_int(t_i32, 123),
     ));
 
+    IrExpr exit_code_val = ir_expr_new(vec_create_in(irm,
+        ir_expr_step_new_get_local(l_exit_code_val),
+    ));
     IrExpr exit_code = ir_expr_new(vec_create_in(irm,
         ir_expr_step_new_get_local(l_exit_code),
     ));
@@ -73,8 +95,9 @@ static Ir *build_ir() {
         ir_stmt_new_expr(irm, call_put_char(irm, t_u8, d_put_char, 'o')),
         ir_stmt_new_expr(irm, call_put_char(irm, t_u8, d_put_char, '!')),
         ir_stmt_new_expr(irm, call_put_char(irm, t_u8, d_put_char, '\n')),
+        ir_stmt_new_init_final(irm, l_exit_code_val, exit_code_set),
         ir_stmt_new_decl_var(irm, l_exit_code),
-        ir_stmt_new_store(irm, exit_code, exit_code_set),
+        ir_stmt_new_store(irm, exit_code, exit_code_val),
         ir_stmt_new_ret(irm, exit_code)
     )));
 

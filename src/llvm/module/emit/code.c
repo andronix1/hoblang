@@ -28,8 +28,11 @@ static void llvm_emit_stmt(LlvmModule *module, IrStmt *stmt) {
             module->func.locals[stmt->var_id] = llvm_alloca(module, module->types[
                 module->ir->funcs[module->func.id].locals[stmt->var_id].type]);
             break;
-        case IR_STMT_COND_JMP:
         case IR_STMT_INIT_FINAL:
+            module->func.locals[stmt->var_id] = llvm_emit_expr(module,
+                &stmt->init_final.value, true);
+            break;
+        case IR_STMT_COND_JMP:
             TODO;
     }
 }

@@ -85,10 +85,13 @@ static void ir_fill_stmts_code(IrStmtCtx *ctx, IrCode *code) {
                 ir_fill_stmts_expr(ctx, &stmt->store.lvalue);
                 ir_fill_stmts_expr(ctx, &stmt->store.rvalue);
                 break;
-            case IR_STMT_DECL_VAR: break;
+            case IR_STMT_INIT_FINAL:
+                ir_fill_stmts_expr(ctx, &stmt->init_final.value);
+                break;
+            case IR_STMT_DECL_VAR:
+                break;
             case IR_STMT_COND_JMP:
             case IR_STMT_RET_VOID:
-            case IR_STMT_INIT_FINAL:
                 TODO;
         }
     }
