@@ -1,8 +1,10 @@
 #pragma once
 
 #include "ir/api/decl.h"
+#include "ir/api/extern.h"
 #include "ir/api/func.h"
 #include "ir/api/type.h"
+#include "ir/extern.h"
 #include "ir/func.h"
 #include "ir/type/type.h"
 
@@ -15,6 +17,9 @@ IrTypeId ir_add_type_record(Ir *ir);
 void ir_set_type_record(Ir *ir, IrTypeId id, IrTypeId type);
 
 IrDeclId ir_add_decl(Ir *ir);
+
+IrExternId ir_init_extern(Ir *ir, IrDeclId id, IrExtern ext);
+
 IrLocalId ir_func_arg_local_id(Ir *ir, IrFuncId id, size_t arg_id);
 IrFuncId ir_init_func(Ir *ir, IrDeclId id, IrFunc func);
 IrLocalId ir_func_add_local(Ir *ir, IrFuncId id, IrFuncLocal local);

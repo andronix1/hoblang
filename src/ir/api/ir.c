@@ -1,6 +1,9 @@
 #include "ir.h"
+#include "core/assert.h"
 #include "core/vec.h"
+#include "ir/api/extern.h"
 #include "ir/decls.h"
+#include "ir/extern.h"
 #include "ir/func.h"
 #include "ir/ir.h"
 #include "core/mempool.h"
@@ -14,6 +17,7 @@ Ir *ir_new() {
     ir->types = vec_new_in(mempool, IrTypeInfo);
     ir->decls = vec_new_in(mempool, IrDecl);
     ir->funcs = vec_new_in(mempool, IrFuncInfo);
+    ir->externs = vec_new_in(mempool, IrExternInfo);
     return ir;
 }
 
@@ -49,11 +53,26 @@ IrDeclId ir_add_decl(Ir *ir) {
     return vec_len(ir->decls) - 1;
 }
 
-static void ir_init_decl(Ir *ir, IrDeclId id, IrTypeId type_id) {
+static inline void ir_init_decl(Ir *ir, IrDeclId id, IrMutability mutability, IrTypeId type_id) {
     IrDecl *decl = &ir->decls[id];
     assert(!decl->filled);
-    decl->type = type_id;
-    decl->filled = true;
+    ir_decl_fill(decl, mutability, type_id);
+}
+
+static inline IrMutability ir_extern_get_mutability(IrExternKind kind) {
+    switch (kind) {
+        case IR_EXTERN_FUNC:
+            return IR_IMMUTABLE;
+        case IR_EXTERN_VAR:
+            return IR_MUTABLE;
+    }
+    UNREACHABLE;
+}
+
+IrExternId ir_init_extern(Ir *ir, IrDeclId id, IrExtern ext) {
+    ir_init_decl(ir, id, ir_extern_get_mutability(ext.kind), ext.type);
+    vec_push(ir->externs, ir_extern_info_new(ext, id));
+    return vec_len(ir->externs) - 1;
 }
 
 IrFuncId ir_init_func(Ir *ir, IrDeclId id, IrFunc func) {
@@ -63,7 +82,7 @@ IrFuncId ir_init_func(Ir *ir, IrDeclId id, IrFunc func) {
         args[i] = func.args[i].type;
     }
     IrTypeId type_id = ir_add_simple_type(ir, ir_type_new_function(args, func.returns));
-    ir_init_decl(ir, id, type_id);
+    ir_init_decl(ir, id, IR_IMMUTABLE, type_id);
     vec_push(ir->funcs, ir_func_info_new(ir->mempool, func, id, type_id));
     return vec_len(ir->funcs) - 1;
 }

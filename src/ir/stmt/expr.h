@@ -24,6 +24,7 @@ AST_EXPR_BINOP,
 AST_EXPR_STRUCT,
 */
 
+#include "ir/api/decl.h"
 #include "ir/api/type.h"
 #include "ir/type/type.h"
 #include "ir/api/local.h"
@@ -35,9 +36,10 @@ typedef enum {
     IR_EXPR_STEP_REAL,
     IR_EXPR_STEP_BINOP,
     IR_EXPR_STEP_STRUCT_FIELD,
+    IR_EXPR_STEP_GET_DECL,
     IR_EXPR_STEP_GET_LOCAL,
-    /*
     IR_EXPR_STEP_CALL,
+    /*
     SEMA_PATH_SEGMENT_DECL,
     SEMA_PATH_SEGMENT_DEREF,
     */
@@ -46,6 +48,8 @@ typedef enum {
 typedef struct {
     IrExprStepKind kind;
 
+    IrTypeId type;
+
     union {
         struct {
             IrTypeId type;
@@ -53,7 +57,7 @@ typedef struct {
         } integer;
 
         struct {
-            IrTypeFloatSize size;
+            IrTypeId type;
             long double value;
         } real;
 
@@ -65,8 +69,34 @@ typedef struct {
         } struct_field;
 
         IrLocalId local_id;
+        IrDeclId decl_id;
+
+        struct {
+            size_t callable;
+            size_t *args;
+        } call;
+
     };
 } IrExprStep;
+
+static inline IrExprStep ir_expr_step_new_call(size_t *args, size_t callable) {
+    IrExprStep step = {
+        .kind = IR_EXPR_STEP_CALL,
+        .call = {
+            .args = args,
+            .callable = callable
+        }
+    };
+    return step;
+}
+
+static inline IrExprStep ir_expr_step_new_get_decl(IrDeclId id) {
+    IrExprStep step = {
+        .kind = IR_EXPR_STEP_GET_DECL,
+        .decl_id = id
+    };
+    return step;
+}
 
 static inline IrExprStep ir_expr_step_new_get_local(IrLocalId id) {
     IrExprStep step = {
@@ -95,11 +125,11 @@ static inline IrExprStep ir_expr_step_new_binop(IrBinop binop) {
     return step;
 }
 
-static inline IrExprStep ir_expr_step_new_real(IrTypeFloatSize size, long double value) {
+static inline IrExprStep ir_expr_step_new_real(IrTypeId type, long double value) {
     IrExprStep step = {
         .kind = IR_EXPR_STEP_REAL,
         .real = {
-            .size = size,
+            .type = type,
             .value = value
         }
     };
