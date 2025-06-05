@@ -55,6 +55,26 @@ static Token lexer_try_next(Lexer *lexer) {
         lexer_mark_parsed(lexer);
     }
     switch (c) {
+        case '#':
+            if (lexer_next_char_is(lexer, '`')) {
+                while (true) {
+                    char c = lexer_next_char(lexer);
+                    if (c == EOF) {
+                        lexer_err(lexer, lexer->pos, "unclosed multiline comment");
+                        return token_simple(TOKEN_FAILED);
+                    }
+                    if (c == '`' && lexer_next_char_is(lexer, '#')) {
+                        break;
+                    }
+                }
+            } else {
+                for (
+                    char c = lexer_next_char(lexer);
+                    c != '\n' && c != EOF;
+                    c = lexer_next_char(lexer)
+                );
+            }
+            return lexer_try_next(lexer);
         case '+':
             if (lexer_next_char_is(lexer, '=')) return token_simple(TOKEN_APPEND);
             return token_simple(TOKEN_PLUS);
