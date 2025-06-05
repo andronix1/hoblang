@@ -32,6 +32,8 @@ static inline AstExpr *parse_middle_expr(Parser *parser) {
             return ast_expr_new_string(parser->mempool, token.slice, token.string);
         case TOKEN_INTEGER:
             return ast_expr_new_integer(parser->mempool, token.slice, token.integer);
+        case TOKEN_CHAR:
+            return ast_expr_new_char(parser->mempool, token.slice, token.character);
         case TOKEN_OPENING_ANGLE_BRACE: {
             AstType *type = NOT_NULL(parse_type(parser));
             PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_ANGLE_BRACE);

@@ -64,6 +64,10 @@ static inline SemaValue *_sema_module_analyze_expr(SemaModule *module, AstExpr *
             }
             return sema_value_new_final(module->mempool, type->function.returns);
         }
+        case AST_EXPR_CHAR:
+            return sema_value_new_final(module->mempool,
+                sema_type_new_primitive_int(module->mempool, SEMA_PRIMITIVE_INT8, false)
+            );            
         case AST_EXPR_SCOPE:
             return sema_module_analyze_expr(module, expr->scope, ctx);
         case AST_EXPR_BINOP: {

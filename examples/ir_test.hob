@@ -1,0 +1,15 @@
+extern(putchar) fun putChar(c: u8); 
+
+global fun main() -> i32 {
+    final c = getChar();
+    putChar(c);
+    if c == 'a' {
+        asdputChar('!');
+        putChar('\n');
+        return 0;
+    } else {
+        putChar('\n');
+        return 1;
+    }
+}
+

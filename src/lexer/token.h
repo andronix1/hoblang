@@ -19,6 +19,7 @@ typedef enum {
     TOKEN_AS,
     // Extended
     TOKEN_IDENT,
+    TOKEN_CHAR,
     TOKEN_INTEGER, TOKEN_STRING,
     // Binops
     TOKEN_MINUS, TOKEN_SUBTRACT,
@@ -50,10 +51,16 @@ typedef struct {
     union {
         Slice string;
         uint64_t integer;
+        char character;
     };
 } Token;
 
 void token_print(va_list list);
+
+static inline Token token_char(char c) {
+    Token token = { .kind = TOKEN_CHAR, .character = c };
+    return token;
+}
 
 static inline Token token_integer(uint64_t integer) {
     Token token = { .kind = TOKEN_INTEGER, .integer = integer };

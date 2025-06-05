@@ -21,6 +21,33 @@ static inline bool char_is_whitespace(char c) {
     return c == ' ' || c == '\t' || c == '\n';
 }
 
+static char lexer_peek_escaped_char(Lexer *lexer, char c, char brace) {
+    if (c == EOF) {
+        lexer_err(lexer, lexer->pos, "EOF while parsing string");
+        return EOF;
+    }
+    if (c == '\\') {
+        c = lexer_next_char(lexer);
+        if (c == brace) {
+            return brace;
+        }
+        switch (c) {
+            case '0': return '\0';
+            case 'n': return '\n';
+            case 't': return '\t';
+            case '\\': return '\\';
+            default: {
+                size_t old = lexer->start_pos;
+                lexer->start_pos = lexer->pos - 1;
+                lexer_err(lexer, lexer->pos, "invalid escape character");
+                lexer->start_pos = old;
+                break;
+            }
+        }
+    }
+    return c;
+}
+
 static Token lexer_try_next(Lexer *lexer) {
     char c;
     lexer_mark_parsed(lexer);
@@ -60,30 +87,25 @@ static Token lexer_try_next(Lexer *lexer) {
         case '>':
             if (lexer_next_char_is(lexer, '=')) return token_simple(TOKEN_GREATER_EQ);
             return token_simple(TOKEN_CLOSING_ANGLE_BRACE);
+        case '\'': {
+            c = lexer_peek_escaped_char(lexer, lexer_next_char(lexer), '\'');
+            if (c == EOF) {
+                return token_simple(TOKEN_FAILED);
+            }
+            if (lexer_next_char(lexer) != '\'') {
+                lexer_err(lexer, lexer->pos, "unclosed character literal");
+                return token_simple(TOKEN_FAILED);
+            }
+            return token_char(c);
+        }
         case '\"': {
             char *string = vec_new_in(lexer->mempool, char);
             for (char c = lexer_next_char(lexer); c != '\"'; c = lexer_next_char(lexer)) {
+                c = lexer_peek_escaped_char(lexer, c, '\"');
                 if (c == EOF) {
-                    lexer_err(lexer, lexer->pos, "EOF while parsing string");
                     return token_simple(TOKEN_FAILED);
                 }
-                if (c == '\\') {
-                    c = lexer_next_char(lexer);
-                    switch (c) {
-                        case '0': vec_push(string, '\0'); break;
-                        case 'n': vec_push(string, '\n'); break;
-                        case 't': vec_push(string, '\t'); break;
-                        case '\"': vec_push(string, '\"'); break;
-                        case '\\': vec_push(string, '\\'); break;
-                        default: {
-                            size_t old = lexer->start_pos;
-                            lexer->start_pos = lexer->pos - 1;
-                            lexer_err(lexer, lexer->pos, "invalid escape character");
-                            lexer->start_pos = old;
-                            break;
-                        }
-                    }
-                } else vec_push(string, c);
+                vec_push(string, c);
             }
             return token_string(slice_new(string, vec_len(string)));
         }

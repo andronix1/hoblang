@@ -11,6 +11,8 @@
 #include "ir/stmt/stmt.h"
 #include "ir/type/type.h"
 #include "print.h"
+#include "sema/api.h"
+#include "sema/project.h"
 #include "llvm/module/api.h"
 
 IrExpr call_put_char(Mempool *mempool, IrTypeId t_u8, IrDeclId d_put_char, char c) {
@@ -134,8 +136,24 @@ static Ir *build_ir() {
     return ir;
 }
 
-int main() {
+int main(int argc, char **argv) {
     setup_log();
+
+    if (argc != 2) {
+        assert(argc != 0);
+        logln("usage: $s <path>", argv[0]);
+        return 1;
+    }
+
+    Path entry_path = argv[1];
+    
+    SemaProject *project = sema_project_new(entry_path);
+    if (!sema_project_analyze(project)) {
+        return 1;
+    }
+    sema_project_free(project);
+    return 0;
+
     Ir *ir = build_ir();
     LlvmModule *llvm = llvm_module_new();
     llvm_module_emit(llvm, ir);

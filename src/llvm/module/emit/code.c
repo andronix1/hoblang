@@ -1,5 +1,4 @@
 #include "code.h"
-#include "core/assert.h"
 #include "ir/stmt/code.h"
 #include "ir/stmt/stmt.h"
 #include "ir/ir.h"
