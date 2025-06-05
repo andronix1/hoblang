@@ -3,8 +3,6 @@
 #include "ir/stages/stmts.h"
 #include "ir/stages/type_tree.h"
 #include "print.h"
-#include "sema/api.h"
-#include "sema/project.h"
 #include "llvm/module/api.h"
 
 int main(int argc, char **argv) {
@@ -16,13 +14,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    Path entry_path = argv[1];
-
     Ir *ir = ir_new();
-    SemaProject *project = sema_project_new(entry_path, ir);
-    if (!sema_project_analyze(project)) {
-        return 1;
-    }
     IrTypeCrossReference *crs = ir_type_check_tree(ir);
     assert(vec_len(crs) == 0);
     ir_fill_stmts(ir);
@@ -36,7 +28,6 @@ int main(int argc, char **argv) {
     }
 
     llvm_module_free(llvm);
-    sema_project_free(project);
     ir_free(ir);
     return 0;
 }
