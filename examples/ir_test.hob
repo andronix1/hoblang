@@ -1,6 +1,30 @@
-extern(putchar) fun putChar(c: u8); 
+#`
+    1. create decls + types
+    2. init decls + types
+    2. emit func bodies
+`#
 
-global fun main() -> i32 {
+#`
+types = [
+    SIMPLE: i32,
+    ...,
+    RECORD, <A>
+]
+
+decls = [
+    0, // putChar
+    1, // getChar
+    2, // main
+]
+`#
+
+extern(putchar) fun putChar(c: u8); # declId + externId
+extern(getchar) fun getChar(c: u8); # declId + externId
+
+type A = i32; # typeId(record)
+              # INIT
+
+global fun main() -> i32 { # declId + funcId + body
     final c = getChar();
     putChar(c);
     if c == 'a' {

@@ -10,8 +10,6 @@
 #include "ast/type.h"
 #include "core/mempool.h"
 #include "core/slice.h"
-#include "sema/module/api/decl_handle.h"
-#include "sema/module/api/generic.h"
 
 typedef enum {
     AST_NODE_TYPE_DECL,
@@ -36,10 +34,6 @@ typedef struct {
 typedef struct {
     Slice name;
     AstType *type;
-
-    struct {
-        SemaDeclHandle *decl;
-    } sema;
 } AstFunArg;
 
 typedef struct AstFunInfo {
@@ -53,16 +47,7 @@ typedef struct AstFunInfo {
         Slice of;
         bool by_ref;
         Slice self_name;
-
-        struct {
-            SemaDeclHandle *self;
-        } sema;
     } ext;
-
-    struct {
-        SemaDeclHandle *decl;
-        SemaGeneric *generic;
-    } sema;
 } AstFunInfo;
 
 typedef struct {
@@ -91,7 +76,6 @@ typedef struct {
 
     struct {
         bool is_global;
-        SemaDeclHandle *decl;
     } sema;
 } AstValueDecl;
 

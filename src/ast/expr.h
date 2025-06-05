@@ -4,8 +4,6 @@
 #include "ast/api/expr.h"
 #include "ast/api/type.h"
 #include "core/mempool.h"
-#include "sema/module/api/value.h"
-#include "sema/module/nodes/exprs/binop_ext.h"
 #include <stdint.h>
 
 typedef enum {
@@ -36,15 +34,6 @@ typedef enum {
 typedef struct AstBinopKind {
     AstBinopKindKind kind;
     Slice slice;
-
-    struct {
-        SemaBinopKind kind;
-        union {
-            SemaBinopArithmeticKind arithmetic;
-            SemaBinopCompareKind compare;
-            SemaBinopEqKind eq;
-        };
-    } sema;
 } AstBinopKind;
 
 typedef struct {
@@ -79,10 +68,6 @@ typedef struct AstExpr {
         AstBinop binop;
         AstExprStructConstructor structure;
     };
-
-    struct {
-        SemaValue *value;
-    } sema;
 } AstExpr;
 
 bool ast_expr_eq(const AstExpr *a, const AstExpr *b);

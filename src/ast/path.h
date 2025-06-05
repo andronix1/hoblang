@@ -4,7 +4,6 @@
 #include "ast/api/path.h"
 #include "core/mempool.h"
 #include "core/slice.h"
-#include "sema/module/nodes/path_ext.h"
 
 typedef enum {
     AST_PATH_SEGMENT_IDENT,
@@ -20,8 +19,6 @@ typedef struct {
         Slice ident;
         AstGenericBuilder *generic;
     };
-
-    SemaPathSegmentExt sema;
 } AstPathSegment;
 
 typedef struct AstPath {
