@@ -75,15 +75,40 @@ IrExternId ir_init_extern(Ir *ir, IrDeclId id, IrExtern ext) {
     return vec_len(ir->externs) - 1;
 }
 
-IrFuncId ir_init_func(Ir *ir, IrDeclId id, IrFunc func) {
-    IrTypeId *args = vec_new_in(ir->mempool, IrTypeId);
-    vec_resize(args, vec_len(func.args));
-    for (size_t i = 0; i < vec_len(func.args); i++) {
-        args[i] = func.args[i].type;
+static IrFuncInfo ir_func_info_new(
+    Ir *ir,
+    IrMutability *args_mut,
+    IrFunc func,
+    IrDeclId id,
+    IrTypeId type_id
+) {
+    IrType *type = &ir->types[ir_type_record_resolve_simple(ir, type_id)].simple;
+    assert(type->kind == IR_TYPE_FUNCTION);
+    assert(vec_len(type->function.args) == vec_len(args_mut));
+
+    IrLocalId *args = vec_new_in(ir->mempool, IrLocalId);
+    vec_resize(args, vec_len(type->function.args));
+    IrFuncLocal *locals = vec_new_in(ir->mempool, IrFuncLocal);
+    vec_resize(locals, vec_len(type->function.args));
+
+    for (size_t i = 0; i < vec_len(type->function.args); i++) {
+        locals[i] = ir_func_local_new(args_mut[i], type->function.args[i]);
+        args[i] = i;
     }
-    IrTypeId type_id = ir_add_simple_type(ir, ir_type_new_function(args, func.returns));
-    ir_init_decl(ir, id, IR_IMMUTABLE, type_id);
-    vec_push(ir->funcs, ir_func_info_new(ir->mempool, func, id, type_id));
+    IrFuncInfo info = {
+        .func = func,
+        .args = args,
+        .locals = locals,
+        .decl_id = id,
+        .type_id = type_id,
+    };
+    return info;
+}
+
+
+IrFuncId ir_init_func(Ir *ir, IrMutability *args_mut, IrDeclId id, IrFunc func) {
+    ir_init_decl(ir, id, IR_IMMUTABLE, func.type_id);
+    vec_push(ir->funcs, ir_func_info_new(ir, args_mut, func, id, func.type_id));
     return vec_len(ir->funcs) - 1;
 }
 

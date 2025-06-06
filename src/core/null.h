@@ -8,6 +8,12 @@
     __val; \
 })
 
+#define RET_ID_ON_NULL(VALUE) ({ \
+    typeof(VALUE) __val = VALUE; \
+    if (!__val) return -1; \
+    __val; \
+})
+
 #define RET_ON_NULL(VALUE) ({ \
     typeof(VALUE) __val = VALUE; \
     if (!__val) return; \

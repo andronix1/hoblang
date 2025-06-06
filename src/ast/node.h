@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ast/api/alias.h"
 #include "ast/api/expr.h"
 #include "ast/api/type.h"
 #include "ast/body.h"
@@ -10,6 +9,9 @@
 #include "ast/type.h"
 #include "core/mempool.h"
 #include "core/slice.h"
+#include "ir/api/decl.h"
+#include "ir/api/func.h"
+#include "sema/module/api/type.h"
 
 typedef enum {
     AST_NODE_TYPE_DECL,
@@ -27,7 +29,7 @@ typedef struct {
     AstGeneric *generics;
 
     struct {
-        SemaTypeAlias *alias;
+        SemaTypeId type_id;
     } sema;
 } AstTypeDecl;
 
@@ -54,6 +56,10 @@ typedef struct {
     AstGlobal *global;
     AstFunInfo *info;
     AstBody *body;
+
+    struct {
+        IrFuncId func_id;
+    } sema;
 } AstFunDecl;
 
 typedef enum {
@@ -73,10 +79,6 @@ typedef struct {
     AstGlobal *global;
     AstValueInfo *info;
     AstExpr *initializer;
-
-    struct {
-        bool is_global;
-    } sema;
 } AstValueDecl;
 
 typedef enum {

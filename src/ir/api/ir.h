@@ -21,7 +21,7 @@ IrDeclId ir_add_decl(Ir *ir);
 IrExternId ir_init_extern(Ir *ir, IrDeclId id, IrExtern ext);
 
 IrLocalId ir_func_arg_local_id(Ir *ir, IrFuncId id, size_t arg_id);
-IrFuncId ir_init_func(Ir *ir, IrDeclId id, IrFunc func);
+IrFuncId ir_init_func(Ir *ir, IrMutability *args_mut, IrDeclId id, IrFunc func);
 IrLocalId ir_func_add_local(Ir *ir, IrFuncId id, IrFuncLocal local);
 void ir_init_func_body(Ir *ir, IrFuncId id, IrCode *code);
 
