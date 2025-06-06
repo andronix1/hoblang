@@ -23,6 +23,20 @@ static bool sema_type_to_ir_number_info(
     return false;
 }
 
+static SemaValue *sema_binop_order(
+    SemaModule *module,
+    IrBinopOrderKind kind,
+    SemaType *type,
+    size_t lss, size_t rss,
+    SemaExprOutput *output
+) {
+    IrNumberInfo info;
+    size_t step_id = vec_len(output->steps);
+    NOT_NULL(sema_type_to_ir_number_info(type, &info));
+    vec_push(output->steps, ir_expr_step_new_binop(ir_expr_binop_new_order(lss, rss, kind, info)));
+    return sema_value_new_runtime_expr_step(module->mempool, sema_type_new_bool(module), step_id);
+}
+
 static SemaValue *sema_binop_compare(
     SemaModule *module,
     IrBinopCompareKind kind,
@@ -85,10 +99,13 @@ SemaValue *sema_module_analyze_expr_binop(SemaModule *module, AstBinop *binop, S
             return sema_binop_compare(module, IR_COMPARE_NE, type, lss, rss, ctx.output);
 
         case AST_BINOP_LESS:
+            return sema_binop_order(module, IR_BINOP_ORDER_LT, type, lss, rss, ctx.output);
         case AST_BINOP_GREATER:
+            return sema_binop_order(module, IR_BINOP_ORDER_GT, type, lss, rss, ctx.output);
         case AST_BINOP_LESS_EQ:
+            return sema_binop_order(module, IR_BINOP_ORDER_LE, type, lss, rss, ctx.output);
         case AST_BINOP_GREATER_EQ:
-            TODO;
+            return sema_binop_order(module, IR_BINOP_ORDER_GE, type, lss, rss, ctx.output);
     }
     UNREACHABLE;
 }

@@ -11,6 +11,8 @@
 #include <stdio.h>
 
 static LLVMValueRef llvm_emit_expr_binop(LlvmModule *module, LLVMValueRef *values, IrBinop *binop) {
+    LLVMValueRef ls = values[binop->ls];
+    LLVMValueRef rs = values[binop->rs];
     switch (binop->kind) {
         case IR_BINOP_COMPARE:
             switch (binop->compare.kind) {
@@ -18,8 +20,7 @@ static LLVMValueRef llvm_emit_expr_binop(LlvmModule *module, LLVMValueRef *value
                     switch (binop->compare.val_kind) {
                         case IR_COMPARE_NUMBER:
                         case IR_COMPARE_BOOL:
-                            return LLVMBuildICmp(module->builder, LLVMIntEQ,
-                                values[binop->ls], values[binop->rs], "");
+                            return LLVMBuildICmp(module->builder, LLVMIntEQ, ls, rs, "");
                     }
                     UNREACHABLE;
                 case IR_COMPARE_NE:
@@ -33,8 +34,50 @@ static LLVMValueRef llvm_emit_expr_binop(LlvmModule *module, LLVMValueRef *value
             }
             UNREACHABLE;
         case IR_BINOP_ARITHMETIC:
+            #define IR_BINOP_ARITHM_OPT(INT, UINT, FLOAT, ...) \
+                switch (binop->arithm.number.kind) { \
+                    case IR_NUMBER_INT: \
+                        return INT(module->builder, ls, rs, ""); \
+                    case IR_NUMBER_UINT: \
+                        return UINT(module->builder, ls, rs, ""); \
+                    case IR_NUMBER_FLOAT: \
+                        return FLOAT(module->builder, ls, rs, ""); \
+                } \
+                UNREACHABLE;
+            switch (binop->arithm.kind) {
+                case IR_BINOP_ARITHM_ADD:
+                    IR_BINOP_ARITHM_OPT(LLVMBuildAdd, LLVMBuildAdd, LLVMBuildFAdd);
+                case IR_BINOP_ARITHM_SUB:
+                    IR_BINOP_ARITHM_OPT(LLVMBuildSub, LLVMBuildSub, LLVMBuildFSub);
+                case IR_BINOP_ARITHM_MUL:
+                    IR_BINOP_ARITHM_OPT(LLVMBuildMul, LLVMBuildMul, LLVMBuildFMul);
+                case IR_BINOP_ARITHM_DIV:
+                    IR_BINOP_ARITHM_OPT(LLVMBuildSDiv, LLVMBuildUDiv, LLVMBuildFDiv);
+            }
+            UNREACHABLE;
         case IR_BINOP_ORDER:
-            TODO;
+            #define IR_BINOP_ORDER_OPT(INT, UINT, FLOAT, ...) \
+                switch (binop->arithm.number.kind) { \
+                    case IR_NUMBER_INT: \
+                        return LLVMBuildICmp(module->builder, INT, ls, rs, ""); \
+                    case IR_NUMBER_UINT: \
+                        return LLVMBuildICmp(module->builder, UINT, ls, rs, ""); \
+                    case IR_NUMBER_FLOAT: \
+                        return LLVMBuildFCmp(module->builder, FLOAT, ls, rs, ""); \
+                } \
+                UNREACHABLE;
+            switch (binop->order.kind) {
+                case IR_BINOP_ORDER_LT:
+                    IR_BINOP_ORDER_OPT(LLVMIntSLT, LLVMIntULT, LLVMRealOLT);
+                case IR_BINOP_ORDER_GT:
+                    IR_BINOP_ORDER_OPT(LLVMIntSGT, LLVMIntUGT, LLVMRealOGT);
+                case IR_BINOP_ORDER_LE:
+                    IR_BINOP_ORDER_OPT(LLVMIntSLE, LLVMIntULE, LLVMRealOLE);
+                case IR_BINOP_ORDER_GE:
+                    IR_BINOP_ORDER_OPT(LLVMIntSGE, LLVMIntUGE, LLVMRealOGE);
+                  break;
+            }
+            UNREACHABLE;
     }
     UNREACHABLE;
 }
