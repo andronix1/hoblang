@@ -5,3 +5,4 @@
 #include "sema/module/api/value.h"
 
 SemaValue *sema_module_path(SemaModule *module, AstPath *path);
+SemaValue *sema_module_path_segment(SemaModule *module, AstPathSegment *path);

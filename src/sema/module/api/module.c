@@ -17,6 +17,7 @@ SemaModule *sema_module_new(Ir *ir, Parser *parser) {
     module->parser = parser;
     module->nodes = nodes;
     module->failed = false;
+    module->ss = NULL;
     module->mempool = mempool_new(1024);
     
     module->types = vec_new_in(module->mempool, SemaTypeInfo);

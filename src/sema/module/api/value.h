@@ -3,7 +3,26 @@
 #include "sema/module/api/module.h"
 #include "sema/module/api/type.h"
 
+typedef enum {
+    SEMA_VALUE_RUNTIME_GLOBAL,
+    SEMA_VALUE_RUNTIME_LOCAL,
+    SEMA_VALUE_RUNTIME_EXPR_STEP,
+} SemaValueRuntimeKind;
+
+typedef struct {
+    SemaValueRuntimeKind kind;
+    SemaType *type;
+
+    union {
+        IrDeclId global_id;
+        IrLocalId local_id;
+        size_t step_id;
+    };
+} SemaValueRuntime;
+
 typedef struct SemaValue SemaValue;
 
 SemaType *sema_value_should_be_type(SemaModule *module, Slice where, SemaValue *value);
+SemaValueRuntime *sema_value_should_be_runtime(SemaModule *module, Slice where, SemaValue *value);
 SemaType *sema_value_is_type(SemaValue *value);
+SemaValueRuntime *sema_value_is_runtime(SemaValue *value);

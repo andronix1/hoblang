@@ -19,14 +19,16 @@ decls = [
 `#
 
 extern(putchar) fun putChar(c: u8); # declId + externId
-extern(getchar) fun getChar(c: u8); # declId + externId
+extern(getchar) fun getChar() -> u8; # declId + externId
 
 type A = i32; # typeId(record)
               # INIT
 
 global fun main() -> i32 { # declId + funcId + body
-    final c = getChar();
+    final c: u8 = getChar();
     putChar(c);
+    return 123;
+#`
     if c == 'a' {
         asdputChar('!');
         putChar('\n');
@@ -35,5 +37,6 @@ global fun main() -> i32 { # declId + funcId + body
         putChar('\n');
         return 1;
     }
+`#
 }
 

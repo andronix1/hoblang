@@ -11,6 +11,8 @@ static inline void sema_module_push_type(SemaModule *module, const char *name, S
 }
 
 void sema_module_setup(SemaModule *module) {
+    sema_module_push_type(module, "bool", sema_type_new_bool(module));
+    sema_module_push_type(module, "void", sema_type_new_void(module));
     sema_module_push_type(module, "u8", sema_type_new_int(module, SEMA_INT_8, false));
     sema_module_push_type(module, "i8", sema_type_new_int(module, SEMA_INT_8, true));
     sema_module_push_type(module, "u16", sema_type_new_int(module, SEMA_INT_16, false));

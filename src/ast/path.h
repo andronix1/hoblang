@@ -11,7 +11,7 @@ typedef enum {
     AST_PATH_SEGMENT_DEREF,
 } AstPathSegmentKind;
 
-typedef struct {
+typedef struct AstPathSegment {
     AstPathSegmentKind kind;
     Slice slice;
 
