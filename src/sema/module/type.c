@@ -10,21 +10,22 @@
 #include "sema/module/api/module.h"
 #include <string.h>
 
+IrTypeIntSize sema_type_int_size_to_ir(SemaTypeIntSize size) {
+    switch (size) {
+        case SEMA_INT_8: return IR_TYPE_INT_8;
+        case SEMA_INT_16: return IR_TYPE_INT_16;
+        case SEMA_INT_32: return IR_TYPE_INT_32;
+        case SEMA_INT_64: return IR_TYPE_INT_64;
+    }
+    UNREACHABLE;
+}
+
 static inline IrType sema_type_to_ir(SemaModule* module, SemaType *type) {
     switch (type->kind) {
         case SEMA_TYPE_VOID: return ir_type_new_void();
         case SEMA_TYPE_INT:
-            switch (type->integer.size) {
-                case SEMA_INT_8:
-                    return ir_type_new_int(IR_TYPE_INT_8, type->integer.is_signed);
-                case SEMA_INT_16:
-                    return ir_type_new_int(IR_TYPE_INT_16, type->integer.is_signed);
-                case SEMA_INT_32:
-                    return ir_type_new_int(IR_TYPE_INT_32, type->integer.is_signed);
-                case SEMA_INT_64:
-                    return ir_type_new_int(IR_TYPE_INT_64, type->integer.is_signed);
-            }
-            UNREACHABLE;
+            return ir_type_new_int(sema_type_int_size_to_ir(type->integer.size),
+                type->integer.is_signed);
         case SEMA_TYPE_BOOL: return ir_type_new_bool();
         case SEMA_TYPE_FUNCTION: {
             IrTypeId *args = vec_new_in(module->mempool, IrTypeId);

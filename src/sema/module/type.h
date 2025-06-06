@@ -47,6 +47,8 @@ typedef struct SemaType {
     };
 } SemaType;
 
+IrTypeIntSize sema_type_int_size_to_ir(SemaTypeIntSize size);
+
 SemaType *sema_type_new_void(SemaModule *module);
 SemaType *sema_type_new_bool(SemaModule *module);
 SemaType *sema_type_new_int(SemaModule *module, SemaTypeIntSize size, bool is_signed);

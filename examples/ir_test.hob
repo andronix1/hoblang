@@ -27,16 +27,13 @@ type A = i32; # typeId(record)
 global fun main() -> i32 { # declId + funcId + body
     final c: u8 = getChar();
     putChar(c);
-    return 123;
-#`
     if c == 'a' {
-        asdputChar('!');
+        putChar('!');
         putChar('\n');
         return 0;
     } else {
         putChar('\n');
         return 1;
     }
-`#
 }
 
