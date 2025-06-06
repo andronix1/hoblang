@@ -24,12 +24,12 @@ static void llvm_emit_cond_jmp(LlvmModule *module, IrStmtCondJmp *cond_jmp) {
         .e:
             ...
     */
+    LLVMBasicBlockRef end = LLVMAppendBasicBlock(module->func.value, "end");
     LLVMBasicBlockRef final_end = cond_jmp->flow == IR_CODE_FLOW_PASSED ?
-        LLVMAppendBasicBlock(module->func.value, "") : NULL;
-    LLVMBasicBlockRef end = LLVMAppendBasicBlock(module->func.value, "");
+        LLVMAppendBasicBlock(module->func.value, "final_end") : NULL;
     for (size_t i = 0; i < vec_len(cond_jmp->conds); i++) {
         IrStmtCondJmpBlock *block = &cond_jmp->conds[i];
-        LLVMBasicBlockRef body = LLVMAppendBasicBlock(module->func.value, "");
+        LLVMBasicBlockRef body = LLVMAppendBasicBlock(module->func.value, "body");
         LLVMValueRef value = llvm_emit_expr(module, &block->cond, true);
         LLVMBuildCondBr(module->builder, value, body, end);
         LLVMPositionBuilderAtEnd(module->builder, body);
@@ -44,7 +44,10 @@ static void llvm_emit_cond_jmp(LlvmModule *module, IrStmtCondJmp *cond_jmp) {
         if (cond_jmp->else_code->flow == IR_CODE_FLOW_PASSED) {
             LLVMBuildBr(module->builder, final_end);
         }
+    } else {
+        LLVMBuildBr(module->builder, final_end);
     }
+    LLVMPositionBuilderAtEnd(module->builder, final_end);
 }
 
 static void llvm_emit_stmt(LlvmModule *module, IrStmt *stmt) {
