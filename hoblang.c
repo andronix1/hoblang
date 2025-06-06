@@ -48,6 +48,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    sema_module_free(module);
     llvm_module_free(llvm);
     ir_free(ir);
     return 0;
