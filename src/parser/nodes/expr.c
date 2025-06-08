@@ -68,6 +68,8 @@ static inline AstExpr *parse_middle_expr(Parser *parser) {
 
 static int get_binop_kind_priority(AstBinopKindKind kind) {
     switch (kind) {
+        case AST_BINOP_OR: return -100;
+        case AST_BINOP_AND: return -100;
         case AST_BINOP_EQUALS: return -10;
         case AST_BINOP_NOT_EQUALS: return -10;
         case AST_BINOP_LESS: return 0;
@@ -129,6 +131,8 @@ static inline AstExpr *parse_post_expr(Parser *parser, AstExpr *expr) {
                 expr = ast_expr_new_callable(parser->mempool, slice_union(expr->slice, slice), expr, args);
                 break;
             }
+            case TOKEN_OR: expr = NOT_NULL(create_expr_lprioritized(parser, token.slice, AST_BINOP_OR, expr)); break;
+            case TOKEN_AND: expr = NOT_NULL(create_expr_lprioritized(parser, token.slice, AST_BINOP_AND, expr)); break;
             case TOKEN_PLUS: expr = NOT_NULL(create_expr_lprioritized(parser, token.slice, AST_BINOP_ADD, expr)); break;
             case TOKEN_MINUS: expr = NOT_NULL(create_expr_lprioritized(parser, token.slice, AST_BINOP_SUBTRACT, expr)); break;
             case TOKEN_STAR: expr = NOT_NULL(create_expr_lprioritized(parser, token.slice, AST_BINOP_MULTIPLY, expr)); break;

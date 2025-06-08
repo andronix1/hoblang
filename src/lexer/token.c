@@ -9,7 +9,8 @@ void token_print(va_list list) {
         case TOKEN_PLUS: printf("`+`"); return;
         case TOKEN_STAR: printf("`*`"); return;
         case TOKEN_SLASH: printf("`/`"); return;
-        case TOKEN_AND: printf("`&`"); return;
+        case TOKEN_AND: printf("`&&`"); return;
+        case TOKEN_OR: printf("`||`"); return;
         case TOKEN_APPEND: printf("`+=`"); return;
         case TOKEN_SUBTRACT: printf("`-=`"); return;
         case TOKEN_FUN_RETURNS: printf("`->`"); return;
@@ -52,6 +53,8 @@ void token_print(va_list list) {
         case TOKEN_GREATER_EQ: printf("`>=`"); return;
         case TOKEN_LESS_EQ: printf("`<=`"); return;
         case TOKEN_NOT: printf("`!`"); return;
+        case TOKEN_BITAND: printf("`&`"); return;
+        case TOKEN_BITOR: printf("`|`"); return;
     }
     UNREACHABLE;
 }

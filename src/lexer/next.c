@@ -92,7 +92,12 @@ static Token lexer_try_next(Lexer *lexer) {
             return token_simple(TOKEN_NOT);
         case ':': return token_simple(TOKEN_COLON);
         case ';': return token_simple(TOKEN_SEMICOLON);
-        case '&': return token_simple(TOKEN_AND);
+        case '&':
+            if (lexer_next_char_is(lexer, '&')) return token_simple(TOKEN_AND);
+            return token_simple(TOKEN_BITAND);
+        case '|':
+            if (lexer_next_char_is(lexer, '|')) return token_simple(TOKEN_OR);
+            return token_simple(TOKEN_BITOR);
         case ',': return token_simple(TOKEN_COMMA);
         case '.': return token_simple(TOKEN_DOT);
         case '{': return token_simple(TOKEN_OPENING_FIGURE_BRACE);

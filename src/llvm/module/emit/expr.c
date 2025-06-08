@@ -1,5 +1,7 @@
 #include "expr.h"
 #include "core/assert.h"
+#include "core/mempool.h"
+#include "core/vec.h"
 #include "ir/api/ir.h"
 #include "ir/decls.h"
 #include "ir/stmt/expr.h"
@@ -7,8 +9,55 @@
 #include "llvm/module/mut.h"
 #include "ir/ir.h"
 #include <alloca.h>
+#include <assert.h>
 #include <llvm-c/Core.h>
 #include <stdio.h>
+
+typedef struct {
+    LLVMValueRef *values;
+    LLVMBasicBlockRef *bbs;
+    LLVMBasicBlockRef end;
+} LlvmEmitExprCtx;
+
+static inline bool llvm_emit_expr_ctx_is_empty(LlvmEmitExprCtx *ctx) {
+    assert(
+        (ctx->bbs == NULL) == (ctx->values == NULL) &&
+        (ctx->bbs == NULL) == (ctx->end == NULL)
+    );
+    return ctx->bbs == NULL;
+}
+
+static inline size_t llvm_emit_expr_ctx_len(LlvmEmitExprCtx *ctx) {
+    if (llvm_emit_expr_ctx_is_empty(ctx)) {
+        return 0;
+    }
+    assert(vec_len(ctx->bbs) == vec_len(ctx->values));
+    return vec_len(ctx->bbs);
+}
+
+static inline LLVMBasicBlockRef llvm_emit_expr_ctx_end(LlvmModule *module, LlvmEmitExprCtx *ctx) {
+    if (llvm_emit_expr_ctx_is_empty(ctx)) {
+        ctx->bbs = vec_new_in(module->mempool, LLVMBasicBlockRef);
+        ctx->values = vec_new_in(module->mempool, LLVMValueRef);
+        ctx->end = LLVMAppendBasicBlock(module->func.value, "");
+    }
+    return ctx->end;
+}
+
+static inline void llvm_emit_expr_ctx_append(LlvmModule *module, LlvmEmitExprCtx *ctx, LLVMValueRef value) {
+    assert(!llvm_emit_expr_ctx_is_empty(ctx));
+    vec_push(ctx->values, value);
+    vec_push(ctx->bbs, LLVMGetInsertBlock(module->builder));
+}
+
+static inline LlvmEmitExprCtx llvm_emit_expr_ctx_new() {
+    LlvmEmitExprCtx ctx = {
+        .bbs = NULL,
+        .values = NULL,
+        .end = NULL,
+    };
+    return ctx;
+}
 
 static LLVMValueRef llvm_emit_expr_binop(LlvmModule *module, LLVMValueRef *values, IrBinop *binop) {
     LLVMValueRef ls = values[binop->ls];
@@ -75,14 +124,19 @@ static LLVMValueRef llvm_emit_expr_binop(LlvmModule *module, LLVMValueRef *value
                     IR_BINOP_ORDER_OPT(LLVMIntSLE, LLVMIntULE, LLVMRealOLE);
                 case IR_BINOP_ORDER_GE:
                     IR_BINOP_ORDER_OPT(LLVMIntSGE, LLVMIntUGE, LLVMRealOGE);
-                  break;
+            }
+            UNREACHABLE;
+        case IR_BINOP_BOOL:
+            switch (binop->boolean.kind) {
+                case IR_BINOP_BOOL_OR: return LLVMBuildOr(module->builder, ls, rs, "");
+                case IR_BINOP_BOOL_AND: return LLVMBuildAnd(module->builder, ls, rs, "");
             }
             UNREACHABLE;
     }
     UNREACHABLE;
 }
 
-static LLVMValueRef llvm_emit_expr_step(LlvmModule *module, LLVMValueRef *values, IrExprStep *steps, size_t step_id, bool load) {
+static LLVMValueRef llvm_emit_expr_step(LlvmModule *module, LLVMValueRef *values, IrExprStep *steps, size_t step_id, LlvmEmitExprCtx *ctx, bool load) {
     IrExprStep *step = &steps[step_id];
     switch (step->kind) {
         case IR_EXPR_STEP_INT:
@@ -124,6 +178,18 @@ static LLVMValueRef llvm_emit_expr_step(LlvmModule *module, LLVMValueRef *values
         }
         case IR_EXPR_STEP_BINOP:
             return llvm_emit_expr_binop(module, values, &step->binop);
+        case IR_EXPR_STEP_BOOL_SKIP: {
+            LLVMValueRef check = values[step->bool_skip.condition];
+            if (!step->bool_skip.expect) {
+                check = LLVMBuildNot(module->builder, check, "");
+            }
+            LLVMBasicBlockRef cont = LLVMAppendBasicBlock(module->func.value, "");
+            LLVMBuildCondBr(module->builder, check, llvm_emit_expr_ctx_end(module, ctx), cont);
+            llvm_emit_expr_ctx_append(module, ctx, LLVMConstInt(LLVMInt1Type(),
+                step->bool_skip.result, false));
+            LLVMPositionBuilderAtEnd(module->builder, cont);
+            return NULL;
+        }
         case IR_EXPR_STEP_REAL:
         case IR_EXPR_STEP_STRUCT_FIELD:
             TODO;
@@ -133,12 +199,24 @@ static LLVMValueRef llvm_emit_expr_step(LlvmModule *module, LLVMValueRef *values
 
 LLVMValueRef llvm_emit_expr(LlvmModule *module, IrExpr *expr, bool load) {
     LLVMValueRef *values = alloca(sizeof(LLVMValueRef) * vec_len(expr->steps));
+    LlvmEmitExprCtx ctx = llvm_emit_expr_ctx_new();
     for (size_t i = 0; i < vec_len(expr->steps); i++) {
         values[i] = llvm_emit_expr_step(module, values,
             expr->steps, i,
+            &ctx,
             i != vec_len(expr->steps) - 1 || load
         );
     }
-    return values[vec_len(expr->steps) - 1];
+    size_t last_step = vec_len(expr->steps) - 1;
+    if (!llvm_emit_expr_ctx_is_empty(&ctx)) {
+        llvm_emit_expr_ctx_append(module, &ctx, values[last_step]);
+        LLVMBuildBr(module->builder, ctx.end);
+        LLVMPositionBuilderAtEnd(module->builder, ctx.end);
+        LLVMValueRef result = LLVMBuildPhi(module->builder,
+            module->types[expr->steps[last_step].type], "");
+        LLVMAddIncoming(result, ctx.values, ctx.bbs, llvm_emit_expr_ctx_len(&ctx));
+        return result;
+    }
+    return values[last_step];
 }
 

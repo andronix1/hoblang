@@ -73,6 +73,23 @@ static SemaValue *sema_binop_arithm(
     return sema_value_new_runtime_expr_step(module->mempool, type, step_id);
 }
 
+static SemaValue *sema_binop_bool(
+    SemaModule *module,
+    IrBinopBoolKind kind,
+    SemaType *type,
+    Slice pos,
+    size_t lss, size_t rss,
+    SemaExprOutput *output
+) {
+    if (type->kind != SEMA_TYPE_BOOL) {
+        sema_module_err(module, pos, "this binop can be used for booleans only");
+    }
+    size_t step_id = vec_len(output->steps);
+    vec_push(output->steps, ir_expr_step_new_binop(ir_expr_binop_new_boolean(
+        lss, rss, kind)));
+    return sema_value_new_runtime_expr_step(module->mempool, type, step_id);
+}
+
 SemaValue *sema_module_analyze_expr_binop(SemaModule *module, AstBinop *binop, SemaExprCtx ctx) {
     SemaValueRuntime *ls = NOT_NULL(sema_module_analyze_runtime_expr(module, binop->left, sema_expr_ctx_new(ctx.output, ctx.expectation)));
     SemaValueRuntime *rs = NOT_NULL(sema_module_analyze_runtime_expr(module, binop->right, sema_expr_ctx_new(ctx.output, ls->type)));
@@ -106,7 +123,16 @@ SemaValue *sema_module_analyze_expr_binop(SemaModule *module, AstBinop *binop, S
             return sema_binop_order(module, IR_BINOP_ORDER_LE, type, lss, rss, ctx.output);
         case AST_BINOP_GREATER_EQ:
             return sema_binop_order(module, IR_BINOP_ORDER_GE, type, lss, rss, ctx.output);
-    }
+
+        case AST_BINOP_OR:
+            vec_push(ctx.output->steps, ir_expr_step_new_bool_skip(lss, true, true));
+            return sema_binop_bool(module, IR_BINOP_BOOL_OR, type, binop->kind.slice,
+                lss, rss, ctx.output);
+        case AST_BINOP_AND:
+            vec_push(ctx.output->steps, ir_expr_step_new_bool_skip(lss, false, false));
+            return sema_binop_bool(module, IR_BINOP_BOOL_AND, type, binop->kind.slice,
+                lss, rss, ctx.output);
+        }
     UNREACHABLE;
 }
 
