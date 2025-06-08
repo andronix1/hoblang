@@ -31,8 +31,8 @@ SemaValue *sema_module_analyze_expr_call(SemaModule *module, AstCall *call, Sema
     }
     size_t step_id = vec_len(ctx.output->steps);
     vec_push(ctx.output->steps, ir_expr_step_new_call(args, callable));
-    return sema_value_new_runtime_expr_step(module->mempool, type->function.returns,
-            step_id);
+    return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL,
+        type->function.returns, step_id);
 }
 
 

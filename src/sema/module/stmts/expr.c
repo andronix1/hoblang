@@ -37,7 +37,7 @@ SemaValue *sema_module_analyze_expr(SemaModule *module, AstExpr *expr, SemaExprC
 
 size_t sema_module_expr_get_runtime(SemaValueRuntime *runtime, SemaExprOutput *output) {
     size_t step_id = vec_len(output->steps);
-    switch (runtime->kind) {
+    switch (runtime->val_kind) {
         case SEMA_VALUE_RUNTIME_GLOBAL:
             vec_push(output->steps, ir_expr_step_new_get_decl(runtime->global_id));
             return step_id;

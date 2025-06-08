@@ -14,8 +14,8 @@ SemaValue *sema_module_analyze_expr_path(SemaModule *module, AstPath *path, Sema
     SemaValue *value = NOT_NULL(sema_module_path_segment(module, &path->segments[0]));
     SemaValueRuntime *runtime = sema_value_is_runtime(value);
     if (runtime) {
-        value = sema_value_new_runtime_expr_step(module->mempool, runtime->type,
-            sema_module_expr_get_runtime(runtime, ctx.output));
+        value = sema_value_new_runtime_expr_step(module->mempool, runtime->kind,
+            runtime->type, sema_module_expr_get_runtime(runtime, ctx.output));
     }
     for (size_t i = 1; i < vec_len(path->segments); i++) {
         AstPathSegment *segment = &path->segments[i];

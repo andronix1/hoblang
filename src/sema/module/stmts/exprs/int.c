@@ -18,7 +18,7 @@ SemaValue *sema_module_analyze_expr_int(SemaModule *module, uint64_t val, SemaEx
         type = sema_type_new_int(module, SEMA_INT_32, true);
     }
     vec_push(ctx.output->steps, ir_expr_step_new_int(sema_type_ir_id(type), val));
-    return sema_value_new_runtime_expr_step(module->mempool, type, step_id);
+    return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, type, step_id);
 }
 
 

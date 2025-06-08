@@ -6,6 +6,7 @@
 #include "sema/module/api/value.h"
 #include "sema/module/module.h"
 #include "sema/module/scope.h"
+#include "sema/module/stmts/assign.h"
 #include "sema/module/stmts/expr.h"
 #include "sema/module/stmts/if.h"
 
@@ -37,6 +38,7 @@ bool sema_module_emit_stmt(SemaModule *module, AstStmt *stmt) {
         case AST_STMT_IF:
             return sema_module_emit_if(module, &stmt->if_else);
         case AST_STMT_ASSIGN:
+            return sema_module_emit_assign(module, &stmt->assign);
         case AST_STMT_WHILE:
             TODO;
     }

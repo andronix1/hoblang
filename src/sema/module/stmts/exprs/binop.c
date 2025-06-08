@@ -33,7 +33,8 @@ static SemaValue *sema_binop_order(
     size_t step_id = vec_len(output->steps);
     NOT_NULL(sema_type_to_ir_number_info(type, &info));
     vec_push(output->steps, ir_expr_step_new_binop(ir_expr_binop_new_order(lss, rss, kind, info)));
-    return sema_value_new_runtime_expr_step(module->mempool, sema_type_new_bool(module), step_id);
+    return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL,
+        sema_type_new_bool(module), step_id);
 }
 
 static SemaValue *sema_binop_compare(
@@ -54,7 +55,7 @@ static SemaValue *sema_binop_compare(
     } else {
         return NULL;
     }
-    return sema_value_new_runtime_expr_step(module->mempool, sema_type_new_bool(module), step_id);
+    return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, sema_type_new_bool(module), step_id);
 }
 
 static SemaValue *sema_binop_arithm(
@@ -69,7 +70,7 @@ static SemaValue *sema_binop_arithm(
     size_t step_id = vec_len(output->steps);
     vec_push(output->steps, ir_expr_step_new_binop(ir_expr_binop_new_arithmetic(
         lss, rss, kind, info)));
-    return sema_value_new_runtime_expr_step(module->mempool, type, step_id);
+    return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, type, step_id);
 }
 
 static SemaValue *sema_binop_bool(
@@ -86,7 +87,7 @@ static SemaValue *sema_binop_bool(
     size_t step_id = vec_len(output->steps);
     vec_push(output->steps, ir_expr_step_new_binop(ir_expr_binop_new_boolean(
         lss, rss, kind)));
-    return sema_value_new_runtime_expr_step(module->mempool, type, step_id);
+    return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, type, step_id);
 }
 
 SemaValue *sema_module_analyze_expr_binop(SemaModule *module, AstBinop *binop, SemaExprCtx ctx) {

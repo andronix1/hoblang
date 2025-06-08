@@ -27,6 +27,16 @@ static inline SemaType *ast_func_info_type(SemaModule *module, AstFunInfo *info)
     return sema_type_new_function(module, args, returns);
 }
 
+static inline SemaRuntimeKind ast_value_kind_to_sema(AstValueDeclKind kind) {
+    switch (kind) {
+        case AST_VALUE_DECL_VAR: return SEMA_RUNTIME_VAR;
+        case AST_VALUE_DECL_FINAL: return SEMA_RUNTIME_FINAL;
+        case AST_VALUE_DECL_CONST:
+            TODO;
+    }
+    UNREACHABLE;
+}
+
 static inline IrMutability ast_value_kind_to_ir(AstValueDeclKind kind) {
     switch (kind) {
         case AST_VALUE_DECL_VAR:
@@ -64,7 +74,7 @@ bool sema_module_fill_node_decls(SemaModule *module, AstNode *node) {
                             sema_type_ir_id(type)));
                     sema_module_push_decl(module, info->fun->name, sema_decl_new(
                         module->mempool, sema_value_new_runtime_global(module->mempool, 
-                            type, decl_id)));
+                            SEMA_RUNTIME_FINAL, type, decl_id)));
                     return true;
                 }
                 case AST_EXTERNAL_DECL_VALUE:
@@ -84,7 +94,7 @@ bool sema_module_fill_node_decls(SemaModule *module, AstNode *node) {
             IrDeclId decl_id = ir_add_decl(module->ir);
             sema_module_push_decl(module, info->info->name, sema_decl_new(
                 module->mempool, sema_value_new_runtime_global(module->mempool, 
-                    type, decl_id)));
+                    SEMA_RUNTIME_FINAL, type, decl_id)));
             IrTypeId type_id = sema_type_ir_id(type);
             info->sema.func_id = ir_init_func(module->ir, args_mut, decl_id,
                 info->global ? 
@@ -115,7 +125,7 @@ bool sema_module_fill_node_decls(SemaModule *module, AstNode *node) {
             node->value_decl.sema.local_id = local_id;
             sema_module_push_decl(module, info->name, sema_decl_new(
                 module->mempool, sema_value_new_runtime_local(module->mempool,
-                    type, local_id)));
+                    ast_value_kind_to_sema(info->kind), type, local_id)));
             return true;
         }
         case AST_NODE_STMT: return true;

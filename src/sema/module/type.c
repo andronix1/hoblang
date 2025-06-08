@@ -31,7 +31,7 @@ static inline IrType sema_type_to_ir(SemaModule* module, SemaType *type) {
             IrTypeId *args = vec_new_in(module->mempool, IrTypeId);
             vec_resize(args, vec_len(type->function.args));
             for (size_t i = 0; i < vec_len(type->function.args); i++) {
-                args[i] = sema_type_ir_id(type->function.returns);
+                args[i] = sema_type_ir_id(type->function.args[i]);
             }
             return ir_type_new_function(args, sema_type_ir_id(type->function.returns));
         }

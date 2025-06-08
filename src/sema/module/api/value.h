@@ -4,13 +4,19 @@
 #include "sema/module/api/type.h"
 
 typedef enum {
+    SEMA_RUNTIME_FINAL,
+    SEMA_RUNTIME_VAR,
+} SemaRuntimeKind;
+
+typedef enum {
     SEMA_VALUE_RUNTIME_GLOBAL,
     SEMA_VALUE_RUNTIME_LOCAL,
     SEMA_VALUE_RUNTIME_EXPR_STEP,
 } SemaValueRuntimeKind;
 
 typedef struct {
-    SemaValueRuntimeKind kind;
+    SemaRuntimeKind kind;
+    SemaValueRuntimeKind val_kind;
     SemaType *type;
 
     union {

@@ -10,27 +10,30 @@ void sema_value_print(va_list list) {
     }
 }
 
-SemaValue *sema_value_new_runtime_global(Mempool *mempool, SemaType *type, IrDeclId id)
+SemaValue *sema_value_new_runtime_global(Mempool *mempool, SemaRuntimeKind kind, SemaType *type, IrDeclId id)
     MEMPOOL_CONSTRUCT(SemaValue,
         out->kind = SEMA_VALUE_RUNTIME;
         out->runtime.type = type;
-        out->runtime.kind = SEMA_VALUE_RUNTIME_GLOBAL;
+        out->runtime.val_kind = SEMA_VALUE_RUNTIME_GLOBAL;
+        out->runtime.kind = kind;
         out->runtime.global_id = id;
     );
 
-SemaValue *sema_value_new_runtime_local(Mempool *mempool, SemaType *type, IrLocalId id)
+SemaValue *sema_value_new_runtime_local(Mempool *mempool, SemaRuntimeKind kind, SemaType *type, IrLocalId id)
     MEMPOOL_CONSTRUCT(SemaValue,
         out->kind = SEMA_VALUE_RUNTIME;
         out->runtime.type = type;
-        out->runtime.kind = SEMA_VALUE_RUNTIME_LOCAL;
+        out->runtime.val_kind = SEMA_VALUE_RUNTIME_LOCAL;
+        out->runtime.kind = kind;
         out->runtime.local_id = id;
     );
 
-SemaValue *sema_value_new_runtime_expr_step(Mempool *mempool, SemaType *type, size_t id)
+SemaValue *sema_value_new_runtime_expr_step(Mempool *mempool, SemaRuntimeKind kind, SemaType *type, size_t id)
     MEMPOOL_CONSTRUCT(SemaValue,
         out->kind = SEMA_VALUE_RUNTIME;
         out->runtime.type = type;
-        out->runtime.kind = SEMA_VALUE_RUNTIME_EXPR_STEP;
+        out->runtime.val_kind = SEMA_VALUE_RUNTIME_EXPR_STEP;
+        out->runtime.kind = kind;
         out->runtime.step_id = id;
     );
 

@@ -24,12 +24,12 @@ static void llvm_emit_cond_jmp(LlvmModule *module, IrStmtCondJmp *cond_jmp) {
         .e:
             ...
     */
-    LLVMBasicBlockRef end = LLVMAppendBasicBlock(module->func.value, "end");
+    LLVMBasicBlockRef end = LLVMAppendBasicBlock(module->func.value, "");
     LLVMBasicBlockRef final_end = cond_jmp->flow == IR_CODE_FLOW_PASSED ?
-        LLVMAppendBasicBlock(module->func.value, "final_end") : NULL;
+        LLVMAppendBasicBlock(module->func.value, "") : NULL;
     for (size_t i = 0; i < vec_len(cond_jmp->conds); i++) {
         IrStmtCondJmpBlock *block = &cond_jmp->conds[i];
-        LLVMBasicBlockRef body = LLVMAppendBasicBlock(module->func.value, "body");
+        LLVMBasicBlockRef body = LLVMAppendBasicBlock(module->func.value, "");
         LLVMValueRef value = llvm_emit_expr(module, &block->cond, true);
         LLVMBuildCondBr(module->builder, value, body, end);
         LLVMPositionBuilderAtEnd(module->builder, body);

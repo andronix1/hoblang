@@ -8,6 +8,6 @@
 SemaValue *sema_module_analyze_expr_bool(SemaModule *module, bool val, SemaExprCtx ctx) {
     size_t step_id = vec_len(ctx.output->steps);
     vec_push(ctx.output->steps, ir_expr_step_new_bool(val));
-    return sema_value_new_runtime_expr_step(module->mempool, sema_type_new_bool(module),
-        step_id);
+    return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL,
+        sema_type_new_bool(module), step_id);
 }

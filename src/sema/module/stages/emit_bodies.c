@@ -6,6 +6,7 @@
 #include "core/vec.h"
 #include "ir/api/ir.h"
 #include "ir/stmt/code.h"
+#include "ir/stmt/expr.h"
 #include "ir/stmt/stmt.h"
 #include "sema/module/api/type.h"
 #include "sema/module/api/value.h"
@@ -43,6 +44,7 @@ void sema_module_emit_func_body(SemaModule *module, AstFunDecl *func) {
         sema_module_push_decl(module, func->info->args[i].name,
             sema_decl_new(module->mempool, sema_value_new_runtime_local(
                 module->mempool,
+                SEMA_RUNTIME_VAR,
                 type->function.args[i],
                 ir_func_arg_local_id(module->ir, func->sema.func_id, i)
             )
@@ -89,7 +91,18 @@ bool sema_module_emit_node_body(SemaModule *module, AstNode *node) {
                     ));
                     return true;
                 }
-                case AST_VALUE_DECL_VAR:
+                case AST_VALUE_DECL_VAR: {
+                    sema_ss_append_stmt(module->ss, ir_stmt_new_decl_var(module->mempool,
+                        node->value_decl.sema.local_id
+                    ));
+                    sema_ss_append_stmt(module->ss, ir_stmt_new_store(module->mempool,
+                        ir_expr_new(vec_create_in(module->mempool, 
+                            ir_expr_step_new_get_local(node->value_decl.sema.local_id)
+                        )),
+                        ir_expr_new(output.steps)
+                    ));
+                    return true;
+                }
                 case AST_VALUE_DECL_CONST:
                     TODO;
             }
