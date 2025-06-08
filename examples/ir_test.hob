@@ -36,7 +36,7 @@ fun isLessThan9(c: u8) -> bool {
 global fun main() -> i32 { # declId + funcId + body
     final c: u8 = getChar();
     # TODO: fix priorities
-    if c >= '0' && (isLessThan9(c)) {
+    if c >= '0' && isLessThan9(c) {
         putChar(c + 1);
         putChar('\n');
         return 0;

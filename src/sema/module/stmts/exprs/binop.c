@@ -10,7 +10,6 @@
 #include "sema/module/stmts/expr.h"
 #include "sema/module/type.h"
 #include "sema/module/value.h"
-#include <stdio.h>
 
 static bool sema_type_to_ir_number_info(
     SemaType *type,
