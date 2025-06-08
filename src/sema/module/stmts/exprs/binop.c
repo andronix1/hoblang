@@ -92,13 +92,18 @@ static SemaValue *sema_binop_bool(
 
 SemaValue *sema_module_analyze_expr_binop(SemaModule *module, AstBinop *binop, SemaExprCtx ctx) {
     SemaValueRuntime *ls = NOT_NULL(sema_module_analyze_runtime_expr(module, binop->left, sema_expr_ctx_new(ctx.output, ctx.expectation)));
+    size_t lss = sema_module_expr_get_runtime(ls, ctx.output);
+    if (binop->kind.kind == AST_BINOP_AND) {
+        vec_push(ctx.output->steps, ir_expr_step_new_bool_skip(lss, false, false));
+    } else if (binop->kind.kind == AST_BINOP_OR) {
+        vec_push(ctx.output->steps, ir_expr_step_new_bool_skip(lss, true, true));
+    }
     SemaValueRuntime *rs = NOT_NULL(sema_module_analyze_runtime_expr(module, binop->right, sema_expr_ctx_new(ctx.output, ls->type)));
+    size_t rss = sema_module_expr_get_runtime(rs, ctx.output);
     if (!sema_type_eq(rs->type, ls->type)) {
         sema_module_err(module, binop->kind.slice, "binop can be applied to equal types only, but $t != $t", ls->type, rs->type);
         return NULL;
     }
-    size_t lss = sema_module_expr_get_runtime(ls, ctx.output);
-    size_t rss = sema_module_expr_get_runtime(rs, ctx.output);
     SemaType *type = rs->type;
     switch (binop->kind.kind) {
         case AST_BINOP_ADD:
@@ -125,14 +130,12 @@ SemaValue *sema_module_analyze_expr_binop(SemaModule *module, AstBinop *binop, S
             return sema_binop_order(module, IR_BINOP_ORDER_GE, type, lss, rss, ctx.output);
 
         case AST_BINOP_OR:
-            vec_push(ctx.output->steps, ir_expr_step_new_bool_skip(lss, true, true));
             return sema_binop_bool(module, IR_BINOP_BOOL_OR, type, binop->kind.slice,
                 lss, rss, ctx.output);
         case AST_BINOP_AND:
-            vec_push(ctx.output->steps, ir_expr_step_new_bool_skip(lss, false, false));
             return sema_binop_bool(module, IR_BINOP_BOOL_AND, type, binop->kind.slice,
                 lss, rss, ctx.output);
-        }
+    }
     UNREACHABLE;
 }
 
