@@ -31,6 +31,7 @@ AST_EXPR_STRUCT,
 #include "expr/binop.h"
 
 typedef enum {
+    IR_EXPR_STEP_BOOL,
     IR_EXPR_STEP_INT,
     IR_EXPR_STEP_REAL,
     IR_EXPR_STEP_BINOP,
@@ -55,6 +56,8 @@ typedef struct {
             IrTypeId type;
             uint64_t value;
         } integer;
+
+        bool boolean;
 
         struct {
             IrTypeId type;
@@ -149,6 +152,14 @@ static inline IrExprStep ir_expr_step_new_real(IrTypeId type, long double value)
             .type = type,
             .value = value
         }
+    };
+    return step;
+}
+
+static inline IrExprStep ir_expr_step_new_bool(bool value) {
+    IrExprStep step = {
+        .kind = IR_EXPR_STEP_BOOL,
+        .boolean = value
     };
     return step;
 }

@@ -190,6 +190,8 @@ static LLVMValueRef llvm_emit_expr_step(LlvmModule *module, LLVMValueRef *values
             LLVMPositionBuilderAtEnd(module->builder, cont);
             return NULL;
         }
+        case IR_EXPR_STEP_BOOL:
+            return LLVMConstInt(LLVMInt1Type(), step->boolean, false);
         case IR_EXPR_STEP_REAL:
         case IR_EXPR_STEP_STRUCT_FIELD:
             TODO;

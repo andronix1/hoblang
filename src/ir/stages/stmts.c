@@ -57,11 +57,12 @@ static inline IrTypeId ir_get_expr_step_type(IrStmtCtx *ctx, IrTypeId *types, Ir
             return ir->decls[step->decl_id].type;
         case IR_EXPR_STEP_GET_LOCAL:
             return ir->funcs[ctx->func].locals[step->local_id].type;
+        case IR_EXPR_STEP_BOOL:
         case IR_EXPR_STEP_BOOL_SKIP:
             return ir_add_simple_type(ir, ir_type_new_bool());
         case IR_EXPR_STEP_STRUCT_FIELD:
             TODO;
-        }
+    }
     UNREACHABLE;
 }
 

@@ -28,6 +28,8 @@ static inline AstExpr *parse_middle_expr(Parser *parser) {
             AstPath *path = NOT_NULL(parse_path(parser));
             return ast_expr_new_path(parser->mempool, ast_path_slice(path), path);
         }
+        case TOKEN_TRUE: return ast_expr_new_bool(parser->mempool, token.slice, true);
+        case TOKEN_FALSE: return ast_expr_new_bool(parser->mempool, token.slice, false);
         case TOKEN_STRING:
             return ast_expr_new_string(parser->mempool, token.slice, token.string);
         case TOKEN_INTEGER:

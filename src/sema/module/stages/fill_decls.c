@@ -81,8 +81,12 @@ bool sema_module_fill_node_decls(SemaModule *module, AstNode *node) {
             for (size_t i = 0; i < vec_len(args_mut); i++) {
                 args_mut[i] = IR_MUTABLE;
             }
+            IrDeclId decl_id = ir_add_decl(module->ir);
+            sema_module_push_decl(module, info->info->name, sema_decl_new(
+                module->mempool, sema_value_new_runtime_global(module->mempool, 
+                    type, decl_id)));
             IrTypeId type_id = sema_type_ir_id(type);
-            info->sema.func_id = ir_init_func(module->ir, args_mut, ir_add_decl(module->ir),
+            info->sema.func_id = ir_init_func(module->ir, args_mut, decl_id,
                 info->global ? 
                     ir_func_new_global(
                         info->global->has_alias ?

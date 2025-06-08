@@ -4,6 +4,7 @@
 #include "core/file_content.h"
 #include "core/slice.h"
 #include "lexer/token.h"
+#include "sema/module/api/type.h"
 #include "sema/module/value.h"
 #include <errno.h>
 #include <stdio.h>
@@ -28,6 +29,7 @@ void setup_log() {
     log_register('v', sema_value_print);
     log_register('V', file_in_lines_view_print);
     log_register('T', token_print);
+    log_register('t', sema_type_print);
     log_register('E', log_errno);
 
 }

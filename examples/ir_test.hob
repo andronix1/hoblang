@@ -24,9 +24,19 @@ extern(getchar) fun getChar() -> u8; # declId + externId
 type A = i32; # typeId(record)
               # INIT
 
+fun isLessThan9(c: u8) -> bool {
+    putChar('<');
+    putChar(' ');
+    putChar('9');
+    putChar('?');
+    putChar('\n');
+    return c < '9';
+}
+
 global fun main() -> i32 { # declId + funcId + body
     final c: u8 = getChar();
-    if c >= '0' && c <= '8' {
+    # TODO: fix priorities
+    if c >= '0' && (isLessThan9(c)) {
         putChar(c + 1);
         putChar('\n');
         return 0;

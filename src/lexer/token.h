@@ -17,6 +17,7 @@ typedef enum {
     TOKEN_WHILE,
     TOKEN_IMPORT,
     TOKEN_AS,
+    TOKEN_TRUE, TOKEN_FALSE,
     // Extended
     TOKEN_IDENT,
     TOKEN_CHAR,

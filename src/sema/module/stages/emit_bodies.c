@@ -9,12 +9,14 @@
 #include "ir/stmt/stmt.h"
 #include "sema/module/api/type.h"
 #include "sema/module/api/value.h"
+#include "sema/module/decl.h"
 #include "sema/module/module.h"
 #include "sema/module/scope.h"
 #include "sema/module/stages/stages.h"
 #include "sema/module/stmts/expr.h"
 #include "sema/module/stmts/stmt.h"
 #include "sema/module/type.h"
+#include "sema/module/value.h"
 
 static inline IrCode *sema_module_emit_code(SemaModule *module, AstBody *body) {
     sema_module_push_scope(module);
@@ -37,6 +39,15 @@ void sema_module_emit_func_body(SemaModule *module, AstFunDecl *func) {
         sema_scope_stack_new(module->mempool, func->sema.func_id, type->function.returns));
 
     sema_module_push_scope(module);
+    for (size_t i = 0; i < vec_len(func->info->args); i++) {
+        sema_module_push_decl(module, func->info->args[i].name,
+            sema_decl_new(module->mempool, sema_value_new_runtime_local(
+                module->mempool,
+                type->function.args[i],
+                ir_func_arg_local_id(module->ir, func->sema.func_id, i)
+            )
+        ));
+    }
     ir_init_func_body(module->ir, func->sema.func_id,
         sema_module_emit_code(module, func->body));
     sema_module_pop_scope(module);

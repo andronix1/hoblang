@@ -30,6 +30,7 @@ bool ast_expr_eq(const AstExpr *a, const AstExpr *b) {
             return true;
         case AST_EXPR_CHAR: return a->character == b->character;
         case AST_EXPR_INTEGER: return a->integer == b->integer;
+        case AST_EXPR_BOOL: return a->boolean == b->boolean;
         case AST_EXPR_SCOPE: return ast_expr_eq(a->scope, b->scope);
         case AST_EXPR_BINOP: return
             a->binop.kind.kind == b->binop.kind.kind &&
@@ -48,6 +49,9 @@ bool ast_expr_eq(const AstExpr *a, const AstExpr *b) {
     }
     UNREACHABLE;
 }
+
+AstExpr *ast_expr_new_bool(Mempool *mempool, Slice slice, bool boolean)
+    CONSTRUCT(AST_EXPR_BOOL, out->boolean = boolean)
 
 AstExpr *ast_expr_new_char(Mempool *mempool, Slice slice, char c)
     CONSTRUCT(AST_EXPR_CHAR, out->character = c)

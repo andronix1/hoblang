@@ -10,6 +10,7 @@ typedef enum {
     AST_EXPR_PATH,
     AST_EXPR_INTEGER,
     AST_EXPR_CHAR,
+    AST_EXPR_BOOL,
     AST_EXPR_STRING,
     AST_EXPR_CALL,
     AST_EXPR_SCOPE,
@@ -65,6 +66,7 @@ typedef struct AstExpr {
         AstExpr *scope;
         uint64_t integer;
         char character;
+        bool boolean;
         Slice string;
         AstCall call;
         AstBinop binop;
@@ -87,6 +89,7 @@ static inline AstBinopKind ast_binop_kind_new(AstBinopKindKind kind, Slice slice
 }
 
 AstExpr *ast_expr_new_char(Mempool *mempool, Slice slice, char c);
+AstExpr *ast_expr_new_bool(Mempool *mempool, Slice slice, bool value);
 AstExpr *ast_expr_new_path(Mempool *mempool, Slice slice, AstPath *path);
 AstExpr *ast_expr_new_integer(Mempool *mempool, Slice slice, uint64_t integer);
 AstExpr *ast_expr_new_string(Mempool *mempool, Slice slice, Slice string);
