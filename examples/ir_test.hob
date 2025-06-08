@@ -25,6 +25,7 @@ type A = i32; # typeId(record)
               # INIT
 
 fun isLessThan9(c: u8) -> bool {
+    # should comment than function executes, try enter `/` :P
     putChar('<');
     putChar(' ');
     putChar('9');
