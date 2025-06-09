@@ -53,11 +53,18 @@ fun printAlphabets(step: u8) {
         while true {
             if i > end {
                 putChar('\n');
-                end = end - step;
+                end -= step;
                 continue outer;
             }
             putChar(i);
-            i = i + 1;
+            #`
+                final expr: *u8 = &i;
+                # get_local(i)
+                # take_ref(0)
+
+                *expr <- *expr + 1;
+            `#
+            i += 1;
         }
     }
 }

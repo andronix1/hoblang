@@ -40,6 +40,8 @@ typedef enum {
     IR_EXPR_STEP_GET_LOCAL,
     IR_EXPR_STEP_CALL,
     IR_EXPR_STEP_BOOL_SKIP,
+    IR_EXPR_STEP_TAKE_REF,
+    IR_EXPR_STEP_DEREF,
     /*
     SEMA_PATH_SEGMENT_DECL,
     SEMA_PATH_SEGMENT_DEREF,
@@ -84,6 +86,9 @@ typedef struct {
             bool expect;
             bool result;
         } bool_skip;
+
+        size_t ref_step;
+        size_t deref_step;
     };
 } IrExprStep;
 
@@ -95,6 +100,22 @@ static inline IrExprStep ir_expr_step_new_bool_skip(size_t condition, bool expec
             .expect = expect,
             .result = result 
         }
+    };
+    return step;
+}
+
+static inline IrExprStep ir_expr_step_new_deref(size_t step_id) {
+    IrExprStep step = {
+        .kind = IR_EXPR_STEP_DEREF,
+        .deref_step = step_id
+    };
+    return step;
+}
+
+static inline IrExprStep ir_expr_step_new_take_ref(size_t step_id) {
+    IrExprStep step = {
+        .kind = IR_EXPR_STEP_TAKE_REF,
+        .ref_step = step_id
     };
     return step;
 }

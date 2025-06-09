@@ -11,10 +11,7 @@
 #include "sema/module/type.h"
 #include "sema/module/value.h"
 
-static bool sema_type_to_ir_number_info(
-    SemaType *type,
-    IrNumberInfo *output
-) {
+static inline bool sema_type_to_ir_number_info(SemaType *type, IrNumberInfo *output) {
     if (type->kind == SEMA_TYPE_INT) {
         *output = ir_number_info_new_int(type->integer.is_signed, sema_type_int_size_to_ir(type->integer.size));
         return true;
@@ -90,6 +87,39 @@ static SemaValue *sema_binop_bool(
     return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, type, step_id);
 }
 
+SemaValue *sema_module_append_expr_binop(SemaModule *module, SemaType *type, size_t lss, size_t rss, AstBinopKind *kind, SemaExprOutput *output) {
+    switch (kind->kind) {
+        case AST_BINOP_ADD:
+            return sema_binop_arithm(module, IR_BINOP_ARITHM_ADD, type, lss, rss, output);
+        case AST_BINOP_SUBTRACT:
+            return sema_binop_arithm(module, IR_BINOP_ARITHM_SUB, type, lss, rss, output);
+        case AST_BINOP_MULTIPLY:
+            return sema_binop_arithm(module, IR_BINOP_ARITHM_MUL, type, lss, rss, output);
+        case AST_BINOP_DIVIDE:
+            return sema_binop_arithm(module, IR_BINOP_ARITHM_DIV, type, lss, rss, output);
+
+        case AST_BINOP_EQUALS:
+            return sema_binop_compare(module, IR_COMPARE_EQ, type, lss, rss, output);
+        case AST_BINOP_NOT_EQUALS:
+            return sema_binop_compare(module, IR_COMPARE_NE, type, lss, rss, output);
+
+        case AST_BINOP_LESS:
+            return sema_binop_order(module, IR_BINOP_ORDER_LT, type, lss, rss, output);
+        case AST_BINOP_GREATER:
+            return sema_binop_order(module, IR_BINOP_ORDER_GT, type, lss, rss, output);
+        case AST_BINOP_LESS_EQ:
+            return sema_binop_order(module, IR_BINOP_ORDER_LE, type, lss, rss, output);
+        case AST_BINOP_GREATER_EQ:
+            return sema_binop_order(module, IR_BINOP_ORDER_GE, type, lss, rss, output);
+
+        case AST_BINOP_OR:
+            return sema_binop_bool(module, IR_BINOP_BOOL_OR, type, kind->slice, lss, rss, output);
+        case AST_BINOP_AND:
+            return sema_binop_bool(module, IR_BINOP_BOOL_AND, type, kind->slice, lss, rss, output);
+    }
+    UNREACHABLE;
+}
+
 SemaValue *sema_module_analyze_expr_binop(SemaModule *module, AstBinop *binop, SemaExprCtx ctx) {
     SemaValueRuntime *ls = NOT_NULL(sema_module_analyze_runtime_expr(module, binop->left, sema_expr_ctx_new(ctx.output, ctx.expectation)));
     size_t lss = sema_module_expr_get_runtime(ls, ctx.output);
@@ -105,38 +135,7 @@ SemaValue *sema_module_analyze_expr_binop(SemaModule *module, AstBinop *binop, S
         return NULL;
     }
     SemaType *type = rs->type;
-    switch (binop->kind.kind) {
-        case AST_BINOP_ADD:
-            return sema_binop_arithm(module, IR_BINOP_ARITHM_ADD, type, lss, rss, ctx.output);
-        case AST_BINOP_SUBTRACT:
-            return sema_binop_arithm(module, IR_BINOP_ARITHM_SUB, type, lss, rss, ctx.output);
-        case AST_BINOP_MULTIPLY:
-            return sema_binop_arithm(module, IR_BINOP_ARITHM_MUL, type, lss, rss, ctx.output);
-        case AST_BINOP_DIVIDE:
-            return sema_binop_arithm(module, IR_BINOP_ARITHM_DIV, type, lss, rss, ctx.output);
-
-        case AST_BINOP_EQUALS:
-            return sema_binop_compare(module, IR_COMPARE_EQ, type, lss, rss, ctx.output);
-        case AST_BINOP_NOT_EQUALS:
-            return sema_binop_compare(module, IR_COMPARE_NE, type, lss, rss, ctx.output);
-
-        case AST_BINOP_LESS:
-            return sema_binop_order(module, IR_BINOP_ORDER_LT, type, lss, rss, ctx.output);
-        case AST_BINOP_GREATER:
-            return sema_binop_order(module, IR_BINOP_ORDER_GT, type, lss, rss, ctx.output);
-        case AST_BINOP_LESS_EQ:
-            return sema_binop_order(module, IR_BINOP_ORDER_LE, type, lss, rss, ctx.output);
-        case AST_BINOP_GREATER_EQ:
-            return sema_binop_order(module, IR_BINOP_ORDER_GE, type, lss, rss, ctx.output);
-
-        case AST_BINOP_OR:
-            return sema_binop_bool(module, IR_BINOP_BOOL_OR, type, binop->kind.slice,
-                lss, rss, ctx.output);
-        case AST_BINOP_AND:
-            return sema_binop_bool(module, IR_BINOP_BOOL_AND, type, binop->kind.slice,
-                lss, rss, ctx.output);
-    }
-    UNREACHABLE;
+    return sema_module_append_expr_binop(module, type, lss, rss, &binop->kind, ctx.output);
 }
 
 

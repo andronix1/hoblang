@@ -71,7 +71,7 @@ static void llvm_emit_loop(LlvmModule *module, IrStmtLoop *loop) {
 static void llvm_emit_stmt(LlvmModule *module, IrStmt *stmt) {
     switch (stmt->kind) {
         case IR_STMT_EXPR:
-            llvm_emit_expr(module, &stmt->expr, false);
+            llvm_emit_expr(module, &stmt->expr, true);
             break;
         case IR_STMT_RET:
             LLVMBuildRet(module->builder, llvm_emit_expr(module, &stmt->ret.value, true));
@@ -90,8 +90,7 @@ static void llvm_emit_stmt(LlvmModule *module, IrStmt *stmt) {
                 module->ir->funcs[module->func.id].locals[stmt->var_id].type]);
             break;
         case IR_STMT_INIT_FINAL:
-            module->func.locals[stmt->var_id] = llvm_emit_expr(module,
-                &stmt->init_final.value, true);
+            module->func.locals[stmt->var_id] = llvm_emit_expr(module, &stmt->init_final.value, true);
             break;
         case IR_STMT_COND_JMP:
             llvm_emit_cond_jmp(module, &stmt->cond_jmp);

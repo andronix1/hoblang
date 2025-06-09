@@ -6,6 +6,7 @@
 #include "ir/stmt/code.h"
 #include "ir/stmt/expr.h"
 #include "ir/stmt/stmt.h"
+#include "ir/type/type.h"
 #include <alloca.h>
 #include <stdio.h>
 #include <string.h>
@@ -41,8 +42,7 @@ static inline IrTypeId ir_get_expr_step_type(IrStmtCtx *ctx, IrTypeId *types, Ir
     Ir *ir = ctx->ir;
     switch (step->kind) {
         case IR_EXPR_STEP_CALL: {
-            IrTypeId callable_id = ir_type_record_resolve_simple(ir,
-                types[step->call.callable]);
+            IrTypeId callable_id = ir_type_record_resolve_simple(ir, types[step->call.callable]);
             IrType *type = &ir->types[callable_id].simple;
             assert(type->kind == IR_TYPE_FUNCTION);
             return type->function.returns;
@@ -55,6 +55,14 @@ static inline IrTypeId ir_get_expr_step_type(IrStmtCtx *ctx, IrTypeId *types, Ir
             return ir_get_binop_type(ir, types, &step->binop);
         case IR_EXPR_STEP_GET_DECL:
             return ir->decls[step->decl_id].type;
+        case IR_EXPR_STEP_TAKE_REF:
+            return ir_add_simple_type(ir, ir_type_new_pointer(types[step->ref_step]));
+        case IR_EXPR_STEP_DEREF: {
+            IrTypeId source_id = ir_type_record_resolve_simple(ir, types[step->deref_step]);
+            IrType *type = &ir->types[source_id].simple;
+            assert(type->kind == IR_TYPE_POINTER);
+            return type->pointer_to;
+        }
         case IR_EXPR_STEP_GET_LOCAL:
             return ir->funcs[ctx->func].locals[step->local_id].type;
         case IR_EXPR_STEP_BOOL:

@@ -6,7 +6,6 @@
 #include "ir/decls.h"
 #include "ir/stmt/expr.h"
 #include "llvm/module/module.h"
-#include "llvm/module/mut.h"
 #include "ir/ir.h"
 #include <alloca.h>
 #include <assert.h>
@@ -59,9 +58,31 @@ static inline LlvmEmitExprCtx llvm_emit_expr_ctx_new() {
     return ctx;
 }
 
-static LLVMValueRef llvm_emit_expr_binop(LlvmModule *module, LLVMValueRef *values, IrBinop *binop) {
-    LLVMValueRef ls = values[binop->ls];
-    LLVMValueRef rs = values[binop->rs];
+typedef struct {
+    LLVMValueRef value;
+    LLVMTypeRef type;
+    bool loaded;
+} LlvmEmitStepRes;
+
+static inline LlvmEmitStepRes llvm_emit_step_res_new(LLVMValueRef value, bool loaded) {
+    LlvmEmitStepRes res = {
+        .value = value,     
+        .loaded = loaded,     
+    };
+    return res;
+}
+
+static inline LLVMValueRef llvm_get_res_value(LlvmModule *module, LlvmEmitStepRes *res) {
+    assert(res->value);
+    if (!res->loaded) {
+        return LLVMBuildLoad2(module->builder, res->type, res->value, "");
+    }
+    return res->value;
+}
+
+static LLVMValueRef llvm_emit_expr_binop(LlvmModule *module, LlvmEmitStepRes *results, IrBinop *binop) {
+    LLVMValueRef ls = llvm_get_res_value(module, &results[binop->ls]);
+    LLVMValueRef rs = llvm_get_res_value(module, &results[binop->rs]);
     switch (binop->kind) {
         case IR_BINOP_COMPARE:
             switch (binop->compare.kind) {
@@ -76,8 +97,7 @@ static LLVMValueRef llvm_emit_expr_binop(LlvmModule *module, LLVMValueRef *value
                     switch (binop->compare.val_kind) {
                         case IR_COMPARE_NUMBER:
                         case IR_COMPARE_BOOL:
-                            return LLVMBuildICmp(module->builder, LLVMIntNE,
-                                values[binop->ls], values[binop->rs], "");
+                            return LLVMBuildICmp(module->builder, LLVMIntNE, ls, rs, "");
                     }
                     UNREACHABLE;
             }
@@ -136,50 +156,45 @@ static LLVMValueRef llvm_emit_expr_binop(LlvmModule *module, LLVMValueRef *value
     UNREACHABLE;
 }
 
-static LLVMValueRef llvm_emit_expr_step(LlvmModule *module, LLVMValueRef *values, IrExprStep *steps, size_t step_id, LlvmEmitExprCtx *ctx, bool load) {
+static LlvmEmitStepRes llvm_emit_expr_step(
+    LlvmModule *module,
+    LlvmEmitStepRes *results,
+    IrExprStep *steps, size_t step_id,
+    LlvmEmitExprCtx *ctx
+) {
     IrExprStep *step = &steps[step_id];
     switch (step->kind) {
         case IR_EXPR_STEP_INT:
-            return LLVMConstInt(
+            return llvm_emit_step_res_new(LLVMConstInt(
                 module->types[step->integer.type],
                 step->integer.value,
                 ir_type_int_is_signed(module->ir, step->integer.type)
-            );
+            ), true);
         case IR_EXPR_STEP_CALL: {
             LLVMValueRef *args = alloca(sizeof(LLVMValueRef) * vec_len(step->call.args));
             for (size_t i = 0; i < vec_len(step->call.args); i++) {
-                args[i] = values[step->call.args[i]];
+                args[i] = llvm_get_res_value(module, &results[step->call.args[i]]);
             }
-            return LLVMBuildCall2(
+            return llvm_emit_step_res_new(LLVMBuildCall2(
                 module->builder,
                 module->types[steps[step->call.callable].type],
-                values[step->call.callable],
+                llvm_get_res_value(module, &results[step->call.callable]),
                 args, vec_len(step->call.args),
                 ""
-            );
+            ), true);
         }
         case IR_EXPR_STEP_GET_DECL: {
             IrDecl *decl = &module->ir->decls[step->decl_id];
-            return load ? llvm_value_get(
-                module,
-                decl->mutability,
-                module->types[decl->type],
-                module->decls[step->decl_id]
-            ) : module->decls[step->decl_id];
+            return llvm_emit_step_res_new(module->decls[step->decl_id], decl->mutability == IR_IMMUTABLE);
         }
         case IR_EXPR_STEP_GET_LOCAL: {
             IrFuncLocal *local = &module->ir->funcs[module->func.id].locals[step->local_id];
-            return load ? llvm_value_get(
-                module,
-                local->mutability,
-                module->types[local->type],
-                module->func.locals[step->local_id]
-            ) : module->func.locals[step->local_id];
+            return llvm_emit_step_res_new(module->func.locals[step->local_id], local->mutability == IR_IMMUTABLE);
         }
         case IR_EXPR_STEP_BINOP:
-            return llvm_emit_expr_binop(module, values, &step->binop);
+            return llvm_emit_step_res_new(llvm_emit_expr_binop(module, results, &step->binop), true);
         case IR_EXPR_STEP_BOOL_SKIP: {
-            LLVMValueRef check = values[step->bool_skip.condition];
+            LLVMValueRef check = llvm_get_res_value(module, &results[step->bool_skip.condition]);
             if (!step->bool_skip.expect) {
                 check = LLVMBuildNot(module->builder, check, "");
             }
@@ -188,10 +203,16 @@ static LLVMValueRef llvm_emit_expr_step(LlvmModule *module, LLVMValueRef *values
             llvm_emit_expr_ctx_append(module, ctx, LLVMConstInt(LLVMInt1Type(),
                 step->bool_skip.result, false));
             LLVMPositionBuilderAtEnd(module->builder, cont);
-            return NULL;
+            return llvm_emit_step_res_new(NULL, false);
         }
         case IR_EXPR_STEP_BOOL:
-            return LLVMConstInt(LLVMInt1Type(), step->boolean, false);
+            return llvm_emit_step_res_new(LLVMConstInt(LLVMInt1Type(), step->boolean, false), true);
+        case IR_EXPR_STEP_TAKE_REF: {
+            assert(!results[step->ref_step].loaded);
+            return llvm_emit_step_res_new(results[step->ref_step].value, true);
+        }
+        case IR_EXPR_STEP_DEREF:
+            return llvm_emit_step_res_new(llvm_get_res_value(module, &results[step->deref_step]), false);
         case IR_EXPR_STEP_REAL:
         case IR_EXPR_STEP_STRUCT_FIELD:
             TODO;
@@ -200,25 +221,27 @@ static LLVMValueRef llvm_emit_expr_step(LlvmModule *module, LLVMValueRef *values
 }
 
 LLVMValueRef llvm_emit_expr(LlvmModule *module, IrExpr *expr, bool load) {
-    LLVMValueRef *values = alloca(sizeof(LLVMValueRef) * vec_len(expr->steps));
+    LlvmEmitStepRes *results = alloca(sizeof(LlvmEmitStepRes) * vec_len(expr->steps));
     LlvmEmitExprCtx ctx = llvm_emit_expr_ctx_new();
     for (size_t i = 0; i < vec_len(expr->steps); i++) {
-        values[i] = llvm_emit_expr_step(module, values,
-            expr->steps, i,
-            &ctx,
-            i != vec_len(expr->steps) - 1 || load
-        );
+        results[i] = llvm_emit_expr_step(module, results, expr->steps, i, &ctx);
+        if (results[i].value) {
+            results[i].type = module->types[expr->steps[i].type];
+        }
     }
     size_t last_step = vec_len(expr->steps) - 1;
     if (!llvm_emit_expr_ctx_is_empty(&ctx)) {
-        llvm_emit_expr_ctx_append(module, &ctx, values[last_step]);
+        llvm_emit_expr_ctx_append(module, &ctx, llvm_get_res_value(module, &results[last_step]));
         LLVMBuildBr(module->builder, ctx.end);
         LLVMPositionBuilderAtEnd(module->builder, ctx.end);
-        LLVMValueRef result = LLVMBuildPhi(module->builder,
-            module->types[expr->steps[last_step].type], "");
+        LLVMValueRef result = LLVMBuildPhi(module->builder, module->types[expr->steps[last_step].type], "");
         LLVMAddIncoming(result, ctx.values, ctx.bbs, llvm_emit_expr_ctx_len(&ctx));
         return result;
     }
-    return values[last_step];
+    if (!load) {
+        assert(!results[last_step].loaded);
+        return results[last_step].value;
+    }
+    return llvm_get_res_value(module, &results[last_step]);
 }
 

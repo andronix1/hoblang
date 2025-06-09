@@ -36,6 +36,7 @@ static inline IrType sema_type_to_ir(SemaModule* module, SemaType *type) {
             return ir_type_new_function(args, sema_type_ir_id(type->function.returns));
         }
         case SEMA_TYPE_RECORD: UNREACHABLE;
+        case SEMA_TYPE_POINTER: return ir_type_new_pointer(sema_type_ir_id(type->pointer_to));
     }
     UNREACHABLE;
 }
@@ -67,6 +68,9 @@ SemaType *sema_type_new_int(SemaModule *module, SemaTypeIntSize size, bool is_si
         out->integer.size = size;
         out->integer.is_signed = is_signed;
     )
+
+SemaType *sema_type_new_pointer(SemaModule *module, SemaType *pointer_to)
+    SEMA_TYPE_CONSTRUCT(SEMA_TYPE_POINTER, out->pointer_to = pointer_to)
 
 SemaType *sema_type_new_function(SemaModule *module, SemaType **args, SemaType *returns)
     SEMA_TYPE_CONSTRUCT(SEMA_TYPE_FUNCTION,

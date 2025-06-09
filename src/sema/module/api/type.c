@@ -35,6 +35,8 @@ void sema_type_print(va_list list) {
             break;
         case SEMA_TYPE_RECORD:
             TODO;
+        case SEMA_TYPE_POINTER:
+            logs("*$t", type->pointer_to);
     }
 }
 
@@ -61,6 +63,8 @@ bool sema_type_eq(const SemaType *a, const SemaType *b) {
                 }
             }
             return sema_type_eq(a->function.returns, b->function.returns);
+        case SEMA_TYPE_POINTER:
+            return sema_type_eq(a->pointer_to, b->pointer_to);
     }
     UNREACHABLE;
 }

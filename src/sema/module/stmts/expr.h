@@ -14,11 +14,13 @@ typedef struct {
     SemaType *expectation;
 } SemaExprCtx;
 
-static inline SemaExprOutput sema_expr_output_new(Mempool *mempool) {
-    SemaExprOutput output = {
-        .steps = vec_new_in(mempool, IrExprStep)
-    };
+static inline SemaExprOutput sema_expr_output_new_with(IrExprStep *steps) {
+    SemaExprOutput output = { .steps = steps };
     return output;
+}
+
+static inline SemaExprOutput sema_expr_output_new(Mempool *mempool) {
+    return sema_expr_output_new_with(vec_new_in(mempool, IrExprStep));
 }
 
 static inline SemaExprCtx sema_expr_ctx_new(SemaExprOutput *output, SemaType *expectation) {
