@@ -11,6 +11,8 @@ typedef enum {
     AST_STMT_RETURN,
     AST_STMT_IF,
     AST_STMT_WHILE,
+    AST_STMT_CONTINUE,
+    AST_STMT_BREAK,
 } AstStmtKind;
 
 typedef struct {
@@ -38,12 +40,36 @@ typedef struct {
 typedef struct {
     AstExpr *cond;
     AstBody *body;
+    struct {
+        bool has;
+        Slice name;
+    } label;
 } AstWhile;
 
 typedef struct {
     Slice slice;
     AstExpr *value;
 } AstReturn;
+
+typedef struct {
+    bool is_labbeled;
+    Slice label;
+} AstLoopControl;
+
+static inline AstLoopControl ast_loop_control_new() {
+    AstLoopControl control = {
+        .is_labbeled = false
+    };
+    return control;
+}
+
+static inline AstLoopControl ast_loop_control_new_labelled(Slice label) {
+    AstLoopControl control = {
+        .is_labbeled = true,
+        .label = label
+    };
+    return control;
+}
 
 typedef struct AstStmt {
     AstStmtKind kind;
@@ -54,6 +80,8 @@ typedef struct AstStmt {
         AstAssign assign;
         AstIf if_else;
         AstWhile while_loop;
+        AstLoopControl break_loop;
+        AstLoopControl continue_loop;
     };
 } AstStmt;
 
@@ -67,9 +95,12 @@ static inline AstCondBlock ast_cond_block_new(AstExpr *expr, AstBody *body) {
     return block;
 }
 
+AstStmt *ast_stmt_new_continue(Mempool *mempool, AstLoopControl control);
+AstStmt *ast_stmt_new_break(Mempool *mempool, AstLoopControl control);
 AstStmt *ast_stmt_new_expr(Mempool *mempool, AstExpr *expr);
 AstStmt *ast_stmt_new_assign(Mempool *mempool, AstExpr *dst, AstExpr *what);
 AstStmt *ast_stmt_new_short_assign(Mempool *mempool, AstExpr *dst, AstExpr *what, AstBinopKind binop);
 AstStmt *ast_stmt_new_return(Mempool *mempool, Slice slice, AstExpr *value);
 AstStmt *ast_stmt_new_if(Mempool *mempool, AstCondBlock *conds, AstBody *else_body);
 AstStmt *ast_stmt_new_while(Mempool *mempool, AstExpr *expr, AstBody *body);
+AstStmt *ast_stmt_new_while_labelled(Mempool *mempool, AstExpr *expr, AstBody *body, Slice label);

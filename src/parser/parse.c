@@ -47,6 +47,18 @@ static AstNode *parser_next_maybe_local(Parser *parser, Token token, bool is_loc
     }
 }
 
+static inline bool parse_loop_control(Parser *parser, AstLoopControl *output) {
+    if (parser_next_is(parser, TOKEN_IDENT)) {
+        Slice label = parser_take(parser).slice;
+        PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
+        *output = ast_loop_control_new_labelled(label);
+        return true;
+    }
+    PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
+    *output = ast_loop_control_new();
+    return true;
+}
+
 static AstNode *parser_next_full(Parser *parser, Token token) {
     switch (token.kind) {
         case TOKEN_IDENT:
@@ -85,9 +97,18 @@ static AstNode *parser_next_full(Parser *parser, Token token) {
         }
         case TOKEN_IF: return parse_if(parser);
         case TOKEN_WHILE: {
+            bool labelled = parser_next_should_be(parser, TOKEN_DOT);
+            Slice label;
+            if (labelled) {
+                label = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
+            }
             AstExpr *cond = NOT_NULL(parse_expr(parser));
             AstBody *body = NOT_NULL(parse_body(parser));
-            return ast_node_new_stmt(parser->mempool, ast_stmt_new_while(parser->mempool, cond, body));
+            return ast_node_new_stmt(parser->mempool,
+                labelled ?
+                    ast_stmt_new_while_labelled(parser->mempool, cond, body, label) :
+                    ast_stmt_new_while(parser->mempool, cond, body)
+            );
         }
         case TOKEN_IMPORT: {
             Token path_token = PARSER_EXPECT_NEXT(parser, TOKEN_STRING);
@@ -95,6 +116,16 @@ static AstNode *parser_next_full(Parser *parser, Token token) {
             Slice alias = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
             PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
             return ast_node_new_import(parser->mempool, path_token.slice, path_token.string, alias);
+        }
+        case TOKEN_CONTINUE: {
+            AstLoopControl output;
+            NOT_NULL(parse_loop_control(parser, &output));
+            return ast_node_new_stmt(parser->mempool, ast_stmt_new_continue(parser->mempool, output));
+        }
+        case TOKEN_BREAK: {
+            AstLoopControl output;
+            NOT_NULL(parse_loop_control(parser, &output));
+            return ast_node_new_stmt(parser->mempool, ast_stmt_new_break(parser->mempool, output));
         }
         default: return parser_next_maybe_local(parser, token, false);
     }

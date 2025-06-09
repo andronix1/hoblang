@@ -21,8 +21,14 @@ bool sema_module_emit_while(SemaModule *module, AstWhile *while_loop) {
         sema_module_err(module, while_loop->cond->slice, "only booleans can be used in while statement conditions, but $t passed", runtime->type);
         return false;
     }
-    IrCode *code = NOT_NULL(sema_module_emit_code(module, while_loop->body));
+
     IrLoopId id = ir_func_add_loop(module->ir, module->ss->func_id);
+    sema_module_push_loop(module, while_loop->label.has ?
+            sema_loop_new_labbeled(id, while_loop->label.name) :
+            sema_loop_new(id));
+    IrCode *code = NOT_NULL(sema_module_emit_code(module, while_loop->body));
+    sema_module_pop_loop(module);
+
     IrStmtCondJmpBlock *conds = vec_create_in(module->mempool,
         ir_stmt_cond_jmp_block(ir_expr_new(output.steps), code),
     );

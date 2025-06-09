@@ -4,11 +4,22 @@
 #include "core/mempool.h"
 #include "core/assert.h"
 #include "core/null.h"
+#include "core/slice.h"
 
 #define CONSTRUCT(KIND, FIELDS) MEMPOOL_CONSTRUCT(AstStmt, { \
     out->kind = KIND; \
     FIELDS; \
 })
+
+static inline bool loop_controls_eq(const AstLoopControl *a, const AstLoopControl *b) {
+    if (a->is_labbeled != b->is_labbeled) {
+        return false;
+    }
+    if (a->is_labbeled) {
+        return slice_eq(a->label, b->label);
+    }
+    return true;
+}
 
 bool ast_stmt_eq(const AstStmt *a, const AstStmt *b) {
     if (a->kind != b->kind) {
@@ -40,9 +51,19 @@ bool ast_stmt_eq(const AstStmt *a, const AstStmt *b) {
         case AST_STMT_WHILE:
             return ast_expr_eq(a->while_loop.cond, b->while_loop.cond) &&
                 ast_body_eq(a->while_loop.body, b->while_loop.body);
+        case AST_STMT_CONTINUE:
+            return loop_controls_eq(&a->continue_loop, &b->continue_loop);
+        case AST_STMT_BREAK:
+            return loop_controls_eq(&a->break_loop, &b->break_loop);
     }
     UNREACHABLE;
 }
+
+AstStmt *ast_stmt_new_continue(Mempool *mempool, AstLoopControl control)
+    CONSTRUCT(AST_STMT_CONTINUE, out->continue_loop = control;)
+
+AstStmt *ast_stmt_new_break(Mempool *mempool, AstLoopControl control)
+    CONSTRUCT(AST_STMT_BREAK, out->break_loop = control;)
 
 AstStmt *ast_stmt_new_assign(Mempool *mempool, AstExpr *dst, AstExpr *what)
     CONSTRUCT(AST_STMT_ASSIGN,
@@ -66,7 +87,19 @@ AstStmt *ast_stmt_new_return(Mempool *mempool, Slice slice, AstExpr *value)
     CONSTRUCT(AST_STMT_RETURN, out->ret.value = value; out->ret.slice = slice;)
 
 AstStmt *ast_stmt_new_while(Mempool *mempool, AstExpr *expr, AstBody *body)
-    CONSTRUCT(AST_STMT_WHILE, out->while_loop.cond = expr; out->while_loop.body = body;)
+    CONSTRUCT(AST_STMT_WHILE,
+        out->while_loop.cond = expr;
+        out->while_loop.body = body;
+        out->while_loop.label.has = false;
+    )
+
+AstStmt *ast_stmt_new_while_labelled(Mempool *mempool, AstExpr *expr, AstBody *body, Slice label)
+    CONSTRUCT(AST_STMT_WHILE,
+        out->while_loop.cond = expr;
+        out->while_loop.body = body;
+        out->while_loop.label.has = true;
+        out->while_loop.label.name = label;
+    )
 
 AstStmt *ast_stmt_new_if(Mempool *mempool, AstCondBlock *conds, AstBody *else_body)
     CONSTRUCT(AST_STMT_IF, out->if_else.conds = conds; out->if_else.else_body = else_body;)

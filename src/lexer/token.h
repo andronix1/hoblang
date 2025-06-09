@@ -16,6 +16,7 @@ typedef enum {
     TOKEN_IF, TOKEN_ELSE,
     TOKEN_WHILE,
     TOKEN_IMPORT,
+    TOKEN_CONTINUE, TOKEN_BREAK,
     TOKEN_AS,
     TOKEN_TRUE, TOKEN_FALSE,
     // Extended

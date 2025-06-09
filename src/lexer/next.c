@@ -164,6 +164,10 @@ static Token lexer_try_next(Lexer *lexer) {
                 else if (slice_eq(slice, slice_from_cstr("while"))) return token_simple(TOKEN_WHILE);
                 else if (slice_eq(slice, slice_from_cstr("import"))) return token_simple(TOKEN_IMPORT);
                 else if (slice_eq(slice, slice_from_cstr("as"))) return token_simple(TOKEN_AS);
+                else if (slice_eq(slice, slice_from_cstr("true"))) return token_simple(TOKEN_TRUE);
+                else if (slice_eq(slice, slice_from_cstr("false"))) return token_simple(TOKEN_FALSE);
+                else if (slice_eq(slice, slice_from_cstr("continue"))) return token_simple(TOKEN_CONTINUE);
+                else if (slice_eq(slice, slice_from_cstr("break"))) return token_simple(TOKEN_BREAK);
                 else return token_simple(TOKEN_IDENT);
             }
             return token_simple(TOKEN_FAILED);

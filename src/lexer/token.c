@@ -38,6 +38,8 @@ void token_print(va_list list) {
         case TOKEN_GLOBAL: printf("`global`"); return;
         case TOKEN_EXTERN: printf("`extern`"); return;
         case TOKEN_RETURN: printf("`return`"); return;
+        case TOKEN_CONTINUE: printf("`continue`"); return;
+        case TOKEN_BREAK: printf("`break`"); return;
         case TOKEN_VAR: printf("`var`"); return;
         case TOKEN_FINAL: printf("`final`"); return;
         case TOKEN_CONST: printf("`const`"); return;

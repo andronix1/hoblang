@@ -1,6 +1,7 @@
 #include "scope.h"
 #include "core/keymap.h"
 #include "core/mempool.h"
+#include "core/slice.h"
 #include "core/vec.h"
 #include "sema/module/api/module.h"
 #include "sema/module/module.h"
@@ -10,7 +11,8 @@ SemaScopeStack *sema_scope_stack_new(Mempool *mempool, IrFuncId func_id, SemaTyp
     MEMPOOL_CONSTRUCT(SemaScopeStack,
         out->returns = returns;
         out->func_id = func_id;
-        out->scopes = vec_new_in(mempool, SemaScope)
+        out->scopes = vec_new_in(mempool, SemaScope);
+        out->loops = vec_new_in(mempool, SemaLoop);
     )
 
 static inline SemaScope sema_scope_new(Mempool *mempool) {
@@ -19,6 +21,36 @@ static inline SemaScope sema_scope_new(Mempool *mempool) {
         .stmts = vec_new_in(mempool, IrStmt*)
     };
     return scope;
+}
+
+IrLoopId *sema_ss_labelled_loop(SemaScopeStack *ss, Slice label) {
+    for (ssize_t i = (ssize_t)vec_len(ss->loops) - 1; i >= 0; i--) {
+        SemaLoop *loop = &ss->loops[i];
+        if (loop->is_labbeled && slice_eq(label, loop->label)) {
+            return &loop->id;
+        }
+    }
+    return NULL;
+}
+
+IrLoopId *sema_ss_top_loop(SemaScopeStack *ss) {
+    if (vec_len(ss->loops) == 0) {
+        return NULL;
+    }
+    return &vec_top(ss->loops)->id;
+}
+
+bool sema_ss_try_push_loop(SemaScopeStack *ss, SemaLoop loop) {
+    if (loop.is_labbeled && sema_ss_labelled_loop(ss, loop.label)) {
+        return false;
+    }
+    vec_push(ss->loops, loop);
+    return true;
+}
+
+void sema_ss_pop_loop(SemaScopeStack *ss) {
+    assert(vec_top(ss->loops));
+    vec_pop(ss->loops);
 }
 
 void sema_ss_push_scope(SemaScopeStack *ss, Mempool *mempool) {

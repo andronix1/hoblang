@@ -104,6 +104,7 @@ AstFunArg ast_fun_arg_new(Slice name, AstType *type) {
     };
     return arg;
 }
+
 AstFunInfo *ast_fun_info_new(Mempool *mempool,
     bool is_local, Slice name,
     AstFunArg *args, AstType *returns
