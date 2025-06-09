@@ -10,6 +10,10 @@ void llvm_func_ctx_set(LlvmModule *module, IrFuncId id, LLVMValueRef value) {
         sizeof(LLVMValueRef) * vec_len(module->ir->funcs[id].locals),
         alignof(LLVMValueRef)
     );
+    module->func.loops = __mempool_alloc(module->mempool,
+        sizeof(LlvmLoopInfo) * module->ir->funcs[id].loops_count,
+        alignof(LlvmLoopInfo)
+    );
 }
 
 LlvmState llvm_switch_state(LlvmModule *llvm, LlvmState state) {

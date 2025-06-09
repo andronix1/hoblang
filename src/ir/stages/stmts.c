@@ -148,6 +148,14 @@ static inline IrCodeFlow ir_fill_stmt(IrStmtCtx *ctx, IrStmt *stmt) {
             return IR_CODE_FLOW_RETURN;
         case IR_STMT_COND_JMP:
             return ir_fill_stmt_cond_jmp(ctx, &stmt->cond_jmp);
+        case IR_STMT_LOOP:
+            ir_fill_stmts_code(ctx, stmt->loop.code);
+            // TODO
+            return IR_CODE_FLOW_PASSED;
+        case IR_STMT_BREAK:
+            return IR_CODE_FLOW_LOOP_BREAK;
+        case IR_STMT_CONTINUE:
+            return IR_CODE_FLOW_LOOP_BREAK;
     }
     UNREACHABLE;
 }

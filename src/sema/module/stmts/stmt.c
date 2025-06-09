@@ -9,6 +9,7 @@
 #include "sema/module/stmts/assign.h"
 #include "sema/module/stmts/expr.h"
 #include "sema/module/stmts/if.h"
+#include "sema/module/stmts/while.h"
 
 bool sema_module_emit_stmt(SemaModule *module, AstStmt *stmt) {
     switch (stmt->kind) {
@@ -20,7 +21,10 @@ bool sema_module_emit_stmt(SemaModule *module, AstStmt *stmt) {
             return true;
         }
         case AST_STMT_RETURN: {
-            assert(stmt->ret.value);
+            if (!stmt->ret.value) {
+                sema_ss_append_stmt(module->ss, ir_stmt_new_ret_void(module->mempool));
+                return true;
+            }
 
             SemaExprOutput output = sema_expr_output_new(module->mempool);
             SemaValueRuntime *runtime = NOT_NULL(sema_module_analyze_runtime_expr(module,
@@ -40,7 +44,7 @@ bool sema_module_emit_stmt(SemaModule *module, AstStmt *stmt) {
         case AST_STMT_ASSIGN:
             return sema_module_emit_assign(module, &stmt->assign);
         case AST_STMT_WHILE:
-            TODO;
+            return sema_module_emit_while(module, &stmt->while_loop);
     }
     UNREACHABLE;
 }

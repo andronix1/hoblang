@@ -101,6 +101,7 @@ static IrFuncInfo ir_func_info_new(
         .locals = locals,
         .decl_id = id,
         .type_id = type_id,
+        .loops_count = 0,
     };
     return info;
 }
@@ -122,6 +123,10 @@ IrLocalId ir_func_add_local(Ir *ir, IrFuncId id, IrFuncLocal local) {
     IrFuncInfo *info = &ir->funcs[id];
     vec_push(info->locals, local);
     return vec_len(info->locals) - 1;
+}
+
+IrLoopId ir_func_add_loop(Ir *ir, IrFuncId id) {
+    return ir->funcs[id].loops_count++;
 }
 
 IrLocalId ir_func_arg_local_id(Ir *ir, IrFuncId id, size_t arg_id) {

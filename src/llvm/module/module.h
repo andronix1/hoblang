@@ -12,8 +12,22 @@ typedef struct {
 } LlvmState;
 
 typedef struct {
+    LLVMBasicBlockRef begin;
+    LLVMBasicBlockRef end;
+} LlvmLoopInfo;
+
+static inline LlvmLoopInfo llvm_loop_info_new(LLVMBasicBlockRef begin, LLVMBasicBlockRef end) {
+    LlvmLoopInfo info = {
+        .begin = begin,
+        .end = end,
+    };
+    return info;
+}
+
+typedef struct {
     IrFuncId id;
     LLVMValueRef *locals;
+    LlvmLoopInfo *loops;
     LLVMValueRef value;
 } LlvmFuncCtx;
 

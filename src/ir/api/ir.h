@@ -6,6 +6,7 @@
 #include "ir/api/type.h"
 #include "ir/extern.h"
 #include "ir/func.h"
+#include "ir/stmt/stmt.h"
 #include "ir/type/type.h"
 
 typedef struct Ir Ir;
@@ -23,6 +24,7 @@ IrExternId ir_init_extern(Ir *ir, IrDeclId id, IrExtern ext);
 IrLocalId ir_func_arg_local_id(Ir *ir, IrFuncId id, size_t arg_id);
 IrFuncId ir_init_func(Ir *ir, IrMutability *args_mut, IrDeclId id, IrFunc func);
 IrLocalId ir_func_add_local(Ir *ir, IrFuncId id, IrFuncLocal local);
+IrLoopId ir_func_add_loop(Ir *ir, IrFuncId id);
 void ir_init_func_body(Ir *ir, IrFuncId id, IrCode *code);
 
 bool ir_type_int_is_signed(Ir *ir, IrTypeId id);

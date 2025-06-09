@@ -5,6 +5,22 @@
 IrStmt *ir_stmt_new_expr(Mempool *mempool, IrExpr expr)
     STMT_CONSTRUCT(IR_STMT_EXPR, out->expr = expr)
 
+IrStmt *ir_stmt_new_loop(Mempool *mempool, IrLoopId id, IrCode *code)
+    STMT_CONSTRUCT(IR_STMT_LOOP,
+        out->loop.code = code;
+        out->loop.id = id;
+    )
+
+IrStmt *ir_stmt_new_break(Mempool *mempool, IrLoopId id)
+    STMT_CONSTRUCT(IR_STMT_BREAK,
+        out->break_loop.id = id;
+    )
+
+IrStmt *ir_stmt_new_continue(Mempool *mempool, IrLoopId id)
+    STMT_CONSTRUCT(IR_STMT_CONTINUE,
+        out->continue_loop.id = id;
+    )
+
 IrStmt *ir_stmt_new_store(Mempool *mempool, IrExpr lvalue, IrExpr rvalue)
     STMT_CONSTRUCT(IR_STMT_STORE,
         out->store.lvalue = lvalue;

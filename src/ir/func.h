@@ -53,4 +53,5 @@ typedef struct {
     IrLocalId *args;
     IrDeclId decl_id;
     IrTypeId type_id;
+    size_t loops_count;
 } IrFuncInfo;

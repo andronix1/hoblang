@@ -1,10 +1,13 @@
 #include "code.h"
+#include "core/assert.h"
 #include "ir/stmt/code.h"
 #include "ir/stmt/stmt.h"
 #include "ir/ir.h"
 #include "llvm/module/emit/expr.h"
 #include "llvm/module/module.h"
 #include <llvm-c/Core.h>
+#include <llvm-c/Types.h>
+#include <stdio.h>
 
 static void llvm_emit_cond_jmp(LlvmModule *module, IrStmtCondJmp *cond_jmp) {
     /*
@@ -50,6 +53,22 @@ static void llvm_emit_cond_jmp(LlvmModule *module, IrStmtCondJmp *cond_jmp) {
     LLVMPositionBuilderAtEnd(module->builder, final_end);
 }
 
+static void llvm_emit_loop(LlvmModule *module, IrStmtLoop *loop) {
+    LLVMBasicBlockRef begin = LLVMAppendBasicBlock(module->func.value, "");
+    LLVMBasicBlockRef end = LLVMAppendBasicBlock(module->func.value, "");
+    module->func.loops[loop->id] = llvm_loop_info_new(begin, end);
+
+    LLVMBuildBr(module->builder, begin);
+
+    LLVMPositionBuilderAtEnd(module->builder, begin);
+    llvm_emit_code(module, loop->code);
+    if (loop->code->flow == IR_CODE_FLOW_PASSED) {
+        LLVMBuildBr(module->builder, begin);
+    }
+
+    LLVMPositionBuilderAtEnd(module->builder, end);
+}
+
 static void llvm_emit_stmt(LlvmModule *module, IrStmt *stmt) {
     switch (stmt->kind) {
         case IR_STMT_EXPR:
@@ -77,6 +96,15 @@ static void llvm_emit_stmt(LlvmModule *module, IrStmt *stmt) {
             break;
         case IR_STMT_COND_JMP:
             llvm_emit_cond_jmp(module, &stmt->cond_jmp);
+            break;
+        case IR_STMT_LOOP:
+            llvm_emit_loop(module, &stmt->loop);
+            break;
+        case IR_STMT_BREAK:
+            LLVMBuildBr(module->builder, module->func.loops[stmt->break_loop.id].end);
+            break;
+        case IR_STMT_CONTINUE:
+            LLVMBuildBr(module->builder, module->func.loops[stmt->break_loop.id].begin);
             break;
     }
 }
