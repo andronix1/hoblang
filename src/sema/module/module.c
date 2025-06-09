@@ -52,8 +52,8 @@ SemaDecl *sema_module_resolve_req_decl(SemaModule *module, Slice name) {
 void sema_module_push_loop(SemaModule *module, SemaLoop loop) {
     assert(module->ss);
     if (!sema_ss_try_push_loop(module->ss, loop)) {
-        assert(loop.is_labbeled);
-        sema_module_err(module, loop.label, "labbeled loop `$S` already exists", loop.label);
+        assert(loop.is_labeled);
+        sema_module_err(module, loop.label, "labeled loop `$S` already exists", loop.label);
     }
 }
 

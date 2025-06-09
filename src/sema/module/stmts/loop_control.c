@@ -5,8 +5,8 @@
 #include "sema/module/scope.h"
 
 static inline IrLoopId *sema_resolve_loop(SemaModule *module, AstLoopControl *control) {
-    return control->is_labbeled ?
-        sema_ss_labelled_loop(module->ss, control->label) :
+    return control->is_labeled ?
+        sema_ss_labeled_loop(module->ss, control->label) :
         sema_ss_top_loop(module->ss);
 }
 

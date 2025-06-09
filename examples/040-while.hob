@@ -18,7 +18,7 @@ fun printAlphabetBeforeWithStep(step: u8, max: u8) {
     while.outer end <= 'z' {
         var i = 'a';
         while i <= end {
-            if i > max {
+            if i > max { # It is not very good example but I don't know how to demonstrate labeled loops
                 putChar('\n');
                 # Here outer loop will be broken
                 break outer;   

@@ -24,7 +24,7 @@ bool sema_module_emit_while(SemaModule *module, AstWhile *while_loop) {
 
     IrLoopId id = ir_func_add_loop(module->ir, module->ss->func_id);
     sema_module_push_loop(module, while_loop->label.has ?
-            sema_loop_new_labbeled(id, while_loop->label.name) :
+            sema_loop_new_labeled(id, while_loop->label.name) :
             sema_loop_new(id));
     IrCode *code = NOT_NULL(sema_module_emit_code(module, while_loop->body));
     sema_module_pop_loop(module);

@@ -10,22 +10,22 @@
 
 typedef struct {
     IrLoopId id;
-    bool is_labbeled;
+    bool is_labeled;
     Slice label;
 } SemaLoop;
 
 static inline SemaLoop sema_loop_new(IrLoopId id) {
     SemaLoop loop = {
         .id = id,
-        .is_labbeled = false,
+        .is_labeled = false,
     };
     return loop;
 }
 
-static inline SemaLoop sema_loop_new_labbeled(IrLoopId id, Slice label) {
+static inline SemaLoop sema_loop_new_labeled(IrLoopId id, Slice label) {
     SemaLoop loop = {
         .id = id,
-        .is_labbeled = true,
+        .is_labeled = true,
         .label = label
     };
     return loop;
@@ -45,7 +45,7 @@ typedef struct SemaScopeStack {
 
 SemaScopeStack *sema_scope_stack_new(Mempool *mempool, IrFuncId func_id, SemaType *returns);
 
-IrLoopId *sema_ss_labelled_loop(SemaScopeStack *ss, Slice label);
+IrLoopId *sema_ss_labeled_loop(SemaScopeStack *ss, Slice label);
 IrLoopId *sema_ss_top_loop(SemaScopeStack *ss);
 bool sema_ss_try_push_loop(SemaScopeStack *ss, SemaLoop loop);
 void sema_ss_pop_loop(SemaScopeStack *ss);

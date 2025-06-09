@@ -51,7 +51,7 @@ static inline bool parse_loop_control(Parser *parser, AstLoopControl *output) {
     if (parser_next_is(parser, TOKEN_IDENT)) {
         Slice label = parser_take(parser).slice;
         PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
-        *output = ast_loop_control_new_labelled(label);
+        *output = ast_loop_control_new_labeled(label);
         return true;
     }
     PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
@@ -97,16 +97,16 @@ static AstNode *parser_next_full(Parser *parser, Token token) {
         }
         case TOKEN_IF: return parse_if(parser);
         case TOKEN_WHILE: {
-            bool labelled = parser_next_should_be(parser, TOKEN_DOT);
+            bool labeled = parser_next_should_be(parser, TOKEN_DOT);
             Slice label;
-            if (labelled) {
+            if (labeled) {
                 label = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
             }
             AstExpr *cond = NOT_NULL(parse_expr(parser));
             AstBody *body = NOT_NULL(parse_body(parser));
             return ast_node_new_stmt(parser->mempool,
-                labelled ?
-                    ast_stmt_new_while_labelled(parser->mempool, cond, body, label) :
+                labeled ?
+                    ast_stmt_new_while_labeled(parser->mempool, cond, body, label) :
                     ast_stmt_new_while(parser->mempool, cond, body)
             );
         }

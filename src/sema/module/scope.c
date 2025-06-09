@@ -23,10 +23,10 @@ static inline SemaScope sema_scope_new(Mempool *mempool) {
     return scope;
 }
 
-IrLoopId *sema_ss_labelled_loop(SemaScopeStack *ss, Slice label) {
+IrLoopId *sema_ss_labeled_loop(SemaScopeStack *ss, Slice label) {
     for (ssize_t i = (ssize_t)vec_len(ss->loops) - 1; i >= 0; i--) {
         SemaLoop *loop = &ss->loops[i];
-        if (loop->is_labbeled && slice_eq(label, loop->label)) {
+        if (loop->is_labeled && slice_eq(label, loop->label)) {
             return &loop->id;
         }
     }
@@ -41,7 +41,7 @@ IrLoopId *sema_ss_top_loop(SemaScopeStack *ss) {
 }
 
 bool sema_ss_try_push_loop(SemaScopeStack *ss, SemaLoop loop) {
-    if (loop.is_labbeled && sema_ss_labelled_loop(ss, loop.label)) {
+    if (loop.is_labeled && sema_ss_labeled_loop(ss, loop.label)) {
         return false;
     }
     vec_push(ss->loops, loop);

@@ -12,10 +12,10 @@
 })
 
 static inline bool loop_controls_eq(const AstLoopControl *a, const AstLoopControl *b) {
-    if (a->is_labbeled != b->is_labbeled) {
+    if (a->is_labeled != b->is_labeled) {
         return false;
     }
-    if (a->is_labbeled) {
+    if (a->is_labeled) {
         return slice_eq(a->label, b->label);
     }
     return true;
@@ -93,7 +93,7 @@ AstStmt *ast_stmt_new_while(Mempool *mempool, AstExpr *expr, AstBody *body)
         out->while_loop.label.has = false;
     )
 
-AstStmt *ast_stmt_new_while_labelled(Mempool *mempool, AstExpr *expr, AstBody *body, Slice label)
+AstStmt *ast_stmt_new_while_labeled(Mempool *mempool, AstExpr *expr, AstBody *body, Slice label)
     CONSTRUCT(AST_STMT_WHILE,
         out->while_loop.cond = expr;
         out->while_loop.body = body;

@@ -52,20 +52,20 @@ typedef struct {
 } AstReturn;
 
 typedef struct {
-    bool is_labbeled;
+    bool is_labeled;
     Slice label;
 } AstLoopControl;
 
 static inline AstLoopControl ast_loop_control_new() {
     AstLoopControl control = {
-        .is_labbeled = false
+        .is_labeled = false
     };
     return control;
 }
 
-static inline AstLoopControl ast_loop_control_new_labelled(Slice label) {
+static inline AstLoopControl ast_loop_control_new_labeled(Slice label) {
     AstLoopControl control = {
-        .is_labbeled = true,
+        .is_labeled = true,
         .label = label
     };
     return control;
@@ -103,4 +103,4 @@ AstStmt *ast_stmt_new_short_assign(Mempool *mempool, AstExpr *dst, AstExpr *what
 AstStmt *ast_stmt_new_return(Mempool *mempool, Slice slice, AstExpr *value);
 AstStmt *ast_stmt_new_if(Mempool *mempool, AstCondBlock *conds, AstBody *else_body);
 AstStmt *ast_stmt_new_while(Mempool *mempool, AstExpr *expr, AstBody *body);
-AstStmt *ast_stmt_new_while_labelled(Mempool *mempool, AstExpr *expr, AstBody *body, Slice label);
+AstStmt *ast_stmt_new_while_labeled(Mempool *mempool, AstExpr *expr, AstBody *body, Slice label);
