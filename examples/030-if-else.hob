@@ -1,0 +1,50 @@
+extern(putchar) fun putChar(c: u8);
+extern(getchar) fun getChar() -> u8;
+
+global fun main() -> i32 {
+    putChar('p');
+    putChar('a');
+    putChar('s');
+    putChar('s');
+    putChar('w');
+    putChar('o');
+    putChar('r');
+    putChar('d');
+    putChar(':');
+    putChar(' ');
+
+    #`
+        If statement takes boolean expression only!
+        Also, in `&&` and `||` expressions execution of second part can be skipped, for example:
+        
+        1. Here function `f1` won't be called
+        ``` false && f1() ```
+        2. Here too
+        ``` true || f1() ```
+            
+        3. But here, result of expression isn't obvious.
+        So both right and left binop expression will be executed and `f1` will be called
+        ``` true && f1() ```
+    `#
+    if 1 == 1 && getChar() == 'a' {
+        putChar('y');
+        putChar('u');
+        putChar('p');
+        putChar(' ');
+        putChar(':');
+        putChar('P');
+        putChar('\n');
+        return 0;
+    } else {
+        putChar('n');
+        putChar('o');
+        putChar('p');
+        putChar('e');
+        putChar(' ');
+        putChar(':');
+        putChar('(');
+        putChar('\n');
+        return 1;
+    }
+}
+

@@ -1,6 +1,0 @@
-local extern(puts) fun print_raw_str(str: []u8);
-
-local global fun main() -> i32 {
-    print_raw_str("hello, world!\0");
-    return 0;
-}

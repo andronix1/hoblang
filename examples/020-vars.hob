@@ -1,0 +1,30 @@
+extern(putchar) fun putChar(c: u8);
+
+global fun main() -> i32 {
+    # You can specify type explicitly...
+    final append: u8 = 1;
+
+    # ... or it can be automatically infered from expression
+    var toPrint = 'a';
+
+    putChar(toPrint);
+    putChar(' ');
+    putChar('-');
+    putChar('>');
+    putChar(' ');
+    
+    #`
+        You can assign (or short-assign) values to variables,
+        but it is forbidden to assign value to `final` or `const`.
+
+        So, this code will throw compile-time error:
+        ``` append += 1; ```
+    `#
+
+    toPrint += append;
+
+    putChar(toPrint);
+    putChar('\n');
+    return 0;
+}
+

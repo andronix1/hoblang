@@ -1,0 +1,27 @@
+#`
+    You can use extern functions and specify external name
+    If you omit it like here the function name will be used as external name
+    ``` extern fun putChar(c: u8); ```
+`#
+extern(putchar) fun putChar(c: u8);
+
+#`
+    Here external name is emitted and function exported globally as `main`.
+`#
+global fun main() -> i32 {
+    putChar('h');
+    putChar('e');
+    putChar('l');
+    putChar('l');
+    putChar('o');
+    putChar(',');
+    putChar(' ');
+    putChar('w');
+    putChar('o');
+    putChar('r');
+    putChar('l');
+    putChar('d');
+    putChar('!');
+    putChar('\n');
+    return 0;
+}

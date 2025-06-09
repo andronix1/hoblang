@@ -1,0 +1,41 @@
+extern(putchar) fun putChar(c: u8);
+extern(getchar) fun getChar() -> u8;
+
+extern(exit) fun exit(code: i32);
+
+fun invalidInput() {
+    putChar('N');
+    putChar('a');
+    putChar('N');
+    putChar('!');
+    putChar('\n');
+}
+
+fun printAlphabetBeforeWithStep(step: u8, max: u8) {
+    var end = 'a';
+
+    # This is labeled loop. You can specify its label for break or continue it in nested loop
+    while.outer end <= 'z' {
+        var i = 'a';
+        while i <= end {
+            if i > max {
+                putChar('\n');
+                # Here outer loop will be broken
+                break outer;   
+            } else {
+                putChar(i);
+                i += 1;
+                # If label is not specified, it breaks parent loop body
+                continue;
+            }
+        }
+        putChar('\n');
+        end += step;
+    }
+}
+
+global fun main() -> i32 {
+    printAlphabetBeforeWithStep(4, 'k');
+    return 0;
+}
+
