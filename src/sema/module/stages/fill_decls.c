@@ -11,6 +11,7 @@
 #include "sema/module/ast/type.h"
 #include "sema/module/decl.h"
 #include "sema/module/module.h"
+#include "sema/module/stmts/expr.h"
 #include "sema/module/type.h"
 #include "sema/module/value.h"
 #include <stdio.h>
@@ -112,12 +113,20 @@ bool sema_module_fill_node_decls(SemaModule *module, AstNode *node) {
                 return false;
             }
             AstValueInfo *info = node->value_decl.info;
-            if (!info->explicit_type) {
-                // TODO
-                sema_module_err(module, node->slice, "type detection is not implemented now :(");
+            assert(node->value_decl.initializer);
+            SemaType *type = info->explicit_type ? sema_module_type(module, info->explicit_type) : NULL;
+            SemaExprOutput output = sema_expr_output_new(module->mempool);
+            SemaValueRuntime *value = NOT_NULL(sema_module_analyze_runtime_expr(module,
+                node->value_decl.initializer, sema_expr_ctx_new(&output, type)));
+            if (type && !sema_type_eq(type, value->type)) {
+                sema_module_err(module, node->value_decl.initializer->slice, 
+                    "trying to initialize declaration with exlicit type $t "
+                    "with expression of type $t", type, value->type);
                 return false;
             }
-            SemaType *type = sema_module_type(module, info->explicit_type);
+            if (!type) {
+                type = value->type;
+            }
             IrLocalId local_id = ir_func_add_local(module->ir, module->ss->func_id,
                 ir_func_local_new(ast_value_kind_to_ir(info->kind),
                     sema_type_ir_id(type)));
@@ -126,7 +135,30 @@ bool sema_module_fill_node_decls(SemaModule *module, AstNode *node) {
             sema_module_push_decl(module, info->name, sema_decl_new(
                 module->mempool, sema_value_new_runtime_local(module->mempool,
                     ast_value_kind_to_sema(info->kind), type, local_id)));
-            return true;
+            switch (info->kind) {
+                case AST_VALUE_DECL_FINAL: {
+                    sema_ss_append_stmt(module->ss, ir_stmt_new_init_final(module->mempool,
+                        node->value_decl.sema.local_id,
+                        ir_expr_new(output.steps)
+                    ));
+                    return true;
+                }
+                case AST_VALUE_DECL_VAR: {
+                    sema_ss_append_stmt(module->ss, ir_stmt_new_decl_var(module->mempool,
+                        node->value_decl.sema.local_id
+                    ));
+                    sema_ss_append_stmt(module->ss, ir_stmt_new_store(module->mempool,
+                        ir_expr_new(vec_create_in(module->mempool, 
+                            ir_expr_step_new_get_local(node->value_decl.sema.local_id)
+                        )),
+                        ir_expr_new(output.steps)
+                    ));
+                    return true;
+                }
+                case AST_VALUE_DECL_CONST:
+                    TODO;
+            }
+            UNREACHABLE;
         }
         case AST_NODE_STMT: return true;
         case AST_NODE_IMPORT:
