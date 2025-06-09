@@ -23,5 +23,9 @@ void llvm_emit_func_body(LlvmModule *module, IrFuncId id) {
         }
         module->func.locals[info->args[i]] = value;
     }
-    llvm_emit_code(module, module->ir->funcs[id].func.code);
+    IrCode *code = module->ir->funcs[id].func.code;
+    llvm_emit_code(module, code);
+    if (code->flow == IR_CODE_FLOW_PASSED) {
+        LLVMBuildRetVoid(module->builder);
+    }
 }

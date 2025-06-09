@@ -34,8 +34,7 @@ fun isLessThan9(c: u8) -> bool {
     return c < '9';
 }
 
-fun printAlphabet() {
-    var a: u8 = 'a';
+fun printAlphabetBefore(c: u8) {
     #`
         loop {
             if a <= 'z' {
@@ -45,16 +44,16 @@ fun printAlphabet() {
             }
         }
     `#
-    while a <= 'z' {
+    var a: u8 = 'a';
+    while a <= c {
         putChar(a);
         a = a + 1;
     }
     putChar('\n');
-    return;
 }
 
 global fun main() -> i32 { # declId + funcId + body
-    printAlphabet();
+    printAlphabetBefore('z');
     var c: u8 = getChar();
     # TODO: fix priorities
     if c >= '0' && isLessThan9(c) {
