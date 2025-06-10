@@ -34,6 +34,8 @@ static inline IrTypeId ir_get_binop_type(Ir *ir, IrTypeId *types, IrBinop *binop
         case IR_BINOP_COMPARE:
         case IR_BINOP_BOOL:
             return ir_add_simple_type(ir, ir_type_new_bool());
+        case IR_BINOP_INT:
+            return types[binop->ls];
     }
     UNREACHABLE;
 }

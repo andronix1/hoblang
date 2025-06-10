@@ -70,6 +70,22 @@ static SemaValue *sema_binop_arithm(
     return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, type, step_id);
 }
 
+static SemaValue *sema_binop_int(
+    SemaModule *module,
+    IrBinopIntKind kind,
+    SemaType *type,
+    Slice pos,
+    size_t lss, size_t rss,
+    SemaExprOutput *output
+) {
+    if (type->kind != SEMA_TYPE_INT) {
+        sema_module_err(module, pos, "this binop can be applied for integer operands only");
+    }
+    size_t step_id = vec_len(output->steps);
+    vec_push(output->steps, ir_expr_step_new_binop(ir_expr_binop_new_integer(lss, rss, kind)));
+    return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, type, step_id);
+}
+
 static SemaValue *sema_binop_bool(
     SemaModule *module,
     IrBinopBoolKind kind,
@@ -79,11 +95,10 @@ static SemaValue *sema_binop_bool(
     SemaExprOutput *output
 ) {
     if (type->kind != SEMA_TYPE_BOOL) {
-        sema_module_err(module, pos, "this binop can be used for booleans only");
+        sema_module_err(module, pos, "this binop can be applied for boolean operands only");
     }
     size_t step_id = vec_len(output->steps);
-    vec_push(output->steps, ir_expr_step_new_binop(ir_expr_binop_new_boolean(
-        lss, rss, kind)));
+    vec_push(output->steps, ir_expr_step_new_binop(ir_expr_binop_new_boolean(lss, rss, kind)));
     return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, type, step_id);
 }
 
@@ -116,6 +131,9 @@ SemaValue *sema_module_append_expr_binop(SemaModule *module, SemaType *type, siz
             return sema_binop_bool(module, IR_BINOP_BOOL_OR, type, kind->slice, lss, rss, output);
         case AST_BINOP_AND:
             return sema_binop_bool(module, IR_BINOP_BOOL_AND, type, kind->slice, lss, rss, output);
+
+        case AST_BINOP_MOD:
+            return sema_binop_int(module, IR_BINOP_INT_MOD, type, kind->slice, lss, rss, output);
     }
     UNREACHABLE;
 }

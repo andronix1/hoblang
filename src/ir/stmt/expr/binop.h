@@ -85,9 +85,18 @@ typedef struct {
 } IrBinopBool;
 
 typedef enum {
+    IR_BINOP_INT_MOD,
+} IrBinopIntKind;
+
+typedef struct {
+    IrBinopIntKind kind;
+} IrBinopInt;
+
+typedef enum {
     IR_BINOP_ARITHMETIC,
     IR_BINOP_ORDER,
     IR_BINOP_COMPARE,
+    IR_BINOP_INT,
     IR_BINOP_BOOL,
 } IrBinopKind;
 
@@ -99,9 +108,22 @@ typedef struct {
         IrBinopArithmetic arithm;
         IrBinopOrder order;
         IrBinopCompare compare;
+        IrBinopInt integer;
         IrBinopBool boolean;
     };
 } IrBinop;
+
+static inline IrBinop ir_expr_binop_new_integer(size_t ls, size_t rs, IrBinopIntKind kind) {
+    IrBinop binop = {
+        .ls = ls,
+        .rs = rs,
+        .kind = IR_BINOP_INT,
+        .integer = {
+            .kind = kind,
+        }
+    };
+    return binop;
+}
 
 static inline IrBinop ir_expr_binop_new_boolean(size_t ls, size_t rs, IrBinopBoolKind kind) {
     IrBinop binop = {

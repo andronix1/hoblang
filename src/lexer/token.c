@@ -8,6 +8,7 @@ void token_print(va_list list) {
         case TOKEN_MINUS: printf("`-`"); return;
         case TOKEN_PLUS: printf("`+`"); return;
         case TOKEN_STAR: printf("`*`"); return;
+        case TOKEN_MOD: printf("`%%`"); return;
         case TOKEN_SLASH: printf("`/`"); return;
         case TOKEN_DIVIDE: printf("`/=`"); return;
         case TOKEN_MULTIPLY: printf("`*=`"); return;

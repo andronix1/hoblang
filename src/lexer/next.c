@@ -96,6 +96,7 @@ static Token lexer_try_next(Lexer *lexer) {
             return token_simple(TOKEN_NOT);
         case ':': return token_simple(TOKEN_COLON);
         case ';': return token_simple(TOKEN_SEMICOLON);
+        case '%': return token_simple(TOKEN_MOD);
         case '&':
             if (lexer_next_char_is(lexer, '&')) return token_simple(TOKEN_AND);
             return token_simple(TOKEN_BITAND);
