@@ -9,6 +9,7 @@
 #include "sema/module/stmts/exprs/call.h"
 #include "sema/module/stmts/exprs/char.h"
 #include "sema/module/stmts/exprs/int.h"
+#include "sema/module/stmts/exprs/not.h"
 #include "sema/module/stmts/exprs/path.h"
 #include "sema/module/value.h"
 
@@ -33,7 +34,8 @@ SemaValue *sema_module_analyze_expr(SemaModule *module, AstExpr *expr, SemaExprC
         case AST_EXPR_STRING:
         case AST_EXPR_STRUCT:
             TODO;
-          break;
+        case AST_EXPR_NOT:
+            return sema_module_analyze_expr_not(module, expr->not_inner, ctx);
     }
     UNREACHABLE;
 }

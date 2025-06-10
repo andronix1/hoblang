@@ -60,6 +60,10 @@ static inline AstExpr *_parse_middle_expr(Parser *parser) {
             AstPath *path = NOT_NULL(parse_path(parser));
             return ast_expr_new_path(parser->mempool, ast_path_slice(path), path);
         }
+        case TOKEN_NOT: {
+            AstExpr *inner = NOT_NULL(_parse_middle_expr(parser));
+            return ast_expr_new_not(parser->mempool, slice_union(token.slice, inner->slice), inner);
+        }
         case TOKEN_TRUE: return ast_expr_new_bool(parser->mempool, token.slice, true);
         case TOKEN_FALSE: return ast_expr_new_bool(parser->mempool, token.slice, false);
         case TOKEN_STRING:
