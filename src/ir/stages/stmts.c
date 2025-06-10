@@ -70,6 +70,8 @@ static inline IrTypeId ir_get_expr_step_type(IrStmtCtx *ctx, IrTypeId *types, Ir
             return ir_add_simple_type(ir, ir_type_new_bool());
         case IR_EXPR_STEP_STRUCT_FIELD:
             TODO;
+        case IR_EXPR_STEP_CAST_INT:
+            return step->cast_int.dest;
     }
     UNREACHABLE;
 }

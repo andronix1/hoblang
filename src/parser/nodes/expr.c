@@ -2,6 +2,7 @@
 #include "ast/api/expr.h"
 #include "ast/expr.h"
 #include "ast/path.h"
+#include "ast/type.h"
 #include "core/assert.h"
 #include "core/keymap.h"
 #include "core/math.h"
@@ -30,6 +31,11 @@ static inline AstExpr *parse_expr_additions(Parser *parser, AstExpr *expr) {
                 }
                 Slice slice = PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_CIRCLE_BRACE).slice;
                 expr = ast_expr_new_callable(parser->mempool, slice_union(expr->slice, slice), expr, args);
+                break;
+            }
+            case TOKEN_AS: {
+                AstType *type = NOT_NULL(parse_type(parser));
+                expr = ast_expr_new_as(parser->mempool, slice_union(expr->slice, type->slice), token.slice, expr, type);
                 break;
             }
             default:

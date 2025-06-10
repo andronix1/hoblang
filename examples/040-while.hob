@@ -3,14 +3,6 @@ extern(getchar) fun getChar() -> u8;
 
 extern(exit) fun exit(code: i32);
 
-fun invalidInput() {
-    putChar('N');
-    putChar('a');
-    putChar('N');
-    putChar('!');
-    putChar('\n');
-}
-
 fun printAlphabetBeforeWithStep(step: u8, max: u8) {
     var end = 'a';
 

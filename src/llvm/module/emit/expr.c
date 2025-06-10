@@ -216,6 +216,20 @@ static LlvmEmitStepRes llvm_emit_expr_step(
         case IR_EXPR_STEP_REAL:
         case IR_EXPR_STEP_STRUCT_FIELD:
             TODO;
+        case IR_EXPR_STEP_CAST_INT: {
+            LLVMValueRef what = llvm_get_res_value(module, &results[step->cast_int.step_id]);
+            LLVMTypeRef type = module->types[step->cast_int.dest];
+            IrTypeInt *source = &module->ir->types[ir_type_record_resolve_simple(module->ir, step->cast_int.source)].simple.integer;
+            IrTypeInt *dest = &module->ir->types[ir_type_record_resolve_simple(module->ir, step->cast_int.dest)].simple.integer;
+            if (source->size > dest->size) {
+                return llvm_emit_step_res_new(LLVMBuildTrunc(module->builder, what, type, ""), true);
+            } else {
+                return llvm_emit_step_res_new(
+                    (source->is_signed && dest->is_signed) ?
+                        LLVMBuildSExt(module->builder, what, type, "") :
+                        LLVMBuildZExt(module->builder, what, type, ""), true);
+            }
+        }
     }
     UNREACHABLE;
 }

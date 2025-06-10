@@ -20,7 +20,7 @@ typedef enum {
 } IrTypeFloatSize;
 
 typedef enum {
-    IR_TYPE_INT_8,
+    IR_TYPE_INT_8 = 0,
     IR_TYPE_INT_16,
     IR_TYPE_INT_32,
     IR_TYPE_INT_64,

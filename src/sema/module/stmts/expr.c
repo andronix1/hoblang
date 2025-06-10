@@ -3,6 +3,7 @@
 #include "core/assert.h"
 #include "core/null.h"
 #include "sema/module/api/value.h"
+#include "sema/module/stmts/exprs/as.h"
 #include "sema/module/stmts/exprs/binop.h"
 #include "sema/module/stmts/exprs/bool.h"
 #include "sema/module/stmts/exprs/call.h"
@@ -27,11 +28,13 @@ SemaValue *sema_module_analyze_expr(SemaModule *module, AstExpr *expr, SemaExprC
             return sema_module_analyze_expr_bool(module, expr->boolean, ctx);
         case AST_EXPR_BINOP:
             return sema_module_analyze_expr_binop(module, &expr->binop, ctx);
+        case AST_EXPR_AS:
+            return sema_module_analyze_expr_as(module, &expr->as, ctx);
         case AST_EXPR_STRING:
         case AST_EXPR_STRUCT:
             TODO;
           break;
-        }
+    }
     UNREACHABLE;
 }
 

@@ -46,6 +46,8 @@ bool ast_expr_eq(const AstExpr *a, const AstExpr *b) {
                 if (!slice_eq(af->key, bf->key) || !ast_expr_eq(af->value.expr, bf->value.expr)) return false;
             }
             return true;
+        case AST_EXPR_AS:
+            return ast_expr_eq(a->as.inner, b->as.inner) && ast_type_eq(a->as.type, b->as.type);
     }
     UNREACHABLE;
 }
@@ -58,6 +60,13 @@ AstExpr *ast_expr_new_char(Mempool *mempool, Slice slice, char c)
 
 AstExpr *ast_expr_new_path(Mempool *mempool, Slice slice, AstPath *path)
     CONSTRUCT(AST_EXPR_PATH, out->path = path)
+
+AstExpr *ast_expr_new_as(Mempool *mempool, Slice slice, Slice as_slice, AstExpr *inner, AstType *as)
+    CONSTRUCT(AST_EXPR_AS,
+        out->as.inner = inner;
+        out->as.type = as;
+        out->as.slice = as_slice;
+    )
 
 AstExpr *ast_expr_new_integer(Mempool *mempool, Slice slice, uint64_t integer)
     CONSTRUCT(AST_EXPR_INTEGER, out->integer = integer)

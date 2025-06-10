@@ -1,0 +1,40 @@
+extern(putchar) fun putChar(c: u8);
+extern(getchar) fun getChar() -> u8;
+extern fun exit(code: i32);
+
+fun invalidInput() {
+    putChar('N');
+    putChar('a');
+    putChar('N');
+    putChar('!');
+    putChar('\n');
+}
+
+fun inputInt() -> i32 {
+    var result: i32 = 0;
+    while true {
+        final char = getChar();
+        if char == '\n' {
+            break;
+        }
+        if char < '0' || char > '9' {
+            invalidInput();
+            exit(1);
+        }
+        result = result * 10 + (char - '0') as i32;
+    }
+    return result;
+}
+
+global fun main() -> i32 {
+    final max = inputInt();
+    var i = max;
+    putChar('1');
+    while i / 10 > 0 {
+        putChar('0');
+        i = i / 10;
+        # TODO: /=
+    }
+    putChar('\n');
+    return max;
+}
