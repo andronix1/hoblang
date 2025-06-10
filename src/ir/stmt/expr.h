@@ -43,6 +43,7 @@ typedef enum {
     IR_EXPR_STEP_TAKE_REF,
     IR_EXPR_STEP_DEREF,
     IR_EXPR_STEP_CAST_INT,
+    IR_EXPR_STEP_NOT,
     /*
     SEMA_PATH_SEGMENT_DECL,
     SEMA_PATH_SEGMENT_DEREF,
@@ -95,8 +96,17 @@ typedef struct {
 
         size_t ref_step;
         size_t deref_step;
+        size_t not_step;
     };
 } IrExprStep;
+
+static inline IrExprStep ir_expr_step_new_not(size_t step_id) {
+    IrExprStep step = {
+        .kind = IR_EXPR_STEP_NOT,
+        .not_step = step_id
+    };
+    return step;
+}
 
 static inline IrExprStep ir_expr_step_new_bool_skip(size_t condition, bool expect, bool result) {
     IrExprStep step = {

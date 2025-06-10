@@ -86,17 +86,19 @@ AstStmt *ast_stmt_new_expr(Mempool *mempool, AstExpr *expr)
 AstStmt *ast_stmt_new_return(Mempool *mempool, Slice slice, AstExpr *value)
     CONSTRUCT(AST_STMT_RETURN, out->ret.value = value; out->ret.slice = slice;)
 
-AstStmt *ast_stmt_new_while(Mempool *mempool, AstExpr *expr, AstBody *body)
+AstStmt *ast_stmt_new_while(Mempool *mempool, AstExpr *expr, AstBody *body, bool is_do_while)
     CONSTRUCT(AST_STMT_WHILE,
         out->while_loop.cond = expr;
         out->while_loop.body = body;
+        out->while_loop.is_do_while = is_do_while;
         out->while_loop.label.has = false;
     )
 
-AstStmt *ast_stmt_new_while_labeled(Mempool *mempool, AstExpr *expr, AstBody *body, Slice label)
+AstStmt *ast_stmt_new_while_labeled(Mempool *mempool, AstExpr *expr, AstBody *body, bool is_do_while, Slice label)
     CONSTRUCT(AST_STMT_WHILE,
         out->while_loop.cond = expr;
         out->while_loop.body = body;
+        out->while_loop.is_do_while = is_do_while;
         out->while_loop.label.has = true;
         out->while_loop.label.name = label;
     )

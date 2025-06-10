@@ -29,16 +29,25 @@ bool sema_module_emit_while(SemaModule *module, AstWhile *while_loop) {
     IrCode *code = NOT_NULL(sema_module_emit_code(module, while_loop->body));
     sema_module_pop_loop(module);
 
-    IrStmtCondJmpBlock *conds = vec_create_in(module->mempool,
-        ir_stmt_cond_jmp_block(ir_expr_new(output.steps), code),
-    );
     IrCode *break_loop = ir_code_new(module->mempool, vec_create_in(module->mempool, 
         ir_stmt_new_break(module->mempool, id)
     ));
-    sema_ss_append_stmt(module->ss, ir_stmt_new_loop(module->mempool, id, ir_code_new(module->mempool,
-        vec_create_in(module->mempool, 
+
+    if (while_loop->is_do_while) {
+        vec_push(output.steps, ir_expr_step_new_not(vec_len(output.steps) - 1));
+        vec_push(code->stmts, 
+            ir_stmt_new_cond_jmp(module->mempool, vec_create_in(module->mempool,
+                ir_stmt_cond_jmp_block(ir_expr_new(output.steps), break_loop),
+            ), NULL)
+        );
+    } else {
+        IrStmtCondJmpBlock *conds = vec_create_in(module->mempool,
+            ir_stmt_cond_jmp_block(ir_expr_new(output.steps), code),
+        );
+        code = ir_code_new(module->mempool, vec_create_in(module->mempool, 
             ir_stmt_new_cond_jmp(module->mempool, conds, break_loop)
-        ))
-    ));
+        ));
+    }
+    sema_ss_append_stmt(module->ss, ir_stmt_new_loop(module->mempool, id, code));
     return true;
 }

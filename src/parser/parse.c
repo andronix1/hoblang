@@ -90,6 +90,22 @@ static AstNode *parser_next_full(Parser *parser, Token token) {
             assert(stmt);
             PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
             return ast_node_new_stmt(parser->mempool, stmt);
+        case TOKEN_DO: {
+            bool labeled = parser_next_should_be(parser, TOKEN_DOT);
+            Slice label;
+            if (labeled) {
+                label = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
+            }
+            AstBody *body = NOT_NULL(parse_body(parser));
+            PARSER_EXPECT_NEXT(parser, TOKEN_WHILE);
+            AstExpr *cond = NOT_NULL(parse_expr(parser));
+            PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
+            return ast_node_new_stmt(parser->mempool,
+                labeled ?
+                    ast_stmt_new_while_labeled(parser->mempool, cond, body, true, label) :
+                    ast_stmt_new_while(parser->mempool, cond, body, true)
+            );
+        }
         case TOKEN_RETURN: {
             AstExpr *value = parser_next_is(parser, TOKEN_SEMICOLON) ?
                 NULL : NOT_NULL(parse_expr(parser));
@@ -108,8 +124,8 @@ static AstNode *parser_next_full(Parser *parser, Token token) {
             AstBody *body = NOT_NULL(parse_body(parser));
             return ast_node_new_stmt(parser->mempool,
                 labeled ?
-                    ast_stmt_new_while_labeled(parser->mempool, cond, body, label) :
-                    ast_stmt_new_while(parser->mempool, cond, body)
+                    ast_stmt_new_while_labeled(parser->mempool, cond, body, false, label) :
+                    ast_stmt_new_while(parser->mempool, cond, body, false)
             );
         }
         case TOKEN_IMPORT: {

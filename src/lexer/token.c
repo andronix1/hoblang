@@ -51,6 +51,7 @@ void token_print(va_list list) {
         case TOKEN_WHILE: printf("`while`"); return;
         case TOKEN_IMPORT: printf("`import`"); return;
         case TOKEN_AS: printf("`as`"); return;
+        case TOKEN_DO: printf("`do`"); return;
         case TOKEN_TRUE: printf("`true`"); return;
         case TOKEN_FALSE: printf("`false`"); return;
         case TOKEN_FAILED: printf("<fail>"); return;

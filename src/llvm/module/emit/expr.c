@@ -235,6 +235,9 @@ static LlvmEmitStepRes llvm_emit_expr_step(
                         LLVMBuildZExt(module->builder, what, type, ""), true);
             }
         }
+        case IR_EXPR_STEP_NOT:
+            return llvm_emit_step_res_new(LLVMBuildNot(module->builder, llvm_get_res_value(module,
+                &results[step->not_step]), ""), true);
     }
     UNREACHABLE;
 }

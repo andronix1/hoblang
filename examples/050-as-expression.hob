@@ -29,15 +29,10 @@ fun inputInt() -> i32 {
 }
 
 fun printIntReversed(value: i32) {
-    # TODO: do-while
-    if value == 0 {
-        putChar('0');
-        return;
-    }
-    while value > 0 {
+    do {
         putChar('0' + (value % 10) as u8);
         value /= 10;
-    }
+    } while value > 0;
 }
 
 global fun main() -> i32 {

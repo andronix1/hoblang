@@ -173,6 +173,7 @@ static Token lexer_try_next(Lexer *lexer) {
                 else if (slice_eq(slice, slice_from_cstr("false"))) return token_simple(TOKEN_FALSE);
                 else if (slice_eq(slice, slice_from_cstr("continue"))) return token_simple(TOKEN_CONTINUE);
                 else if (slice_eq(slice, slice_from_cstr("break"))) return token_simple(TOKEN_BREAK);
+                else if (slice_eq(slice, slice_from_cstr("do"))) return token_simple(TOKEN_DO);
                 else return token_simple(TOKEN_IDENT);
             }
             return token_simple(TOKEN_FAILED);
