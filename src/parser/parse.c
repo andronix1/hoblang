@@ -77,6 +77,8 @@ static AstNode *parser_next_full(Parser *parser, Token token) {
                     return ast_node_new_stmt(parser->mempool, ast_stmt_new_expr(parser->mempool, expr));
                 case TOKEN_APPEND: stmt = SASSIGN(AST_BINOP_ADD); break;
                 case TOKEN_SUBTRACT: stmt = SASSIGN(AST_BINOP_SUBTRACT); break;
+                case TOKEN_MULTIPLY: stmt = SASSIGN(AST_BINOP_MULTIPLY); break;
+                case TOKEN_DIVIDE: stmt = SASSIGN(AST_BINOP_DIVIDE); break;
                 case TOKEN_ASSIGN:
                     stmt = ast_stmt_new_assign(parser->mempool, expr, NOT_NULL(parse_expr(parser)));
                     break;

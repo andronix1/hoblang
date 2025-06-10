@@ -82,8 +82,12 @@ static Token lexer_try_next(Lexer *lexer) {
             if (lexer_next_char_is(lexer, '=')) return token_simple(TOKEN_SUBTRACT);
             else if (lexer_next_char_is(lexer, '>')) return token_simple(TOKEN_FUN_RETURNS);
             return token_simple(TOKEN_MINUS);
-        case '*': return token_simple(TOKEN_STAR);
-        case '/': return token_simple(TOKEN_SLASH);
+        case '*':
+            if (lexer_next_char_is(lexer, '=')) return token_simple(TOKEN_MULTIPLY);
+            return token_simple(TOKEN_STAR);
+        case '/':
+            if (lexer_next_char_is(lexer, '=')) return token_simple(TOKEN_DIVIDE);
+            return token_simple(TOKEN_SLASH);
         case '=':
             if (lexer_next_char_is(lexer, '=')) return token_simple(TOKEN_EQUALS);
             return token_simple(TOKEN_ASSIGN);
