@@ -1,0 +1,6 @@
+type Fd = i32;
+
+global fun main() -> i32 {
+    final stdout = 0 as Fd;
+    return 0;
+}

@@ -57,8 +57,9 @@ bool sema_module_fill_node_decls(SemaModule *module, AstNode *node) {
                 NOT_NULL(sema_module_type(module, node->type_decl.type)),
                 sema_type_alias_new(module->mempool, info->sema.type_id)
             );
-            ir_set_type_record(module->ir, sema_module_get_type_id(module, info->sema.type_id),
-                sema_type_ir_id(type));
+            ir_set_type_record(module->ir, sema_module_get_type_id(module, info->sema.type_id), sema_type_ir_id(type));
+            sema_module_push_decl(module, info->name, sema_decl_new(module->mempool,
+                sema_value_new_type(module->mempool, type)));
             return true;
         }
         case AST_NODE_EXTERNAL_DECL: {
