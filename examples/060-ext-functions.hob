@@ -1,5 +1,7 @@
 type Fd = i32;
 
+extern fun Fd.write(self, ptr: *u8, size: u32) -> i32;
+
 global fun main() -> i32 {
     final stdout = 0 as Fd;
     return 0;

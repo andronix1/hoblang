@@ -34,9 +34,11 @@ void sema_type_print(va_list list) {
             logs(") -> $t", type->function.returns);
             break;
         case SEMA_TYPE_RECORD:
-            TODO;
+            logs("<alias>", type->pointer_to);
+            break;
         case SEMA_TYPE_POINTER:
             logs("*$t", type->pointer_to);
+            break;
     }
 }
 

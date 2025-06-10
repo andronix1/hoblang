@@ -40,11 +40,9 @@ AstFunInfo *parse_fun_info(Parser *parser, bool is_local) {
         vec_push(args, ast_fun_arg_new(arg_name, NOT_NULL(parse_type(parser))));
         if (!parser_check_list_sep(parser, TOKEN_CLOSING_CIRCLE_BRACE)) return NULL;
     }
-    AstType *returns = parser_next_should_be(parser, TOKEN_FUN_RETURNS) ?
-        NOT_NULL(parse_type(parser)) : NULL;
+    AstType *returns = parser_next_should_be(parser, TOKEN_FUN_RETURNS) ? NOT_NULL(parse_type(parser)) : NULL;
     return is_ext ?
-        ast_ext_fun_info_new(parser->mempool, is_local, name, args, returns,
-            ext_of, by_ref, self_name):
+        ast_ext_fun_info_new(parser->mempool, is_local, name, args, returns, ext_of, by_ref, self_name):
         ast_fun_info_new(parser->mempool, is_local, name, args, returns);
 }
 

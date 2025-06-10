@@ -9,7 +9,8 @@
 #include "sema/module/value.h"
 
 SemaValue *sema_module_analyze_expr_as(SemaModule *module, AstAs *as, SemaExprCtx ctx) {
-    SemaType *dest = NOT_NULL(sema_module_type(module, as->type));
+    SemaType *real_dest = NOT_NULL(sema_module_type(module, as->type));
+    SemaType *dest = real_dest->kind == SEMA_TYPE_RECORD ? module->types[real_dest->type_id].type : real_dest;
     SemaValueRuntime *source_runtime = NOT_NULL(sema_module_analyze_runtime_expr(module, as->inner,
         sema_expr_ctx_new(ctx.output, NULL)));
     SemaType *source = source_runtime->type;
@@ -21,5 +22,5 @@ SemaValue *sema_module_analyze_expr_as(SemaModule *module, AstAs *as, SemaExprCt
         sema_module_err(module, as->slice, "$t cannot be casted to $t", source, dest);
     }
 
-    return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, dest, vec_len(ctx.output->steps) - 1);
+    return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, real_dest, vec_len(ctx.output->steps) - 1);
 }

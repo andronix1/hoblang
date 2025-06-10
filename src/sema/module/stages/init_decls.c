@@ -1,13 +1,17 @@
 #include "init_decls.h"
 #include "ast/node.h"
+#include "sema/module/decl.h"
 #include "sema/module/module.h"
 #include "core/assert.h"
+#include "sema/module/type.h"
+#include "sema/module/value.h"
 
 bool sema_module_init_node_decls(SemaModule *module, AstNode *node) {
     switch (node->kind) {
         case AST_NODE_TYPE_DECL: {
-            AstTypeDecl *info = &node->type_decl;
-            info->sema.type_id = sema_module_register_type_alias(module);
+            SemaTypeId id = node->type_decl.sema.type_id = sema_module_register_type_alias(module);
+            sema_module_push_decl(module, node->type_decl.name, sema_decl_new(module->mempool,
+                sema_value_new_type(module->mempool, node->type_decl.sema.type = sema_type_new_record(module, id))));
             return true;
         }
         case AST_NODE_EXTERNAL_DECL:

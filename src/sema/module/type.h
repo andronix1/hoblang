@@ -54,6 +54,7 @@ IrTypeIntSize sema_type_int_size_to_ir(SemaTypeIntSize size);
 
 SemaType *sema_type_new_void(SemaModule *module);
 SemaType *sema_type_new_bool(SemaModule *module);
+SemaType *sema_type_new_record(SemaModule *module, size_t type_id);
 SemaType *sema_type_new_int(SemaModule *module, SemaTypeIntSize size, bool is_signed);
 SemaType *sema_type_new_pointer(SemaModule *module, SemaType *pointer_to);
 SemaType *sema_type_new_function(SemaModule *module, SemaType **args, SemaType *returns);

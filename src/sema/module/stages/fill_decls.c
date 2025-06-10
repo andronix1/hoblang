@@ -1,5 +1,6 @@
 #include "fill_decls.h"
 #include "ast/node.h"
+#include "ast/path.h"
 #include "core/assert.h"
 #include "core/mempool.h"
 #include "core/null.h"
@@ -18,9 +19,15 @@
 
 static inline SemaType *ast_func_info_type(SemaModule *module, AstFunInfo *info) {
     SemaType **args = vec_new_in(module->mempool, SemaType*);
-    vec_resize(args, vec_len(info->args));
+    vec_reserve(args, vec_len(info->args) + info->ext.is);
+    if (info->ext.is) {
+        AstType *of = ast_type_new_path(module->mempool, ast_path_new(module->mempool, vec_create_in(module->mempool,
+            ast_path_segment_new_ident(info->ext.of))));
+        SemaType *ext_of = NOT_NULL(sema_module_type(module, of));
+        vec_push(args, info->ext.by_ref ? sema_type_new_pointer(module, ext_of) : ext_of);
+    }
     for (size_t i = 0; i < vec_len(info->args); i++) {
-        args[i] = NOT_NULL(sema_module_type(module, info->args->type));
+        vec_push(args, NOT_NULL(sema_module_type(module, info->args[i].type)));
     }
     SemaType *returns = info->returns ?
         NOT_NULL(sema_module_type(module, info->returns)) :
@@ -53,13 +60,10 @@ bool sema_module_fill_node_decls(SemaModule *module, AstNode *node) {
     switch (node->kind) {
         case AST_NODE_TYPE_DECL: {
             AstTypeDecl *info = &node->type_decl;
-            SemaType *type = sema_type_new_alias(module->mempool,
-                NOT_NULL(sema_module_type(module, node->type_decl.type)),
-                sema_type_alias_new(module->mempool, info->sema.type_id)
-            );
-            ir_set_type_record(module->ir, sema_module_get_type_id(module, info->sema.type_id), sema_type_ir_id(type));
-            sema_module_push_decl(module, info->name, sema_decl_new(module->mempool,
-                sema_value_new_type(module->mempool, type)));
+            SemaType *source_type = module->types[info->sema.type_id].type =
+                NOT_NULL(sema_module_type(module, node->type_decl.type));
+            sema_type_new_alias(module->mempool, source_type, sema_type_alias_new(module->mempool, info->sema.type_id));
+            ir_set_type_record(module->ir, module->types[info->sema.type_id].id, sema_type_ir_id(source_type));
             return true;
         }
         case AST_NODE_EXTERNAL_DECL: {
@@ -69,10 +73,7 @@ bool sema_module_fill_node_decls(SemaModule *module, AstNode *node) {
                     SemaType *type = NOT_NULL(ast_func_info_type(module, info->fun));
                     IrDeclId decl_id = ir_add_decl(module->ir);
                     ir_init_extern(module->ir, decl_id,
-                        ir_extern_new(IR_EXTERN_FUNC,
-                            info->has_alias ?
-                                info->alias :
-                                info->fun->name,
+                        ir_extern_new(IR_EXTERN_FUNC, info->has_alias ? info->alias : info->fun->name,
                             sema_type_ir_id(type)));
                     sema_module_push_decl(module, info->fun->name, sema_decl_new(
                         module->mempool, sema_value_new_runtime_global(module->mempool, 
@@ -86,25 +87,22 @@ bool sema_module_fill_node_decls(SemaModule *module, AstNode *node) {
         }
         case AST_NODE_FUN_DECL: {
             AstFunDecl *info = &node->fun_decl;
-            SemaType *type = info->sema.type =
-                NOT_NULL(ast_func_info_type(module, info->info));
+            SemaType *type = info->sema.type = NOT_NULL(ast_func_info_type(module, info->info));
             IrMutability *args_mut = vec_new_in(module->mempool, IrMutability);
-            vec_resize(args_mut, vec_len(type->function.args));
+            vec_reserve(args_mut, vec_len(type->function.args) + info->info->ext.is);
+            if (info->info->ext.is) {
+                vec_push(args_mut, IR_IMMUTABLE);
+            }
             for (size_t i = 0; i < vec_len(args_mut); i++) {
-                args_mut[i] = IR_MUTABLE;
+                vec_push(args_mut, IR_MUTABLE);
             }
             IrDeclId decl_id = ir_add_decl(module->ir);
-            sema_module_push_decl(module, info->info->name, sema_decl_new(
-                module->mempool, sema_value_new_runtime_global(module->mempool, 
-                    SEMA_RUNTIME_FINAL, type, decl_id)));
+            sema_module_push_decl(module, info->info->name, sema_decl_new(module->mempool,
+                    sema_value_new_runtime_global(module->mempool, SEMA_RUNTIME_FINAL, type, decl_id)));
             IrTypeId type_id = sema_type_ir_id(type);
-            info->sema.func_id = ir_init_func(module->ir, args_mut, decl_id,
-                info->global ? 
-                    ir_func_new_global(
-                        info->global->has_alias ?
-                            info->global->alias :
-                            info->info->name, type_id
-                        ) : ir_func_new(type_id));
+            info->sema.func_id = ir_init_func(module->ir, args_mut, decl_id, info->global ? 
+                ir_func_new_global(info->global->has_alias ? info->global->alias : info->info->name, type_id) :
+                ir_func_new(type_id));
             return true;
         }
         case AST_NODE_VALUE_DECL: {

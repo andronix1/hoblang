@@ -60,6 +60,9 @@ SemaTypeAlias *sema_type_alias_new(Mempool *mempool, IrTypeId id)
 SemaType *sema_type_new_void(SemaModule *module)
     SEMA_TYPE_CONSTRUCT(SEMA_TYPE_VOID,)
 
+SemaType *sema_type_new_record(SemaModule *module, size_t type_id)
+    SEMA_TYPE_CONSTRUCT(SEMA_TYPE_RECORD, out->type_id = type_id)
+
 SemaType *sema_type_new_bool(SemaModule *module)
     SEMA_TYPE_CONSTRUCT(SEMA_TYPE_BOOL,)
 

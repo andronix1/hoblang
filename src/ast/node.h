@@ -30,6 +30,7 @@ typedef struct {
 
     struct {
         SemaTypeId type_id;
+        SemaType *type;
     } sema;
 } AstTypeDecl;
 
