@@ -4,4 +4,4 @@
 #include "sema/module/api/module.h"
 #include <stdbool.h>
 
-bool sema_module_emit_assign(SemaModule *module, AstAssign *assign);
+bool sema_module_emit_stmt_assign(SemaModule *module, AstAssign *assign);

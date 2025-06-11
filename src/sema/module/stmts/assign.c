@@ -8,14 +8,14 @@
 #include "sema/module/api/type.h"
 #include "sema/module/module.h"
 #include "sema/module/scope.h"
-#include "sema/module/stmts/expr.h"
-#include "sema/module/stmts/exprs/binop.h"
+#include "sema/module/exprs/expr.h"
+#include "sema/module/exprs/binop.h"
 #include "sema/module/type.h"
 #include <assert.h>
 
-bool sema_module_emit_assign(SemaModule *module, AstAssign *assign) {
+bool sema_module_emit_stmt_assign(SemaModule *module, AstAssign *assign) {
     SemaExprOutput dsto = sema_expr_output_new(module->mempool);
-    SemaValueRuntime *lvalue = NOT_NULL(sema_module_analyze_runtime_expr(module,
+    SemaValueRuntime *lvalue = NOT_NULL(sema_module_emit_runtime_expr(module,
         assign->dst, sema_expr_ctx_new(&dsto, NULL)));
 
     if (lvalue->kind != SEMA_RUNTIME_VAR) {
@@ -23,7 +23,7 @@ bool sema_module_emit_assign(SemaModule *module, AstAssign *assign) {
     }
 
     SemaExprOutput valueo = sema_expr_output_new(module->mempool);
-    SemaValueRuntime *rvalue = NOT_NULL(sema_module_analyze_runtime_expr(module,
+    SemaValueRuntime *rvalue = NOT_NULL(sema_module_emit_runtime_expr(module,
         assign->what, sema_expr_ctx_new(&valueo, lvalue->type)));
     if (lvalue->kind != SEMA_RUNTIME_VAR) {
         sema_module_err(module, assign->dst->slice, "this expression is not assignable");

@@ -13,7 +13,7 @@
 #include "sema/module/ast/type.h"
 #include "sema/module/decl.h"
 #include "sema/module/module.h"
-#include "sema/module/stmts/expr.h"
+#include "sema/module/exprs/expr.h"
 #include "sema/module/type.h"
 #include "sema/module/value.h"
 #include <stdio.h>
@@ -128,7 +128,7 @@ bool sema_module_fill_node_decls(SemaModule *module, AstNode *node) {
             assert(node->value_decl.initializer);
             SemaType *type = info->explicit_type ? sema_module_type(module, info->explicit_type) : NULL;
             SemaExprOutput output = sema_expr_output_new(module->mempool);
-            SemaValueRuntime *value = NOT_NULL(sema_module_analyze_runtime_expr(module,
+            SemaValueRuntime *value = NOT_NULL(sema_module_emit_runtime_expr(module,
                 node->value_decl.initializer, sema_expr_ctx_new(&output, type)));
             if (type && !sema_type_eq(type, value->type)) {
                 sema_module_err(module, node->value_decl.initializer->slice, 

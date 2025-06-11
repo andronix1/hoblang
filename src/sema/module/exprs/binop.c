@@ -7,7 +7,6 @@
 #include "sema/module/api/type.h"
 #include "sema/module/api/value.h"
 #include "sema/module/module.h"
-#include "sema/module/stmts/expr.h"
 #include "sema/module/type.h"
 #include "sema/module/value.h"
 
@@ -138,16 +137,16 @@ SemaValue *sema_module_append_expr_binop(SemaModule *module, SemaType *type, siz
     UNREACHABLE;
 }
 
-SemaValue *sema_module_analyze_expr_binop(SemaModule *module, AstBinop *binop, SemaExprCtx ctx) {
-    SemaValueRuntime *ls = NOT_NULL(sema_module_analyze_runtime_expr(module, binop->left, sema_expr_ctx_new(ctx.output, ctx.expectation)));
-    size_t lss = sema_module_expr_get_runtime(ls, ctx.output);
+SemaValue *sema_module_emit_expr_binop(SemaModule *module, AstBinop *binop, SemaExprCtx ctx) {
+    SemaValueRuntime *ls = NOT_NULL(sema_module_emit_runtime_expr(module, binop->left, sema_expr_ctx_new(ctx.output, ctx.expectation)));
+    size_t lss = sema_module_expr_emit_runtime(ls, ctx.output);
     if (binop->kind.kind == AST_BINOP_AND) {
         vec_push(ctx.output->steps, ir_expr_step_new_bool_skip(lss, false, false));
     } else if (binop->kind.kind == AST_BINOP_OR) {
         vec_push(ctx.output->steps, ir_expr_step_new_bool_skip(lss, true, true));
     }
-    SemaValueRuntime *rs = NOT_NULL(sema_module_analyze_runtime_expr(module, binop->right, sema_expr_ctx_new(ctx.output, ls->type)));
-    size_t rss = sema_module_expr_get_runtime(rs, ctx.output);
+    SemaValueRuntime *rs = NOT_NULL(sema_module_emit_runtime_expr(module, binop->right, sema_expr_ctx_new(ctx.output, ls->type)));
+    size_t rss = sema_module_expr_emit_runtime(rs, ctx.output);
     if (!sema_type_eq(rs->type, ls->type)) {
         sema_module_err(module, binop->kind.slice, "binop can be applied to equal types only, but $t != $t", ls->type, rs->type);
         return NULL;

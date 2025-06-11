@@ -6,7 +6,7 @@
 #include "ir/stmt/expr.h"
 #include "sema/module/value.h"
 
-SemaValue *sema_module_analyze_expr_int(SemaModule *module, uint64_t val, SemaExprCtx ctx) {
+SemaValue *sema_module_emit_expr_int(SemaModule *module, uint64_t val, SemaExprCtx ctx) {
     size_t step_id = vec_len(ctx.output->steps);
     SemaType *type = NULL;
     if (ctx.expectation) {

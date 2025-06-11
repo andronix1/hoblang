@@ -10,12 +10,12 @@
 #include "sema/module/module.h"
 #include "sema/module/scope.h"
 #include "sema/module/stmts/body.h"
-#include "sema/module/stmts/expr.h"
+#include "sema/module/exprs/expr.h"
 #include "sema/module/type.h"
 
-bool sema_module_emit_while(SemaModule *module, AstWhile *while_loop) {
+bool sema_module_emit_stmt_while(SemaModule *module, AstWhile *while_loop) {
     SemaExprOutput output = sema_expr_output_new(module->mempool);
-    SemaValueRuntime *runtime = NOT_NULL(sema_module_analyze_runtime_expr(module, while_loop->cond,
+    SemaValueRuntime *runtime = NOT_NULL(sema_module_emit_runtime_expr(module, while_loop->cond,
         sema_expr_ctx_new(&output, sema_type_new_bool(module))));
     if (runtime->type->kind != SEMA_TYPE_BOOL) {
         sema_module_err(module, while_loop->cond->slice, "only booleans can be used in while statement conditions, but $t passed", runtime->type);

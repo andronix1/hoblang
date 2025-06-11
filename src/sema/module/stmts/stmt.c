@@ -1,55 +1,22 @@
 #include "stmt.h"
 #include "core/assert.h"
-#include "core/null.h"
-#include "ir/stmt/expr.h"
-#include "ir/stmt/stmt.h"
-#include "sema/module/api/value.h"
 #include "sema/module/module.h"
-#include "sema/module/scope.h"
 #include "sema/module/stmts/assign.h"
 #include "sema/module/stmts/expr.h"
 #include "sema/module/stmts/if.h"
 #include "sema/module/stmts/loop_control.h"
+#include "sema/module/stmts/return.h"
 #include "sema/module/stmts/while.h"
 
 bool sema_module_emit_stmt(SemaModule *module, AstStmt *stmt) {
     switch (stmt->kind) {
-        case AST_STMT_EXPR: {
-            SemaExprOutput output = sema_expr_output_new(module->mempool);
-            NOT_NULL(sema_module_analyze_expr(module, stmt->expr, sema_expr_ctx_new(&output, NULL)));
-            sema_ss_append_stmt(module->ss, ir_stmt_new_expr(module->mempool,
-                    ir_expr_new(output.steps)));
-            return true;
-        }
-        case AST_STMT_RETURN: {
-            if (!stmt->ret.value) {
-                sema_ss_append_stmt(module->ss, ir_stmt_new_ret_void(module->mempool));
-                return true;
-            }
-
-            SemaExprOutput output = sema_expr_output_new(module->mempool);
-            SemaValueRuntime *runtime = NOT_NULL(sema_module_analyze_runtime_expr(module,
-                stmt->ret.value, sema_expr_ctx_new(&output, module->ss->returns)));
-
-            if (!sema_type_eq(module->ss->returns, runtime->type)) {
-                sema_module_err(module, stmt->expr->slice, "expected to return $t, got $t",
-                    module->ss->returns, runtime->type);
-                return false;
-            }
-            sema_ss_append_stmt(module->ss, ir_stmt_new_ret(module->mempool,
-                    ir_expr_new(output.steps)));
-            return true;
-        }
-        case AST_STMT_IF:
-            return sema_module_emit_if(module, &stmt->if_else);
-        case AST_STMT_ASSIGN:
-            return sema_module_emit_assign(module, &stmt->assign);
-        case AST_STMT_WHILE:
-            return sema_module_emit_while(module, &stmt->while_loop);
-        case AST_STMT_CONTINUE:
-            return sema_module_emit_continue(module, &stmt->continue_loop);
-        case AST_STMT_BREAK:
-            return sema_module_emit_break(module, &stmt->break_loop);
+        case AST_STMT_EXPR: return sema_module_emit_stmt_expr(module, stmt->expr);
+        case AST_STMT_RETURN: return sema_module_emit_stmt_return(module, &stmt->ret);
+        case AST_STMT_IF: return sema_module_emit_stmt_if(module, &stmt->if_else);
+        case AST_STMT_ASSIGN: return sema_module_emit_stmt_assign(module, &stmt->assign);
+        case AST_STMT_WHILE: return sema_module_emit_stmt_while(module, &stmt->while_loop);
+        case AST_STMT_CONTINUE: return sema_module_emit_stmt_continue(module, &stmt->continue_loop);
+        case AST_STMT_BREAK: return sema_module_emit_stmt_break(module, &stmt->break_loop);
     }
     UNREACHABLE;
 }

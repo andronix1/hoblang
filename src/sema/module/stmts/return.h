@@ -4,4 +4,4 @@
 #include "sema/module/api/module.h"
 #include <stdbool.h>
 
-bool sema_module_emit_stmt_if(SemaModule *module, AstIf *if_else);
+bool sema_module_emit_stmt_return(SemaModule *module, AstReturn *ret);

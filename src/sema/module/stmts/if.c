@@ -8,17 +8,17 @@
 #include "sema/module/api/value.h"
 #include "sema/module/module.h"
 #include "sema/module/stmts/body.h"
-#include "sema/module/stmts/expr.h"
+#include "sema/module/exprs/expr.h"
 #include "sema/module/type.h"
 
-bool sema_module_emit_if(SemaModule *module, AstIf *if_else) {
+bool sema_module_emit_stmt_if(SemaModule *module, AstIf *if_else) {
     IrStmtCondJmpBlock *conds = vec_new_in(module->mempool, IrStmtCondJmpBlock);
     vec_resize(conds, vec_len(if_else->conds));
     for (size_t i = 0; i < vec_len(if_else->conds); i++) {
         AstCondBlock *block = &if_else->conds[i];
         SemaExprOutput output = sema_expr_output_new(module->mempool);
         SemaType *boolean = sema_type_new_bool(module);
-        SemaValueRuntime *runtime = NOT_NULL(sema_module_analyze_runtime_expr(module,
+        SemaValueRuntime *runtime = NOT_NULL(sema_module_emit_runtime_expr(module,
             block->cond, sema_expr_ctx_new(&output, boolean)));
         if (!sema_type_eq(boolean, runtime->type)) {
             sema_module_err(module, block->cond->slice, "only booleans can be used in if statement conditions, but $t passed", runtime->type);
