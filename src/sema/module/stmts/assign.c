@@ -56,9 +56,9 @@ bool sema_module_emit_stmt_assign(SemaModule *module, AstAssign *assign) {
         sema_ss_append_stmt(module->ss, ir_stmt_new_store(module->mempool, ir_expr_new(vec_create_in(module->mempool, 
             ir_expr_step_new_get_local(temp),
             ir_expr_step_new_deref(0),
-        )), ir_expr_new(output.steps)));
+        )), sema_expr_output_collect(&output)));
         return true;
     }
-    sema_ss_append_stmt(module->ss, ir_stmt_new_store(module->mempool, ir_expr_new(dsto.steps), ir_expr_new(steps)));
+    sema_ss_append_stmt(module->ss, ir_stmt_new_store(module->mempool, sema_expr_output_collect(&dsto), ir_expr_new(steps)));
     return true;
 }

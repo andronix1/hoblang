@@ -2,6 +2,8 @@
 #include "ast/expr.h"
 #include "core/assert.h"
 #include "core/null.h"
+#include "core/vec.h"
+#include "ir/stmt/expr.h"
 #include "sema/module/api/value.h"
 #include "sema/module/exprs/as.h"
 #include "sema/module/exprs/binop.h"
@@ -13,7 +15,6 @@
 #include "sema/module/exprs/path.h"
 #include "sema/module/exprs/take_ref.h"
 #include "sema/module/value.h"
-#include <stdio.h>
 
 SemaValue *sema_module_emit_expr(SemaModule *module, AstExpr *expr, SemaExprCtx ctx) {
     switch (expr->kind) {
@@ -33,18 +34,28 @@ SemaValue *sema_module_emit_expr(SemaModule *module, AstExpr *expr, SemaExprCtx 
 }
 
 size_t sema_module_expr_emit_runtime(SemaValueRuntime *runtime, SemaExprOutput *output) {
-    size_t step_id = vec_len(output->steps);
     switch (runtime->val_kind) {
         case SEMA_VALUE_RUNTIME_GLOBAL:
-            vec_push(output->steps, ir_expr_step_new_get_decl(runtime->global_id));
-            return step_id;
+            return sema_expr_output_push_step(output, ir_expr_step_new_get_decl(runtime->global_id));
         case SEMA_VALUE_RUNTIME_LOCAL:
-            vec_push(output->steps, ir_expr_step_new_get_local(runtime->local_id));
-            return step_id;
+            return sema_expr_output_push_step(output, ir_expr_step_new_get_local(runtime->global_id));
         case SEMA_VALUE_RUNTIME_EXPR_STEP:
             return runtime->in_expr_id.step_id;
     }
     UNREACHABLE;
+}
+
+size_t sema_expr_output_push_step(SemaExprOutput *output, IrExprStep step) {
+    vec_push(output->steps, step);
+    return vec_len(output->steps) - 1;
+}
+
+size_t sema_expr_output_last_id(SemaExprOutput *output) {
+    return vec_len(output->steps);
+}
+
+IrExpr sema_expr_output_collect(SemaExprOutput *output) {
+    return ir_expr_new(output->steps);
 }
 
 SemaValueRuntime *sema_module_emit_runtime_expr(SemaModule *module, AstExpr *expr, SemaExprCtx ctx) {

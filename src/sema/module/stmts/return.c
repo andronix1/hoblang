@@ -19,6 +19,6 @@ bool sema_module_emit_stmt_return(SemaModule *module, AstReturn *ret) {
         return false;
     }
     sema_ss_append_stmt(module->ss, ir_stmt_new_ret(module->mempool,
-            ir_expr_new(output.steps)));
+            sema_expr_output_collect(&output)));
     return true;
 }

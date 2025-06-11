@@ -2,7 +2,6 @@
 #include "core/mempool.h"
 #include "core/null.h"
 #include "core/vec.h"
-#include "ir/stmt/expr.h"
 #include "ir/stmt/stmt.h"
 #include "sema/module/api/type.h"
 #include "sema/module/api/value.h"
@@ -24,7 +23,7 @@ bool sema_module_emit_stmt_if(SemaModule *module, AstIf *if_else) {
             sema_module_err(module, block->cond->slice, "only booleans can be used in if statement conditions, but $t passed", runtime->type);
         }
         IrCode *body = NOT_NULL(sema_module_emit_code(module, block->body));
-        conds[i] = ir_stmt_cond_jmp_block(ir_expr_new(output.steps), body);
+        conds[i] = ir_stmt_cond_jmp_block(sema_expr_output_collect(&output), body);
     }
     IrCode *else_body = NULL;
     if (if_else->else_body) {

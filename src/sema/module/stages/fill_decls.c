@@ -151,7 +151,7 @@ bool sema_module_fill_node_decls(SemaModule *module, AstNode *node) {
                 case AST_VALUE_DECL_FINAL: {
                     sema_ss_append_stmt(module->ss, ir_stmt_new_init_final(module->mempool,
                         node->value_decl.sema.local_id,
-                        ir_expr_new(output.steps)
+                        sema_expr_output_collect(&output)
                     ));
                     return true;
                 }
@@ -163,7 +163,7 @@ bool sema_module_fill_node_decls(SemaModule *module, AstNode *node) {
                         ir_expr_new(vec_create_in(module->mempool, 
                             ir_expr_step_new_get_local(node->value_decl.sema.local_id)
                         )),
-                        ir_expr_new(output.steps)
+                        sema_expr_output_collect(&output)
                     ));
                     return true;
                 }

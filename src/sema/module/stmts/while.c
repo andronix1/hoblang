@@ -34,15 +34,15 @@ bool sema_module_emit_stmt_while(SemaModule *module, AstWhile *while_loop) {
     ));
 
     if (while_loop->is_do_while) {
-        vec_push(output.steps, ir_expr_step_new_not(vec_len(output.steps) - 1));
+        sema_expr_output_push_step(&output, ir_expr_step_new_not(sema_expr_output_last_id(&output)));
         vec_push(code->stmts, 
             ir_stmt_new_cond_jmp(module->mempool, vec_create_in(module->mempool,
-                ir_stmt_cond_jmp_block(ir_expr_new(output.steps), break_loop),
+                ir_stmt_cond_jmp_block(sema_expr_output_collect(&output), break_loop),
             ), NULL)
         );
     } else {
         IrStmtCondJmpBlock *conds = vec_create_in(module->mempool,
-            ir_stmt_cond_jmp_block(ir_expr_new(output.steps), code),
+            ir_stmt_cond_jmp_block(sema_expr_output_collect(&output), code),
         );
         code = ir_code_new(module->mempool, vec_create_in(module->mempool, 
             ir_stmt_new_cond_jmp(module->mempool, conds, break_loop)
