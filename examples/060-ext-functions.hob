@@ -28,7 +28,8 @@ global fun main() -> i32 {
 
         But, when you call it, it automatically appends first argument for `self`.
     `#
-    stdout.putChar('a');
+    final justPutChar = stdout.putChar;
+    justPutChar(stdout, 'a');
     stdout.putChar('b');
     stdout.putChar('c');
     stdout.putChar('d');
