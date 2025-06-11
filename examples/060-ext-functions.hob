@@ -1,8 +1,37 @@
 type Fd = i32;
 
+#`
+    Extension functions are stored in type alias record.
+
+    Here, we are defining extension function `write` type alias Fd, not in i32.
+`#
 extern fun Fd.write(self, ptr: *u8, size: u32) -> i32;
 
+#`
+    In extension functions first arg specifies name for instance over which it will be called.
+    There is, first argument named `self`, but you can name it as you want :P
+    Also, `self` is immutable (or `final`), unlike other arguments (for example, `char`), that are mutable (or `var`)
+`#
+fun Fd.putChar(self, char: u8) {
+    self.write(&char, 1);
+}
+
 global fun main() -> i32 {
-    final stdout = 0 as Fd;
+    final stdout = 1 as Fd;
+    #`
+        Extension function handles lives only in expression scope.
+        So, here type of `a` will be `fun (Fd, u8) -> void`:
+
+        ```
+        final a: fun (Fd, u8) -> void = stdout.putChar;
+        ```
+
+        But, when you call it, it automatically appends first argument for `self`.
+    `#
+    stdout.putChar('a');
+    stdout.putChar('b');
+    stdout.putChar('c');
+    stdout.putChar('d');
+    stdout.putChar('\n');
     return 0;
 }

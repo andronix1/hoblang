@@ -50,6 +50,8 @@ bool ast_expr_eq(const AstExpr *a, const AstExpr *b) {
             return ast_expr_eq(a->as.inner, b->as.inner) && ast_type_eq(a->as.type, b->as.type);
         case AST_EXPR_NOT:
             return ast_expr_eq(a->not_inner, b->not_inner);
+        case AST_EXPR_TAKE_REF:
+            return ast_expr_eq(a->take_ref_inner, b->take_ref_inner);
     }
     UNREACHABLE;
 }
@@ -65,6 +67,9 @@ AstExpr *ast_expr_new_path(Mempool *mempool, Slice slice, AstPath *path)
 
 AstExpr *ast_expr_new_not(Mempool *mempool, Slice slice, AstExpr *inner)
     CONSTRUCT(AST_EXPR_NOT, out->not_inner = inner)
+
+AstExpr *ast_expr_new_take_ref(Mempool *mempool, Slice slice, AstExpr *inner)
+    CONSTRUCT(AST_EXPR_TAKE_REF, out->take_ref_inner = inner)
 
 AstExpr *ast_expr_new_as(Mempool *mempool, Slice slice, Slice as_slice, AstExpr *inner, AstType *as)
     CONSTRUCT(AST_EXPR_AS,

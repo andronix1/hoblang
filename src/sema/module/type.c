@@ -43,7 +43,8 @@ static inline IrType sema_type_to_ir(SemaModule* module, SemaType *type) {
 
 SemaTypeAlias *sema_type_alias_new(Mempool *mempool, IrTypeId id)
     MEMPOOL_CONSTRUCT(SemaTypeAlias,
-        out->id = id
+        out->id = id;
+        out->decls_map = keymap_new_in(mempool, SemaDecl*);
     )
 
 #define SEMA_TYPE_CONSTRUCT(KIND, FIELDS) { \

@@ -11,7 +11,9 @@
 #include "sema/module/stmts/exprs/int.h"
 #include "sema/module/stmts/exprs/not.h"
 #include "sema/module/stmts/exprs/path.h"
+#include "sema/module/stmts/exprs/take_ref.h"
 #include "sema/module/value.h"
+#include <stdio.h>
 
 SemaValue *sema_module_analyze_expr(SemaModule *module, AstExpr *expr, SemaExprCtx ctx) {
     switch (expr->kind) {
@@ -36,6 +38,8 @@ SemaValue *sema_module_analyze_expr(SemaModule *module, AstExpr *expr, SemaExprC
             TODO;
         case AST_EXPR_NOT:
             return sema_module_analyze_expr_not(module, expr->not_inner, ctx);
+        case AST_EXPR_TAKE_REF:
+            return sema_module_analyze_expr_take_ref(module, expr->not_inner, ctx);
     }
     UNREACHABLE;
 }
@@ -50,7 +54,7 @@ size_t sema_module_expr_get_runtime(SemaValueRuntime *runtime, SemaExprOutput *o
             vec_push(output->steps, ir_expr_step_new_get_local(runtime->local_id));
             return step_id;
         case SEMA_VALUE_RUNTIME_EXPR_STEP:
-            return runtime->step_id;
+            return runtime->in_expr_id.step_id;
     }
     UNREACHABLE;
 }

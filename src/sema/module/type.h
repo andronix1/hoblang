@@ -1,12 +1,14 @@
 #pragma once
 
 #include "ir/api/type.h"
+#include "sema/module/api/decl.h"
 #include "sema/module/api/module.h"
 #include "sema/module/api/type.h"
 #include <stdbool.h>
 
 typedef struct SemaTypeAlias {
     IrTypeId id;
+    SemaDecl **decls_map;
 } SemaTypeAlias;
 
 SemaTypeAlias *sema_type_alias_new(Mempool *mempool, IrTypeId id);

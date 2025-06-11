@@ -22,7 +22,11 @@ typedef struct {
     union {
         IrDeclId global_id;
         IrLocalId local_id;
-        size_t step_id;
+        struct {
+            size_t step_id;
+            size_t ext_of;
+            bool is_ext;
+        } in_expr_id;
     };
 } SemaValueRuntime;
 

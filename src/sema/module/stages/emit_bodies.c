@@ -36,13 +36,23 @@ void sema_module_emit_func_body(SemaModule *module, AstFunDecl *func) {
         sema_scope_stack_new(module->mempool, func->sema.func_id, type->function.returns));
 
     sema_module_push_scope(module);
+    if (func->info->ext.is) {
+        sema_module_push_decl(module, func->info->ext.self_name,
+            sema_decl_new(module->mempool, sema_value_new_runtime_local(
+                module->mempool,
+                SEMA_RUNTIME_FINAL,
+                type->function.args[0],
+                ir_func_arg_local_id(module->ir, func->sema.func_id, 0)
+            )
+        ));
+    }
     for (size_t i = 0; i < vec_len(func->info->args); i++) {
         sema_module_push_decl(module, func->info->args[i].name,
             sema_decl_new(module->mempool, sema_value_new_runtime_local(
                 module->mempool,
                 SEMA_RUNTIME_VAR,
-                type->function.args[i],
-                ir_func_arg_local_id(module->ir, func->sema.func_id, i)
+                type->function.args[i + func->info->ext.is],
+                ir_func_arg_local_id(module->ir, func->sema.func_id, i + func->info->ext.is)
             )
         ));
     }

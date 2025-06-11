@@ -1,5 +1,6 @@
 #include "type.h"
 #include "core/assert.h"
+#include "core/keymap.h"
 #include "core/log.h"
 #include "core/vec.h"
 #include "sema/module/type.h"
@@ -69,4 +70,17 @@ bool sema_type_eq(const SemaType *a, const SemaType *b) {
             return sema_type_eq(a->pointer_to, b->pointer_to);
     }
     UNREACHABLE;
+}
+
+SemaDecl *sema_type_search_ext(SemaType *type, Slice name) {
+    if (!type->aliases) {
+        return NULL;
+    }
+    for (ssize_t i = vec_len(type->aliases) - 1; i >= 0; i--) {
+        SemaDecl **decl = keymap_get(type->aliases[i]->decls_map, name);
+        if (decl) {
+            return *decl;
+        }
+    }
+    return NULL;
 }

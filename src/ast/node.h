@@ -50,6 +50,10 @@ typedef struct AstFunInfo {
         Slice of;
         bool by_ref;
         Slice self_name;
+
+        struct {
+            SemaType *ext_type;
+        } sema;
     } ext;
 } AstFunInfo;
 

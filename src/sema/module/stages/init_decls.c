@@ -11,7 +11,8 @@ bool sema_module_init_node_decls(SemaModule *module, AstNode *node) {
         case AST_NODE_TYPE_DECL: {
             SemaTypeId id = node->type_decl.sema.type_id = sema_module_register_type_alias(module);
             sema_module_push_decl(module, node->type_decl.name, sema_decl_new(module->mempool,
-                sema_value_new_type(module->mempool, node->type_decl.sema.type = sema_type_new_record(module, id))));
+                sema_value_new_type(module->mempool, node->type_decl.sema.type = sema_type_new_alias(module->mempool,
+                    sema_type_new_record(module, id), sema_type_alias_new(module->mempool, id)))));
             return true;
         }
         case AST_NODE_EXTERNAL_DECL:
