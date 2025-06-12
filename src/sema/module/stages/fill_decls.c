@@ -80,7 +80,6 @@ bool sema_module_fill_node_decls(SemaModule *module, AstNode *node) {
             AstTypeDecl *info = &node->type_decl;
             SemaType *source_type = module->types[info->sema.type_id].type =
                 NOT_NULL(sema_module_type(module, node->type_decl.type));
-            sema_type_new_alias(module->mempool, source_type, sema_type_alias_new(module->mempool, info->sema.type_id));
             ir_set_type_record(module->ir, module->types[info->sema.type_id].id, sema_type_ir_id(source_type));
             return true;
         }
