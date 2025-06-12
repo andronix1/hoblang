@@ -17,7 +17,9 @@ fun Fd.putChar(self, char: u8) {
 }
 
 global fun main() -> i32 {
-    var stdout = 1 as Fd;
+    var stdout = 0 as Fd;
+    final stdoutPtr = &stdout as *i32;
+    stdoutPtr.* += 1;
     #`
         Extension function handles lives only in expression scope.
         So, here type of `a` will be `fun (Fd, u8) -> void`:

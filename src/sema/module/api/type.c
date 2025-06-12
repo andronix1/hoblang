@@ -4,6 +4,7 @@
 #include "core/log.h"
 #include "core/vec.h"
 #include "sema/module/type.h"
+#include "sema/module/module.h"
 #include <stdio.h>
 
 IrTypeId sema_type_ir_id(SemaType *type) {
@@ -43,7 +44,16 @@ void sema_type_print(va_list list) {
     }
 }
 
+const SemaType *sema_type_resolve(const SemaType *type) {
+    while (type->kind == SEMA_TYPE_RECORD) {
+        type = type->record.module->types[type->record.id].type;
+    }
+    return type;
+}
+
 bool sema_type_eq(const SemaType *a, const SemaType *b) {
+    a = sema_type_resolve(a);
+    b = sema_type_resolve(b);
     if (a->kind != b->kind) {
         return false;
     }
@@ -51,7 +61,7 @@ bool sema_type_eq(const SemaType *a, const SemaType *b) {
         case SEMA_TYPE_VOID:
         case SEMA_TYPE_BOOL:
             return true;
-        case SEMA_TYPE_RECORD: return a->type_id == b->type_id;
+        case SEMA_TYPE_RECORD: UNREACHABLE;
         case SEMA_TYPE_INT:
             return
                 a->integer.size == b->integer.size &&

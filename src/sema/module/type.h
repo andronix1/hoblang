@@ -48,7 +48,10 @@ typedef struct SemaType {
 
         SemaType *pointer_to;
 
-        SemaTypeId type_id;
+        struct {
+            SemaTypeId id;
+            SemaModule *module;
+        } record;
     };
 } SemaType;
 

@@ -53,7 +53,7 @@ SemaTypeAlias *sema_type_alias_new(Mempool *mempool, IrTypeId id)
         FIELDS; \
         out->aliases = NULL; \
         out->ir_id = KIND == SEMA_TYPE_RECORD ? \
-            sema_module_get_type_id(module, out->type_id) : \
+            sema_module_get_type_id(module, out->record.id) : \
             ir_add_simple_type(module->ir, sema_type_to_ir(module, out)); \
         return out; \
     }
@@ -62,7 +62,10 @@ SemaType *sema_type_new_void(SemaModule *module)
     SEMA_TYPE_CONSTRUCT(SEMA_TYPE_VOID,)
 
 SemaType *sema_type_new_record(SemaModule *module, size_t type_id)
-    SEMA_TYPE_CONSTRUCT(SEMA_TYPE_RECORD, out->type_id = type_id)
+    SEMA_TYPE_CONSTRUCT(SEMA_TYPE_RECORD,
+        out->record.id = type_id;
+        out->record.module = module;
+    )
 
 SemaType *sema_type_new_bool(SemaModule *module)
     SEMA_TYPE_CONSTRUCT(SEMA_TYPE_BOOL,)

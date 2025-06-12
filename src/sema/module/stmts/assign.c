@@ -40,7 +40,7 @@ bool sema_module_emit_stmt_assign(SemaModule *module, AstAssign *assign) {
         IrLocalId temp = ir_func_add_local(module->ir, module->ss->func_id, ir_func_local_new(IR_IMMUTABLE, 
             sema_type_ir_id(sema_type_new_pointer(module, lvalue->type))));
 
-        vec_push(dsto.steps, ir_expr_step_new_take_ref(vec_len(dsto.steps) - 1));
+        sema_expr_output_push_step(&dsto, ir_expr_step_new_take_ref(sema_expr_output_last_id(&dsto)));
         sema_ss_append_stmt(module->ss, ir_stmt_new_init_final(module->mempool, temp, ir_expr_new(dsto.steps)));
 
         IrLocalId value = ir_func_add_local(module->ir, module->ss->func_id, ir_func_local_new(IR_IMMUTABLE, type));

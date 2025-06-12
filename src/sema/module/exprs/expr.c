@@ -60,5 +60,7 @@ IrExpr sema_expr_output_collect(SemaExprOutput *output) {
 
 SemaValueRuntime *sema_module_emit_runtime_expr(SemaModule *module, AstExpr *expr, SemaExprCtx ctx) {
     SemaValue *value = NOT_NULL(sema_module_emit_expr(module, expr, ctx)); 
-    return NOT_NULL(sema_value_should_be_runtime(module, expr->slice, value));
+    SemaValueRuntime *runtime = NOT_NULL(sema_value_should_be_runtime(module, expr->slice, value));
+    sema_module_expr_emit_runtime(runtime, ctx.output);
+    return runtime;
 }

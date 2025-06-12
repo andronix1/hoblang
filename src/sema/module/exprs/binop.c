@@ -20,12 +20,16 @@ static inline bool sema_type_to_ir_number_info(SemaType *type, IrNumberInfo *out
 static SemaValue *sema_binop_order(
     SemaModule *module,
     IrBinopOrderKind kind,
+    Slice where,
     SemaType *type,
     size_t lss, size_t rss,
     SemaExprOutput *output
 ) {
     IrNumberInfo info;
-    NOT_NULL(sema_type_to_ir_number_info(type, &info));
+    if (!sema_type_to_ir_number_info(type, &info)) {
+        sema_module_err(module, where, "this binop for number types only");
+        return NULL;
+    }
     size_t step_id = sema_expr_output_push_step(output, ir_expr_step_new_binop(
         ir_expr_binop_new_order(lss, rss, kind, info)));
     return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL,
@@ -35,6 +39,7 @@ static SemaValue *sema_binop_order(
 static SemaValue *sema_binop_compare(
     SemaModule *module,
     IrBinopCompareKind kind,
+    Slice where,
     SemaType *type,
     size_t lss, size_t rss,
     SemaExprOutput *output
@@ -48,6 +53,7 @@ static SemaValue *sema_binop_compare(
         step_id = sema_expr_output_push_step(output, ir_expr_step_new_binop(
             ir_expr_binop_new_compare_bool(lss, rss, kind)));
     } else {
+        sema_module_err(module, where, "this binop can be applied for bool or number");
         return NULL;
     }
     return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, sema_type_new_bool(module), step_id);
@@ -56,12 +62,16 @@ static SemaValue *sema_binop_compare(
 static SemaValue *sema_binop_arithm(
     SemaModule *module,
     IrBinopArithmeticKind kind,
+    Slice where,
     SemaType *type,
     size_t lss, size_t rss,
     SemaExprOutput *output
 ) {
     IrNumberInfo info;
-    NOT_NULL(sema_type_to_ir_number_info(type, &info));
+    if (!sema_type_to_ir_number_info(type, &info)) {
+        sema_module_err(module, where, "this binop for number types only");
+        return NULL;
+    }
     size_t step_id = sema_expr_output_push_step(output, ir_expr_step_new_binop(ir_expr_binop_new_arithmetic(
         lss, rss, kind, info)));
     return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, type, step_id);
@@ -101,18 +111,18 @@ static SemaValue *sema_binop_bool(
 
 SemaValue *sema_module_append_expr_binop(SemaModule *module, SemaType *type, size_t lss, size_t rss, AstBinopKind *kind, SemaExprOutput *output) {
     switch (kind->kind) {
-        case AST_BINOP_ADD: return sema_binop_arithm(module, IR_BINOP_ARITHM_ADD, type, lss, rss, output);
-        case AST_BINOP_SUBTRACT: return sema_binop_arithm(module, IR_BINOP_ARITHM_SUB, type, lss, rss, output);
-        case AST_BINOP_MULTIPLY: return sema_binop_arithm(module, IR_BINOP_ARITHM_MUL, type, lss, rss, output);
-        case AST_BINOP_DIVIDE: return sema_binop_arithm(module, IR_BINOP_ARITHM_DIV, type, lss, rss, output);
+        case AST_BINOP_ADD: return sema_binop_arithm(module, IR_BINOP_ARITHM_ADD, kind->slice, type, lss, rss, output);
+        case AST_BINOP_SUBTRACT: return sema_binop_arithm(module, IR_BINOP_ARITHM_SUB, kind->slice, type, lss, rss, output);
+        case AST_BINOP_MULTIPLY: return sema_binop_arithm(module, IR_BINOP_ARITHM_MUL, kind->slice, type, lss, rss, output);
+        case AST_BINOP_DIVIDE: return sema_binop_arithm(module, IR_BINOP_ARITHM_DIV, kind->slice, type, lss, rss, output);
 
-        case AST_BINOP_EQUALS: return sema_binop_compare(module, IR_COMPARE_EQ, type, lss, rss, output);
-        case AST_BINOP_NOT_EQUALS: return sema_binop_compare(module, IR_COMPARE_NE, type, lss, rss, output);
+        case AST_BINOP_EQUALS: return sema_binop_compare(module, IR_COMPARE_EQ, kind->slice, type, lss, rss, output);
+        case AST_BINOP_NOT_EQUALS: return sema_binop_compare(module, IR_COMPARE_NE, kind->slice, type, lss, rss, output);
 
-        case AST_BINOP_LESS: return sema_binop_order(module, IR_BINOP_ORDER_LT, type, lss, rss, output);
-        case AST_BINOP_GREATER: return sema_binop_order(module, IR_BINOP_ORDER_GT, type, lss, rss, output);
-        case AST_BINOP_LESS_EQ: return sema_binop_order(module, IR_BINOP_ORDER_LE, type, lss, rss, output);
-        case AST_BINOP_GREATER_EQ: return sema_binop_order(module, IR_BINOP_ORDER_GE, type, lss, rss, output);
+        case AST_BINOP_LESS: return sema_binop_order(module, IR_BINOP_ORDER_LT, kind->slice, type, lss, rss, output);
+        case AST_BINOP_GREATER: return sema_binop_order(module, IR_BINOP_ORDER_GT, kind->slice, type, lss, rss, output);
+        case AST_BINOP_LESS_EQ: return sema_binop_order(module, IR_BINOP_ORDER_LE, kind->slice, type, lss, rss, output);
+        case AST_BINOP_GREATER_EQ: return sema_binop_order(module, IR_BINOP_ORDER_GE, kind->slice, type, lss, rss, output);
 
         case AST_BINOP_OR: return sema_binop_bool(module, IR_BINOP_BOOL_OR, type, kind->slice, lss, rss, output);
         case AST_BINOP_AND: return sema_binop_bool(module, IR_BINOP_BOOL_AND, type, kind->slice, lss, rss, output);
