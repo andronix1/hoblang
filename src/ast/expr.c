@@ -19,6 +19,10 @@ bool ast_expr_eq(const AstExpr *a, const AstExpr *b) {
     }
     switch (a->kind) {
         case AST_EXPR_PATH: return ast_path_eq(a->path, b->path);
+        case AST_EXPR_INNER_PATH:
+            return 
+                    ast_path_eq(a->inner_path.path, b->inner_path.path) &&
+                    ast_expr_eq(a->inner_path.inner, b->inner_path.inner);
         case AST_EXPR_CALL:
             if (!ast_expr_eq(a->call.inner, b->call.inner) ||
                 vec_len(a->call.args) != vec_len(b->call.args)) return false;
@@ -64,6 +68,12 @@ AstExpr *ast_expr_new_char(Mempool *mempool, Slice slice, char c)
 
 AstExpr *ast_expr_new_path(Mempool *mempool, Slice slice, AstPath *path)
     CONSTRUCT(AST_EXPR_PATH, out->path = path)
+
+AstExpr *ast_expr_new_inner_path(Mempool *mempool, Slice slice, AstExpr *inner, AstPath *path)
+    CONSTRUCT(AST_EXPR_INNER_PATH,
+        out->inner_path.inner = inner;
+        out->inner_path.path = path;
+    )
 
 AstExpr *ast_expr_new_not(Mempool *mempool, Slice slice, AstExpr *inner)
     CONSTRUCT(AST_EXPR_NOT, out->not_inner = inner)

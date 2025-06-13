@@ -213,7 +213,7 @@ static LlvmEmitStepRes llvm_emit_expr_step(
         case IR_EXPR_STEP_BOOL:
             return llvm_emit_step_res_new(LLVMConstInt(LLVMInt1Type(), step->boolean, false), true);
         case IR_EXPR_STEP_TAKE_REF: {
-            // assert(!results[step->ref_step].loaded);
+            assert(!results[step->ref_step].loaded);
             return llvm_emit_step_res_new(results[step->ref_step].value, true);
         }
         case IR_EXPR_STEP_DEREF:

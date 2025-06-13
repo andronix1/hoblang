@@ -42,10 +42,8 @@ static SemaValue *sema_module_analyze_expr_path_ident(SemaModule *module, SemaVa
     return NULL;
 }
 
-SemaValue *sema_module_emit_expr_path(SemaModule *module, AstPath *path, SemaExprCtx ctx) {
-    assert(vec_len(path->segments) > 0);
-    SemaValue *value = NOT_NULL(sema_module_path_segment(module, &path->segments[0]));
-    for (size_t i = 1; i < vec_len(path->segments); i++) {
+SemaValue *sema_module_emit_expr_path_from(SemaModule *module, SemaValue *value, AstPath *path, size_t offset, SemaExprCtx ctx) {
+    for (size_t i = offset; i < vec_len(path->segments); i++) {
         AstPathSegment *segment = &path->segments[i];
         switch (segment->kind) {
             case AST_PATH_SEGMENT_IDENT:
@@ -59,6 +57,12 @@ SemaValue *sema_module_emit_expr_path(SemaModule *module, AstPath *path, SemaExp
         }
     }
     return value;
+}
+
+SemaValue *sema_module_emit_expr_path(SemaModule *module, AstPath *path, SemaExprCtx ctx) {
+    assert(vec_len(path->segments) > 0);
+    SemaValue *value = NOT_NULL(sema_module_path_segment(module, &path->segments[0]));
+    return sema_module_emit_expr_path_from(module, value, path, 1, ctx);
 }
 
 

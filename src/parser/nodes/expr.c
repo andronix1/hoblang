@@ -38,6 +38,11 @@ static inline AstExpr *parse_expr_additions(Parser *parser, AstExpr *expr) {
                 expr = ast_expr_new_as(parser->mempool, slice_union(expr->slice, type->slice), token.slice, expr, type);
                 break;
             }
+            case TOKEN_DOT: {
+                AstPath *path = NOT_NULL(parse_path(parser));
+                expr = ast_expr_new_inner_path(parser->mempool, slice_union(expr->slice, ast_path_slice(path)), expr, path);
+                break;
+            }
             default:
                 parser_skip_next(parser);
                 reading = false;

@@ -13,6 +13,7 @@
 #include "sema/module/exprs/int.h"
 #include "sema/module/exprs/not.h"
 #include "sema/module/exprs/path.h"
+#include "sema/module/exprs/inner_path.h"
 #include "sema/module/exprs/take_ref.h"
 #include "sema/module/value.h"
 
@@ -28,6 +29,7 @@ SemaValue *sema_module_emit_expr(SemaModule *module, AstExpr *expr, SemaExprCtx 
         case AST_EXPR_AS: return sema_module_emit_expr_as(module, &expr->as, ctx);
         case AST_EXPR_NOT: return sema_module_emit_expr_not(module, expr->not_inner, ctx);
         case AST_EXPR_TAKE_REF: return sema_module_emit_expr_take_ref(module, expr->not_inner, ctx);
+        case AST_EXPR_INNER_PATH: return sema_module_emit_expr_inner_path(module, &expr->inner_path, ctx);
         case AST_EXPR_STRING: case AST_EXPR_STRUCT: TODO;
     }
     UNREACHABLE;
