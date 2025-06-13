@@ -2,6 +2,7 @@
 #include "core/file_content.h"
 #include "core/keymap.h"
 #include "core/log.h"
+#include "core/null.h"
 #include "core/path.h"
 #include "ir/api/ir.h"
 #include "parser/parser.h"
@@ -9,6 +10,7 @@
 #include "sema/module/api/decl.h"
 #include "sema/module/api/type.h"
 #include "sema/module/scope.h"
+#include "sema/module/decl.h"
 #include <stdarg.h>
 #include <stdio.h>
 
@@ -56,6 +58,15 @@ SemaDecl *sema_module_resolve_req_decl(SemaModule *module, Slice name) {
         return NULL;
     }
     return *decl;
+}
+
+SemaDecl *sema_module_resolve_req_decl_from(SemaModule *module, SemaModule *from, Slice name) {
+    SemaDecl *decl = NOT_NULL(sema_module_resolve_req_decl(module, name));
+    if (decl->module && decl->module != from) {
+        sema_module_err(from, name, "`$S` is private", name);
+        return NULL;
+    }
+    return decl;
 }
 
 void sema_module_push_loop(SemaModule *module, SemaLoop loop) {
@@ -108,6 +119,9 @@ void sema_module_push_decl(SemaModule *module, Slice name, SemaDecl *decl) {
             sema_module_err(module, name, "`$S` already declared", name);
         }
     } else {
+        if (!decl->module) {
+            sema_module_err(module, name, "trying to specify visibility in local scope");
+        }
         sema_ss_push_decl(module, module->ss, name, decl);
     }
 }

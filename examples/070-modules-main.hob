@@ -1,10 +1,17 @@
 #`
-    You can import modules using `import` keyword. 
-    Alias must be specified.
+    You can import modules using `import` keyword. Alias must be specified.
 `#
 import "070-modules-exit.hob" as module1;
 
-fun getExitCode() -> module1.ExitCode {
+#`
+    The `public` keyword should be specified if you wanna use declaration
+    in other modules. If you won't specify it, compile-time error will be
+    thrown.
+
+    In this case, function `getExitCode` uses in `070-modules-exit.hob` 
+    module
+`#
+public fun getExitCode() -> module1.ExitCode {
     return 0;
 }
 

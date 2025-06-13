@@ -23,7 +23,7 @@ typedef enum {
 } AstNodeKind;
 
 typedef struct {
-    bool is_local;
+    bool is_public;
     Slice name;
     AstType *type;
     AstGeneric *generics;
@@ -40,7 +40,7 @@ typedef struct {
 } AstFunArg;
 
 typedef struct AstFunInfo {
-    bool is_local;
+    bool is_public;
     Slice name;
     AstFunArg *args;
     AstType *returns;
@@ -75,7 +75,7 @@ typedef enum {
 } AstValueDeclKind;
 
 typedef struct AstValueInfo {
-    bool is_local;
+    bool is_public;
     Slice name;
     AstValueDeclKind kind;
     AstType *explicit_type;
@@ -98,7 +98,7 @@ typedef enum {
 } AstExternalDeclKind;
 
 typedef struct {
-    bool is_local;
+    bool is_public;
     AstExternalDeclKind kind;
 
     bool has_alias;
@@ -134,20 +134,20 @@ bool ast_node_eq(const AstNode *a, const AstNode *b);
 
 AstFunArg ast_fun_arg_new(Slice name, AstType *type);
 AstFunInfo *ast_fun_info_new(Mempool *mempool,
-    bool is_local, Slice name,
+    bool is_public, Slice name,
     AstFunArg *args, AstType *returns
 );
 AstFunInfo *ast_ext_fun_info_new(Mempool *mempool,
-    bool is_local, Slice name,
+    bool is_public, Slice name,
     AstFunArg *args, AstType *returns,
     Slice of, bool by_ref, Slice self_name
 );
 AstValueInfo *ast_value_info_new(Mempool *mempool,
-    bool is_local, AstValueDeclKind kind, Slice name,
+    bool is_public, AstValueDeclKind kind, Slice name,
     AstType *explicit_type
 );
 
-AstNode *ast_node_new_type_decl(Mempool *mempool, bool is_local, Slice name, AstGeneric *generics, AstType *type);
+AstNode *ast_node_new_type_decl(Mempool *mempool, bool is_public, Slice name, AstGeneric *generics, AstType *type);
 AstNode *ast_node_new_fun_decl(Mempool *mempool, AstGlobal *global, AstFunInfo *info, AstBody *body);
 AstNode *ast_node_new_value_decl(Mempool *mempool, AstGlobal *global, AstValueInfo *info, AstExpr *initializer);
 AstNode *ast_node_new_external_value(Mempool *mempool, AstValueInfo *info, bool has_alias, Slice alias);

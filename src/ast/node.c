@@ -36,14 +36,14 @@ bool ast_generic_eq(const AstGeneric *a, const AstGeneric *b) {
 
 bool ast_value_info_eq(const AstValueInfo *a, const AstValueInfo *b) {
     return
-        a->is_local == b->is_local &&
+        a->is_public == b->is_public &&
         a->kind == b->kind &&
         slice_eq(a->name, b->name) &&
         equals_nullable(a->explicit_type, b->explicit_type, (EqFunc)ast_type_eq);
 }
 
 bool ast_fun_info_eq(const AstFunInfo *a, const AstFunInfo *b) {
-    bool meta_equals = a->is_local == b->is_local &&
+    bool meta_equals = a->is_public == b->is_public &&
         slice_eq(a->name, b->name) &&
         equals_nullable(a->returns, b->returns, (EqFunc)ast_type_eq) &&
         vec_len(a->args) == vec_len(b->args);
@@ -66,7 +66,7 @@ bool ast_node_eq(const AstNode *a, const AstNode *b) {
     }
     switch (a->kind) {
         case AST_NODE_TYPE_DECL:
-            return a->type_decl.is_local == b->type_decl.is_local &&
+            return a->type_decl.is_public == b->type_decl.is_public &&
                 equals_nullable(a->type_decl.generics, b->type_decl.generics, (EqFunc)ast_generic_eq) &&
                 slice_eq(a->type_decl.name, b->type_decl.name) &&
                 ast_type_eq(a->type_decl.type, b->type_decl.type);
@@ -106,10 +106,10 @@ AstFunArg ast_fun_arg_new(Slice name, AstType *type) {
 }
 
 AstFunInfo *ast_fun_info_new(Mempool *mempool,
-    bool is_local, Slice name,
+    bool is_public, Slice name,
     AstFunArg *args, AstType *returns
 ) MEMPOOL_CONSTRUCT(AstFunInfo,
-    out->is_local = is_local;
+    out->is_public = is_public;
     out->ext.is = false;
     out->name = name;
     out->args = args;
@@ -117,11 +117,11 @@ AstFunInfo *ast_fun_info_new(Mempool *mempool,
 )
 
 AstFunInfo *ast_ext_fun_info_new(Mempool *mempool,
-    bool is_local, Slice name,
+    bool is_public, Slice name,
     AstFunArg *args, AstType *returns,
     Slice of, bool by_ref, Slice self_name
 ) MEMPOOL_CONSTRUCT(AstFunInfo,
-    out->is_local = is_local;
+    out->is_public = is_public;
     out->ext.is = true;
     out->ext.of = of;
     out->ext.self_name = self_name;
@@ -132,21 +132,21 @@ AstFunInfo *ast_ext_fun_info_new(Mempool *mempool,
 )
 
 AstValueInfo *ast_value_info_new(Mempool *mempool,
-    bool is_local, AstValueDeclKind kind, Slice name,
+    bool is_public, AstValueDeclKind kind, Slice name,
     AstType *explicit_type
 ) MEMPOOL_CONSTRUCT(AstValueInfo,
-    out->is_local = is_local;
+    out->is_public = is_public;
     out->kind = kind;
     out->name = name;
     out->explicit_type = explicit_type;
 )
 
-AstNode *ast_node_new_type_decl(Mempool *mempool, bool is_local, Slice name, AstGeneric *generics, AstType *type)
+AstNode *ast_node_new_type_decl(Mempool *mempool, bool is_public, Slice name, AstGeneric *generics, AstType *type)
     CONSTRUCT(AST_NODE_TYPE_DECL,
         out->type_decl.name = name;
         out->type_decl.type = type;
         out->type_decl.generics = generics;
-        out->type_decl.is_local = is_local;
+        out->type_decl.is_public = is_public;
     )
 
 AstNode *ast_node_new_fun_decl(Mempool *mempool,

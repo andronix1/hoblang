@@ -14,7 +14,7 @@ typedef enum {
 } AstTypeKind;
 
 typedef struct {
-    bool is_local;
+    bool is_public;
     AstType *type;
 } AstStructField;
 
@@ -36,7 +36,7 @@ typedef struct AstType {
 
 bool ast_type_eq(const AstType *a, const AstType *b);
 
-AstStructField ast_struct_field_new(bool is_local, AstType *type);
+AstStructField ast_struct_field_new(bool is_public, AstType *type);
 AstType *ast_type_new_struct(Mempool *pool, AstStructField *fields_map);
 AstType *ast_type_new_path(Mempool *pool, AstPath *path);
 AstType *ast_type_new_pointer(Mempool *pool, AstType *of);

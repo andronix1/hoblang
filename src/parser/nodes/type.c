@@ -14,10 +14,10 @@ AstType *parse_type(Parser *parser) {
             PARSER_EXPECT_NEXT(parser, TOKEN_OPENING_FIGURE_BRACE);
             AstStructField *fields = keymap_new_in(parser->mempool, AstStructField);
             while (!parser_next_should_be(parser, TOKEN_CLOSING_FIGURE_BRACE)) {
-                bool is_local = parser_next_should_be(parser, TOKEN_LOCAL);
+                bool is_public = parser_next_should_be(parser, TOKEN_PUBLIC);
                 Slice name = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
                 PARSER_EXPECT_NEXT(parser, TOKEN_COLON);
-                if (keymap_insert(fields, name, ast_struct_field_new(is_local, NOT_NULL(parse_type(parser))))) {
+                if (keymap_insert(fields, name, ast_struct_field_new(is_public, NOT_NULL(parse_type(parser))))) {
                     parser_err(parser, name, "duplicate field");
                 }
                 if (!parser_check_list_sep(parser, TOKEN_CLOSING_FIGURE_BRACE)) return NULL;

@@ -92,6 +92,7 @@ bool sema_module_fill_node_decls(SemaModule *module, AstNode *node) {
                     ir_init_extern(module->ir, decl_id, ir_extern_new(IR_EXTERN_FUNC,
                         info->has_alias ? info->alias : info->fun->name, sema_type_ir_id(type)));
                     sema_module_push_fun_info_decl(module, info->fun, sema_decl_new(module->mempool,
+                        info->fun->is_public ? NULL : module,
                         sema_value_new_runtime_global(module->mempool, SEMA_RUNTIME_FINAL, type, decl_id)));
                     return true;
                 }
@@ -110,6 +111,7 @@ bool sema_module_fill_node_decls(SemaModule *module, AstNode *node) {
             }
             IrDeclId decl_id = ir_add_decl(module->ir);
             sema_module_push_fun_info_decl(module, info->info, sema_decl_new(module->mempool,
+                info->info->is_public ? NULL : module,
                 sema_value_new_runtime_global(module->mempool, SEMA_RUNTIME_FINAL, type, decl_id)));
             IrTypeId type_id = sema_type_ir_id(type);
             info->sema.func_id = ir_init_func(module->ir, args_mut, decl_id, info->global ? 
@@ -143,8 +145,9 @@ bool sema_module_fill_node_decls(SemaModule *module, AstNode *node) {
                     sema_type_ir_id(type)));
             node->value_decl.sema.type = type;
             node->value_decl.sema.local_id = local_id;
-            sema_module_push_decl(module, info->name, sema_decl_new(
-                module->mempool, sema_value_new_runtime_local(module->mempool,
+            sema_module_push_decl(module, info->name, sema_decl_new(module->mempool,
+                info->is_public ? NULL : module,
+                sema_value_new_runtime_local(module->mempool,
                     ast_value_kind_to_sema(info->kind), type, local_id)));
             switch (info->kind) {
                 case AST_VALUE_DECL_FINAL: {

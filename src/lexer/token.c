@@ -35,7 +35,7 @@ void token_print(va_list list) {
         case TOKEN_INTEGER: printf("<integer>"); return;
         case TOKEN_STRING: printf("<string>"); return;
         case TOKEN_STRUCT: printf("`struct`"); return;
-        case TOKEN_LOCAL: printf("`local`"); return;
+        case TOKEN_PUBLIC: printf("`public`"); return;
         case TOKEN_TYPE: printf("`type`"); return;
         case TOKEN_FUN: printf("`fun`"); return;
         case TOKEN_GLOBAL: printf("`global`"); return;

@@ -38,6 +38,7 @@ Path sema_module_file_path(SemaModule *module);
 void sema_module_push_loop(SemaModule *module, SemaLoop loop);
 void sema_module_pop_loop(SemaModule *module);
 SemaDecl *sema_module_resolve_req_decl(SemaModule *module, Slice name);
+SemaDecl *sema_module_resolve_req_decl_from(SemaModule *module, SemaModule *from, Slice name);
 SemaScopeStack *sema_module_swap_ss(SemaModule *module, SemaScopeStack *new_ss);
 void sema_module_push_scope(SemaModule *module);
 void sema_module_pop_scope(SemaModule *module);

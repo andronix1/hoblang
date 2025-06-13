@@ -5,9 +5,9 @@
 `#
 import "070-modules-main.hob" as module2;
 
-type ExitCode = i32;
+public type ExitCode = i32;
 
-fun getExitCode() -> ExitCode {
+public fun getExitCode() -> ExitCode {
     return module2.getExitCode();
 }
 

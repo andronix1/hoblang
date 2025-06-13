@@ -8,9 +8,9 @@
 
 #define CONSTRUCT(KIND, FIELDS) MEMPOOL_CONSTRUCT(AstType, out->kind = KIND; FIELDS)
 
-AstStructField ast_struct_field_new(bool is_local, AstType *type) {
+AstStructField ast_struct_field_new(bool is_public, AstType *type) {
     AstStructField field = {
-        .is_local = is_local,
+        .is_public = is_public,
         .type = type,
     };
     return field;
@@ -29,7 +29,7 @@ bool ast_type_eq(const AstType *a, const AstType *b) {
             for (size_t i = 0; i < vec_len(a->structure.fields_map); i++) {
                 keymap_at(a->structure.fields_map, i, af);
                 keymap_at(a->structure.fields_map, i, bf);
-                if (af->value.is_local != bf->value.is_local) {
+                if (af->value.is_public != bf->value.is_public) {
                     return false;
                 }
                 if (!slice_eq(af->key, bf->key)) {

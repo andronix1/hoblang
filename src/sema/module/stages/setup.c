@@ -8,7 +8,7 @@
 #include "sema/module/value.h"
 
 static inline void sema_module_push_type(SemaModule *module, const char *name, SemaType *type) {
-    sema_module_push_decl(module, slice_from_cstr(name), sema_decl_new(module->mempool,
+    sema_module_push_decl(module, slice_from_cstr(name), sema_decl_new(module->mempool, module,
         sema_value_new_type(module->mempool, type)));
 }
 

@@ -5,7 +5,8 @@
 #include "sema/module/api/value.h"
 
 typedef struct SemaDecl {
+    SemaModule *module;
     SemaValue *value;
 } SemaDecl;
 
-SemaDecl *sema_decl_new(Mempool *mempool, SemaValue *value);
+SemaDecl *sema_decl_new(Mempool *mempool, SemaModule *module, SemaValue *value);
