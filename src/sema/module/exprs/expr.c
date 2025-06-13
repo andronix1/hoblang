@@ -53,7 +53,7 @@ size_t sema_expr_output_push_step(SemaExprOutput *output, IrExprStep step) {
 }
 
 size_t sema_expr_output_last_id(SemaExprOutput *output) {
-    return vec_len(output->steps);
+    return vec_len(output->steps) - 1;
 }
 
 IrExpr sema_expr_output_collect(SemaExprOutput *output) {

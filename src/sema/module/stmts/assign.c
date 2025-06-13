@@ -12,6 +12,7 @@
 #include "sema/module/exprs/binop.h"
 #include "sema/module/type.h"
 #include <assert.h>
+#include <stdio.h>
 
 bool sema_module_emit_stmt_assign(SemaModule *module, AstAssign *assign) {
     SemaExprOutput dsto = sema_expr_output_new(module->mempool);
@@ -33,7 +34,7 @@ bool sema_module_emit_stmt_assign(SemaModule *module, AstAssign *assign) {
         sema_module_err(module, assign->what->slice, "cannot assign expression of type $t to assignable expression of type $t", rvalue->type, lvalue->type);
         return false;
     }
-    IrExprStep *steps = valueo.steps;
+    IrExpr value_expr = sema_expr_output_collect(&valueo);
     if (assign->short_assign.is) {
         IrTypeId type = sema_type_ir_id(lvalue->type);
         
@@ -41,10 +42,10 @@ bool sema_module_emit_stmt_assign(SemaModule *module, AstAssign *assign) {
             sema_type_ir_id(sema_type_new_pointer(module, lvalue->type))));
 
         sema_expr_output_push_step(&dsto, ir_expr_step_new_take_ref(sema_expr_output_last_id(&dsto)));
-        sema_ss_append_stmt(module->ss, ir_stmt_new_init_final(module->mempool, temp, ir_expr_new(dsto.steps)));
+        sema_ss_append_stmt(module->ss, ir_stmt_new_init_final(module->mempool, temp, sema_expr_output_collect(&dsto)));
 
         IrLocalId value = ir_func_add_local(module->ir, module->ss->func_id, ir_func_local_new(IR_IMMUTABLE, type));
-        sema_ss_append_stmt(module->ss, ir_stmt_new_init_final(module->mempool, value, ir_expr_new(steps)));
+        sema_ss_append_stmt(module->ss, ir_stmt_new_init_final(module->mempool, value, value_expr));
 
         SemaExprOutput output = sema_expr_output_new_with(vec_create_in(module->mempool,
             ir_expr_step_new_get_local(temp),
@@ -59,6 +60,6 @@ bool sema_module_emit_stmt_assign(SemaModule *module, AstAssign *assign) {
         )), sema_expr_output_collect(&output)));
         return true;
     }
-    sema_ss_append_stmt(module->ss, ir_stmt_new_store(module->mempool, sema_expr_output_collect(&dsto), ir_expr_new(steps)));
+    sema_ss_append_stmt(module->ss, ir_stmt_new_store(module->mempool, sema_expr_output_collect(&dsto), value_expr));
     return true;
 }
