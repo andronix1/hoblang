@@ -1,5 +1,6 @@
 #include "init_decls.h"
 #include "ast/node.h"
+#include "core/null.h"
 #include "sema/module/decl.h"
 #include "sema/module/module.h"
 #include "core/assert.h"
@@ -26,8 +27,13 @@ bool sema_module_init_node_decls(SemaModule *module, AstNode *node) {
                 return false;
             }
             return true;
-        case AST_NODE_IMPORT:
-            TODO;
+        case AST_NODE_IMPORT: {
+            SemaModule *imported = NOT_NULL(sema_project_add_module(module->project, sema_module_file_path(module),
+                mempool_slice_to_cstr(module->mempool, node->import.path)));
+            sema_module_push_decl(module, node->import.alias, sema_decl_new(module->mempool,
+                sema_value_new_module(module->mempool, imported)));
+            return true;
+        }
     }
     UNREACHABLE;
 }

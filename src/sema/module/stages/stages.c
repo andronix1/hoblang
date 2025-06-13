@@ -6,6 +6,7 @@
 #define SEMA_STAGES_COUNT 3
 
 size_t sema_stages_count = SEMA_STAGES_COUNT;
+size_t sema_setup_stages_count = 2;
 
 SemaStage sema_stages[SEMA_STAGES_COUNT] = {
     sema_module_init_node_decls,

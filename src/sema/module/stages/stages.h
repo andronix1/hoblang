@@ -6,4 +6,5 @@
 typedef bool (*SemaStage)(SemaModule *module, AstNode *node);
 
 extern size_t sema_stages_count;
+extern size_t sema_setup_stages_count;
 extern SemaStage sema_stages[];

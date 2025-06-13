@@ -16,6 +16,7 @@
 #include "sema/module/exprs/inner_path.h"
 #include "sema/module/exprs/take_ref.h"
 #include "sema/module/value.h"
+#include <assert.h>
 
 SemaValue *sema_module_emit_expr(SemaModule *module, AstExpr *expr, SemaExprCtx ctx) {
     switch (expr->kind) {
@@ -48,15 +49,18 @@ size_t sema_module_expr_emit_runtime(SemaValueRuntime *runtime, SemaExprOutput *
 }
 
 size_t sema_expr_output_push_step(SemaExprOutput *output, IrExprStep step) {
+    if (!output) return 0;
     vec_push(output->steps, step);
     return vec_len(output->steps) - 1;
 }
 
 size_t sema_expr_output_last_id(SemaExprOutput *output) {
+    if (!output) return 0;
     return vec_len(output->steps) - 1;
 }
 
 IrExpr sema_expr_output_collect(SemaExprOutput *output) {
+    assert(output);
     return ir_expr_new(output->steps);
 }
 

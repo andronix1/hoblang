@@ -5,6 +5,7 @@
 #include "core/slice.h"
 #include "ir/api/ir.h"
 #include "parser/api.h"
+#include "sema/api/project.h"
 #include "sema/module/api/decl.h"
 #include "sema/module/api/type.h"
 #include "sema/module/api/decl.h"
@@ -20,15 +21,19 @@ typedef struct SemaModule {
     Parser *parser;
     AstNode **nodes;
     Ir *ir;
+    SemaProject *project;
 
     bool failed;
 
     SemaScopeStack *ss;
     SemaDecl **local_decls_map;
     SemaTypeInfo *types;
+    bool *stage_failures;
 } SemaModule;
 
 void sema_module_err(SemaModule *module, Slice where, const char *fmt, ...);
+void sema_module_link_project(SemaModule *module, SemaProject *project);
+Path sema_module_file_path(SemaModule *module);
 
 void sema_module_push_loop(SemaModule *module, SemaLoop loop);
 void sema_module_pop_loop(SemaModule *module);

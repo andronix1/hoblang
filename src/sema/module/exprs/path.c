@@ -25,6 +25,10 @@ static SemaValue *sema_module_analyze_expr_path_deref(SemaModule *module, SemaVa
 }
 
 static SemaValue *sema_module_analyze_expr_path_ident(SemaModule *module, SemaValue *value, Slice ident, SemaExprOutput *output) {
+    SemaModule *in_module = sema_value_is_module(value);
+    if (in_module) {
+        return NOT_NULL(sema_module_resolve_req_decl(in_module, ident))->value;
+    }
     SemaValueRuntime *runtime = sema_value_is_runtime(value);
     if (runtime) {
         size_t of = sema_module_expr_emit_runtime(runtime, output);

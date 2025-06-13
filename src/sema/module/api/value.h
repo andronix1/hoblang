@@ -35,4 +35,5 @@ typedef struct SemaValue SemaValue;
 SemaType *sema_value_should_be_type(SemaModule *module, Slice where, SemaValue *value);
 SemaValueRuntime *sema_value_should_be_runtime(SemaModule *module, Slice where, SemaValue *value);
 SemaType *sema_value_is_type(SemaValue *value);
+SemaModule *sema_value_is_module(SemaValue *value);
 SemaValueRuntime *sema_value_is_runtime(SemaValue *value);

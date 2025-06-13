@@ -171,9 +171,9 @@ bool sema_module_fill_node_decls(SemaModule *module, AstNode *node) {
             }
             UNREACHABLE;
         }
-        case AST_NODE_STMT: return true;
         case AST_NODE_IMPORT:
-            TODO;
+        case AST_NODE_STMT:
+            return true;
     }
     UNREACHABLE;
 }

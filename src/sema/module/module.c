@@ -2,6 +2,7 @@
 #include "core/file_content.h"
 #include "core/keymap.h"
 #include "core/log.h"
+#include "core/path.h"
 #include "ir/api/ir.h"
 #include "parser/parser.h"
 #include "lexer/lexer.h"
@@ -23,6 +24,10 @@ static inline const FileContent *sema_module_file_content(SemaModule *module) {
     return module->parser->lexer->content;
 }
 
+Path sema_module_file_path(SemaModule *module) {
+    return sema_module_file_content(module)->path;
+}
+
 void sema_module_err(SemaModule *module, Slice where, const char *fmt, ...) {
     module->failed = true;
     va_list list;
@@ -32,6 +37,10 @@ void sema_module_err(SemaModule *module, Slice where, const char *fmt, ...) {
     logv(fmt, list);
     logln("\n$V", file_content_get_in_lines_view(content, where));
     va_end(list);
+}
+
+void sema_module_link_project(SemaModule *module, SemaProject *project) {
+    module->project = project;
 }
 
 SemaDecl *sema_module_resolve_req_decl(SemaModule *module, Slice name) {

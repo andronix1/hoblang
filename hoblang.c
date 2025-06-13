@@ -1,15 +1,11 @@
-#include "core/file_content.h"
 #include "core/log.h"
 #include "ir/api/ir.h"
 #include "ir/dump/dump.h"
 #include "ir/stages/checks.h"
 #include "ir/stages/stmts.h"
 #include "ir/stages/type_tree.h"
-#include "lexer/api.h"
-#include "parser/api.h"
 #include "print.h"
-#include "sema/module/api/module.h"
-#include "sema/module/stages/setup.h"
+#include "sema/api/project.h"
 #include "llvm/module/api.h"
 
 int main(int argc, char **argv) {
@@ -23,15 +19,12 @@ int main(int argc, char **argv) {
     Path entry_path = argv[1];
 
     Ir *ir = ir_new();
-    SemaModule *module = sema_module_new(ir, parser_new(lexer_new(file_content_read(entry_path))));
-    if (!module) {
-        return 1;
-    }
-    sema_module_setup(module);
-    sema_module_emit(module);
+    SemaProject *project = sema_project_new(ir);
+    sema_project_add_module(project, NULL, entry_path);
+    sema_project_emit(project);
 
-    if (sema_module_failed(module)) {
-        sema_module_free(module);
+    if (sema_project_failed(project)) {
+        sema_project_free(project);
         ir_free(ir);
         return 1;
     }
@@ -50,7 +43,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    sema_module_free(module);
+    sema_project_free(project);
     llvm_module_free(llvm);
     ir_free(ir);
     return 0;

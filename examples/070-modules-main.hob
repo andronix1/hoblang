@@ -1,0 +1,22 @@
+#`
+    You can import modules using `import` keyword. 
+    Alias must be specified.
+`#
+import "070-modules-exit.hob" as module1;
+
+fun getExitCode() -> module1.ExitCode {
+    return 0;
+}
+
+global fun main() -> module1.ExitCode {
+    #`
+        Module is compile-time value, so you cannot assign it to variable:
+        So, code below will throw compile-time error
+        ``` final iWannaGetModule = module1; ```
+    `#
+    return module1.getExitCode();
+}
+
+#`
+    Read more in `070-modules-exit.hob` :)
+`#

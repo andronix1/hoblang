@@ -1,0 +1,13 @@
+#`
+    You can cross-import modules. If you import module in different modules,
+    or import it twice, it will be readed, validated e.t.c. once (so, only
+    one instance will be created)
+`#
+import "070-modules-main.hob" as module2;
+
+type ExitCode = i32;
+
+fun getExitCode() -> ExitCode {
+    return module2.getExitCode();
+}
+

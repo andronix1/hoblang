@@ -1,5 +1,4 @@
 #include "module.h"
-#include "core/log.h"
 #include "core/mempool.h"
 #include "core/vec.h"
 #include "parser/api.h"
@@ -22,20 +21,20 @@ SemaModule *sema_module_new(Ir *ir, Parser *parser) {
     
     module->types = vec_new_in(module->mempool, SemaTypeInfo);
     module->local_decls_map = keymap_new_in(module->mempool, SemaDecl*);
+
+    module->stage_failures = vec_new_in(module->mempool, bool);
+    vec_resize(module->stage_failures, vec_len(nodes));
+    memset(module->stage_failures, 0, sizeof(bool) * vec_len(nodes));
+
     return module;
 }
 
-void sema_module_emit(SemaModule *module) {
-    bool *stage_failures = vec_new_in(module->mempool, bool);
-    vec_resize(stage_failures, vec_len(module->nodes));
-    memset(stage_failures, 0, sizeof(bool) * vec_len(stage_failures));
-    for (size_t i = 0; i < sema_stages_count; i++) {
-        logln("running sema stage: $l", i);
-        for (size_t j = 0; j < vec_len(module->nodes); j++) {
-            if (stage_failures[j]) continue;
-            if (!sema_stages[i](module, module->nodes[j])) {
-                stage_failures[i] = true;
-            }
+void sema_module_run_stage(SemaModule *module, size_t stage_id) {
+    assert(stage_id < sema_stages_count);
+    for (size_t i = 0; i < vec_len(module->nodes); i++) {
+        if (module->stage_failures[i]) continue;
+        if (!sema_stages[stage_id](module, module->nodes[i])) {
+            module->stage_failures[stage_id] = true;
         }
     }
 }

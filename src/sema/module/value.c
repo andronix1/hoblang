@@ -9,6 +9,7 @@ void sema_value_print(va_list list) {
     switch (value->kind) {
         case SEMA_VALUE_TYPE: printf("type"); break;
         case SEMA_VALUE_RUNTIME: printf("value"); break;
+        case SEMA_VALUE_MODULE: printf("module"); break;
     }
 }
 
@@ -49,6 +50,12 @@ SemaValue *sema_value_new_runtime_ext_expr_step(Mempool *mempool, SemaRuntimeKin
         out->runtime.in_expr_id.step_id = step_id;
         out->runtime.in_expr_id.is_ext = true;
         out->runtime.in_expr_id.ext_of = of;
+    );
+
+SemaValue *sema_value_new_module(Mempool *mempool, SemaModule *module)
+    MEMPOOL_CONSTRUCT(SemaValue,
+        out->kind = SEMA_VALUE_MODULE;
+        out->module = module; 
     );
 
 SemaValue *sema_value_new_type(Mempool *mempool, SemaType *type)

@@ -1,7 +1,9 @@
 #include "setup.h"
 #include "core/slice.h"
+#include "sema/module/api/module.h"
 #include "sema/module/decl.h"
 #include "sema/module/module.h"
+#include "sema/module/stages/stages.h"
 #include "sema/module/type.h"
 #include "sema/module/value.h"
 
@@ -21,4 +23,7 @@ void sema_module_setup(SemaModule *module) {
     sema_module_push_type(module, "i32", sema_type_new_int(module, SEMA_INT_32, true));
     sema_module_push_type(module, "u64", sema_type_new_int(module, SEMA_INT_64, false));
     sema_module_push_type(module, "i64", sema_type_new_int(module, SEMA_INT_64, true));
+    for (size_t i = 0; i < sema_setup_stages_count; i++) {
+        sema_module_run_stage(module, i);
+    }
 }

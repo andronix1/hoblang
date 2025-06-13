@@ -16,6 +16,13 @@ inline SemaValueRuntime *sema_value_is_runtime(SemaValue *value) {
     return &value->runtime;
 }
 
+inline SemaModule *sema_value_is_module(SemaValue *value) {
+    if (value->kind != SEMA_VALUE_MODULE) {
+        return NULL;
+    }
+    return value->module;
+}
+
 SemaType *sema_value_should_be_type(SemaModule *module, Slice where, SemaValue *value) {
     SemaType *type = sema_value_is_type(value);
     if (!type) {
