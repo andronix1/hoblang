@@ -3,6 +3,7 @@
 #include "core/keymap.h"
 #include "core/log.h"
 #include "core/vec.h"
+#include "sema/module/decl.h"
 #include "sema/module/type.h"
 #include "sema/module/module.h"
 #include <stdio.h>
@@ -82,13 +83,17 @@ bool sema_type_eq(const SemaType *a, const SemaType *b) {
     UNREACHABLE;
 }
 
-SemaDecl *sema_type_search_ext(SemaType *type, Slice name) {
+SemaDecl *sema_type_search_ext(SemaModule *module, SemaType *type, Slice name) {
     if (!type->aliases) {
         return NULL;
     }
     for (ssize_t i = vec_len(type->aliases) - 1; i >= 0; i--) {
         SemaDecl **decl = keymap_get(type->aliases[i]->decls_map, name);
         if (decl) {
+            if ((*decl)->module != NULL && (*decl)->module != module) {
+                sema_module_err(module, name, "`$S` is private", name);
+                return NULL;
+            }
             return *decl;
         }
     }

@@ -32,7 +32,7 @@ static SemaValue *sema_module_analyze_expr_path_ident(SemaModule *module, SemaVa
     SemaValueRuntime *runtime = sema_value_is_runtime(value);
     if (runtime) {
         size_t of = sema_module_expr_emit_runtime(runtime, output);
-        SemaDecl *decl = sema_type_search_ext(runtime->type, ident);
+        SemaDecl *decl = sema_type_search_ext(module, runtime->type, ident);
         if (decl) {
             SemaValueRuntime *decl_runtime = sema_value_is_runtime(decl->value);
             if (decl_runtime) {
