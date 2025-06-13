@@ -87,10 +87,18 @@ void ir_dump_functions(Mempool *mempool, IrFuncInfo *funcs, FILE *stream) {
         fprintf(stream, "(");
         for (size_t i = 0; i < vec_len(info->args); i++) {
             if (i != 0) fprintf(stream, ", ");
-            fprintf(stream, info->args[i] == IR_MUTABLE ? "mut" : "imm");
+            fprintf(stream, "local%lu", info->args[i]);
         }
-        fprintf(stream, ")");
-        fprintf(stream, ": type%lu ", info->func.type_id);
+        fprintf(stream, "): type%lu [", info->func.type_id);
+        if (vec_len(info->locals)) {
+            fprintf(stream, "\n");
+            for (size_t i = 0; i < vec_len(info->locals); i++) {
+                IrFuncLocal *local = &info->locals[i];
+                fprintf(stream, "  local%lu(%s): type%lu\n", i, local->mutability == IR_MUTABLE ? "mut" : "imm",
+                    local->type);
+            }
+        }
+        fprintf(stream, "] ");
         ir_code_dump(info->func.code, stream);
         fprintf(stream, "\n");
     }
