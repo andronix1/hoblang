@@ -31,7 +31,8 @@ bool sema_module_init_node_decls(SemaModule *module, AstNode *node) {
         case AST_NODE_IMPORT: {
             SemaModule *imported = NOT_NULL(sema_project_add_module(module->project, sema_module_file_path(module),
                 mempool_slice_to_cstr(module->mempool, node->import.path)));
-            sema_module_push_decl(module, node->import.alias, sema_decl_new(module->mempool, module,
+            sema_module_push_decl(module, node->import.alias, sema_decl_new(module->mempool,
+                node->import.is_public ? NULL : module,
                 sema_value_new_module(module->mempool, imported)));
             return true;
         }

@@ -111,6 +111,7 @@ typedef struct {
 } AstExternalDecl;
 
 typedef struct {
+    bool is_public;
     Slice path;
     Slice path_slice;
     Slice alias;
@@ -152,5 +153,5 @@ AstNode *ast_node_new_fun_decl(Mempool *mempool, AstGlobal *global, AstFunInfo *
 AstNode *ast_node_new_value_decl(Mempool *mempool, AstGlobal *global, AstValueInfo *info, AstExpr *initializer);
 AstNode *ast_node_new_external_value(Mempool *mempool, AstValueInfo *info, bool has_alias, Slice alias);
 AstNode *ast_node_new_external_fun(Mempool *mempool, AstFunInfo *info, bool has_alias, Slice alias);
-AstNode *ast_node_new_import(Mempool *mempool, Slice path_slice, Slice path, Slice alias);
+AstNode *ast_node_new_import(Mempool *mempool, bool is_public, Slice path_slice, Slice path, Slice alias);
 AstNode *ast_node_new_stmt(Mempool *mempool, AstStmt *stmt);

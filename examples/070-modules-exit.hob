@@ -8,6 +8,9 @@ import "070-modules-main.hob" as module2;
 public type ExitCode = i32;
 
 public fun getExitCode() -> ExitCode {
-    return module2.getExitCode();
+    #`
+        Why not, lol :P
+    `#
+    return module2.module1.module2.getExitCode();
 }
 

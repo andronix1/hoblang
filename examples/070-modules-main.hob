@@ -1,7 +1,7 @@
 #`
     You can import modules using `import` keyword. Alias must be specified.
 `#
-import "070-modules-exit.hob" as module1;
+public import "070-modules-exit.hob" as module1;
 
 #`
     The `public` keyword should be specified if you wanna use declaration

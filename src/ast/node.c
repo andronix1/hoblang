@@ -160,8 +160,9 @@ AstNode *ast_node_new_fun_decl(Mempool *mempool,
         out->fun_decl.body = body;
     )
 
-AstNode *ast_node_new_import(Mempool *mempool, Slice path_slice, Slice path, Slice alias)
+AstNode *ast_node_new_import(Mempool *mempool, bool is_public, Slice path_slice, Slice path, Slice alias)
     CONSTRUCT(AST_NODE_IMPORT,
+        out->import.is_public = is_public;
         out->import.path_slice = path_slice;
         out->import.path = path;
         out->import.alias = alias;

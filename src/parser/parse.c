@@ -22,7 +22,7 @@
 
 #define NOT_FOUND ((void*)-1)
 
-static AstNode *parser_next_maybe_local_and_global(Parser *parser, AstGlobal *global, bool is_public) {
+static AstNode *parser_next_maybe_public_and_global(Parser *parser, AstGlobal *global, bool is_public) {
     Token token = parser_take(parser);
     switch (token.kind) {
         case TOKEN_FUN: return parse_fun_decl_node(parser, global, is_public);
@@ -30,7 +30,7 @@ static AstNode *parser_next_maybe_local_and_global(Parser *parser, AstGlobal *gl
     }
 }
 
-static AstNode *parser_next_maybe_local(Parser *parser, Token token, bool is_public) {
+static AstNode *parser_next_maybe_public(Parser *parser, Token token, bool is_public) {
     switch (token.kind) {
         case TOKEN_TYPE:
             return parse_type_decl_node(parser, is_public);
@@ -38,12 +38,19 @@ static AstNode *parser_next_maybe_local(Parser *parser, Token token, bool is_pub
             parser_skip_next(parser);
             return parse_value_decl_node(parser, is_public);
         case TOKEN_GLOBAL:
-            return parser_next_maybe_local_and_global(parser, NOT_NULL(parse_global(parser)), is_public);
+            return parser_next_maybe_public_and_global(parser, NOT_NULL(parse_global(parser)), is_public);
         case TOKEN_EXTERN:
             return parse_extern_node(parser, is_public);
+        case TOKEN_IMPORT: {
+            Token path_token = PARSER_EXPECT_NEXT(parser, TOKEN_STRING);
+            PARSER_EXPECT_NEXT(parser, TOKEN_AS);
+            Slice alias = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
+            PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
+            return ast_node_new_import(parser->mempool, is_public, path_token.slice, path_token.string, alias);
+        }
         default:
             parser_skip_next(parser);
-            return parser_next_maybe_local_and_global(parser, NULL, is_public);
+            return parser_next_maybe_public_and_global(parser, NULL, is_public);
     }
 }
 
@@ -128,13 +135,6 @@ static AstNode *parser_next_full(Parser *parser, Token token) {
                     ast_stmt_new_while(parser->mempool, cond, body, false)
             );
         }
-        case TOKEN_IMPORT: {
-            Token path_token = PARSER_EXPECT_NEXT(parser, TOKEN_STRING);
-            PARSER_EXPECT_NEXT(parser, TOKEN_AS);
-            Slice alias = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
-            PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
-            return ast_node_new_import(parser->mempool, path_token.slice, path_token.string, alias);
-        }
         case TOKEN_CONTINUE: {
             AstLoopControl output;
             NOT_NULL(parse_loop_control(parser, &output));
@@ -145,7 +145,7 @@ static AstNode *parser_next_full(Parser *parser, Token token) {
             NOT_NULL(parse_loop_control(parser, &output));
             return ast_node_new_stmt(parser->mempool, ast_stmt_new_break(parser->mempool, output));
         }
-        default: return parser_next_maybe_local(parser, token, false);
+        default: return parser_next_maybe_public(parser, token, false);
     }
 }
 
@@ -157,7 +157,7 @@ AstNode *parser_next(Parser *parser) {
             return NULL;
         }
         AstNode *try = is_public ?
-            parser_next_maybe_local(parser, token, true) :
+            parser_next_maybe_public(parser, token, true) :
             parser_next_full(parser, token);
         if (try == NOT_FOUND) {
             parser_err(parser, token.slice, "unexpected token $T", token);
