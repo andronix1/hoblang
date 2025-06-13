@@ -1,6 +1,7 @@
 #include "core/file_content.h"
 #include "core/log.h"
 #include "ir/api/ir.h"
+#include "ir/dump/dump.h"
 #include "ir/stages/checks.h"
 #include "ir/stages/stmts.h"
 #include "ir/stages/type_tree.h"
@@ -39,6 +40,7 @@ int main(int argc, char **argv) {
     assert(vec_len(crs) == 0);
     ir_fill_stmts(ir);
     ir_check_cosistency(ir);
+    ir_dump(ir, "test.hir");
 
     LlvmModule *llvm = llvm_module_new();
     llvm_module_emit(llvm, ir);
