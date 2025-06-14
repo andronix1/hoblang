@@ -5,7 +5,7 @@ public type Fd = i32;
 
 extern fun Fd.write(self, ptr: *u8, size: def.Size);
 
-public fun Fd.putStrSlice(self, data: internal.Str) {
+public fun Fd.putStr(self, data: internal.Str) {
     self.write(data.raw, data.length);
 }
 
