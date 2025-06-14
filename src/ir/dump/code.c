@@ -15,6 +15,7 @@ static void ir_expr_dump(IrExpr *expr, FILE *stream, size_t tabs) {
         fprintf(stream, "step%lu: ", i);
         switch (step->kind) {
             case IR_EXPR_STEP_BOOL: fprintf(stream, step->boolean ? "true" : "false"); break;
+            case IR_EXPR_STEP_STRING: fprintf(stream, "<string>"); break;
             case IR_EXPR_STEP_INT:
                 fprintf(stream, "int of type type%lu %lu", step->integer.type, step->integer.value);
                 break;

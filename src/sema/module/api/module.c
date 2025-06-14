@@ -18,6 +18,7 @@ SemaModule *sema_module_new(Ir *ir, Parser *parser) {
     module->failed = false;
     module->ss = NULL;
     module->mempool = mempool_new(1024);
+    module->internal = sema_internal_module_new();
     
     module->types = vec_new_in(module->mempool, SemaTypeInfo);
     module->local_decls_map = keymap_new_in(module->mempool, SemaDecl*);

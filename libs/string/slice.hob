@@ -1,0 +1,8 @@
+import def;
+import slice;
+
+public type StrSlice = slice.Slice;
+
+public fun new(raw: *u8, length: def.Size) -> StrSlice {
+    return slice.new(raw, length);
+}

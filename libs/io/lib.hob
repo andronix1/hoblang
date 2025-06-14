@@ -1,16 +1,16 @@
-import std;
-import slice;
+import def;
+import internal;
 
 public type Fd = i32;
 
-extern fun Fd.write(self, ptr: *u8, size: std.def.Size);
+extern fun Fd.write(self, ptr: *u8, size: def.Size);
 
-public fun Fd.putSlice(self, data: slice.Slice) {
+public fun Fd.putStrSlice(self, data: internal.StrSlice) {
     self.write(data.raw, data.length);
 }
 
 public fun Fd.putChar(self, char: u8) {
-    self.putSlice(slice.new(&char, 1));
+    self.putStrSlice(internal._newStrSlice(&char, 1));
 }
 
 public fun out() -> Fd {

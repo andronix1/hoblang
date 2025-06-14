@@ -69,6 +69,10 @@ static inline IrTypeId ir_get_expr_step_type(IrStmtCtx *ctx, IrTypeId *types, Ir
             assert(type->kind == IR_TYPE_STRUCT);
             return type->structure.fields[step->struct_field.idx];
         }
+        case IR_EXPR_STEP_STRING: {
+            IrTypeId u8 = ir_add_simple_type(ir, ir_type_new_int(IR_TYPE_INT_8, false));
+            return ir_add_simple_type(ir, ir_type_new_pointer(u8));
+        }
         case IR_EXPR_STEP_BOOL:
         case IR_EXPR_STEP_BOOL_SKIP:
         case IR_EXPR_STEP_NOT:

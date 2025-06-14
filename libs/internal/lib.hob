@@ -1,0 +1,8 @@
+public import "slice.hob" as slice;
+
+public type StrSlice = slice.Slice;
+
+public fun _newStrSlice(raw: *u8, length: u64) -> StrSlice {
+    return slice.new(raw, length);
+}
+

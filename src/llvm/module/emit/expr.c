@@ -175,6 +175,13 @@ static LlvmEmitStepRes llvm_emit_expr_step(
                 step->integer.value,
                 ir_type_int_is_signed(module->ir, step->integer.type)
             ), true);
+        case IR_EXPR_STEP_STRING: {
+            LLVMValueRef str_global = LLVMAddGlobal(module->module, LLVMArrayType(LLVMInt8Type(), step->string.length),
+                "");
+            LLVMSetInitializer(str_global, LLVMConstString(step->string.value, step->string.length, true));
+            LLVMValueRef str_ptr = LLVMBuildBitCast(module->builder, str_global, LLVMPointerType(LLVMInt8Type(), 0), "");
+            return llvm_emit_step_res_new(str_ptr, IR_IMMUTABLE);
+        }
         case IR_EXPR_STEP_CALL: {
             LLVMValueRef *args = alloca(sizeof(LLVMValueRef) * vec_len(step->call.args));
             for (size_t i = 0; i < vec_len(step->call.args); i++) {

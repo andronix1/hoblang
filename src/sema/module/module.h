@@ -9,6 +9,7 @@
 #include "sema/module/api/decl.h"
 #include "sema/module/api/type.h"
 #include "sema/module/api/decl.h"
+#include "sema/module/internal/string.h"
 #include "sema/module/scope.h"
 
 typedef struct SemaTypeInfo {
@@ -25,6 +26,7 @@ typedef struct SemaModule {
 
     bool failed;
 
+    SemaInternalModuleInfo internal;
     SemaScopeStack *ss;
     SemaDecl **local_decls_map;
     SemaTypeInfo *types;
@@ -39,6 +41,7 @@ void sema_module_push_loop(SemaModule *module, SemaLoop loop);
 void sema_module_pop_loop(SemaModule *module);
 SemaDecl *sema_module_resolve_req_decl(SemaModule *module, Slice name);
 SemaDecl *sema_module_resolve_req_decl_from(SemaModule *module, SemaModule *from, Slice name);
+SemaDecl *sema_module_resolve_req_decl_from_at(SemaModule *module, SemaModule *from, Slice at, Slice name);
 SemaScopeStack *sema_module_swap_ss(SemaModule *module, SemaScopeStack *new_ss);
 void sema_module_push_scope(SemaModule *module);
 void sema_module_pop_scope(SemaModule *module);

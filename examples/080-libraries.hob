@@ -10,14 +10,6 @@
 import io;
 
 global fun main() -> i32 {
-    final out = io.out();
-    out.putChar('l');
-    out.putChar('i');
-    out.putChar('b');
-    out.putChar('s');
-    out.putChar('!');
-    out.putChar('!');
-    out.putChar('!');
-    out.putChar('\n');
+    io.out().putStrSlice("hello from libraries!\n");
     return 0;
 }

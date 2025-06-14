@@ -1,13 +1,14 @@
-import std;
+import def;
 
 public type Slice = struct {
     public raw: *u8,
-    public length: std.def.Size,
+    public length: def.Size,
 };
 
-public fun new(raw: *u8, length: std.def.Size) -> Slice {
+public fun new(raw: *u8, length: def.Size) -> Slice {
     return <Slice> {
         raw: raw,
         length: length,
     };
 }
+

@@ -48,7 +48,7 @@ SemaDecl *sema_module_resolve_req_decl(SemaModule *module, Slice name) {
     return sema_module_resolve_req_decl_from(module, module, name);
 }
 
-SemaDecl *sema_module_resolve_req_decl_from(SemaModule *module, SemaModule *from, Slice name) {
+SemaDecl *sema_module_resolve_req_decl_from_at(SemaModule *module, SemaModule *from, Slice at, Slice name) {
     if (module->ss) {
         SemaDecl *decl = sema_ss_resolve_decl(module->ss, name);
         if (decl) {
@@ -57,15 +57,19 @@ SemaDecl *sema_module_resolve_req_decl_from(SemaModule *module, SemaModule *from
     }
     SemaDecl **ptr = keymap_get(module->local_decls_map, name);
     if (!ptr) {
-        sema_module_err(from, name, "cannot find declaration `$S`", name);
+        sema_module_err(from, at, "cannot find declaration `$S`", name);
         return NULL;
     }
     SemaDecl *decl = *ptr;
     if (decl->module && decl->module != from) {
-        sema_module_err(from, name, "`$S` is private", name);
+        sema_module_err(from, at, "`$S` is private", name);
         return NULL;
     }
     return decl;
+}
+
+SemaDecl *sema_module_resolve_req_decl_from(SemaModule *module, SemaModule *from, Slice name) {
+    return sema_module_resolve_req_decl_from_at(module, from, name, name);
 }
 
 void sema_module_push_loop(SemaModule *module, SemaLoop loop) {
