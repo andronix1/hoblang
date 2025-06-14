@@ -32,6 +32,15 @@ static SemaValue *sema_module_analyze_expr_path_ident(SemaModule *module, SemaVa
     SemaValueRuntime *runtime = sema_value_is_runtime(value);
     if (runtime) {
         size_t of = sema_module_expr_emit_runtime(runtime, output);
+        SemaType *type = sema_type_resolve(runtime->type);
+        if (type->kind == SEMA_TYPE_STRUCTURE) {
+            size_t idx = keymap_get_idx(type->structure.fields_map, ident);
+            if (idx != (size_t)-1) {
+                size_t step_id = sema_expr_output_push_step(output, ir_expr_step_new_struct_field(idx, of));
+                keymap_at(type->structure.fields_map, idx, field);
+                return sema_value_new_runtime_expr_step(module->mempool, runtime->kind, field->value.type, step_id);
+            }
+        }
         SemaDecl *decl = sema_type_search_ext(module, runtime->type, ident);
         if (decl) {
             SemaValueRuntime *decl_runtime = sema_value_is_runtime(decl->value);

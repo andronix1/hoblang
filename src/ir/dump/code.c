@@ -83,6 +83,13 @@ static void ir_expr_dump(IrExpr *expr, FILE *stream, size_t tabs) {
                 fprintf(stream, "cast int step%lu to type%lu", step->cast_int.step_id, step->cast_int.dest);
                 break;
             case IR_EXPR_STEP_NOT: fprintf(stream, "not step%lu", step->not_step); break;
+            case IR_EXPR_STEP_BUILD_STRUCT:
+                fprintf(stream, "type%lu { ", step->build_struct.type);
+                for (size_t i = 0; i < vec_len(step->build_struct.fields); i++) {
+                    fprintf(stream, i == 0 ? "step%lu" : ", step%lu", step->build_struct.fields[i]);
+                }
+                fprintf(stream, "{");
+                break;
         }
         fprintf(stream, "\n");
     }

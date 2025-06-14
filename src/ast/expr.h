@@ -58,10 +58,6 @@ typedef struct {
 
 typedef struct {
     AstExpr *expr;
-
-    struct {
-        size_t field_idx;
-    } sema;
 } AstExprStructField;
 
 typedef struct {

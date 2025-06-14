@@ -218,8 +218,32 @@ static LlvmEmitStepRes llvm_emit_expr_step(
         }
         case IR_EXPR_STEP_DEREF:
             return llvm_emit_step_res_new(llvm_get_res_value(module, &results[step->deref_step]), false);
+        case IR_EXPR_STEP_STRUCT_FIELD: {
+            LlvmEmitStepRes *res = &results[step->struct_field.step];
+            if (res->loaded) {
+                return llvm_emit_step_res_new(LLVMBuildExtractValue(module->builder, res->value,
+                    step->struct_field.idx, ""), false);
+            } else {
+                LLVMTypeRef type = module->types[steps[step->struct_field.step].type];
+                LLVMValueRef indices[] = {
+                    LLVMConstInt(LLVMInt32Type(), 0, false),
+                    LLVMConstInt(LLVMInt32Type(), step->struct_field.idx, false)
+                };
+                return llvm_emit_step_res_new(LLVMBuildGEP2(module->builder, type, res->value, indices, 2, ""), false);
+            }
+        }
+        case IR_EXPR_STEP_BUILD_STRUCT: {
+            IrType *type = &module->ir->types[ir_type_record_resolve_simple(module->ir, step->build_struct.type)].simple;
+            assert(type->kind == IR_TYPE_STRUCT);
+            LLVMTypeRef llvm_type = module->types[step->build_struct.type];
+            LLVMValueRef result = LLVMBuildLoad2(module->builder, llvm_type, llvm_alloca(module, llvm_type), "");
+            for (size_t i = 0; i < vec_len(step->build_struct.fields); i++) {
+                result = LLVMBuildInsertValue(module->builder, result, llvm_get_res_value(module,
+                    &results[step->build_struct.fields[i]]), i, "");
+            }
+            return llvm_emit_step_res_new(result, true);
+        }
         case IR_EXPR_STEP_REAL:
-        case IR_EXPR_STEP_STRUCT_FIELD:
             TODO;
         case IR_EXPR_STEP_CAST_INT: {
             LLVMValueRef what = llvm_get_res_value(module, &results[step->cast_int.step_id]);

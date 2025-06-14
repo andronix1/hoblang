@@ -42,6 +42,9 @@ void sema_type_print(va_list list) {
         case SEMA_TYPE_POINTER:
             logs("*$t", type->pointer_to);
             break;
+        case SEMA_TYPE_STRUCTURE:
+            logs("structure", type->pointer_to);
+            break;
     }
 }
 
@@ -63,6 +66,7 @@ bool sema_type_eq(SemaType *a, SemaType *b) {
         case SEMA_TYPE_BOOL:
             return true;
         case SEMA_TYPE_RECORD: UNREACHABLE;
+        case SEMA_TYPE_STRUCTURE: return a == b;
         case SEMA_TYPE_INT:
             return
                 a->integer.size == b->integer.size &&

@@ -44,6 +44,7 @@ typedef enum {
     IR_EXPR_STEP_DEREF,
     IR_EXPR_STEP_CAST_INT,
     IR_EXPR_STEP_NOT,
+    IR_EXPR_STEP_BUILD_STRUCT,
     /*
     SEMA_PATH_SEGMENT_DECL,
     SEMA_PATH_SEGMENT_DEREF,
@@ -93,6 +94,11 @@ typedef struct {
             bool expect;
             bool result;
         } bool_skip;
+
+        struct {
+            IrTypeId type;
+            size_t *fields;
+        } build_struct;
 
         size_t ref_step;
         size_t deref_step;
@@ -209,6 +215,17 @@ static inline IrExprStep ir_expr_step_new_bool(bool value) {
     IrExprStep step = {
         .kind = IR_EXPR_STEP_BOOL,
         .boolean = value
+    };
+    return step;
+}
+
+static inline IrExprStep ir_expr_step_new_build_struct(IrTypeId type_id, size_t *fields) {
+    IrExprStep step = {
+        .kind = IR_EXPR_STEP_BUILD_STRUCT,
+        .build_struct = {
+            .type = type_id,
+            .fields = fields
+        }
     };
     return step;
 }

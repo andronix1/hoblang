@@ -1,0 +1,13 @@
+import std;
+
+public type Slice = struct {
+    public raw: *u8,
+    public length: std.def.Size,
+};
+
+public fun new(raw: *u8, length: std.def.Size) -> Slice {
+    return <Slice> {
+        raw: raw,
+        length: length,
+    };
+}

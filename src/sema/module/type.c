@@ -35,8 +35,17 @@ static inline IrType sema_type_to_ir(SemaModule* module, SemaType *type) {
             }
             return ir_type_new_function(args, sema_type_ir_id(type->function.returns));
         }
-        case SEMA_TYPE_RECORD: TODO;
         case SEMA_TYPE_POINTER: return ir_type_new_pointer(sema_type_ir_id(type->pointer_to));
+        case SEMA_TYPE_STRUCTURE: {
+            IrTypeId *fields = vec_new_in(module->mempool, IrTypeId);
+            vec_resize(fields, vec_len(type->structure.fields_map));
+            for (size_t i = 0; i < vec_len(type->structure.fields_map); i++) {
+                keymap_at(type->structure.fields_map, i, field);
+                fields[i] = sema_type_ir_id(field->value.type);
+            }
+            return ir_type_new_struct(fields);
+        }
+        case SEMA_TYPE_RECORD: TODO;
     }
     UNREACHABLE;
 }
@@ -66,6 +75,9 @@ SemaType *sema_type_new_record(SemaModule *module, size_t type_id)
         out->record.id = type_id;
         out->record.module = module;
     )
+
+SemaType *sema_type_new_structure(SemaModule *module, SemaTypeStructField *fields_map)
+    SEMA_TYPE_CONSTRUCT(SEMA_TYPE_STRUCTURE, out->structure.fields_map = fields_map;)
 
 SemaType *sema_type_new_bool(SemaModule *module)
     SEMA_TYPE_CONSTRUCT(SEMA_TYPE_BOOL,)
