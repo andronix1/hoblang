@@ -2,7 +2,6 @@
 #include "core/file_content.h"
 #include "core/keymap.h"
 #include "core/log.h"
-#include "core/null.h"
 #include "core/path.h"
 #include "ir/api/ir.h"
 #include "parser/parser.h"
@@ -46,22 +45,22 @@ void sema_module_link_project(SemaModule *module, SemaProject *project) {
 }
 
 SemaDecl *sema_module_resolve_req_decl(SemaModule *module, Slice name) {
+    return sema_module_resolve_req_decl_from(module, module, name);
+}
+
+SemaDecl *sema_module_resolve_req_decl_from(SemaModule *module, SemaModule *from, Slice name) {
     if (module->ss) {
         SemaDecl *decl = sema_ss_resolve_decl(module->ss, name);
         if (decl) {
             return decl;
         }
     }
-    SemaDecl **decl = keymap_get(module->local_decls_map, name);
-    if (!decl) {
-        sema_module_err(module, name, "cannot find declaration `$S`", name);
+    SemaDecl **ptr = keymap_get(module->local_decls_map, name);
+    if (!ptr) {
+        sema_module_err(from, name, "cannot find declaration `$S`", name);
         return NULL;
     }
-    return *decl;
-}
-
-SemaDecl *sema_module_resolve_req_decl_from(SemaModule *module, SemaModule *from, Slice name) {
-    SemaDecl *decl = NOT_NULL(sema_module_resolve_req_decl(module, name));
+    SemaDecl *decl = *ptr;
     if (decl->module && decl->module != from) {
         sema_module_err(from, name, "`$S` is private", name);
         return NULL;

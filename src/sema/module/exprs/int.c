@@ -8,6 +8,7 @@
 SemaValue *sema_module_emit_expr_int(SemaModule *module, uint64_t val, SemaExprCtx ctx) {
     SemaType *type = NULL;
     if (ctx.expectation) {
+        ctx.expectation = sema_type_resolve(ctx.expectation);
         if (ctx.expectation->kind == SEMA_TYPE_INT) {
             type = ctx.expectation;
         }

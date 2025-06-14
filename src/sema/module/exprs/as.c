@@ -9,7 +9,7 @@
 #include "sema/module/value.h"
 
 SemaValue *sema_module_emit_expr_as(SemaModule *module, AstAs *as, SemaExprCtx ctx) {
-    SemaType *dest = NOT_NULL(sema_module_type(module, as->type));
+    SemaType *dest = sema_type_resolve(NOT_NULL(sema_module_type(module, as->type)));
     SemaValueRuntime *source_runtime = NOT_NULL(sema_module_emit_runtime_expr(module, as->inner,
         sema_expr_ctx_new(ctx.output, NULL)));
     SemaType *source = source_runtime->type;

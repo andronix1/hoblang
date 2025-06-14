@@ -45,14 +45,14 @@ void sema_type_print(va_list list) {
     }
 }
 
-const SemaType *sema_type_resolve(const SemaType *type) {
+SemaType *sema_type_resolve(SemaType *type) {
     while (type->kind == SEMA_TYPE_RECORD) {
         type = type->record.module->types[type->record.id].type;
     }
     return type;
 }
 
-bool sema_type_eq(const SemaType *a, const SemaType *b) {
+bool sema_type_eq(SemaType *a, SemaType *b) {
     a = sema_type_resolve(a);
     b = sema_type_resolve(b);
     if (a->kind != b->kind) {
