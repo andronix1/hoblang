@@ -10,7 +10,6 @@ typedef enum {
     AST_TYPE_STRUCT,
     AST_TYPE_PATH,
     AST_TYPE_POINTER,
-    AST_TYPE_SLICE,
 } AstTypeKind;
 
 typedef struct {

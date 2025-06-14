@@ -15,7 +15,6 @@ SemaType *sema_module_type(SemaModule *module, AstType *type) {
         case AST_TYPE_POINTER:
             return sema_type_new_pointer(module, NOT_NULL(sema_module_type(module, type->pointer_to)));
         case AST_TYPE_STRUCT:
-        case AST_TYPE_SLICE:
             TODO;
     }
     UNREACHABLE;

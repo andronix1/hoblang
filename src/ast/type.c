@@ -42,7 +42,6 @@ bool ast_type_eq(const AstType *a, const AstType *b) {
             return true;
         }
         case AST_TYPE_POINTER: return ast_type_eq(a->pointer_to, b->pointer_to);
-        case AST_TYPE_SLICE: return ast_type_eq(a->slice_of, b->slice_of);
     }
     UNREACHABLE;
 }
@@ -55,6 +54,3 @@ AstType *ast_type_new_path(Mempool *mempool, AstPath *path)
 
 AstType *ast_type_new_pointer(Mempool *mempool, AstType *to)
     CONSTRUCT(AST_TYPE_POINTER, out->pointer_to = to;)
-
-AstType *ast_type_new_slice(Mempool *mempool, AstType *of)
-    CONSTRUCT(AST_TYPE_SLICE, out->slice_of = of;)
