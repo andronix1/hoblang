@@ -44,7 +44,7 @@ IrDeclId *sema_module_internal_string_new(SemaModule *module, Slice at) {
         SemaType *usize = sema_type_new_int(module, SEMA_INT_64, false);
 
         SemaType *str = sema_module_internal_type(module, internal_module, at, slice_from_cstr("Str"));
-        IrDeclId id = *NOT_NULL(sema_module_internal_value(module, internal_module, at, slice_from_cstr("newStr"),
+        IrDeclId id = *NOT_NULL(sema_module_internal_value(module, internal_module, at, slice_from_cstr("_newStr"),
             sema_type_new_function(module, vec_create_in(module->mempool, 
                 sema_type_new_pointer(module, sema_type_new_int(module, SEMA_INT_8, false)),
                 sema_type_new_int(module, SEMA_INT_64, false)

@@ -4,6 +4,24 @@
 public import "070-modules-exit.hob" as module1;
 
 #`
+    You can import decls directly into module using `use` keyword.
+    Module paths can have more difficult structure:
+    ```
+        use module1.{
+            module2.module1.{
+                module2.module1 as m1
+            },
+            module2 as m2
+        };
+
+        # or
+
+        use module1.module2 as m2
+    ```
+`#
+use module1.{ getExitCode as gec, ExitCode };
+
+#`
     The `public` keyword should be specified if you wanna use declaration
     in other modules. If you won't specify it, compile-time error will be
     thrown.
@@ -11,17 +29,17 @@ public import "070-modules-exit.hob" as module1;
     In this case, function `getExitCode` uses in `070-modules-exit.hob` 
     module
 `#
-public fun getExitCode() -> module1.ExitCode {
+public fun getExitCode() -> ExitCode {
     return 0;
 }
 
-global fun main() -> module1.ExitCode {
+global fun main() -> ExitCode {
     #`
         Module is compile-time value, so you cannot assign it to variable:
         So, code below will throw compile-time error
         ``` final iWannaGetModule = module1; ```
     `#
-    return module1.getExitCode();
+    return gec();
 }
 
 #`

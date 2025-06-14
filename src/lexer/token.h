@@ -19,6 +19,7 @@ typedef enum {
     TOKEN_CONTINUE, TOKEN_BREAK,
     TOKEN_AS,
     TOKEN_DO,
+    TOKEN_USE,
     TOKEN_TRUE, TOKEN_FALSE,
     // Extended
     TOKEN_IDENT,

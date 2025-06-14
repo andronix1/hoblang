@@ -13,6 +13,30 @@
 #include "core/mempool.h"
 #include <stdio.h>
 
+AstModulePath *ast_module_path_single(Mempool *mempool, Slice *module_path, Slice decl_name)
+    MEMPOOL_CONSTRUCT(AstModulePath,
+        out->module_path = module_path;
+        out->is_combined = false;
+        out->single.has_alias = false;
+        out->single.decl_name = decl_name;
+    )
+
+AstModulePath *ast_module_path_single_alias(Mempool *mempool, Slice *module_path, Slice decl_name, Slice alias)
+    MEMPOOL_CONSTRUCT(AstModulePath,
+        out->module_path = module_path;
+        out->is_combined = false;
+        out->single.has_alias = true;
+        out->single.decl_name = decl_name;
+        out->single.alias = alias;
+    )
+    
+AstModulePath *ast_module_path_combined(Mempool *mempool, Slice *module_path, AstModulePath **paths)
+    MEMPOOL_CONSTRUCT(AstModulePath,
+        out->module_path = module_path;
+        out->is_combined = true;
+        out->paths = paths;
+    )
+
 #define CONSTRUCT(KIND, FIELDS) MEMPOOL_CONSTRUCT(AstNode, { \
     out->kind = KIND; \
     FIELDS; \
@@ -60,6 +84,30 @@ bool ast_fun_info_eq(const AstFunInfo *a, const AstFunInfo *b) {
     return true;
 }
 
+bool ast_module_paths_eq(const AstModulePath *a, const AstModulePath *b) {
+    if (a->is_combined != b->is_combined || vec_len(a->module_path) != vec_len(b->module_path)) {
+        return false;
+    }
+    for (size_t i = 0; i < vec_len(a->module_path); i++) {
+        if (!slice_eq(a->module_path[i], b->module_path[i])) {
+            return false;
+        }
+    }
+    if (a->is_combined) {
+        for (size_t i = 0; i < vec_len(a->paths); i++) {
+            if (!ast_module_paths_eq(a->paths[i], b->paths[i])) {
+                return false;
+            }
+        }
+        return true;
+    } else {
+        if (a->single.has_alias != b->single.has_alias || !slice_eq(a->single.decl_name, b->single.decl_name)) {
+            return false;
+        }
+        return !a->single.has_alias || slice_eq(a->single.alias, b->single.alias);
+    }
+}
+
 bool ast_node_eq(const AstNode *a, const AstNode *b) {
     if (a->kind != b->kind) {
         return false;
@@ -91,11 +139,13 @@ bool ast_node_eq(const AstNode *a, const AstNode *b) {
                 case AST_EXTERNAL_DECL_VALUE: return ast_value_info_eq(a->external_decl.value, b->external_decl.value);
             }
             UNREACHABLE;
+        case AST_NODE_USE:
+            return a->use.is_public != b->use.is_public &&
+                ast_module_paths_eq(a->use.path, b->use.path);
         case AST_NODE_IMPORT:
-            if (a->import.kind != b->import.kind) {
-                return false;
-            }
-            if (a->import.has_alias != b->import.has_alias ||
+            if (a->import.is_public != b->import.is_public ||
+                a->import.kind != b->import.kind ||
+                a->import.has_alias != b->import.has_alias ||
                 (a->import.has_alias && !slice_eq(a->import.alias, b->import.alias))) {
                 return false;
             }
@@ -151,6 +201,12 @@ AstValueInfo *ast_value_info_new(Mempool *mempool,
     out->name = name;
     out->explicit_type = explicit_type;
 )
+
+AstNode *ast_node_new_use(Mempool *mempool, bool is_public, AstModulePath *path)
+    CONSTRUCT(AST_NODE_USE,
+        out->use.is_public = is_public;
+        out->use.path = path;
+    )
 
 AstNode *ast_node_new_type_decl(Mempool *mempool, bool is_public, Slice name, AstGeneric *generics, AstType *type)
     CONSTRUCT(AST_NODE_TYPE_DECL,

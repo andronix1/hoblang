@@ -19,6 +19,7 @@ typedef enum {
     AST_NODE_VALUE_DECL,
     AST_NODE_EXTERNAL_DECL,
     AST_NODE_IMPORT,
+    AST_NODE_USE,
     AST_NODE_STMT,
 } AstNodeKind;
 
@@ -110,6 +111,32 @@ typedef struct {
     };
 } AstExternalDecl;
 
+typedef struct AstModulePath AstModulePath;
+
+typedef struct AstModulePath {
+    bool is_combined;
+    Slice *module_path;
+
+    union {
+        AstModulePath **paths;
+
+        struct {
+            Slice decl_name;
+            bool has_alias;
+            Slice alias;
+        } single;
+    };
+} AstModulePath;
+
+AstModulePath *ast_module_path_single(Mempool *mempool, Slice *module_path, Slice decl_name);
+AstModulePath *ast_module_path_single_alias(Mempool *mempool, Slice *module_path, Slice decl_name, Slice alias);
+AstModulePath *ast_module_path_combined(Mempool *mempool, Slice *module_path, AstModulePath **paths);
+
+typedef struct {
+    bool is_public;
+    AstModulePath *path;
+} AstUse;
+
 typedef enum {
     AST_IMPORT_MODULE,
     AST_IMPORT_LIBRARY,
@@ -142,6 +169,7 @@ typedef struct AstNode {
         AstFunDecl fun_decl;
         AstValueDecl value_decl;
         AstExternalDecl external_decl;
+        AstUse use;
         AstStmt *stmt;
     };
 } AstNode;
@@ -168,6 +196,7 @@ AstNode *ast_node_new_fun_decl(Mempool *mempool, AstGlobal *global, AstFunInfo *
 AstNode *ast_node_new_value_decl(Mempool *mempool, AstGlobal *global, AstValueInfo *info, AstExpr *initializer);
 AstNode *ast_node_new_external_value(Mempool *mempool, AstValueInfo *info, bool has_alias, Slice alias);
 AstNode *ast_node_new_external_fun(Mempool *mempool, AstFunInfo *info, bool has_alias, Slice alias);
+AstNode *ast_node_new_use(Mempool *mempool, bool is_public, AstModulePath *path);
 AstNode *ast_node_new_import_module(Mempool *mempool, bool is_public, Slice path_slice, Slice path);
 AstNode *ast_node_new_import_module_alias(Mempool *mempool, bool is_public, Slice path_slice, Slice path, Slice alias);
 AstNode *ast_node_new_import_library(Mempool *mempool, bool is_public, Slice library);

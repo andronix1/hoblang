@@ -10,7 +10,7 @@ public fun Fd.putStrSlice(self, data: internal.Str) {
 }
 
 public fun Fd.putChar(self, char: u8) {
-    self.putStrSlice(internal.newStr(&char, 1));
+    self.putStrSlice(internal.string.new(&char, 1));
 }
 
 public fun out() -> Fd {

@@ -76,6 +76,7 @@ bool sema_module_emit_node_body(SemaModule *module, AstNode *node) {
         case AST_NODE_TYPE_DECL:
         case AST_NODE_EXTERNAL_DECL:
         case AST_NODE_IMPORT:
+        case AST_NODE_USE:
             return true;
     }
     if (node->kind != AST_NODE_FUN_DECL) {

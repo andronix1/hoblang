@@ -31,6 +31,36 @@ static AstNode *parser_next_maybe_public_and_global(Parser *parser, AstGlobal *g
     }
 }
 
+static AstModulePath *parse_module_path(Parser *parser) {
+    Slice *module_path = vec_new_in(parser->mempool, Slice);
+    Slice ident = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
+    while (parser_next_should_be(parser, TOKEN_DOT)) {
+        vec_push(module_path, ident);
+        Token next = parser_take(parser);
+        switch (next.kind) {
+            case TOKEN_IDENT:
+                ident = next.slice;
+                break;
+            case TOKEN_OPENING_FIGURE_BRACE: {
+                AstModulePath **paths = vec_new_in(parser->mempool, AstModulePath*);
+                while (!parser_next_should_be(parser, TOKEN_CLOSING_FIGURE_BRACE)) {
+                    vec_push(paths, NOT_NULL(parse_module_path(parser)));
+                    if (!parser_check_list_sep(parser, TOKEN_CLOSING_FIGURE_BRACE)) return NULL;
+                }
+                return ast_module_path_combined(parser->mempool, module_path, paths);
+            }
+            default:
+                parser_err(parser, next.slice, "expected module path segment");
+                return NULL;
+        }
+    }
+    if (parser_next_should_be(parser, TOKEN_AS)) {
+        Slice alias = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
+        return ast_module_path_single_alias(parser->mempool, module_path, ident, alias);
+    }
+    return ast_module_path_single(parser->mempool, module_path, ident);
+}
+
 static AstNode *parser_next_maybe_public(Parser *parser, Token token, bool is_public) {
     switch (token.kind) {
         case TOKEN_TYPE:
@@ -42,6 +72,11 @@ static AstNode *parser_next_maybe_public(Parser *parser, Token token, bool is_pu
             return parser_next_maybe_public_and_global(parser, NOT_NULL(parse_global(parser)), is_public);
         case TOKEN_EXTERN:
             return parse_extern_node(parser, is_public);
+        case TOKEN_USE: {
+            AstModulePath *path = NOT_NULL(parse_module_path(parser));
+            PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
+            return ast_node_new_use(parser->mempool, is_public, path);
+        }
         case TOKEN_IMPORT: {
             Token what = parser_take(parser);
             switch (what.kind) {
