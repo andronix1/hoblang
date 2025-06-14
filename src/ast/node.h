@@ -110,10 +110,25 @@ typedef struct {
     };
 } AstExternalDecl;
 
+typedef enum {
+    AST_IMPORT_MODULE,
+    AST_IMPORT_LIBRARY,
+} AstImportKind;
+
 typedef struct {
+    AstImportKind kind;
     bool is_public;
-    Slice path;
-    Slice path_slice;
+    union {
+        struct {
+            Slice path;
+            Slice path_slice;
+        } module;
+
+        struct {
+            Slice name;
+        } library;
+    };
+    bool has_alias;
     Slice alias;
 } AstImport;
 
@@ -153,5 +168,8 @@ AstNode *ast_node_new_fun_decl(Mempool *mempool, AstGlobal *global, AstFunInfo *
 AstNode *ast_node_new_value_decl(Mempool *mempool, AstGlobal *global, AstValueInfo *info, AstExpr *initializer);
 AstNode *ast_node_new_external_value(Mempool *mempool, AstValueInfo *info, bool has_alias, Slice alias);
 AstNode *ast_node_new_external_fun(Mempool *mempool, AstFunInfo *info, bool has_alias, Slice alias);
-AstNode *ast_node_new_import(Mempool *mempool, bool is_public, Slice path_slice, Slice path, Slice alias);
+AstNode *ast_node_new_import_module(Mempool *mempool, bool is_public, Slice path_slice, Slice path);
+AstNode *ast_node_new_import_module_alias(Mempool *mempool, bool is_public, Slice path_slice, Slice path, Slice alias);
+AstNode *ast_node_new_import_library(Mempool *mempool, bool is_public, Slice library);
+AstNode *ast_node_new_import_library_alias(Mempool *mempool, bool is_public, Slice library, Slice alias);
 AstNode *ast_node_new_stmt(Mempool *mempool, AstStmt *stmt);

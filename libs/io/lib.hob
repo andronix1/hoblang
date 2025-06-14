@@ -1,0 +1,13 @@
+import std;
+
+public type Fd = i32;
+
+extern fun Fd.write(self, ptr: *u8, size: u64);
+
+public fun Fd.putChar(self, char: u8) {
+    self.write(&char, 1);
+}
+
+public fun stdout() -> Fd {
+    return 1;
+}

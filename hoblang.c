@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
     Path entry_path = argv[1];
 
     Ir *ir = ir_new();
-    SemaProject *project = sema_project_new(ir);
+    SemaProject *project = sema_project_new(ir, "../libs");
     sema_project_add_module(project, NULL, entry_path);
     sema_project_emit(project);
 

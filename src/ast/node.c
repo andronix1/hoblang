@@ -92,7 +92,18 @@ bool ast_node_eq(const AstNode *a, const AstNode *b) {
             }
             UNREACHABLE;
         case AST_NODE_IMPORT:
-            return slice_eq(a->import.path, b->import.path) && slice_eq(a->import.alias, b->import.alias);
+            if (a->import.kind != b->import.kind) {
+                return false;
+            }
+            if (a->import.has_alias != b->import.has_alias ||
+                (a->import.has_alias && !slice_eq(a->import.alias, b->import.alias))) {
+                return false;
+            }
+            switch (a->import.kind) {
+                case AST_IMPORT_MODULE: return slice_eq(a->import.module.path, b->import.module.path);
+                case AST_IMPORT_LIBRARY: return slice_eq(a->import.library.name, b->import.library.name);
+            }
+            UNREACHABLE;
     }
     UNREACHABLE;
 }
@@ -160,11 +171,39 @@ AstNode *ast_node_new_fun_decl(Mempool *mempool,
         out->fun_decl.body = body;
     )
 
-AstNode *ast_node_new_import(Mempool *mempool, bool is_public, Slice path_slice, Slice path, Slice alias)
+AstNode *ast_node_new_import_module(Mempool *mempool, bool is_public, Slice path_slice, Slice path)
     CONSTRUCT(AST_NODE_IMPORT,
+        out->import.kind = AST_IMPORT_MODULE;
         out->import.is_public = is_public;
-        out->import.path_slice = path_slice;
-        out->import.path = path;
+        out->import.module.path_slice = path_slice;
+        out->import.module.path = path;
+        out->import.has_alias = false;
+    )
+
+AstNode *ast_node_new_import_module_alias(Mempool *mempool, bool is_public, Slice path_slice, Slice path, Slice alias)
+    CONSTRUCT(AST_NODE_IMPORT,
+        out->import.kind = AST_IMPORT_MODULE;
+        out->import.is_public = is_public;
+        out->import.module.path_slice = path_slice;
+        out->import.module.path = path;
+        out->import.has_alias = true;
+        out->import.alias = alias;
+    )
+
+AstNode *ast_node_new_import_library(Mempool *mempool, bool is_public, Slice library)
+    CONSTRUCT(AST_NODE_IMPORT,
+        out->import.kind = AST_IMPORT_LIBRARY;
+        out->import.is_public = is_public;
+        out->import.library.name = library;
+        out->import.has_alias = false;
+    )
+
+AstNode *ast_node_new_import_library_alias(Mempool *mempool, bool is_public, Slice library, Slice alias)
+    CONSTRUCT(AST_NODE_IMPORT,
+        out->import.kind = AST_IMPORT_LIBRARY;
+        out->import.is_public = is_public;
+        out->import.library.name = library;
+        out->import.has_alias = true;
         out->import.alias = alias;
     )
 

@@ -1,0 +1,16 @@
+#`
+    Library is a module. When you importing it, compiler searches it in library path.
+    For example, path to library `io` module is `<LIBRARY_PATH>/io/lib.hob` 
+
+    Unlike module import, library import does not require alias, but you can specify it explicitly:
+    ```
+    import io as io2;
+    ```
+`#
+import io;
+
+global fun main() -> i32 {
+    io.stdout().putChar('a');
+    io.stdout().putChar('\n');
+    return 0;
+}

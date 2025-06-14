@@ -15,11 +15,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-SemaProject *sema_project_new(Ir *ir) {
+SemaProject *sema_project_new(Ir *ir, const Path libraries_path) {
     SemaProject *project = malloc(sizeof(SemaProject));
     project->mempool = mempool_new(1024);
     project->modules_map = keymap_new_in(project->mempool, SemaModule*);
     project->ir = ir;
+    project->libraries_path = libraries_path;
     return project;
 }
 
@@ -43,6 +44,12 @@ SemaModule *sema_project_add_module(SemaProject *project, Path from, Path path) 
     sema_module_link_project(new_module, project);
     sema_module_setup(new_module);
     return new_module;
+}
+
+SemaModule *sema_project_add_library(SemaProject *project, Slice name) {
+    Path dir = path_join_in(project->mempool, project->libraries_path, mempool_slice_to_cstr(project->mempool, name));
+    Path entry = path_join_in(project->mempool, dir, "lib.hob");
+    return sema_project_add_module(project, NULL, entry);
 }
 
 void sema_project_emit(SemaProject *project) {

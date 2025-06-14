@@ -7,5 +7,7 @@ typedef struct SemaProject {
     SemaModule **modules_map;
     Mempool *mempool;
     Ir *ir;
+
+    Path libraries_path;
 } SemaProject;
 

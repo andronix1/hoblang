@@ -5,6 +5,7 @@
 #include "ast/global.h"
 #include "ast/node.h"
 #include "ast/stmt.h"
+#include "core/assert.h"
 #include "core/mempool.h"
 #include "core/null.h"
 #include "core/slice.h"
@@ -42,11 +43,31 @@ static AstNode *parser_next_maybe_public(Parser *parser, Token token, bool is_pu
         case TOKEN_EXTERN:
             return parse_extern_node(parser, is_public);
         case TOKEN_IMPORT: {
-            Token path_token = PARSER_EXPECT_NEXT(parser, TOKEN_STRING);
-            PARSER_EXPECT_NEXT(parser, TOKEN_AS);
-            Slice alias = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
-            PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
-            return ast_node_new_import(parser->mempool, is_public, path_token.slice, path_token.string, alias);
+            Token what = parser_take(parser);
+            switch (what.kind) {
+                case TOKEN_STRING: {
+                    if (parser_next_should_be(parser, TOKEN_AS)) {
+                        Slice alias = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
+                        PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
+                        return ast_node_new_import_module_alias(parser->mempool, is_public, what.slice, what.string,
+                            alias);
+                    }
+                    PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
+                    return ast_node_new_import_module(parser->mempool, is_public, what.slice, what.string);
+                }
+                case TOKEN_IDENT: {
+                    if (parser_next_should_be(parser, TOKEN_AS)) {
+                        Slice alias = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
+                        PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
+                        return ast_node_new_import_library_alias(parser->mempool, is_public, what.slice, alias);
+                    }
+                    PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
+                    return ast_node_new_import_library(parser->mempool, is_public, what.slice);
+                }
+                default:
+                    parser_err(parser, what.slice, "expected module path or library name");
+            }
+            UNREACHABLE;
         }
         default:
             parser_skip_next(parser);
