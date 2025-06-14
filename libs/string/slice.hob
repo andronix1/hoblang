@@ -3,6 +3,6 @@ import slice;
 
 public type StrSlice = slice.Slice;
 
-public fun new(raw: *u8, length: def.Size) -> StrSlice {
+public fun new(raw: *u8, length: def.Size) -> Str {
     return slice.new(raw, length);
 }

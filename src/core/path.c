@@ -1,5 +1,6 @@
 #include "path.h"
 #include "core/mempool.h"
+#include "core/null.h"
 #include "core/vec.h"
 #include <assert.h>
 #include <linux/limits.h>
@@ -9,13 +10,10 @@
 
 Path path_realpath_in(Mempool *mempool, Path path) {
     char buf[PATH_MAX];
-    char *real_path = realpath(path, buf);
-    assert(real_path);
+    char *real_path = NOT_NULL(realpath(path, buf));
     size_t len = strlen(real_path);
     Path output = vec_new_in(mempool, char);
-    for (size_t i = 0; i <= len; i++) {
-        vec_push(output, path[i]);
-    }
+    for (size_t i = 0; i <= len; i++) vec_push(output, real_path[i]);
     return output;
 }
 
@@ -36,36 +34,24 @@ Path path_dirname_in(Mempool *mempool, Path path) {
 }
 
 Path path_join_in(Mempool *mempool, Path left, Path right) {
-    char path[PATH_MAX];
-    size_t idx = 0;
+    char *path = vec_new_in(mempool, char);
 
     size_t left_len = strlen(left);
     size_t right_len = strlen(right);
 
-    for (size_t i = 0; i < left_len; i++) {
-        path[idx++] = left[i];
-        assert(idx < PATH_MAX);
-    }
+    for (size_t i = 0; i < left_len; i++) vec_push(path, left[i]);
 
     bool ends_with_slash = left[left_len - 1] == '/';
     bool starts_with_slash = right[0] == '/';
-
-    if (!ends_with_slash && !starts_with_slash) {
-        path[idx++] = '/';
-        assert(idx < PATH_MAX);
-    }
+    if (!ends_with_slash && !starts_with_slash) vec_push(path, '/');
 
     if (starts_with_slash) {
         right++;
         right_len--;
     }
 
-    for (size_t i = 0; i < right_len; i++) {
-        path[idx++] = right[i];
-        assert(idx < PATH_MAX);
-    }
+    for (size_t i = 0; i < right_len; i++) vec_push(path, right[i]);
+    vec_push(path, 0);
 
-    path[idx++] = 0;
-
-    return path_realpath_in(mempool, path);
+    return path;
 }

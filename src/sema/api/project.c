@@ -28,7 +28,12 @@ SemaModule *sema_project_add_module(SemaProject *project, Path from, Path path) 
     if (from) {
         path = path_join_in(project->mempool, path_dirname_in(project->mempool, from), path);
     }
-    path = path_realpath_in(project->mempool, path);
+    Path new_path = path_realpath_in(project->mempool, path);
+    if (!new_path) {
+        logln("error: failed to load module at `$s`", path);
+        return NULL;
+    }
+    path = new_path;
     Slice path_slice = slice_from_cstr(path);
     SemaModule **module = keymap_get(project->modules_map, path_slice);
     if (module) {

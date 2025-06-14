@@ -17,18 +17,18 @@ IrDeclId *sema_module_internal_string_new(SemaModule *module, Slice at) {
         SemaType *usize = sema_type_new_int(module, SEMA_INT_64, false);
 
         SemaDecl *str_slice = NOT_NULL(sema_module_resolve_req_decl_from_at(internal_module, module, at,
-            slice_from_cstr("StrSlice")));
+            slice_from_cstr("Str")));
         SemaType *str_slice_type = sema_value_is_type(str_slice->value);
         if (!str_slice_type) {
-            sema_module_err(module, at, "`StrSlice` in `internal` module is not a type");
+            sema_module_err(module, at, "`Str` in `internal` module is not a type");
             return NULL;
         }
 
         SemaDecl *decl = NOT_NULL(sema_module_resolve_req_decl_from_at(internal_module, module, at,
-            slice_from_cstr("_newStrSlice")));
+            slice_from_cstr("_newStr")));
         SemaValueRuntime *runtime = sema_value_is_runtime(decl->value);
         if (!runtime) {
-            sema_module_err(module, at, "`_newStrSlice` in `internal` module is not a runtime value");
+            sema_module_err(module, at, "`_newStr` in `internal` module is not a runtime value");
             return NULL;
         }
 
@@ -37,7 +37,7 @@ IrDeclId *sema_module_internal_string_new(SemaModule *module, Slice at) {
             usize, // TODO: usize type
         ), str_slice_type))) {
             sema_module_err(module, at,
-                "`_newStrSlice` in `internal` module is not matching a type fun (*u8, u64) -> StrSlice");
+                "`_newStr` in `internal` module is not matching a type fun (*u8, u64) -> Str");
             return NULL;
         }
 

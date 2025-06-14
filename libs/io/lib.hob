@@ -5,12 +5,12 @@ public type Fd = i32;
 
 extern fun Fd.write(self, ptr: *u8, size: def.Size);
 
-public fun Fd.putStrSlice(self, data: internal.StrSlice) {
+public fun Fd.putStrSlice(self, data: internal.Str) {
     self.write(data.raw, data.length);
 }
 
 public fun Fd.putChar(self, char: u8) {
-    self.putStrSlice(internal._newStrSlice(&char, 1));
+    self.putStrSlice(internal._newStr(&char, 1));
 }
 
 public fun out() -> Fd {
