@@ -2,7 +2,7 @@ public import "slice.hob" as slice;
 
 public type Str = slice.Slice;
 
-public fun _newStr(raw: *u8, length: u64) -> Str {
+public fun newStr(raw: *u8, length: u64) -> Str {
     return slice.new(raw, length);
 }
 

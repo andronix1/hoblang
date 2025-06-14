@@ -7,8 +7,10 @@
 typedef struct SemaStringModule {
     bool loaded;
     SemaType *usize;
-    SemaType *type;
-    IrDeclId new;
+    struct {
+        SemaType *type;
+        IrDeclId new;
+    } string;
 } SemaInternalModuleInfo;
 
 static inline SemaInternalModuleInfo sema_internal_module_new() {

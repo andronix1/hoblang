@@ -9,7 +9,7 @@
 #include "sema/module/api/decl.h"
 #include "sema/module/api/type.h"
 #include "sema/module/api/decl.h"
-#include "sema/module/internal/string.h"
+#include "sema/module/internal.h"
 #include "sema/module/scope.h"
 
 typedef struct SemaTypeInfo {
