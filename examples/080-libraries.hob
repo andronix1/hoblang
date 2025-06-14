@@ -10,7 +10,14 @@
 import io;
 
 global fun main() -> i32 {
-    io.stdout().putChar('a');
-    io.stdout().putChar('\n');
+    final out = io.out();
+    out.putChar('l');
+    out.putChar('i');
+    out.putChar('b');
+    out.putChar('s');
+    out.putChar('!');
+    out.putChar('!');
+    out.putChar('!');
+    out.putChar('\n');
     return 0;
 }
