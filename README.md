@@ -39,7 +39,7 @@ Create `main.hob` file with following content:
 import io;
 
 global fun main() -> i32 {
-    io.out().putStr("hello, world!\n");
+    io.out.putStr("hello, world!\n");
     return 0;
 }
 ```
