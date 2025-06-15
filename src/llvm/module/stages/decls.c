@@ -26,6 +26,15 @@ static void llvm_module_setup_externs(LlvmModule *module) {
     }
 }
 
+static void llvm_module_setup_vars(LlvmModule *module) {
+    for (size_t i = 0; i < vec_len(module->ir->vars); i++) {
+        IrVarInfo *info = &module->ir->vars[i];
+        LLVMValueRef value = LLVMAddGlobal(module->module, module->types[info->var.type],
+            info->var.is_global ? mempool_slice_to_cstr(module->mempool, info->var.global_name) : "");
+        module->decls[info->decl_id] = value;
+    }
+}
+
 static void llvm_module_setup_funcs(LlvmModule *module) {
     for (size_t i = 0; i < vec_len(module->ir->funcs); i++) {
         IrFuncInfo *info = &module->ir->funcs[i];
@@ -45,6 +54,7 @@ void llvm_module_setup_decls(LlvmModule *module) {
     }
     llvm_module_setup_funcs(module);
     llvm_module_setup_externs(module);
+    llvm_module_setup_vars(module);
     for (size_t i = 0; i < vec_len(module->ir->decls); i++) {
         assert(module->decls[i]);
     }

@@ -18,6 +18,7 @@ Ir *ir_new() {
     ir->decls = vec_new_in(mempool, IrDecl);
     ir->funcs = vec_new_in(mempool, IrFuncInfo);
     ir->externs = vec_new_in(mempool, IrExternInfo);
+    ir->vars = vec_new_in(mempool, IrVarInfo);
     return ir;
 }
 
@@ -111,6 +112,16 @@ IrFuncId ir_init_func(Ir *ir, IrMutability *args_mut, IrDeclId id, IrFunc func) 
     ir_init_decl(ir, id, IR_IMMUTABLE, func.type_id);
     vec_push(ir->funcs, ir_func_info_new(ir, args_mut, func, id, func.type_id));
     return vec_len(ir->funcs) - 1;
+}
+
+IrVarId ir_init_var(Ir *ir, IrDeclId id, IrVar var) {
+    ir_init_decl(ir, id, IR_MUTABLE, var.type);
+    vec_push(ir->vars, ir_var_info_new(var, id));
+    return vec_len(ir->vars) - 1;
+}
+
+void ir_set_var_initializer(Ir *ir, IrVarId id, IrConst *initializer) {
+    ir->vars[id].var.initializer = initializer;
 }
 
 void ir_init_func_body(Ir *ir, IrFuncId id, IrCode *code) {

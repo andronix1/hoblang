@@ -24,6 +24,7 @@ AST_EXPR_BINOP,
 AST_EXPR_STRUCT,
 */
 
+#include "ir/api/const.h"
 #include "ir/api/decl.h"
 #include "ir/api/type.h"
 #include "ir/api/local.h"
@@ -31,9 +32,7 @@ AST_EXPR_STRUCT,
 #include "expr/binop.h"
 
 typedef enum {
-    IR_EXPR_STEP_BOOL,
-    IR_EXPR_STEP_INT,
-    IR_EXPR_STEP_REAL,
+    IR_EXPR_STEP_CONST,
     IR_EXPR_STEP_BINOP,
     IR_EXPR_STEP_STRUCT_FIELD,
     IR_EXPR_STEP_GET_DECL,
@@ -58,17 +57,7 @@ typedef struct {
     IrTypeId type;
 
     union {
-        struct {
-            IrTypeId type;
-            uint64_t value;
-        } integer;
-
-        bool boolean;
-
-        struct {
-            IrTypeId type;
-            long double value;
-        } real;
+        IrConst *constant;
 
         IrBinop binop;
 
@@ -211,21 +200,10 @@ static inline IrExprStep ir_expr_step_new_binop(IrBinop binop) {
     return step;
 }
 
-static inline IrExprStep ir_expr_step_new_real(IrTypeId type, long double value) {
+static inline IrExprStep ir_expr_step_new_const(IrConst *constant) {
     IrExprStep step = {
-        .kind = IR_EXPR_STEP_REAL,
-        .real = {
-            .type = type,
-            .value = value
-        }
-    };
-    return step;
-}
-
-static inline IrExprStep ir_expr_step_new_bool(bool value) {
-    IrExprStep step = {
-        .kind = IR_EXPR_STEP_BOOL,
-        .boolean = value
+        .kind = IR_EXPR_STEP_CONST,
+        .constant = constant 
     };
     return step;
 }
@@ -236,17 +214,6 @@ static inline IrExprStep ir_expr_step_new_build_struct(IrTypeId type_id, size_t 
         .build_struct = {
             .type = type_id,
             .fields = fields
-        }
-    };
-    return step;
-}
-
-static inline IrExprStep ir_expr_step_new_int(IrTypeId type_id, uint64_t value) {
-    IrExprStep step = {
-        .kind = IR_EXPR_STEP_INT,
-        .integer = {
-            .type = type_id,
-            .value = value
         }
     };
     return step;

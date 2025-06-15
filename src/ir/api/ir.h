@@ -1,13 +1,16 @@
 #pragma once
 
+#include "ir/api/const.h"
 #include "ir/api/decl.h"
 #include "ir/api/extern.h"
 #include "ir/api/func.h"
 #include "ir/api/type.h"
+#include "ir/api/var.h"
 #include "ir/extern.h"
 #include "ir/func.h"
 #include "ir/stmt/stmt.h"
 #include "ir/type/type.h"
+#include "ir/var.h"
 
 typedef struct Ir Ir;
 
@@ -20,6 +23,9 @@ void ir_set_type_record(Ir *ir, IrTypeId id, IrTypeId type);
 IrDeclId ir_add_decl(Ir *ir);
 
 IrExternId ir_init_extern(Ir *ir, IrDeclId id, IrExtern ext);
+
+IrVarId ir_init_var(Ir *ir, IrDeclId id, IrVar var);
+void ir_set_var_initializer(Ir *ir, IrVarId id, IrConst *initializer);
 
 IrLocalId ir_func_arg_local_id(Ir *ir, IrFuncId id, size_t arg_id);
 IrFuncId ir_init_func(Ir *ir, IrMutability *args_mut, IrDeclId id, IrFunc func);

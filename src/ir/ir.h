@@ -5,6 +5,7 @@
 #include "ir/func.h"
 #include "ir/type/info.h"
 #include "ir/decls.h"
+#include "ir/var.h"
 
 typedef struct Ir {
     Mempool *mempool;
@@ -12,6 +13,7 @@ typedef struct Ir {
     IrDecl *decls;
 
     IrFuncInfo *funcs;
+    IrVarInfo *vars;
     IrExternInfo *externs;
 } Ir;
 

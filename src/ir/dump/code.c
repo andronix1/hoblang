@@ -1,10 +1,28 @@
 #include "code.h"
+#include "ir/const.h"
 #include "ir/stmt/code.h"
 #include "ir/stmt/stmt.h"
 #include <stdio.h>
 
 static inline void ftabs(FILE *stream, size_t tabs) {
     for (size_t i = 0; i < tabs; i++) fprintf(stream, "  ");
+}
+
+static void ir_const_dump(IrConst *constant, FILE *stream) {
+    switch (constant->kind) {
+        case IR_CONST_BOOL: fprintf(stream, constant->boolean ? "true" : "false"); break;
+        case IR_CONST_INT: fprintf(stream, "int of type type%lu %lu", constant->type, constant->integer); break;
+        case IR_CONST_REAL: fprintf(stream, "real of type type%lu %Lf", constant->type, constant->real); break;
+        case IR_CONST_STRUCT:
+            fprintf(stream, "type%lu { ", constant->type);
+            for (size_t i = 0; i < vec_len(constant->struct_fields); i++) {
+                if (i == 0) fprintf(stream, ", ");
+                ir_const_dump(constant->struct_fields[i], stream);
+            }
+            fprintf(stream, "}");
+            break;
+        case IR_CONST_DECL_PTR: fprintf(stream, "const pointer to decl%lu", constant->decl); break;
+    }
 }
 
 static void ir_expr_dump(IrExpr *expr, FILE *stream, size_t tabs) {
@@ -14,14 +32,8 @@ static void ir_expr_dump(IrExpr *expr, FILE *stream, size_t tabs) {
         ftabs(stream, tabs + 1);
         fprintf(stream, "step%lu: ", i);
         switch (step->kind) {
-            case IR_EXPR_STEP_BOOL: fprintf(stream, step->boolean ? "true" : "false"); break;
             case IR_EXPR_STEP_STRING: fprintf(stream, "<string>"); break;
-            case IR_EXPR_STEP_INT:
-                fprintf(stream, "int of type type%lu %lu", step->integer.type, step->integer.value);
-                break;
-            case IR_EXPR_STEP_REAL:
-                fprintf(stream, "int of type type%lu real %Lf", step->real.type, step->real.value);
-                break;
+            case IR_EXPR_STEP_CONST: ir_const_dump(step->constant, stream); break;
             case IR_EXPR_STEP_BINOP:
                 fprintf(stream, "step%lu ", step->binop.ls);
                 switch (step->binop.kind) {
@@ -89,7 +101,7 @@ static void ir_expr_dump(IrExpr *expr, FILE *stream, size_t tabs) {
                 for (size_t i = 0; i < vec_len(step->build_struct.fields); i++) {
                     fprintf(stream, i == 0 ? "step%lu" : ", step%lu", step->build_struct.fields[i]);
                 }
-                fprintf(stream, "{");
+                fprintf(stream, "}");
                 break;
         }
         fprintf(stream, "\n");

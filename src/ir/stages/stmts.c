@@ -3,6 +3,7 @@
 #include "core/vec.h"
 #include "ir/api/ir.h"
 #include "ir/ir.h"
+#include "ir/const.h"
 #include "ir/stmt/code.h"
 #include "ir/stmt/expr.h"
 #include "ir/stmt/stmt.h"
@@ -49,8 +50,6 @@ static inline IrTypeId ir_get_expr_step_type(IrStmtCtx *ctx, IrTypeId *types, Ir
             assert(type->kind == IR_TYPE_FUNCTION);
             return type->function.returns;
         }
-        case IR_EXPR_STEP_INT: return step->integer.type;
-        case IR_EXPR_STEP_REAL: return step->real.type;
         case IR_EXPR_STEP_BINOP: return ir_get_binop_type(ir, types, &step->binop);
         case IR_EXPR_STEP_GET_DECL: return ir->decls[step->decl_id].type;
         case IR_EXPR_STEP_TAKE_REF: return ir_add_simple_type(ir, ir_type_new_pointer(types[step->ref_step]));
@@ -63,6 +62,7 @@ static inline IrTypeId ir_get_expr_step_type(IrStmtCtx *ctx, IrTypeId *types, Ir
         case IR_EXPR_STEP_GET_LOCAL: return ir->funcs[ctx->func].locals[step->local_id].type;
         case IR_EXPR_STEP_CAST_INT: return step->cast_int.dest;
         case IR_EXPR_STEP_BUILD_STRUCT: return step->build_struct.type;
+        case IR_EXPR_STEP_CONST: return step->constant->type;
         case IR_EXPR_STEP_STRUCT_FIELD: {
             IrTypeId source_id = ir_type_record_resolve_simple(ir, types[step->struct_field.step]);
             IrType *type = &ir->types[source_id].simple;
@@ -73,7 +73,6 @@ static inline IrTypeId ir_get_expr_step_type(IrStmtCtx *ctx, IrTypeId *types, Ir
             IrTypeId u8 = ir_add_simple_type(ir, ir_type_new_int(IR_TYPE_INT_8, false));
             return ir_add_simple_type(ir, ir_type_new_pointer(u8));
         }
-        case IR_EXPR_STEP_BOOL:
         case IR_EXPR_STEP_BOOL_SKIP:
         case IR_EXPR_STEP_NOT:
             return ir_add_simple_type(ir, ir_type_new_bool());

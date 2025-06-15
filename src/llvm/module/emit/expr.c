@@ -3,6 +3,7 @@
 #include "core/mempool.h"
 #include "core/vec.h"
 #include "ir/api/ir.h"
+#include "ir/const.h"
 #include "ir/decls.h"
 #include "ir/stmt/expr.h"
 #include "llvm/module/module.h"
@@ -161,6 +162,29 @@ static LLVMValueRef llvm_emit_expr_binop(LlvmModule *module, LlvmEmitStepRes *re
     UNREACHABLE;
 }
 
+LLVMValueRef llvm_emit_const(LlvmModule *module, IrConst *constant) {
+    switch (constant->kind) {
+        case IR_CONST_BOOL:
+            return LLVMConstInt(LLVMInt1Type(), constant->boolean, false);
+        case IR_CONST_INT:
+            return LLVMConstInt(
+                module->types[constant->type],
+                constant->integer,
+                ir_type_int_is_signed(module->ir, constant->type)
+            );
+        case IR_CONST_REAL: TODO;
+        case IR_CONST_STRUCT: {
+            LLVMValueRef *fields = alloca(sizeof(LLVMValueRef) * vec_len(constant->struct_fields));
+            for (size_t i = 0; i < vec_len(constant->struct_fields); i++) {
+                fields[i] = llvm_emit_const(module, constant->struct_fields[i]);
+            }
+            return LLVMConstStruct(fields, vec_len(constant->struct_fields), false);
+        }
+        case IR_CONST_DECL_PTR: return module->decls[constant->decl];
+    }
+    UNREACHABLE;
+}
+
 static LlvmEmitStepRes llvm_emit_expr_step(
     LlvmModule *module,
     LlvmEmitStepRes *results,
@@ -169,18 +193,13 @@ static LlvmEmitStepRes llvm_emit_expr_step(
 ) {
     IrExprStep *step = &steps[step_id];
     switch (step->kind) {
-        case IR_EXPR_STEP_INT:
-            return llvm_emit_step_res_new(LLVMConstInt(
-                module->types[step->integer.type],
-                step->integer.value,
-                ir_type_int_is_signed(module->ir, step->integer.type)
-            ), true);
+        case IR_EXPR_STEP_CONST: return llvm_emit_step_res_new(llvm_emit_const(module, step->constant), true);
         case IR_EXPR_STEP_STRING: {
             LLVMValueRef str_global = LLVMAddGlobal(module->module, LLVMArrayType(LLVMInt8Type(), step->string.length),
                 "");
             LLVMSetInitializer(str_global, LLVMConstString(step->string.value, step->string.length, true));
             LLVMValueRef str_ptr = LLVMBuildBitCast(module->builder, str_global, LLVMPointerType(LLVMInt8Type(), 0), "");
-            return llvm_emit_step_res_new(str_ptr, IR_IMMUTABLE);
+            return llvm_emit_step_res_new(str_ptr, true);
         }
         case IR_EXPR_STEP_CALL: {
             LLVMValueRef *args = alloca(sizeof(LLVMValueRef) * vec_len(step->call.args));
@@ -217,8 +236,6 @@ static LlvmEmitStepRes llvm_emit_expr_step(
             LLVMPositionBuilderAtEnd(module->builder, cont);
             return llvm_emit_step_res_new(NULL, false);
         }
-        case IR_EXPR_STEP_BOOL:
-            return llvm_emit_step_res_new(LLVMConstInt(LLVMInt1Type(), step->boolean, false), true);
         case IR_EXPR_STEP_TAKE_REF: {
             assert(!results[step->ref_step].loaded);
             return llvm_emit_step_res_new(results[step->ref_step].value, true);
@@ -250,8 +267,6 @@ static LlvmEmitStepRes llvm_emit_expr_step(
             }
             return llvm_emit_step_res_new(result, true);
         }
-        case IR_EXPR_STEP_REAL:
-            TODO;
         case IR_EXPR_STEP_CAST_INT: {
             LLVMValueRef what = llvm_get_res_value(module, &results[step->cast_int.step_id]);
             LLVMTypeRef type = module->types[step->cast_int.dest];
