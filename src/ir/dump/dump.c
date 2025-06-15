@@ -62,6 +62,23 @@ static void ir_dump_types(IrTypeInfo *types, FILE *stream) {
     fprintf(stream, "\n");
 }
 
+void ir_dump_vars(Mempool *mempool, IrVarInfo *vars, FILE *stream) {
+    for (size_t i = 0; i < vec_len(vars); i++) {
+        IrVarInfo *info = &vars[i];
+        fprintf(stream, "decl%lu: var", info->decl_id);
+        if (info->var.is_global) {
+            fprintf(stream, " `%s`", mempool_slice_to_cstr(mempool, info->var.global_name));
+        }
+        fprintf(stream, ": type%lu", info->var.type);
+        if (info->var.initializer) {
+            fprintf(stream, " = ");
+            ir_const_dump(info->var.initializer, stream);
+        }
+        fprintf(stream, "\n");
+    }
+    fprintf(stream, "\n");
+}
+
 void ir_dump_externs(Mempool *mempool, IrExternInfo *externs, FILE *stream) {
     for (size_t i = 0; i < vec_len(externs); i++) {
         IrExternInfo *info = &externs[i];
@@ -110,6 +127,7 @@ bool ir_dump(Ir *ir, const Path output) {
         return false;
     }
     ir_dump_types(ir->types, stream);
+    ir_dump_vars(ir->mempool, ir->vars, stream);
     ir_dump_externs(ir->mempool, ir->externs, stream);
     ir_dump_functions(ir->mempool, ir->funcs, stream);
     fclose(stream);

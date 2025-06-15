@@ -45,6 +45,9 @@ size_t sema_module_expr_emit_runtime(SemaValueRuntime *runtime, SemaExprOutput *
             return sema_expr_output_push_step(output, ir_expr_step_new_get_decl(runtime->global_id));
         case SEMA_VALUE_RUNTIME_LOCAL:
             return sema_expr_output_push_step(output, ir_expr_step_new_get_local(runtime->global_id));
+        case SEMA_VALUE_RUNTIME_CONST:
+            return sema_expr_output_push_step(output, ir_expr_step_new_const(sema_const_to_ir(output->mempool,
+                runtime->constant)));
         case SEMA_VALUE_RUNTIME_EXPR_STEP:
             return runtime->in_expr_id.step_id;
     }

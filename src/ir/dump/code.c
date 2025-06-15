@@ -8,7 +8,7 @@ static inline void ftabs(FILE *stream, size_t tabs) {
     for (size_t i = 0; i < tabs; i++) fprintf(stream, "  ");
 }
 
-static void ir_const_dump(IrConst *constant, FILE *stream) {
+void ir_const_dump(IrConst *constant, FILE *stream) {
     switch (constant->kind) {
         case IR_CONST_BOOL: fprintf(stream, constant->boolean ? "true" : "false"); break;
         case IR_CONST_INT: fprintf(stream, "int of type type%lu %lu", constant->type, constant->integer); break;

@@ -6,6 +6,7 @@
 #include "sema/module/api/value.h"
 
 typedef struct {
+    Mempool *mempool;
     IrExprStep *steps;
 } SemaExprOutput;
 
@@ -14,13 +15,13 @@ typedef struct {
     SemaType *expectation;
 } SemaExprCtx;
 
-static inline SemaExprOutput sema_expr_output_new_with(IrExprStep *steps) {
-    SemaExprOutput output = { .steps = steps };
+static inline SemaExprOutput sema_expr_output_new_with(Mempool *mempool, IrExprStep *steps) {
+    SemaExprOutput output = { .steps = steps, .mempool = mempool };
     return output;
 }
 
 static inline SemaExprOutput sema_expr_output_new(Mempool *mempool) {
-    return sema_expr_output_new_with(vec_new_in(mempool, IrExprStep));
+    return sema_expr_output_new_with(mempool, vec_new_in(mempool, IrExprStep));
 }
 
 static inline SemaExprCtx sema_expr_ctx_new(SemaExprOutput *output, SemaType *expectation) {

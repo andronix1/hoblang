@@ -47,7 +47,7 @@ bool sema_module_emit_stmt_assign(SemaModule *module, AstAssign *assign) {
         IrLocalId value = ir_func_add_local(module->ir, module->ss->func_id, ir_func_local_new(IR_IMMUTABLE, type));
         sema_ss_append_stmt(module->ss, ir_stmt_new_init_final(module->mempool, value, value_expr));
 
-        SemaExprOutput output = sema_expr_output_new_with(vec_create_in(module->mempool,
+        SemaExprOutput output = sema_expr_output_new_with(module->mempool, vec_create_in(module->mempool,
             ir_expr_step_new_get_local(temp),
             ir_expr_step_new_deref(0),
             ir_expr_step_new_get_local(value)

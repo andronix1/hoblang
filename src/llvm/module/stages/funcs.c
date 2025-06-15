@@ -11,7 +11,8 @@ void llvm_module_setup_funcs(LlvmModule *module) {
     }
     for (size_t i = 0; i < vec_len(module->ir->vars); i++) {
         IrVarInfo *info = &module->ir->vars[i];
-        LLVMSetInitializer(module->decls[info->decl_id], llvm_emit_const(module, info->var.initializer));
+        LLVMSetInitializer(module->decls[info->decl_id], info->var.initializer ? 
+            llvm_emit_const(module, info->var.initializer) : LLVMGetUndef(module->types[info->var.type]));
         llvm_emit_func_body(module, i);
     }
 }

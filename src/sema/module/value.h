@@ -29,5 +29,6 @@ SemaValue *sema_value_new_module(Mempool *mempool, SemaModule *module);
 SemaValue *sema_value_new_runtime_global(Mempool *mempool, SemaRuntimeKind kind, SemaType *type, IrDeclId id);
 SemaValue *sema_value_new_runtime_local(Mempool *mempool, SemaRuntimeKind kind, SemaType *type, IrLocalId id);
 SemaValue *sema_value_new_runtime_expr_step(Mempool *mempool, SemaRuntimeKind kind, SemaType *type, size_t id);
+SemaValue *sema_value_new_runtime_const(Mempool *mempool, SemaConst *constant);
 SemaValue *sema_value_new_runtime_ext_expr_step(Mempool *mempool, SemaRuntimeKind kind, SemaType *type, size_t step_id, size_t of);
 void sema_value_print(va_list list);

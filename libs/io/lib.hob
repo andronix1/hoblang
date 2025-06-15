@@ -10,9 +10,7 @@ public fun Fd.putStr(self, data: internal.Str) {
 }
 
 public fun Fd.putChar(self, char: u8) {
-    self.putStrSlice(internal.string.new(&char, 1));
+    self.putStr(internal.string.new(&char, 1));
 }
 
-public fun out() -> Fd {
-    return 1;
-}
+public var out: Fd = 1;

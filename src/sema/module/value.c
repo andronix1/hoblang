@@ -1,6 +1,7 @@
 #include "value.h"
 #include "core/mempool.h"
 #include "sema/module/api/value.h"
+#include "sema/module/const.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -29,6 +30,15 @@ SemaValue *sema_value_new_runtime_local(Mempool *mempool, SemaRuntimeKind kind, 
         out->runtime.val_kind = SEMA_VALUE_RUNTIME_LOCAL;
         out->runtime.kind = kind;
         out->runtime.local_id = id;
+    );
+
+SemaValue *sema_value_new_runtime_const(Mempool *mempool, SemaConst *constant)
+    MEMPOOL_CONSTRUCT(SemaValue,
+        out->kind = SEMA_VALUE_RUNTIME;
+        out->runtime.type = constant->type;
+        out->runtime.val_kind = SEMA_VALUE_RUNTIME_CONST;
+        out->runtime.kind = SEMA_RUNTIME_FINAL;
+        out->runtime.constant = constant;
     );
 
 SemaValue *sema_value_new_runtime_expr_step(Mempool *mempool, SemaRuntimeKind kind, SemaType *type, size_t id)

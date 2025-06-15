@@ -89,7 +89,10 @@ typedef struct {
 
     struct {
         SemaType *type;
-        IrLocalId local_id;
+        union {
+            IrLocalId local_id;
+            IrVarId var_id;
+        };
     } sema;
 } AstValueDecl;
 

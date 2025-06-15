@@ -23,6 +23,14 @@ inline SemaModule *sema_value_is_module(SemaValue *value) {
     return value->module;
 }
 
+SemaConst *sema_value_runtime_should_be_constant(SemaModule *module, Slice where, SemaValueRuntime *runtime) {
+    if (runtime->val_kind != SEMA_VALUE_RUNTIME_CONST) {
+        sema_module_err(module, where, "value is not a constant");
+        return NULL;
+    }
+    return runtime->constant;
+}
+
 SemaType *sema_value_should_be_type(SemaModule *module, Slice where, SemaValue *value) {
     SemaType *type = sema_value_is_type(value);
     if (!type) {

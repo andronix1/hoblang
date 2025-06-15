@@ -4,3 +4,4 @@
 #include "sema/module/api/module.h"
 
 bool sema_module_stage_fill_value(SemaModule *module, AstValueDecl *value_decl);
+bool sema_module_stage_emit_value(SemaModule *module, AstValueDecl *value_decl);

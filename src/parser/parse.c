@@ -27,6 +27,9 @@ static AstNode *parser_next_maybe_public_and_global(Parser *parser, AstGlobal *g
     Token token = parser_take(parser);
     switch (token.kind) {
         case TOKEN_FUN: return parse_fun_decl_node(parser, global, is_public);
+        case TOKEN_VAR: case TOKEN_FINAL: case TOKEN_CONST:
+            parser_skip_next(parser);
+            return parse_value_decl_node(parser, global, is_public);
         default: return NOT_FOUND;
     }
 }
@@ -65,9 +68,6 @@ static AstNode *parser_next_maybe_public(Parser *parser, Token token, bool is_pu
     switch (token.kind) {
         case TOKEN_TYPE:
             return parse_type_decl_node(parser, is_public);
-        case TOKEN_VAR: case TOKEN_FINAL: case TOKEN_CONST:
-            parser_skip_next(parser);
-            return parse_value_decl_node(parser, is_public);
         case TOKEN_GLOBAL:
             return parser_next_maybe_public_and_global(parser, NOT_NULL(parse_global(parser)), is_public);
         case TOKEN_EXTERN:
