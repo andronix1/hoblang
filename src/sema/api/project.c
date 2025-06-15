@@ -39,7 +39,6 @@ SemaModule *sema_project_add_module(SemaProject *project, Path from, Path path) 
     if (module) {
         return *module;
     }
-    logln("using module $s", path);
     FileContent *content = file_content_read(path);
     if (!content) {
         logln("failed to read file `$S`", path);
