@@ -135,7 +135,7 @@ SemaValue *sema_module_append_expr_binop(SemaModule *module, SemaType *type, siz
 SemaValue *sema_module_emit_expr_binop(SemaModule *module, AstBinop *binop, SemaExprCtx ctx) {
     SemaValueRuntime *ls = NOT_NULL(sema_module_emit_runtime_expr(module, binop->left,
         sema_expr_ctx_new(ctx.output, ctx.expectation)));
-    size_t lss = sema_module_expr_emit_runtime(ls, ctx.output);
+    size_t lss = sema_module_expr_emit_runtime(module->mempool, ls, ctx.output);
     if (binop->kind.kind == AST_BINOP_AND) {
         sema_expr_output_push_step(ctx.output, ir_expr_step_new_bool_skip(lss, false, false));
     } else if (binop->kind.kind == AST_BINOP_OR) {
@@ -143,7 +143,7 @@ SemaValue *sema_module_emit_expr_binop(SemaModule *module, AstBinop *binop, Sema
     }
     SemaValueRuntime *rs = NOT_NULL(sema_module_emit_runtime_expr(module, binop->right,
         sema_expr_ctx_new(ctx.output, ls->type)));
-    size_t rss = sema_module_expr_emit_runtime(rs, ctx.output);
+    size_t rss = sema_module_expr_emit_runtime(module->mempool, rs, ctx.output);
     if (!sema_type_eq(rs->type, ls->type)) {
         sema_module_err(module, binop->kind.slice, "binop can be applied to equal types only, but $t != $t", ls->type, rs->type);
         return NULL;

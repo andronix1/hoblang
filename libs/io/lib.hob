@@ -13,4 +13,4 @@ public fun Fd.putChar(self, char: u8) {
     self.putStr(internal.string.new(&char, 1));
 }
 
-public var out: Fd = 1;
+public const out: Fd = 1;

@@ -20,7 +20,7 @@ static SemaValue *sema_module_analyze_expr_path_deref(SemaModule *module, SemaVa
         return NULL;
     }
     size_t step_id = sema_expr_output_push_step(output,
-        ir_expr_step_new_deref(sema_module_expr_emit_runtime(runtime, output)));
+        ir_expr_step_new_deref(sema_module_expr_emit_runtime(module->mempool, runtime, output)));
     return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_VAR, runtime->type->pointer_to, step_id);
 }
 
@@ -31,7 +31,7 @@ static SemaValue *sema_module_analyze_expr_path_ident(SemaModule *module, SemaVa
     }
     SemaValueRuntime *runtime = sema_value_is_runtime(value);
     if (runtime) {
-        size_t of = sema_module_expr_emit_runtime(runtime, output);
+        size_t of = sema_module_expr_emit_runtime(module->mempool, runtime, output);
         SemaType *type = sema_type_resolve(runtime->type);
         if (type->kind == SEMA_TYPE_STRUCTURE) {
             size_t idx = keymap_get_idx(type->structure.fields_map, ident);
@@ -45,7 +45,7 @@ static SemaValue *sema_module_analyze_expr_path_ident(SemaModule *module, SemaVa
         if (decl) {
             SemaValueRuntime *decl_runtime = sema_value_is_runtime(decl->value);
             if (decl_runtime) {
-                size_t step_id = sema_module_expr_emit_runtime(decl_runtime, output);
+                size_t step_id = sema_module_expr_emit_runtime(module->mempool, decl_runtime, output);
                 return sema_value_new_runtime_ext_expr_step(module->mempool, decl_runtime->kind,
                     decl_runtime->type, step_id, of);
             }

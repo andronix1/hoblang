@@ -144,15 +144,8 @@ IrLocalId ir_func_arg_local_id(Ir *ir, IrFuncId id, size_t arg_id) {
     return ir->funcs[id].args[arg_id];
 }
 
-static inline IrType *ir_type_is_simple(Ir *ir, IrTypeId id) {
-    IrTypeInfo *info = &ir->types[id];
-    assert(info->kind == IR_TYPE_INFO_SIMPLE);
-    return &info->simple;
-}
-
 bool ir_type_int_is_signed(Ir *ir, IrTypeId id) {
-    IrType *type = ir_type_is_simple(ir, id);
-    assert(type->kind == IR_TYPE_INT);
+    IrType *type = &ir->types[ir_type_record_resolve_simple(ir, id)].simple;
     return type->integer.is_signed;
 }
 

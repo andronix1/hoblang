@@ -17,6 +17,7 @@
 #include "sema/module/exprs/string.h"
 #include "sema/module/exprs/struct.h"
 #include "sema/module/exprs/take_ref.h"
+#include "sema/module/module.h"
 #include "sema/module/value.h"
 #include <assert.h>
 
@@ -39,14 +40,14 @@ SemaValue *sema_module_emit_expr(SemaModule *module, AstExpr *expr, SemaExprCtx 
     UNREACHABLE;
 }
 
-size_t sema_module_expr_emit_runtime(SemaValueRuntime *runtime, SemaExprOutput *output) {
+size_t sema_module_expr_emit_runtime(Mempool *mempool, SemaValueRuntime *runtime, SemaExprOutput *output) {
     switch (runtime->val_kind) {
         case SEMA_VALUE_RUNTIME_GLOBAL:
             return sema_expr_output_push_step(output, ir_expr_step_new_get_decl(runtime->global_id));
         case SEMA_VALUE_RUNTIME_LOCAL:
             return sema_expr_output_push_step(output, ir_expr_step_new_get_local(runtime->global_id));
         case SEMA_VALUE_RUNTIME_CONST:
-            return sema_expr_output_push_step(output, ir_expr_step_new_const(sema_const_to_ir(output->mempool,
+            return sema_expr_output_push_step(output, ir_expr_step_new_const(sema_const_to_ir(mempool,
                 runtime->constant)));
         case SEMA_VALUE_RUNTIME_EXPR_STEP:
             return runtime->in_expr_id.step_id;
@@ -73,6 +74,6 @@ IrExpr sema_expr_output_collect(SemaExprOutput *output) {
 SemaValueRuntime *sema_module_emit_runtime_expr(SemaModule *module, AstExpr *expr, SemaExprCtx ctx) {
     SemaValue *value = NOT_NULL(sema_module_emit_expr(module, expr, ctx)); 
     SemaValueRuntime *runtime = NOT_NULL(sema_value_should_be_runtime(module, expr->slice, value));
-    sema_module_expr_emit_runtime(runtime, ctx.output);
+    sema_module_expr_emit_runtime(module->mempool, runtime, ctx.output);
     return runtime;
 }
