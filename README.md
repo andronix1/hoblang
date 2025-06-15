@@ -50,20 +50,7 @@ You can compile code using hoblang compiler now.
 Make sure, that you're running programm in `build` directory (to be fixed :P)
 
 ```bash
-./hoblang /path/to/source/file
-```
-
-### Let's RUN!
-
-After compiling, 3 files is going to be created in cwd (to be fixed :P):
-- `test.o` - binary
-- `test.hir` - intermidiate language representation dump
-- `test.ll` - llvm intermidiate representation
-
-For running, we will be using `test.o` only. Let's compile it using `gcc` (to be fixed :P)
-
-```bash
-gcc test.o -o test
+./hoblang build-exe main.hob test
 ```
 
 This is all! You can run `test` and see "hello, world!"
