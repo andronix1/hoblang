@@ -10,6 +10,14 @@
 #include "sema/module/api/module.h"
 #include <string.h>
 
+IrTypeFloatSize sema_type_float_size_to_ir(SemaTypeFloatSize size) {
+    switch (size) {
+        case SEMA_FLOAT_32: return IR_TYPE_FLOAT_32;
+        case SEMA_FLOAT_64: return IR_TYPE_FLOAT_64;
+    }
+    UNREACHABLE;
+}
+
 IrTypeIntSize sema_type_int_size_to_ir(SemaTypeIntSize size) {
     switch (size) {
         case SEMA_INT_8: return IR_TYPE_INT_8;
@@ -23,9 +31,8 @@ IrTypeIntSize sema_type_int_size_to_ir(SemaTypeIntSize size) {
 static inline IrType sema_type_to_ir(SemaModule* module, SemaType *type) {
     switch (type->kind) {
         case SEMA_TYPE_VOID: return ir_type_new_void();
-        case SEMA_TYPE_INT:
-            return ir_type_new_int(sema_type_int_size_to_ir(type->integer.size),
-                type->integer.is_signed);
+        case SEMA_TYPE_INT: return ir_type_new_int(sema_type_int_size_to_ir(type->integer.size), type->integer.is_signed);
+        case SEMA_TYPE_FLOAT: return ir_type_new_float(sema_type_float_size_to_ir(type->float_size));
         case SEMA_TYPE_BOOL: return ir_type_new_bool();
         case SEMA_TYPE_FUNCTION: {
             IrTypeId *args = vec_new_in(module->mempool, IrTypeId);
@@ -87,6 +94,9 @@ SemaType *sema_type_new_int(SemaModule *module, SemaTypeIntSize size, bool is_si
         out->integer.size = size;
         out->integer.is_signed = is_signed;
     )
+
+SemaType *sema_type_new_float(SemaModule *module, SemaTypeFloatSize size)
+    SEMA_TYPE_CONSTRUCT(SEMA_TYPE_FLOAT, out->float_size = size)
 
 SemaType *sema_type_new_pointer(SemaModule *module, SemaType *pointer_to)
     SEMA_TYPE_CONSTRUCT(SEMA_TYPE_POINTER, out->pointer_to = pointer_to)

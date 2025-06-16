@@ -11,6 +11,7 @@ typedef enum {
     AST_EXPR_INTEGER,
     AST_EXPR_CHAR,
     AST_EXPR_BOOL,
+    AST_EXPR_FLOAT,
     AST_EXPR_STRING,
     AST_EXPR_CALL,
     AST_EXPR_SCOPE,
@@ -81,6 +82,7 @@ typedef struct AstExpr {
         AstExpr *take_ref_inner;
         AstExprInnerPath inner_path;
         uint64_t integer;
+        long double float_value;
         char character;
         bool boolean;
         Slice string;
@@ -113,6 +115,7 @@ AstExpr *ast_expr_new_take_ref(Mempool *mempool, Slice slice, AstExpr *inner);
 AstExpr *ast_expr_new_not(Mempool *mempool, Slice slice, AstExpr *inner);
 AstExpr *ast_expr_new_as(Mempool *mempool, Slice slice, Slice as_slice, AstExpr *inner, AstType *as);
 AstExpr *ast_expr_new_integer(Mempool *mempool, Slice slice, uint64_t integer);
+AstExpr *ast_expr_new_float(Mempool *mempool, Slice slice, long double float_value);
 AstExpr *ast_expr_new_string(Mempool *mempool, Slice slice, Slice string);
 AstExpr *ast_expr_new_callable(Mempool *mempool, Slice slice, AstExpr *inner, AstExpr **args);
 AstExpr *ast_expr_new_scope(Mempool *mempool, Slice slice, AstExpr *inner);

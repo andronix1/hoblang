@@ -14,6 +14,11 @@ typedef struct SemaTypeAlias {
 SemaTypeAlias *sema_type_alias_new(Mempool *mempool, IrTypeId id);
 
 typedef enum {
+    SEMA_FLOAT_32,
+    SEMA_FLOAT_64,
+} SemaTypeFloatSize;
+
+typedef enum {
     SEMA_INT_8,
     SEMA_INT_16,
     SEMA_INT_32,
@@ -23,6 +28,7 @@ typedef enum {
 typedef enum {
     SEMA_TYPE_VOID,
     SEMA_TYPE_INT,
+    SEMA_TYPE_FLOAT,
     SEMA_TYPE_BOOL,
     SEMA_TYPE_FUNCTION,
     SEMA_TYPE_POINTER,
@@ -50,6 +56,8 @@ typedef struct SemaType {
     IrTypeId ir_id;
 
     union {
+        SemaTypeFloatSize float_size;
+        
         struct {
             SemaTypeIntSize size;
             bool is_signed;
@@ -74,12 +82,14 @@ typedef struct SemaType {
 } SemaType;
 
 IrTypeIntSize sema_type_int_size_to_ir(SemaTypeIntSize size);
+IrTypeFloatSize sema_type_float_size_to_ir(SemaTypeFloatSize size);
 
 SemaType *sema_type_new_void(SemaModule *module);
 SemaType *sema_type_new_bool(SemaModule *module);
 SemaType *sema_type_new_record(SemaModule *module, size_t type_id);
 SemaType *sema_type_new_structure(SemaModule *module, SemaTypeStructField *fields);
 SemaType *sema_type_new_int(SemaModule *module, SemaTypeIntSize size, bool is_signed);
+SemaType *sema_type_new_float(SemaModule *module, SemaTypeFloatSize size);
 SemaType *sema_type_new_pointer(SemaModule *module, SemaType *pointer_to);
 SemaType *sema_type_new_function(SemaModule *module, SemaType **args, SemaType *returns);
 

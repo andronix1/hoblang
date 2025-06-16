@@ -24,6 +24,8 @@ void sema_module_setup(SemaModule *module) {
     sema_module_push_type(module, "i32", sema_type_new_int(module, SEMA_INT_32, true));
     sema_module_push_type(module, "u64", sema_type_new_int(module, SEMA_INT_64, false));
     sema_module_push_type(module, "i64", sema_type_new_int(module, SEMA_INT_64, true));
+    sema_module_push_type(module, "f32", sema_type_new_float(module, SEMA_FLOAT_32));
+    sema_module_push_type(module, "f64", sema_type_new_float(module, SEMA_FLOAT_64));
 
     if (!module->no_std) {
         sema_module_push_type(module, "string", sema_module_std_string(module, sema_module_internal_slice()));

@@ -172,7 +172,9 @@ LLVMValueRef llvm_emit_const(LlvmModule *module, IrConst *constant) {
                 constant->integer,
                 ir_type_int_is_signed(module->ir, constant->type)
             );
-        case IR_CONST_REAL: TODO;
+        case IR_CONST_REAL: {
+            return LLVMConstReal(module->types[constant->type], constant->real);
+        }
         case IR_CONST_STRUCT: {
             LLVMValueRef *fields = alloca(sizeof(LLVMValueRef) * vec_len(constant->struct_fields));
             for (size_t i = 0; i < vec_len(constant->struct_fields); i++) {

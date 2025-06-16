@@ -33,6 +33,7 @@ void token_print(va_list list) {
         case TOKEN_IDENT: printf("<ident>"); return;
         case TOKEN_CHAR: printf("<char>"); return;
         case TOKEN_INTEGER: printf("<integer>"); return;
+        case TOKEN_FLOAT: printf("<float>"); return;
         case TOKEN_STRING: printf("<string>"); return;
         case TOKEN_STRUCT: printf("`struct`"); return;
         case TOKEN_PUBLIC: printf("`public`"); return;

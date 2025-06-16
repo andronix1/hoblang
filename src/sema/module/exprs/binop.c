@@ -14,6 +14,10 @@ static inline bool sema_type_to_ir_number_info(SemaType *type, IrNumberInfo *out
         *output = ir_number_info_new_int(type->integer.is_signed, sema_type_int_size_to_ir(type->integer.size));
         return true;
     }
+    if (type->kind == SEMA_TYPE_FLOAT) {
+        *output = ir_number_info_new_float(sema_type_float_size_to_ir(type->float_size));
+        return true;
+    }
     return false;
 }
 

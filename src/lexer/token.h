@@ -23,8 +23,7 @@ typedef enum {
     TOKEN_TRUE, TOKEN_FALSE,
     // Extended
     TOKEN_IDENT,
-    TOKEN_CHAR,
-    TOKEN_INTEGER, TOKEN_STRING,
+    TOKEN_CHAR, TOKEN_INTEGER, TOKEN_STRING, TOKEN_FLOAT,
     // Binops
     TOKEN_MINUS, TOKEN_SUBTRACT,
     TOKEN_STAR, TOKEN_MULTIPLY,
@@ -58,6 +57,7 @@ typedef struct {
     union {
         Slice string;
         uint64_t integer;
+        long double float_value;
         char character;
     };
 } Token;
@@ -66,6 +66,11 @@ void token_print(va_list list);
 
 static inline Token token_char(char c) {
     Token token = { .kind = TOKEN_CHAR, .character = c };
+    return token;
+}
+
+static inline Token token_float(long double value) {
+    Token token = { .kind = TOKEN_FLOAT, .float_value = value };
     return token;
 }
 

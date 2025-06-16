@@ -79,6 +79,8 @@ static inline AstExpr *_parse_middle_expr(Parser *parser) {
             return ast_expr_new_string(parser->mempool, token.slice, token.string);
         case TOKEN_INTEGER:
             return ast_expr_new_integer(parser->mempool, token.slice, token.integer);
+        case TOKEN_FLOAT:
+            return ast_expr_new_float(parser->mempool, token.slice, token.float_value);
         case TOKEN_CHAR:
             return ast_expr_new_char(parser->mempool, token.slice, token.character);
         case TOKEN_OPENING_ANGLE_BRACE: {

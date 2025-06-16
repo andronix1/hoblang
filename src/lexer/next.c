@@ -147,6 +147,16 @@ static Token lexer_try_next(Lexer *lexer) {
                 while (char_is_digit(c = lexer_next_char(lexer))) {
                     value = value * 10 + c - '0';
                 }
+                if (c == '.') {
+                    uint64_t secondary = 0;
+                    uint64_t sec_div = 1;
+                    while (char_is_digit(c = lexer_next_char(lexer))) {
+                        secondary = secondary * 10 + c - '0';
+                        sec_div *= 10;
+                    }
+                    lexer->pos--;
+                    return token_float(value + (long double)secondary / sec_div);
+                }
                 lexer->pos--;
                 return token_integer(value);
             }

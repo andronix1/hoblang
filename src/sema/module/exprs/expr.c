@@ -10,6 +10,7 @@
 #include "sema/module/exprs/bool.h"
 #include "sema/module/exprs/call.h"
 #include "sema/module/exprs/char.h"
+#include "sema/module/exprs/float.h"
 #include "sema/module/exprs/int.h"
 #include "sema/module/exprs/not.h"
 #include "sema/module/exprs/path.h"
@@ -25,6 +26,7 @@ SemaValue *sema_module_emit_expr(SemaModule *module, AstExpr *expr, SemaExprCtx 
     switch (expr->kind) {
         case AST_EXPR_PATH: return sema_module_emit_expr_path(module, expr->path, ctx);
         case AST_EXPR_INTEGER: return sema_module_emit_expr_int(module, expr->integer, ctx);
+        case AST_EXPR_FLOAT: return sema_module_emit_expr_float(module, expr->float_value, ctx);
         case AST_EXPR_CALL: return sema_module_emit_expr_call(module, &expr->call, ctx);
         case AST_EXPR_SCOPE: return sema_module_emit_expr(module, expr->scope, ctx);
         case AST_EXPR_CHAR: return sema_module_emit_expr_char(module, expr->character, ctx);

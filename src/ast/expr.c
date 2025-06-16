@@ -56,6 +56,8 @@ bool ast_expr_eq(const AstExpr *a, const AstExpr *b) {
             return ast_expr_eq(a->not_inner, b->not_inner);
         case AST_EXPR_TAKE_REF:
             return ast_expr_eq(a->take_ref_inner, b->take_ref_inner);
+        case AST_EXPR_FLOAT:
+            return a->float_value == b->float_value;
     }
     UNREACHABLE;
 }
@@ -90,6 +92,9 @@ AstExpr *ast_expr_new_as(Mempool *mempool, Slice slice, Slice as_slice, AstExpr 
 
 AstExpr *ast_expr_new_integer(Mempool *mempool, Slice slice, uint64_t integer)
     CONSTRUCT(AST_EXPR_INTEGER, out->integer = integer)
+
+AstExpr *ast_expr_new_float(Mempool *mempool, Slice slice, long double value)
+    CONSTRUCT(AST_EXPR_FLOAT, out->float_value = value)
 
 AstExpr *ast_expr_new_string(Mempool *mempool, Slice slice, Slice string)
     CONSTRUCT(AST_EXPR_STRING, out->string = string)

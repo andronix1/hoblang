@@ -19,6 +19,12 @@ void sema_type_print(va_list list) {
     SemaType *type = va_arg(list, SemaType*);
     switch (type->kind) {
         case SEMA_TYPE_VOID: logs("void"); break;
+        case SEMA_TYPE_FLOAT:
+            switch (type->float_size) {
+                case SEMA_FLOAT_32: logs("f32"); break;
+                case SEMA_FLOAT_64: logs("f64"); break;
+            }
+            break;
         case SEMA_TYPE_INT:
             logs(type->integer.is_signed ? "i" : "u");
             switch (type->integer.size) {
@@ -83,6 +89,8 @@ bool sema_type_eq(SemaType *a, SemaType *b) {
             return sema_type_eq(a->function.returns, b->function.returns);
         case SEMA_TYPE_POINTER:
             return sema_type_eq(a->pointer_to, b->pointer_to);
+        case SEMA_TYPE_FLOAT:
+            return a->float_size == b->float_size;
     }
     UNREACHABLE;
 }

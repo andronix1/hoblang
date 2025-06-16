@@ -1,0 +1,1 @@
+public extern(sin) fun sinF(a: f32, b: f32) -> f32;
