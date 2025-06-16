@@ -1,6 +1,5 @@
 #include "value.h"
 #include "core/assert.h"
-#include "core/log.h"
 #include "core/null.h"
 #include "ir/api/ir.h"
 #include "sema/module/api/value.h"
@@ -108,7 +107,6 @@ bool sema_module_stage_fill_value(SemaModule *module, AstValueDecl *value_decl) 
         if (value_decl->sema.type) {
             IrLocalId local_id = value_decl->sema.local_id = ir_func_add_local(module->ir, module->ss->func_id,
                 ir_func_local_new(ast_value_kind_to_ir(info->kind), sema_type_ir_id(value_decl->sema.type)));
-            logln("$S", value_decl->info->name);
             sema_module_push_decl(module, info->name, sema_decl_new(module->mempool, info->is_public ? NULL : module,
                 sema_value_new_runtime_local(module->mempool, ast_value_kind_to_sema(info->kind), value_decl->sema.type, local_id)));
         }

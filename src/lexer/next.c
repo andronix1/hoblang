@@ -1,4 +1,5 @@
 #include "api.h"
+#include "core/assert.h"
 #include "core/mempool.h"
 #include "core/slice.h"
 #include "lexer/lexer.h"
@@ -9,8 +10,20 @@ static inline bool char_is_digit(char c) {
     return c >= '0' && c <= '9';
 }
 
+static inline bool char_is_lower_latin(char c) {
+    return (c >= 'a' && c <= 'z');
+}
+
+static inline bool char_is_upper_latin(char c) {
+    return (c >= 'A' && c <= 'Z');
+}
+
+static inline bool char_is_latin(char c) {
+    return char_is_lower_latin(c) || char_is_upper_latin(c);
+}
+
 static inline bool char_is_ident_start(char c) {
-    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || c == '$';
+    return char_is_latin(c) || c == '_' || c == '$';
 }
 
 static inline bool char_is_ident(char c) {
@@ -46,6 +59,32 @@ static char lexer_peek_escaped_char(Lexer *lexer, char c, char brace) {
         }
     }
     return c;
+}
+
+static inline bool char_is_based_digit(char c) {
+    return char_is_digit(c) || char_is_latin(c);
+}
+
+static inline char char_to_digit(char c) {
+    if (char_is_digit(c)) return c - '0';
+    if (char_is_lower_latin(c)) return 10 + c - 'a';
+    if (char_is_upper_latin(c)) return 10 + c - 'A';
+    UNREACHABLE;
+}
+
+static Token lex_based_int(Lexer *lexer, char base) {
+    uint64_t result = 0; 
+    char c;
+    while (char_is_based_digit(c = lexer_next_char(lexer))) {
+        char digit = char_to_digit(c);
+        if (digit >= base) {
+            lexer->pos--;
+            return token_integer(result);
+        }
+        result = result * base + digit;
+    }
+    lexer->pos--;
+    return token_integer(result);
 }
 
 static Token lexer_try_next(Lexer *lexer) {
@@ -145,6 +184,11 @@ static Token lexer_try_next(Lexer *lexer) {
             return token_simple(TOKEN_EOI);
         default:
             if (char_is_digit(c)) {
+                if (c == '0') {
+                    if (lexer_next_char_is(lexer, 'x')) return lex_based_int(lexer, 16);
+                    if (lexer_next_char_is(lexer, 'o')) return lex_based_int(lexer, 8);
+                    if (lexer_next_char_is(lexer, 'b')) return lex_based_int(lexer, 2);
+                }
                 uint64_t value = c - '0';
                 while (char_is_digit(c = lexer_next_char(lexer))) {
                     value = value * 10 + c - '0';
