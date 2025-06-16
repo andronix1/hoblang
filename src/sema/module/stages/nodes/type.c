@@ -10,10 +10,11 @@ bool sema_module_stage_init_type_decl(SemaModule *module, AstTypeDecl *type_decl
     SemaTypeId id = sema_module_register_type_alias(module);
     type_decl->sema.type_id = id;
     IrTypeId ir_id = module->types[id].id;
+    SemaType *type = sema_type_new_alias(module->mempool,
+        sema_type_new_record(module, id), sema_type_alias_new(module->mempool, ir_id));
+    type_decl->sema.type = type;
     sema_module_push_decl(module, type_decl->name, sema_decl_new(module->mempool,
-        type_decl->is_public ? NULL : module,
-        sema_value_new_type(module->mempool, type_decl->sema.type = sema_type_new_alias(module->mempool,
-            sema_type_new_record(module, id), sema_type_alias_new(module->mempool, ir_id)))));
+        type_decl->is_public ? NULL : module, sema_value_new_type(module->mempool, type)));
     return true;
 }
 

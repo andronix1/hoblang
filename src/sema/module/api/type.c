@@ -109,5 +109,8 @@ SemaDecl *sema_type_search_ext(SemaModule *module, SemaType *type, Slice name) {
             return *decl;
         }
     }
+    if (type->kind == SEMA_TYPE_RECORD) {
+        return sema_type_search_ext(module, type->record.module->types[type->record.id].type, name);
+    }
     return NULL;
 }
