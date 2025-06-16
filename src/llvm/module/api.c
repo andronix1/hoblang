@@ -52,6 +52,9 @@ void llvm_module_emit(LlvmModule *module, Ir *ir) {
 }
 
 bool llvm_module_write_obj(LlvmModule *module, const char *output) {
+    if (LLVMVerifyModule(module->module, LLVMAbortProcessAction | LLVMPrintMessageAction | LLVMReturnStatusAction, NULL)) {
+        return false;
+	}
 	char *error;
 	if (LLVMTargetMachineEmitToFile(module->machine, module->module, output, LLVMObjectFile, &error) == 1) {
 		logln("error: failed to emit to file: %s", error);

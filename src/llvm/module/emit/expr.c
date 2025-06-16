@@ -200,7 +200,8 @@ static LlvmEmitStepRes llvm_emit_expr_step(
             LLVMValueRef str_global = LLVMAddGlobal(module->module, LLVMArrayType(LLVMInt8Type(), step->string.length),
                 "");
             LLVMSetInitializer(str_global, LLVMConstString(step->string.value, step->string.length, true));
-            LLVMValueRef str_ptr = LLVMBuildBitCast(module->builder, str_global, LLVMPointerType(LLVMInt8Type(), 0), "");
+            LLVMValueRef str_ptr = LLVMBuildBitCast(module->builder, str_global,
+                LLVMPointerTypeInContext(module->context, 0), "");
             return llvm_emit_step_res_new(str_ptr, true);
         }
         case IR_EXPR_STEP_CALL: {
@@ -248,7 +249,7 @@ static LlvmEmitStepRes llvm_emit_expr_step(
             LlvmEmitStepRes *res = &results[step->struct_field.step];
             if (res->loaded) {
                 return llvm_emit_step_res_new(LLVMBuildExtractValue(module->builder, res->value,
-                    step->struct_field.idx, ""), false);
+                    step->struct_field.idx, ""), true);
             } else {
                 LLVMTypeRef type = module->types[steps[step->struct_field.step].type];
                 LLVMValueRef indices[] = {
@@ -262,12 +263,17 @@ static LlvmEmitStepRes llvm_emit_expr_step(
             IrType *type = &module->ir->types[ir_type_record_resolve_simple(module->ir, step->build_struct.type)].simple;
             assert(type->kind == IR_TYPE_STRUCT);
             LLVMTypeRef llvm_type = module->types[step->build_struct.type];
-            LLVMValueRef result = LLVMBuildLoad2(module->builder, llvm_type, llvm_alloca(module, llvm_type), "");
+            LLVMValueRef result = llvm_alloca(module, llvm_type);
             for (size_t i = 0; i < vec_len(step->build_struct.fields); i++) {
-                result = LLVMBuildInsertValue(module->builder, result, llvm_get_res_value(module,
-                    &results[step->build_struct.fields[i]]), i, "");
+                LLVMValueRef value = llvm_get_res_value(module, &results[step->build_struct.fields[i]]);
+                LLVMValueRef indices[] = {
+                    LLVMConstInt(LLVMInt32TypeInContext(module->context), 0, false),
+                    LLVMConstInt(LLVMInt32TypeInContext(module->context), i, false),
+                };
+                LLVMValueRef field = LLVMBuildGEP2(module->builder, llvm_type, result, indices, 2, "");
+                LLVMBuildStore(module->builder, value, field);
             }
-            return llvm_emit_step_res_new(result, true);
+            return llvm_emit_step_res_new(LLVMBuildLoad2(module->builder, llvm_type, result, ""), true);
         }
         case IR_EXPR_STEP_CAST_INT: {
             LLVMValueRef what = llvm_get_res_value(module, &results[step->cast_int.step_id]);

@@ -21,20 +21,20 @@ static LLVMTypeRef llvm_ir_type(LlvmModule *module, IrTypeId id) {
 
 static LLVMTypeRef _llvm_ir_type(LlvmModule *module, IrType *type) {
     switch (type->kind) {
-        case IR_TYPE_VOID: return LLVMVoidType();
-        case IR_TYPE_BOOL: return LLVMInt1Type();
+        case IR_TYPE_VOID: return LLVMVoidTypeInContext(module->context);
+        case IR_TYPE_BOOL: return LLVMInt1TypeInContext(module->context);
         case IR_TYPE_INT:
             switch (type->integer.size) {
-                case IR_TYPE_INT_8: return LLVMInt8Type();
-                case IR_TYPE_INT_16: return LLVMInt16Type();
-                case IR_TYPE_INT_32: return LLVMInt32Type();
-                case IR_TYPE_INT_64: return LLVMInt64Type();
+                case IR_TYPE_INT_8: return LLVMInt8TypeInContext(module->context);
+                case IR_TYPE_INT_16: return LLVMInt16TypeInContext(module->context);
+                case IR_TYPE_INT_32: return LLVMInt32TypeInContext(module->context);
+                case IR_TYPE_INT_64: return LLVMInt64TypeInContext(module->context);
             }
             UNREACHABLE;
         case IR_TYPE_FLOAT:
             switch (type->float_size) {
-                case IR_TYPE_FLOAT_32: return LLVMFloatType();
-                case IR_TYPE_FLOAT_64: return LLVMDoubleType();
+                case IR_TYPE_FLOAT_32: return LLVMFloatTypeInContext(module->context);
+                case IR_TYPE_FLOAT_64: return LLVMDoubleTypeInContext(module->context);
             }
             UNREACHABLE;
         case IR_TYPE_FUNCTION: {
@@ -46,14 +46,14 @@ static LLVMTypeRef _llvm_ir_type(LlvmModule *module, IrType *type) {
             return LLVMFunctionType(llvm_ir_type(module, type->function.returns),
                 types, count, false);
         }
-        case IR_TYPE_POINTER: return LLVMPointerType(LLVMVoidType(), 0);
+        case IR_TYPE_POINTER: return LLVMPointerTypeInContext(module->context, 0);
         case IR_TYPE_STRUCT: {
             size_t count = vec_len(type->structure.fields);
             LLVMTypeRef *types = alloca(sizeof(LLVMTypeRef) * count);
             for (size_t i = 0; i < count; i++) {
                 types[i] = llvm_ir_type(module, type->structure.fields[i]);
             }
-            return LLVMStructType(types, count, false);
+            return LLVMStructTypeInContext(module->context, types, count, false);
         }
     }
     UNREACHABLE;
