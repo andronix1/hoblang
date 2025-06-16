@@ -57,7 +57,7 @@ static SemaValueRuntime *sema_value_decl_get_initializer(SemaModule *module, Sem
         return NULL;
     }
     if (!type) {
-        type = value->type;
+        value_decl->sema.type = type = value->type;
     }
     if (!type) {
         sema_module_err(module, value_decl->info->name,
@@ -87,7 +87,7 @@ bool sema_module_stage_fill_value(SemaModule *module, AstValueDecl *value_decl) 
                 value_decl->initializer->slice, runtime));
             sema_module_push_decl(module, value_decl->info->name, sema_decl_new(module->mempool,
                 value_decl->info->is_public ? NULL : module, sema_value_new_runtime_const(module->mempool,
-                    sema_const_nest(module->mempool, constant, type))));
+                    sema_const_nest(module->mempool, constant, value_decl->sema.type))));
             return true;
         } else {
             sema_module_err(module, value_decl->info->name, "global value declaration can be a variable or constant only");
