@@ -13,8 +13,12 @@
 #include "sema/api/project.h"
 #include "llvm/module/api.h"
 
-static SemaProject *cmd_sema_project(CmdSources *sources, Ir *ir) {
-    SemaProject *project = sema_project_new(ir, "../libs");
+static SemaProject *cmd_sema_project(Mempool *mempool, CmdSources *sources, Ir *ir) {
+    Path *lib_dirs = vec_create_in(mempool, (char*)"../libs", "./libs");
+    for (size_t i = 0; i < vec_len(sources->additional_lib_dirs); i++) {
+        vec_push(lib_dirs, mempool_slice_to_cstr(mempool, sources->additional_lib_dirs[i]));
+    }
+    SemaProject *project = sema_project_new(ir, lib_dirs);
     sema_project_add_module(project, NULL, sources->entry, false);
     return project;
 }
@@ -26,9 +30,9 @@ static void complete_ir(Ir *ir) {
     ir_check_cosistency(ir);
 }
 
-static bool cmd_build(CmdBuild *build) {
+static bool cmd_build(Mempool *mempool, CmdBuild *build) {
     Ir *ir = ir_new();
-    SemaProject *project = cmd_sema_project(&build->sources, ir);
+    SemaProject *project = cmd_sema_project(mempool, &build->sources, ir);
     if (!project) {
         ir_free(ir);
         return false;
@@ -89,9 +93,9 @@ static bool cmd_build(CmdBuild *build) {
     return result;
 }
 
-static bool cmd_emit(CmdEmit *emit) {
+static bool cmd_emit(Mempool *mempool, CmdEmit *emit) {
     Ir *ir = ir_new();
-    SemaProject *project = cmd_sema_project(&emit->sources, ir);
+    SemaProject *project = cmd_sema_project(mempool, &emit->sources, ir);
     if (!project) {
         ir_free(ir);
         return false;
@@ -167,12 +171,12 @@ static bool cmd_version() {
     return true;
 }
 
-static bool cmd_exec(Cmd *cmd) {
+static bool cmd_exec(Mempool *mempool, Cmd *cmd) {
     switch (cmd->kind) {
         case CMD_VERSION: return cmd_version();
         case CMD_HELP: return cmd_help(cmd->executable);
-        case CMD_BUILD: return cmd_build(&cmd->build);
-        case CMD_EMIT: return cmd_emit(&cmd->emit);
+        case CMD_BUILD: return cmd_build(mempool, &cmd->build);
+        case CMD_EMIT: return cmd_emit(mempool, &cmd->emit);
     }
     UNREACHABLE;
 }
@@ -188,7 +192,7 @@ int main(int argc, char **argv) {
         mempool_free(mempool);
         return 1;
     }
-    bool result = cmd_exec(cmd);
+    bool result = cmd_exec(mempool, cmd);
 
     mempool_free(mempool);
     return result ? 0 : 1;

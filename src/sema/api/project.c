@@ -14,13 +14,14 @@
 #include "sema/module/stages/stages.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
-SemaProject *sema_project_new(Ir *ir, const Path libraries_path) {
+SemaProject *sema_project_new(Ir *ir, Path *lib_dirs) {
     SemaProject *project = malloc(sizeof(SemaProject));
     project->mempool = mempool_new(1024);
     project->modules_map = keymap_new_in(project->mempool, SemaModule*);
     project->ir = ir;
-    project->libraries_path = libraries_path;
+    project->lib_dirs = lib_dirs;
     return project;
 }
 
@@ -55,9 +56,15 @@ inline SemaModule *sema_project_add_module(SemaProject *project, Path from, Path
 }
 
 static inline SemaModule *_sema_project_add_library(SemaProject *project, Slice name, bool force_internal) {
-    Path dir = path_join_in(project->mempool, project->libraries_path, mempool_slice_to_cstr(project->mempool, name));
-    Path entry = path_join_in(project->mempool, dir, "lib.hob");
-    return sema_project_add_module(project, NULL, entry, force_internal);
+    for (size_t i = 0; i < vec_len(project->lib_dirs); i++) {
+        Path dir = path_join_in(project->mempool, project->lib_dirs[i], mempool_slice_to_cstr(project->mempool, name));
+        Path entry = path_join_in(project->mempool, dir, "lib.hob");
+        if (!access(entry, F_OK)) {
+            return sema_project_add_module(project, NULL, entry, force_internal);
+        }
+    }
+    logln("failed to find library `$S`", name);
+    return NULL;
 }
 
 SemaModule *sema_project_add_library(SemaProject *project, Slice name) {

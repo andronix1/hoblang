@@ -8,6 +8,6 @@ typedef struct SemaProject {
     Mempool *mempool;
     Ir *ir;
 
-    Path libraries_path;
+    Path *lib_dirs;
 } SemaProject;
 

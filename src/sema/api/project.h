@@ -4,7 +4,7 @@
 
 typedef struct SemaProject SemaProject;
 
-SemaProject *sema_project_new(Ir *ir, const Path libraries_path);
+SemaProject *sema_project_new(Ir *ir, Path *lib_dirs);
 SemaModule *sema_project_add_module(SemaProject *project, const Path from, const Path path, bool force_internal);
 SemaModule *sema_project_add_library(SemaProject *project, Slice name);
 SemaModule *sema_project_add_internal_library(SemaProject *project, Slice name);
