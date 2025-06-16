@@ -62,6 +62,8 @@ void token_print(va_list list) {
         case TOKEN_NOT_EQUALS: printf("`!=`"); return;
         case TOKEN_GREATER_EQ: printf("`>=`"); return;
         case TOKEN_LESS_EQ: printf("`<=`"); return;
+        case TOKEN_SHL: printf("`<<`"); return;
+        case TOKEN_SHR: printf("`>>`"); return;
         case TOKEN_NOT: printf("`!`"); return;
         case TOKEN_BITAND: printf("`&`"); return;
         case TOKEN_BITOR: printf("`|`"); return;

@@ -131,6 +131,10 @@ static int get_binop_kind_priority(AstBinopKindKind kind) {
         case AST_BINOP_GREATER: return 0;
         case AST_BINOP_LESS_EQ: return 0;
         case AST_BINOP_GREATER_EQ: return 0;
+        case AST_BINOP_BITAND: return 2;
+        case AST_BINOP_BITOR: return 2;
+        case AST_BINOP_SHR: return 5;
+        case AST_BINOP_SHL: return 5;
         case AST_BINOP_ADD: return 10;
         case AST_BINOP_SUBTRACT: return 10;
         case AST_BINOP_MOD: return 100;
@@ -188,6 +192,10 @@ static inline AstExpr *parse_post_expr(Parser *parser, AstExpr *expr) {
             case TOKEN_CLOSING_ANGLE_BRACE: expr = NOT_NULL(create_expr_lprioritized(parser, token.slice, AST_BINOP_GREATER, expr)); break;
             case TOKEN_LESS_EQ: expr = NOT_NULL(create_expr_lprioritized(parser, token.slice, AST_BINOP_LESS_EQ, expr)); break;
             case TOKEN_GREATER_EQ: expr = NOT_NULL(create_expr_lprioritized(parser, token.slice, AST_BINOP_GREATER_EQ, expr)); break;
+            case TOKEN_BITAND: expr = NOT_NULL(create_expr_lprioritized(parser, token.slice, AST_BINOP_BITAND, expr)); break;
+            case TOKEN_BITOR: expr = NOT_NULL(create_expr_lprioritized(parser, token.slice, AST_BINOP_BITOR, expr)); break;
+            case TOKEN_SHR: expr = NOT_NULL(create_expr_lprioritized(parser, token.slice, AST_BINOP_SHR, expr)); break;
+            case TOKEN_SHL: expr = NOT_NULL(create_expr_lprioritized(parser, token.slice, AST_BINOP_SHL, expr)); break;
             default:
                 parser_skip_next(parser);
                 reading = false;

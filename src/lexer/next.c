@@ -113,9 +113,11 @@ static Token lexer_try_next(Lexer *lexer) {
         case ']': return token_simple(TOKEN_CLOSING_SQUARE_BRACE);
         case '<':
             if (lexer_next_char_is(lexer, '=')) return token_simple(TOKEN_LESS_EQ);
+            else if (lexer_next_char_is(lexer, '<')) return token_simple(TOKEN_SHL);
             return token_simple(TOKEN_OPENING_ANGLE_BRACE);
         case '>':
             if (lexer_next_char_is(lexer, '=')) return token_simple(TOKEN_GREATER_EQ);
+            else if (lexer_next_char_is(lexer, '>')) return token_simple(TOKEN_SHR);
             return token_simple(TOKEN_CLOSING_ANGLE_BRACE);
         case '\'': {
             c = lexer_peek_escaped_char(lexer, lexer_next_char(lexer), '\'');

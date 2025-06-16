@@ -132,6 +132,10 @@ SemaValue *sema_module_append_expr_binop(SemaModule *module, SemaType *type, siz
         case AST_BINOP_AND: return sema_binop_bool(module, IR_BINOP_BOOL_AND, type, kind->slice, lss, rss, output);
 
         case AST_BINOP_MOD: return sema_binop_int(module, IR_BINOP_INT_MOD, type, kind->slice, lss, rss, output);
+        case AST_BINOP_BITOR: return sema_binop_int(module, IR_BINOP_INT_BITOR, type, kind->slice, lss, rss, output);
+        case AST_BINOP_BITAND: return sema_binop_int(module, IR_BINOP_INT_BITAND, type, kind->slice, lss, rss, output);
+        case AST_BINOP_SHL: return sema_binop_int(module, IR_BINOP_INT_SHL, type, kind->slice, lss, rss, output);
+        case AST_BINOP_SHR: return sema_binop_int(module, IR_BINOP_INT_SHR, type, kind->slice, lss, rss, output);
     }
     UNREACHABLE;
 }

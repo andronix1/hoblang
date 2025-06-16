@@ -86,6 +86,10 @@ typedef struct {
 
 typedef enum {
     IR_BINOP_INT_MOD,
+    IR_BINOP_INT_BITOR,
+    IR_BINOP_INT_BITAND,
+    IR_BINOP_INT_SHR,
+    IR_BINOP_INT_SHL,
 } IrBinopIntKind;
 
 typedef struct {

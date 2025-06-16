@@ -156,6 +156,10 @@ static LLVMValueRef llvm_emit_expr_binop(LlvmModule *module, LlvmEmitStepRes *re
         case IR_BINOP_INT:
             switch (binop->integer.kind) {
                 case IR_BINOP_INT_MOD: return LLVMBuildURem(module->builder, ls, rs, "");
+                case IR_BINOP_INT_BITOR: return LLVMBuildOr(module->builder, ls, rs, "");
+                case IR_BINOP_INT_BITAND: return LLVMBuildAnd(module->builder, ls, rs, "");
+                case IR_BINOP_INT_SHR: return LLVMBuildLShr(module->builder, ls, rs, "");
+                case IR_BINOP_INT_SHL: return LLVMBuildShl(module->builder, ls, rs, "");
             }
             UNREACHABLE;
     }

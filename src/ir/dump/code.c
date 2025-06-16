@@ -62,6 +62,10 @@ static void ir_expr_dump(IrExpr *expr, FILE *stream, size_t tabs) {
                     case IR_BINOP_INT:
                         switch (step->binop.integer.kind) {
                             case IR_BINOP_INT_MOD: fprintf(stream, "%%"); break;
+                            case IR_BINOP_INT_BITOR: fprintf(stream, "|"); break;
+                            case IR_BINOP_INT_BITAND: fprintf(stream, "&"); break;
+                            case IR_BINOP_INT_SHR: fprintf(stream, ">>"); break;
+                            case IR_BINOP_INT_SHL: fprintf(stream, "<<"); break;
                         }
                         break;
                     case IR_BINOP_BOOL:
