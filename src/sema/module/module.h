@@ -9,7 +9,7 @@
 #include "sema/module/api/decl.h"
 #include "sema/module/api/type.h"
 #include "sema/module/api/decl.h"
-#include "sema/module/internal.h"
+#include "sema/module/std.h"
 #include "sema/module/scope.h"
 
 typedef struct SemaTypeInfo {
@@ -23,18 +23,22 @@ typedef struct SemaModule {
     AstNode **nodes;
     Ir *ir;
     SemaProject *project;
+    bool no_std;
 
     bool failed;
 
-    SemaInternalModuleInfo internal;
+    SemaStd std;
     SemaScopeStack *ss;
     SemaDecl **local_decls_map;
     SemaTypeInfo *types;
     bool *stage_failures;
 } SemaModule;
 
+Slice sema_module_internal_slice();
 void sema_module_err(SemaModule *module, Slice where, const char *fmt, ...);
+void sema_module_internal_err(SemaModule *module, const char *fmt, ...);
 void sema_module_link_project(SemaModule *module, SemaProject *project);
+void sema_module_make_no_std(SemaModule *module);
 Path sema_module_file_path(SemaModule *module);
 
 void sema_module_push_loop(SemaModule *module, SemaLoop loop);

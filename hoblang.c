@@ -15,7 +15,7 @@
 
 static SemaProject *cmd_sema_project(CmdSources *sources, Ir *ir) {
     SemaProject *project = sema_project_new(ir, "../libs");
-    sema_project_add_module(project, NULL, sources->entry);
+    sema_project_add_module(project, NULL, sources->entry, false);
     return project;
 }
 

@@ -1,16 +1,15 @@
-import def;
-import internal;
+import std;
 
 public type Fd = i32;
 
-extern fun Fd.write(self, ptr: *u8, size: def.Size);
+extern fun Fd.write(self, ptr: *u8, size: usize);
 
-public fun Fd.putStr(self, data: internal.Str) {
+public fun Fd.putString(self, data: string) {
     self.write(data.raw, data.length);
 }
 
 public fun Fd.putChar(self, char: u8) {
-    self.putStr(internal.string.new(&char, 1));
+    self.putString(std.str.new(&char, 1));
 }
 
 public const out: Fd = 1;

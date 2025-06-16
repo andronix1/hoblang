@@ -1,0 +1,9 @@
+public import "str.hob" as str;
+public import "slice.hob" as slice;
+public import "def.hob" as def;
+
+use str.{
+    Str as string,
+    new as newString
+};
+use def.Size as usize;

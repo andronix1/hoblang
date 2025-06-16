@@ -16,9 +16,10 @@ SemaModule *sema_module_new(Ir *ir, Parser *parser) {
     module->parser = parser;
     module->nodes = nodes;
     module->failed = false;
+    module->no_std = false;
     module->ss = NULL;
     module->mempool = mempool_new(1024);
-    module->internal = sema_internal_module_new();
+    module->std = sema_std_module_new();
     
     module->types = vec_new_in(module->mempool, SemaTypeInfo);
     module->local_decls_map = keymap_new_in(module->mempool, SemaDecl*);
@@ -35,7 +36,7 @@ void sema_module_run_stage(SemaModule *module, size_t stage_id) {
     for (size_t i = 0; i < vec_len(module->nodes); i++) {
         if (module->stage_failures[i]) continue;
         if (!sema_stages[stage_id](module, module->nodes[i])) {
-            module->stage_failures[stage_id] = true;
+            module->stage_failures[i] = true;
         }
     }
 }

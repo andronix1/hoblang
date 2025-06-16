@@ -1,4 +1,0 @@
-public import "string.hob" as string;
-public import "slice.hob" as slice;
-
-public use string.{ Str, new as _newStr };

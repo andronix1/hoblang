@@ -1,4 +1,4 @@
-import def;
+public import "def.hob" as def;
 
 public type Slice = struct {
     public raw: *u8,

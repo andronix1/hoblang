@@ -10,7 +10,7 @@ bool sema_module_stage_init_import(SemaModule *module, AstImport *import) {
     switch (import->kind) {
         case AST_IMPORT_MODULE: {
             SemaModule *imported = NOT_NULL(sema_project_add_module(module->project, sema_module_file_path(module),
-                mempool_slice_to_cstr(module->mempool, import->module.path)));
+                mempool_slice_to_cstr(module->mempool, import->module.path), module->no_std));
             if (!import->has_alias) {
                 sema_module_err(module, import->module.path_slice, "import alias must be specified for importing module");
                 return false;

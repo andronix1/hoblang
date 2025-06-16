@@ -24,7 +24,7 @@ SemaProject *sema_project_new(Ir *ir, const Path libraries_path) {
     return project;
 }
 
-SemaModule *sema_project_add_module(SemaProject *project, Path from, Path path) {
+inline SemaModule *sema_project_add_module(SemaProject *project, Path from, Path path, bool force_internal) {
     if (from) {
         path = path_join_in(project->mempool, path_dirname_in(project->mempool, from), path);
     }
@@ -47,14 +47,25 @@ SemaModule *sema_project_add_module(SemaProject *project, Path from, Path path) 
     SemaModule *new_module = sema_module_new(project->ir, parser_new(lexer_new(content)));
     keymap_insert(project->modules_map, path_slice, new_module);
     sema_module_link_project(new_module, project);
+    if (force_internal) {
+        sema_module_make_no_std(new_module);
+    }
     sema_module_setup(new_module);
     return new_module;
 }
 
-SemaModule *sema_project_add_library(SemaProject *project, Slice name) {
+static inline SemaModule *_sema_project_add_library(SemaProject *project, Slice name, bool force_internal) {
     Path dir = path_join_in(project->mempool, project->libraries_path, mempool_slice_to_cstr(project->mempool, name));
     Path entry = path_join_in(project->mempool, dir, "lib.hob");
-    return sema_project_add_module(project, NULL, entry);
+    return sema_project_add_module(project, NULL, entry, force_internal);
+}
+
+SemaModule *sema_project_add_library(SemaProject *project, Slice name) {
+    return _sema_project_add_library(project, name, false);
+}
+
+SemaModule *sema_project_add_internal_library(SemaProject *project, Slice name) {
+    return _sema_project_add_library(project, name, true);
 }
 
 void sema_project_emit(SemaProject *project) {

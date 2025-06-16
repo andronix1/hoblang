@@ -25,6 +25,10 @@ static inline const FileContent *sema_module_file_content(SemaModule *module) {
     return module->parser->lexer->content;
 }
 
+Slice sema_module_internal_slice() {
+    return slice_new(NULL, 0);
+}
+
 Path sema_module_file_path(SemaModule *module) {
     return sema_module_file_content(module)->path;
 }
@@ -33,15 +37,25 @@ void sema_module_err(SemaModule *module, Slice where, const char *fmt, ...) {
     module->failed = true;
     va_list list;
     va_start(list, fmt);
-    const FileContent *content = sema_module_file_content(module);
-    logs("$L: error: ", file_content_locate(content, where).begin);
-    logv(fmt, list);
-    logln("\n$V", file_content_get_in_lines_view(content, where));
+    if (where.value == NULL) {
+        logs("error: ");
+        logv(fmt, list);
+    } else {
+        const FileContent *content = sema_module_file_content(module);
+        logs("$L: error: ", file_content_locate(content, where).begin);
+        logv(fmt, list);
+        logln("\n$V", file_content_get_in_lines_view(content, where));
+    }
+    logs("\n");
     va_end(list);
 }
 
 void sema_module_link_project(SemaModule *module, SemaProject *project) {
     module->project = project;
+}
+
+void sema_module_make_no_std(SemaModule *module) {
+    module->no_std = true;
 }
 
 SemaDecl *sema_module_resolve_req_decl(SemaModule *module, Slice name) {
