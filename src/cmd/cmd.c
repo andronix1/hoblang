@@ -20,9 +20,17 @@ static inline char *args_take_req(Args *args, const char *what) {
     return result;
 }
 
-static inline void cmd_setup_build(Cmd *cmd, CmdBuildKind kind, char *output, char *entry) {
+static inline void cmd_setup_build_exe(Cmd *cmd, char *output, char *entry, bool run) {
     cmd->kind = CMD_BUILD;
-    cmd->build.kind = kind;
+    cmd->build.kind = CMD_BUILD_EXE;
+    cmd->build.output = output;
+    cmd->build.sources.entry = entry;
+    cmd->build.exe.run = run;
+}
+
+static inline void cmd_setup_build_obj(Cmd *cmd, char *output, char *entry) {
+    cmd->kind = CMD_BUILD;
+    cmd->build.kind = CMD_BUILD_OBJ;
     cmd->build.output = output;
     cmd->build.sources.entry = entry;
 }
@@ -52,14 +60,23 @@ Cmd *cmd_parse(Mempool *mempool, Args args) {
     if (!strcmp(name, "build-obj")) {
         char *input = NOT_NULL(args_take_req(&args, "entry file path"));
         char *output = NOT_NULL(args_take_req(&args, "output path"));
-        cmd_setup_build(cmd, CMD_BUILD_OBJ, output, input);
+        cmd_setup_build_obj(cmd, output, input);
         return cmd;
     }
 
     if (!strcmp(name, "build-exe")) {
         char *input = NOT_NULL(args_take_req(&args, "entry file path"));
         char *output = NOT_NULL(args_take_req(&args, "output path"));
-        cmd_setup_build(cmd, CMD_BUILD_EXE, output, input);
+        char *run_flag = args_take(&args);
+        bool run = false;
+        if (run_flag) {
+            if (!strcmp(run_flag, "--run")) {
+                run = true;
+            } else {
+                logln("unexpected arg `$s`", run_flag);
+            }
+        }
+        cmd_setup_build_exe(cmd, output, input, run);
         return cmd;
     }
 

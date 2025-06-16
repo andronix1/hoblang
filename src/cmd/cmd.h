@@ -15,6 +15,12 @@ typedef struct {
     CmdBuildKind kind;
     CmdSources sources;
     Path output;
+
+    union {
+        struct {
+            bool run;
+        } exe;
+    };
 } CmdBuild;
 
 typedef enum {

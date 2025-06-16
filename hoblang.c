@@ -64,6 +64,17 @@ static bool cmd_build(CmdBuild *build) {
             char **args = vec_create(temp_obj_path, "-o", build->output);
             result = process_run("/usr/bin/gcc", args, &status);
             vec_free(args);
+            if (status) {
+                logln("linker failed with status $l", status);
+                break;
+            }
+
+            if (build->exe.run) {
+                int status;
+                char **args = vec_new(char*);
+                result = process_run(build->output, args, &status);
+                vec_free(args);
+            }
             break;
         }
     }
