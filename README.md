@@ -1,4 +1,4 @@
-# hoblang - simple system language
+# hoblang - simple system programming language
 
 ## Getting started
 
@@ -53,4 +53,4 @@ Make sure, that you're running program in `build` directory (to be fixed :P)
 ./hoblang build-exe main.hob ./hello-world --run
 ```
 
-Now, you should see "hello, world" in console.
+Now, you should see "hello, world!" in console.
