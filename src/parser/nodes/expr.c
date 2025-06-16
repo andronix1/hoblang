@@ -52,6 +52,8 @@ static inline AstExpr *parse_expr_additions(Parser *parser, AstExpr *expr) {
     return expr;
 }
 
+static AstExpr *parse_middle_expr(Parser *parser);
+
 static inline AstExpr *_parse_middle_expr(Parser *parser) {
     Token token = parser_take(parser);
     switch (token.kind) {
@@ -66,11 +68,11 @@ static inline AstExpr *_parse_middle_expr(Parser *parser) {
             return ast_expr_new_path(parser->mempool, ast_path_slice(path), path);
         }
         case TOKEN_NOT: {
-            AstExpr *inner = NOT_NULL(_parse_middle_expr(parser));
+            AstExpr *inner = NOT_NULL(parse_middle_expr(parser));
             return ast_expr_new_not(parser->mempool, slice_union(token.slice, inner->slice), inner);
         }
         case TOKEN_BITAND: {
-            AstExpr *inner = NOT_NULL(_parse_middle_expr(parser));
+            AstExpr *inner = NOT_NULL(parse_middle_expr(parser));
             return ast_expr_new_take_ref(parser->mempool, slice_union(token.slice, inner->slice), inner);
         }
         case TOKEN_TRUE: return ast_expr_new_bool(parser->mempool, token.slice, true);
