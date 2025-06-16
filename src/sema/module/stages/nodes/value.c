@@ -1,5 +1,6 @@
 #include "value.h"
 #include "core/assert.h"
+#include "core/log.h"
 #include "core/null.h"
 #include "ir/api/ir.h"
 #include "sema/module/api/value.h"
@@ -32,14 +33,20 @@ static bool sema_module_emit_local_value(SemaModule *module, AstValueDecl *value
         case AST_VALUE_DECL_FINAL: {
             sema_ss_append_stmt(module->ss, ir_stmt_new_init_final(module->mempool, value_decl->sema.local_id,
                 sema_expr_output_collect(output)));
+            if (!output) {
+                sema_module_err(module, value_decl->info->name, "final value must be initialized!");
+                return false;
+            }
             return true;
         }
         case AST_VALUE_DECL_VAR: {
             sema_ss_append_stmt(module->ss, ir_stmt_new_decl_var(module->mempool, value_decl->sema.local_id));
-            sema_ss_append_stmt(module->ss, ir_stmt_new_store(module->mempool,
-                ir_expr_new(vec_create_in(module->mempool, ir_expr_step_new_get_local(value_decl->sema.local_id))),
-                sema_expr_output_collect(output)
-            ));
+            if (output) {
+                sema_ss_append_stmt(module->ss, ir_stmt_new_store(module->mempool,
+                    ir_expr_new(vec_create_in(module->mempool, ir_expr_step_new_get_local(value_decl->sema.local_id))),
+                    sema_expr_output_collect(output)
+                ));
+            }
             return true;
         }
         case AST_VALUE_DECL_CONST:
@@ -98,28 +105,43 @@ bool sema_module_stage_fill_value(SemaModule *module, AstValueDecl *value_decl) 
             sema_module_err(module, value_decl->info->name, "local value declaration cannot be global value");
             return false;
         }
+        if (value_decl->sema.type) {
+            IrLocalId local_id = value_decl->sema.local_id = ir_func_add_local(module->ir, module->ss->func_id,
+                ir_func_local_new(ast_value_kind_to_ir(info->kind), sema_type_ir_id(value_decl->sema.type)));
+            logln("$S", value_decl->info->name);
+            sema_module_push_decl(module, info->name, sema_decl_new(module->mempool, info->is_public ? NULL : module,
+                sema_value_new_runtime_local(module->mempool, ast_value_kind_to_sema(info->kind), value_decl->sema.type, local_id)));
+        }
         return true;
     }
 }
 
 bool sema_module_stage_emit_value(SemaModule *module, AstValueDecl *value_decl) {
-    if (!value_decl->initializer) return true;
     if (sema_module_is_global_scope(module) && value_decl->info->kind == AST_VALUE_DECL_CONST) return true;
-    SemaExprOutput output = sema_expr_output_new(module->mempool);
-    SemaValueRuntime *runtime = NOT_NULL(sema_value_decl_get_initializer(module, value_decl->sema.type, value_decl,
-        &output));
+
+    SemaExprOutput tmp_output;
+    SemaExprOutput *output = NULL;
+    SemaValueRuntime *runtime = NULL;
+    if (value_decl->initializer) {
+        tmp_output = sema_expr_output_new(module->mempool);
+        output = &tmp_output;
+        runtime = NOT_NULL(sema_value_decl_get_initializer(module, value_decl->sema.type, value_decl, output));
+    }
     if (sema_module_is_global_scope(module)) {
-        assert(value_decl->info->kind == AST_VALUE_DECL_VAR);
-        SemaConst *constant = NOT_NULL(sema_value_runtime_should_be_constant(module, value_decl->initializer->slice, runtime));
-        ir_set_var_initializer(module->ir, value_decl->sema.var_id, sema_const_to_ir(module->mempool, constant));
+        if (runtime) {
+            assert(value_decl->info->kind == AST_VALUE_DECL_VAR);
+            SemaConst *constant = NOT_NULL(sema_value_runtime_should_be_constant(module, value_decl->initializer->slice, runtime));
+            ir_set_var_initializer(module->ir, value_decl->sema.var_id, sema_const_to_ir(module->mempool, constant));
+        }
         return true;
     } else {
         AstValueInfo *info = value_decl->info;
-        IrLocalId local_id = ir_func_add_local(module->ir, module->ss->func_id,
-            ir_func_local_new(ast_value_kind_to_ir(info->kind), sema_type_ir_id(value_decl->sema.type)));
-        value_decl->sema.local_id = local_id;
-        sema_module_push_decl(module, info->name, sema_decl_new(module->mempool, info->is_public ? NULL : module,
-            sema_value_new_runtime_local(module->mempool, ast_value_kind_to_sema(info->kind), value_decl->sema.type, local_id)));
-        return sema_module_emit_local_value(module, value_decl, &output);
+        if (!value_decl->info->explicit_type) {
+            IrLocalId local_id = value_decl->sema.local_id = ir_func_add_local(module->ir, module->ss->func_id,
+                ir_func_local_new(ast_value_kind_to_ir(info->kind), sema_type_ir_id(value_decl->sema.type)));
+            sema_module_push_decl(module, info->name, sema_decl_new(module->mempool, info->is_public ? NULL : module,
+                sema_value_new_runtime_local(module->mempool, ast_value_kind_to_sema(info->kind), value_decl->sema.type, local_id)));
+        }
+        return sema_module_emit_local_value(module, value_decl, output);
     }
 }
