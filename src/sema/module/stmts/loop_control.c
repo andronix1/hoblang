@@ -12,12 +12,16 @@ static inline IrLoopId *sema_resolve_loop(SemaModule *module, AstLoopControl *co
 
 bool sema_module_emit_stmt_break(SemaModule *module, AstLoopControl *control) {
     IrLoopId id = *NOT_NULL(sema_resolve_loop(module, control));
+    sema_module_emit_defers_before_loop(module, id);
     sema_ss_append_stmt(module->ss, ir_stmt_new_break(module->mempool, id));
+    sema_module_scope_break(module);
     return true;
 }
 
 bool sema_module_emit_stmt_continue(SemaModule *module, AstLoopControl *control) {
     IrLoopId id = *NOT_NULL(sema_resolve_loop(module, control));
+    sema_module_emit_defers_before_loop(module, id);
     sema_ss_append_stmt(module->ss, ir_stmt_new_continue(module->mempool, id));
+    sema_module_scope_break(module);
     return true;
 }

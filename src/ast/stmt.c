@@ -55,6 +55,8 @@ bool ast_stmt_eq(const AstStmt *a, const AstStmt *b) {
             return loop_controls_eq(&a->continue_loop, &b->continue_loop);
         case AST_STMT_BREAK:
             return loop_controls_eq(&a->break_loop, &b->break_loop);
+        case AST_STMT_DEFER:
+            return ast_body_eq(a->defer_body, b->defer_body);
     }
     UNREACHABLE;
 }
@@ -64,6 +66,9 @@ AstStmt *ast_stmt_new_continue(Mempool *mempool, AstLoopControl control)
 
 AstStmt *ast_stmt_new_break(Mempool *mempool, AstLoopControl control)
     CONSTRUCT(AST_STMT_BREAK, out->break_loop = control;)
+
+AstStmt *ast_stmt_new_defer(Mempool *mempool, AstBody *body)
+    CONSTRUCT(AST_STMT_DEFER, out->defer_body = body;)
 
 AstStmt *ast_stmt_new_assign(Mempool *mempool, AstExpr *dst, AstExpr *what)
     CONSTRUCT(AST_STMT_ASSIGN,

@@ -13,6 +13,7 @@ typedef enum {
     AST_STMT_WHILE,
     AST_STMT_CONTINUE,
     AST_STMT_BREAK,
+    AST_STMT_DEFER,
 } AstStmtKind;
 
 typedef struct {
@@ -77,6 +78,7 @@ typedef struct AstStmt {
 
     union {
         AstExpr *expr;
+        AstBody *defer_body;
         AstReturn ret;
         AstAssign assign;
         AstIf if_else;
@@ -98,6 +100,7 @@ static inline AstCondBlock ast_cond_block_new(AstExpr *expr, AstBody *body) {
 
 AstStmt *ast_stmt_new_continue(Mempool *mempool, AstLoopControl control);
 AstStmt *ast_stmt_new_break(Mempool *mempool, AstLoopControl control);
+AstStmt *ast_stmt_new_defer(Mempool *mempool, AstBody *body);
 AstStmt *ast_stmt_new_expr(Mempool *mempool, AstExpr *expr);
 AstStmt *ast_stmt_new_assign(Mempool *mempool, AstExpr *dst, AstExpr *what);
 AstStmt *ast_stmt_new_short_assign(Mempool *mempool, AstExpr *dst, AstExpr *what, AstBinopKind binop);

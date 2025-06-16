@@ -232,6 +232,7 @@ static Token lexer_try_next(Lexer *lexer) {
                 else if (slice_eq(slice, slice_from_cstr("do"))) return token_simple(TOKEN_DO);
                 else if (slice_eq(slice, slice_from_cstr("use"))) return token_simple(TOKEN_USE);
                 else if (slice_eq(slice, slice_from_cstr("sizeof"))) return token_simple(TOKEN_SIZEOF);
+                else if (slice_eq(slice, slice_from_cstr("defer"))) return token_simple(TOKEN_DEFER);
                 else return token_simple(TOKEN_IDENT);
             }
             return token_simple(TOKEN_FAILED);

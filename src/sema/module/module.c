@@ -1,4 +1,5 @@
 #include "module.h"
+#include "core/assert.h"
 #include "core/file_content.h"
 #include "core/keymap.h"
 #include "core/log.h"
@@ -86,22 +87,13 @@ SemaDecl *sema_module_resolve_req_decl_from(SemaModule *module, SemaModule *from
     return sema_module_resolve_req_decl_from_at(module, from, name, name);
 }
 
-void sema_module_push_loop(SemaModule *module, SemaLoop loop) {
+void sema_module_push_scope(SemaModule *module, SemaLoop *loop) {
     assert(module->ss);
-    if (!sema_ss_try_push_loop(module->ss, loop)) {
-        assert(loop.is_labeled);
-        sema_module_err(module, loop.label, "labeled loop `$S` already exists", loop.label);
+    if (loop && loop->is_labeled && sema_ss_labeled_loop(module->ss, loop->label)) {
+        sema_module_err(module, loop->label, "labeled loop `$S` already exists", loop->label);
+        loop = NULL;
     }
-}
-
-void sema_module_pop_loop(SemaModule *module) {
-    assert(module->ss);
-    sema_ss_pop_loop(module->ss);
-}
-
-void sema_module_push_scope(SemaModule *module) {
-    assert(module->ss);
-    sema_ss_push_scope(module->ss, module->mempool);
+    sema_ss_push_scope(module->ss, loop, module->mempool);
 }
 
 void sema_module_pop_scope(SemaModule *module) {
@@ -141,6 +133,50 @@ void sema_module_push_decl(SemaModule *module, Slice name, SemaDecl *decl) {
         }
         sema_ss_push_decl(module, module->ss, name, decl);
     }
+}
+
+static inline void sema_module_emit_defers_before_opt_loop(SemaModule *module, IrLoopId *id) {
+    for (ssize_t i = (ssize_t)vec_len(module->ss->scopes) - 1; i >= 0; i--) {
+        SemaScope *scope = &module->ss->scopes[i];
+        for (ssize_t j = (ssize_t)vec_len(scope->defers) - 1; j >= 0; j--) {
+            sema_ss_append_body(module->ss, scope->defers[j]);
+        }
+        if (id && scope->loop && scope->loop->id == *id) {
+            return;
+        }
+    }
+    if (id) UNREACHABLE;
+}
+
+bool sema_module_scope_breaks(SemaModule *module) {
+    SemaScope *scope = vec_top(module->ss->scopes);
+    return scope->breaks;
+}
+
+void sema_module_scope_break(SemaModule *module) {
+    SemaScope *scope = vec_top(module->ss->scopes);
+    scope->breaks = true;
+}
+
+void sema_module_emit_defers_before_loop(SemaModule *module, IrLoopId id) {
+    return sema_module_emit_defers_before_opt_loop(module, &id);
+}
+
+void sema_module_emit_current_defers(SemaModule *module) {
+    assert(module->ss && vec_len(module->ss->scopes));
+    SemaScope *scope = vec_top(module->ss->scopes);
+    for (ssize_t i = (ssize_t)vec_len(scope->defers) - 1; i >= 0; i--) {
+        sema_ss_append_body(module->ss, scope->defers[i]);
+    }
+}
+
+void sema_module_emit_defers(SemaModule *module) {
+    return sema_module_emit_defers_before_opt_loop(module, NULL);
+}
+
+void sema_module_add_defer(SemaModule *module, IrCode *code) {
+    assert(module->ss);
+    sema_ss_push_defer(module->ss, code);
 }
 
 IrTypeId sema_module_get_type_id(SemaModule *module, SemaTypeId id) {

@@ -22,12 +22,12 @@ bool sema_module_emit_stmt_if(SemaModule *module, AstIf *if_else) {
         if (!sema_type_eq(boolean, runtime->type)) {
             sema_module_err(module, block->cond->slice, "only booleans can be used in if statement conditions, but $t passed", runtime->type);
         }
-        IrCode *body = NOT_NULL(sema_module_emit_code(module, block->body));
+        IrCode *body = NOT_NULL(sema_module_emit_code(module, block->body, NULL));
         conds[i] = ir_stmt_cond_jmp_block(sema_expr_output_collect(&output), body);
     }
     IrCode *else_body = NULL;
     if (if_else->else_body) {
-        else_body = NOT_NULL(sema_module_emit_code(module, if_else->else_body));
+        else_body = NOT_NULL(sema_module_emit_code(module, if_else->else_body, NULL));
     }
     sema_ss_append_stmt(module->ss, ir_stmt_new_cond_jmp(module->mempool, conds, else_body));
     return true;

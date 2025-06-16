@@ -18,6 +18,8 @@ bool sema_module_emit_stmt_return(SemaModule *module, AstReturn *ret) {
         sema_module_err(module, ret->value->slice, "expected to return $t, got $t", module->ss->returns, runtime->type);
         return false;
     }
+    sema_module_emit_defers(module);
     sema_ss_append_stmt(module->ss, ir_stmt_new_ret(module->mempool, ir_expr_new(output.steps)));
+    sema_module_scope_break(module);
     return true;
 }

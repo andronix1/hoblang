@@ -32,13 +32,15 @@ static inline SemaLoop sema_loop_new_labeled(IrLoopId id, Slice label) {
 }
 
 typedef struct {
+    SemaLoop *loop;
     SemaDecl **decls_map;
     IrStmt **stmts;
+    IrCode **defers;
+    bool breaks;
 } SemaScope;
 
 typedef struct SemaScopeStack {
     SemaScope *scopes;
-    SemaLoop *loops;
     IrFuncId func_id;
     SemaType *returns;
 } SemaScopeStack;
@@ -47,11 +49,11 @@ SemaScopeStack *sema_scope_stack_new(Mempool *mempool, IrFuncId func_id, SemaTyp
 
 IrLoopId *sema_ss_labeled_loop(SemaScopeStack *ss, Slice label);
 IrLoopId *sema_ss_top_loop(SemaScopeStack *ss);
-bool sema_ss_try_push_loop(SemaScopeStack *ss, SemaLoop loop);
-void sema_ss_pop_loop(SemaScopeStack *ss);
-void sema_ss_push_scope(SemaScopeStack *ss, Mempool *mempool);
+void sema_ss_push_defer(SemaScopeStack *ss, IrCode *code);
+void sema_ss_push_scope(SemaScopeStack *ss, SemaLoop *loop, Mempool *mempool);
 void sema_ss_pop_scope(SemaScopeStack *ss);
 void sema_ss_append_stmt(SemaScopeStack *ss, IrStmt *stmt);
+void sema_ss_append_body(SemaScopeStack *ss, IrCode *code);
 IrStmt **sema_ss_get_stmts(SemaScopeStack *ss);
 
 void sema_ss_push_decl(SemaModule *module, SemaScopeStack *ss, Slice name, SemaDecl *decl);

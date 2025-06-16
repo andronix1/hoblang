@@ -41,13 +41,21 @@ void sema_module_link_project(SemaModule *module, SemaProject *project);
 void sema_module_make_no_std(SemaModule *module);
 Path sema_module_file_path(SemaModule *module);
 
-void sema_module_push_loop(SemaModule *module, SemaLoop loop);
-void sema_module_pop_loop(SemaModule *module);
 SemaDecl *sema_module_resolve_req_decl(SemaModule *module, Slice name);
 SemaDecl *sema_module_resolve_req_decl_from(SemaModule *module, SemaModule *from, Slice name);
 SemaDecl *sema_module_resolve_req_decl_from_at(SemaModule *module, SemaModule *from, Slice at, Slice name);
 SemaScopeStack *sema_module_swap_ss(SemaModule *module, SemaScopeStack *new_ss);
-void sema_module_push_scope(SemaModule *module);
+
+void sema_module_add_defer(SemaModule *module, IrCode *code);
+void sema_module_scope_break(SemaModule *module);
+bool sema_module_scope_breaks(SemaModule *module);
+
+void sema_module_emit_defers(SemaModule *module);
+void sema_module_emit_current_defers(SemaModule *module);
+void sema_module_emit_defers_before_loop(SemaModule *module, IrLoopId id);
+
+void sema_module_push_scope_looped(SemaModule *module, SemaLoop *loop);
+void sema_module_push_scope(SemaModule *module, SemaLoop *loop);
 void sema_module_pop_scope(SemaModule *module);
 
 SemaTypeId sema_module_register_type_alias(SemaModule *module);

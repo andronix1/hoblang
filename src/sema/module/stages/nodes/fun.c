@@ -31,7 +31,7 @@ bool sema_module_stage_emit_fun(SemaModule *module, AstFunDecl *func) {
     SemaScopeStack *old_ss = sema_module_swap_ss(module,
         sema_scope_stack_new(module->mempool, func->sema.func_id, type->function.returns));
 
-    sema_module_push_scope(module);
+    sema_module_push_scope(module, NULL);
     if (func->info->ext.is) {
         sema_module_push_decl(module, func->info->ext.self_name,
             sema_decl_new(module->mempool, module, sema_value_new_runtime_local(
@@ -52,7 +52,7 @@ bool sema_module_stage_emit_fun(SemaModule *module, AstFunDecl *func) {
             )
         ));
     }
-    ir_init_func_body(module->ir, func->sema.func_id, sema_module_emit_code(module, func->body));
+    ir_init_func_body(module->ir, func->sema.func_id, sema_module_emit_code(module, func->body, NULL));
     sema_module_pop_scope(module);
 
     sema_module_swap_ss(module, old_ss);

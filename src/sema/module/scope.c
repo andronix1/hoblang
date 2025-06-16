@@ -12,20 +12,22 @@ SemaScopeStack *sema_scope_stack_new(Mempool *mempool, IrFuncId func_id, SemaTyp
         out->returns = returns;
         out->func_id = func_id;
         out->scopes = vec_new_in(mempool, SemaScope);
-        out->loops = vec_new_in(mempool, SemaLoop);
     )
 
-static inline SemaScope sema_scope_new(Mempool *mempool) {
+static inline SemaScope sema_scope_new(Mempool *mempool, SemaLoop *loop) {
     SemaScope scope = {
+        .loop = loop,
         .decls_map = keymap_new_in(mempool, SemaDecl*),
-        .stmts = vec_new_in(mempool, IrStmt*)
+        .stmts = vec_new_in(mempool, IrStmt*),
+        .defers = vec_new_in(mempool, IrCode*),
     };
     return scope;
 }
 
 IrLoopId *sema_ss_labeled_loop(SemaScopeStack *ss, Slice label) {
-    for (ssize_t i = (ssize_t)vec_len(ss->loops) - 1; i >= 0; i--) {
-        SemaLoop *loop = &ss->loops[i];
+    for (ssize_t i = (ssize_t)vec_len(ss->scopes) - 1; i >= 0; i--) {
+        SemaLoop *loop = ss->scopes[i].loop;
+        if (!loop) continue;
         if (loop->is_labeled && slice_eq(label, loop->label)) {
             return &loop->id;
         }
@@ -34,27 +36,15 @@ IrLoopId *sema_ss_labeled_loop(SemaScopeStack *ss, Slice label) {
 }
 
 IrLoopId *sema_ss_top_loop(SemaScopeStack *ss) {
-    if (vec_len(ss->loops) == 0) {
-        return NULL;
+    for (ssize_t i = (ssize_t)vec_len(ss->scopes) - 1; i >= 0; i--) {
+        SemaLoop *loop = ss->scopes[i].loop;
+        if (loop) return &loop->id;
     }
-    return &vec_top(ss->loops)->id;
+    return NULL;
 }
 
-bool sema_ss_try_push_loop(SemaScopeStack *ss, SemaLoop loop) {
-    if (loop.is_labeled && sema_ss_labeled_loop(ss, loop.label)) {
-        return false;
-    }
-    vec_push(ss->loops, loop);
-    return true;
-}
-
-void sema_ss_pop_loop(SemaScopeStack *ss) {
-    assert(vec_top(ss->loops));
-    vec_pop(ss->loops);
-}
-
-void sema_ss_push_scope(SemaScopeStack *ss, Mempool *mempool) {
-    vec_push(ss->scopes, sema_scope_new(mempool));
+void sema_ss_push_scope(SemaScopeStack *ss, SemaLoop *loop, Mempool *mempool) {
+    vec_push(ss->scopes, sema_scope_new(mempool, loop));
 }
 
 void sema_ss_pop_scope(SemaScopeStack *ss) {
@@ -77,6 +67,16 @@ void sema_ss_push_decl(SemaModule *module, SemaScopeStack *ss, Slice name, SemaD
     if (keymap_insert(top->decls_map, name, decl)) {
         sema_module_err(module, name, "`$S` already declared", name);
     }
+}
+
+void sema_ss_push_defer(SemaScopeStack *ss, IrCode *code) {
+    assert(vec_len(ss->scopes) > 0);
+    vec_push(vec_top(ss->scopes)->defers, code);
+}
+
+void sema_ss_append_body(SemaScopeStack *ss, IrCode *code) {
+    assert(vec_len(ss->scopes));
+    vec_extend(vec_top(ss->scopes)->stmts, code->stmts);
 }
 
 SemaDecl *sema_ss_resolve_decl(SemaScopeStack *ss, Slice name) {
