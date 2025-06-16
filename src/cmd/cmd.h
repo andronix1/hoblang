@@ -20,6 +20,10 @@ typedef struct {
 
     union {
         struct {
+            struct {
+                Slice *path;
+                Slice *flags;
+            } linker;
             bool run;
         } exe;
     };
@@ -52,12 +56,19 @@ typedef struct {
     };
 } Cmd;
 
-static inline void cmd_setup_build_exe(Cmd *cmd, char *output, CmdSources sources, bool run) {
+static inline void cmd_setup_build_exe(
+    Cmd *cmd,
+    char *output, CmdSources sources,
+    Slice *linker_path, Slice *linker_flags,
+    bool run
+) {
     cmd->kind = CMD_BUILD;
     cmd->build.kind = CMD_BUILD_EXE;
     cmd->build.output = output;
     cmd->build.sources = sources;
     cmd->build.exe.run = run;
+    cmd->build.exe.linker.path = linker_path;
+    cmd->build.exe.linker.flags = linker_flags;
 }
 
 static inline void cmd_setup_build_obj(Cmd *cmd, char *output, CmdSources sources) {

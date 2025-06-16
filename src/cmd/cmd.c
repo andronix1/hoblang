@@ -28,6 +28,25 @@ static inline bool raw_cmd_check_flag(RawCmd *cmd, const char *name, bool *outpu
     }
 }
 
+static inline bool raw_cmd_resolve_opt_value(RawCmd *cmd, const char *name, Slice **output) {
+    RawFlag *flag = keymap_get(cmd->flags_map, slice_from_cstr(name));
+    if (!flag) {
+        *output = NULL;
+        return true;
+    } else {
+        switch (flag->kind) {
+            case RAW_FLAG_EMPTY:
+            case RAW_FLAG_LIST:
+                logln("error: flag `$s` must be a value", name);
+                return false;
+            case RAW_FLAG_VALUE:
+                *output = &flag->value;
+                return true;
+        }
+        UNREACHABLE;
+    }
+}
+
 static inline Slice *raw_cmd_resolve_opt_list(Mempool *mempool, RawCmd *cmd, const char *name) {
     RawFlag *flag = keymap_get(cmd->flags_map, slice_from_cstr(name));
     if (!flag) {
@@ -92,9 +111,12 @@ Cmd *cmd_parse(Mempool *mempool, RawCmd *raw) {
         CmdSources sources;
         NOT_NULL(cmd_sources_parse(mempool, raw, &sources));
         char *output = NOT_NULL(raw_cmd_take_pos_req(raw, "output path"));
+        Slice *linker_path;
+        NOT_NULL(raw_cmd_resolve_opt_value(raw, "linker", &linker_path));
+        Slice *linker_flags = NOT_NULL(raw_cmd_resolve_opt_list(mempool, raw, "linkerFlags"));
         bool run;
         NOT_NULL(raw_cmd_check_flag(raw, "run", &run));
-        cmd_setup_build_exe(cmd, output, sources, run);
+        cmd_setup_build_exe(cmd, output, sources, linker_path, linker_flags, run);
         return cmd;
     }
     

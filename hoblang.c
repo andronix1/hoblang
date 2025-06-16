@@ -66,7 +66,14 @@ static bool cmd_build(Mempool *mempool, CmdBuild *build) {
         case CMD_BUILD_EXE: {
             int status;
             char **args = vec_create(temp_obj_path, "-o", build->output);
-            result = process_run("/usr/bin/gcc", args, &status);
+            for (size_t i = 0; i < vec_len(build->exe.linker.flags); i++) {
+                vec_push(args, mempool_slice_to_cstr(mempool, build->exe.linker.flags[i]));
+            }
+            result = process_run(
+                build->exe.linker.path ? mempool_slice_to_cstr(mempool, *build->exe.linker.path) : "/usr/bin/gcc",
+                args,
+                &status
+            );
             vec_free(args);
             if (status) {
                 logln("linker failed with status $l", status);
@@ -145,7 +152,7 @@ static bool cmd_emit(Mempool *mempool, CmdEmit *emit) {
     } while (0)
 
 static inline void cmd_help_sources() {
-    FLAG_VALUE("libDirs", "[lib1,lib2,...]", "add library search directories");
+    FLAG_VALUE("libDirs", "lib1,lib2,...", "add library search directories");
 }
 
 static bool cmd_help(char *exe) {
@@ -158,10 +165,12 @@ static bool cmd_help(char *exe) {
     });
     HELP_COMMAND("build-exe", "<entry> <output>", "emit executable", {
         cmd_help_sources();
+        FLAG_EMPTY("run", "run executable after successful build");
+        FLAG_VALUE("linker", "/path/to/linker", "specify linker path");
+        FLAG_VALUE("linkerFlags", "flag1,flag2,...", "specify additional flags for linker");
     });
     HELP_COMMAND("build-obj", "<entry> <output>", "emit executable", {
         cmd_help_sources();
-        FLAG_EMPTY("run", "run executable after successful build");
     });
     return true;
 }
