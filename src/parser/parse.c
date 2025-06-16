@@ -174,8 +174,15 @@ static AstNode *parser_next_full(Parser *parser, Token token) {
             PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
             return ast_node_new_stmt(parser->mempool, ast_stmt_new_return(parser->mempool, token.slice, value));
         }
-        case TOKEN_DEFER:
-            return ast_node_new_stmt(parser->mempool, ast_stmt_new_defer(parser->mempool, NOT_NULL(parse_body(parser))));
+        case TOKEN_DEFER: {
+            if (parser_next_is(parser, TOKEN_OPENING_FIGURE_BRACE)) {
+                return ast_node_new_stmt(parser->mempool, ast_stmt_new_defer_body(parser->mempool,
+                    NOT_NULL(parse_body(parser))));
+            }
+            AstExpr *expr = NOT_NULL(parse_expr(parser));
+            PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
+            return ast_node_new_stmt(parser->mempool, ast_stmt_new_defer_expr(parser->mempool, expr));
+        }
         case TOKEN_IF: return parse_if(parser);
         case TOKEN_WHILE: {
             bool labeled = parser_next_should_be(parser, TOKEN_DOT);

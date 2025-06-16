@@ -1,0 +1,34 @@
+#`
+    `defer` body executes when outer body finishes
+`#
+import io;
+
+global fun main() -> i32 {
+    # you can pass expression
+    defer io.out.putString("out of main second!\n");
+    # or body
+    defer {
+        io.out.putString("out of main first!\n");
+        io.out.putString("with body!\n");
+    }
+    if true {
+        defer io.out.putString("out of if!\n");
+        # if defer will be called
+    }
+    var i = 0;
+    while.outer i < 3 {
+        var j = 0;
+        defer io.out.putString("out of outer iteration!\n");
+        while j < 3 {
+            defer io.out.putString("out of inner iteration!\n");
+            j += 1;
+            i += 1;
+            # outer and inner iteration will be called
+            continue outer; 
+        }
+    }
+    defer io.out.putString("final!\n");
+    # all defers in this body (not nested) will be called
+    return 0;
+}
+

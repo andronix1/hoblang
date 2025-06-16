@@ -12,7 +12,7 @@
 bool sema_module_emit_stmt(SemaModule *module, AstStmt *stmt) {
     switch (stmt->kind) {
         case AST_STMT_EXPR: return sema_module_emit_stmt_expr(module, stmt->expr);
-        case AST_STMT_DEFER: return sema_module_emit_stmt_defer(module, stmt->defer_body);
+        case AST_STMT_DEFER: return sema_module_emit_stmt_defer(module, &stmt->defer);
         case AST_STMT_RETURN: return sema_module_emit_stmt_return(module, &stmt->ret);
         case AST_STMT_IF: return sema_module_emit_stmt_if(module, &stmt->if_else);
         case AST_STMT_ASSIGN: return sema_module_emit_stmt_assign(module, &stmt->assign);

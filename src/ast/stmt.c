@@ -56,7 +56,14 @@ bool ast_stmt_eq(const AstStmt *a, const AstStmt *b) {
         case AST_STMT_BREAK:
             return loop_controls_eq(&a->break_loop, &b->break_loop);
         case AST_STMT_DEFER:
-            return ast_body_eq(a->defer_body, b->defer_body);
+            if (a->defer.kind != b->defer.kind) {
+                return false;
+            }
+            switch (a->defer.kind) {
+                case AST_DEFER_BODY: return ast_body_eq(a->defer.body, b->defer.body);
+                case AST_DEFER_EXPR: return ast_expr_eq(a->defer.expr, b->defer.expr);
+            }
+            UNREACHABLE;
     }
     UNREACHABLE;
 }
@@ -67,8 +74,17 @@ AstStmt *ast_stmt_new_continue(Mempool *mempool, AstLoopControl control)
 AstStmt *ast_stmt_new_break(Mempool *mempool, AstLoopControl control)
     CONSTRUCT(AST_STMT_BREAK, out->break_loop = control;)
 
-AstStmt *ast_stmt_new_defer(Mempool *mempool, AstBody *body)
-    CONSTRUCT(AST_STMT_DEFER, out->defer_body = body;)
+AstStmt *ast_stmt_new_defer_expr(Mempool *mempool, AstExpr *expr)
+    CONSTRUCT(AST_STMT_DEFER,
+        out->defer.kind = AST_DEFER_EXPR;
+        out->defer.expr = expr;
+    )
+
+AstStmt *ast_stmt_new_defer_body(Mempool *mempool, AstBody *body)
+    CONSTRUCT(AST_STMT_DEFER,
+        out->defer.kind = AST_DEFER_BODY;
+        out->defer.body = body;
+    )
 
 AstStmt *ast_stmt_new_assign(Mempool *mempool, AstExpr *dst, AstExpr *what)
     CONSTRUCT(AST_STMT_ASSIGN,
