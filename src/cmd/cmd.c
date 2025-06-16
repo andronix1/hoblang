@@ -1,99 +1,103 @@
 #include "cmd.h"
+#include "core/assert.h"
 #include "core/log.h"
 #include "core/mempool.h"
 #include "core/null.h"
 #include <string.h>
 
-static inline char *args_take(Args *args) {
-    if (args->count <= 0) return NULL;
-    args->count--;
-    char *result = args->values[0];
-    args->values = &args->values[1];
-    return result;
-}
-
-static inline char *args_take_req(Args *args, const char *what) {
-    char *result = args_take(args);
+static inline char *raw_cmd_take_pos_req(RawCmd *cmd, char *name) {
+    char *result = raw_cmd_take_pos(cmd);
     if (!result) {
-        logln("error: missing required arg: $s", what);
+        logln("error: missing required positional argument: $s", name);
     }
     return result;
 }
 
-static inline void cmd_setup_build_exe(Cmd *cmd, char *output, char *entry, bool run) {
-    cmd->kind = CMD_BUILD;
-    cmd->build.kind = CMD_BUILD_EXE;
-    cmd->build.output = output;
-    cmd->build.sources.entry = entry;
-    cmd->build.exe.run = run;
+static inline bool raw_cmd_check_flag(RawCmd *cmd, const char *name, bool *output) {
+    RawFlag *flag = keymap_get(cmd->flags_map, slice_from_cstr(name));
+    if (!flag) {
+        *output = false;
+        return true;
+    } else {
+        if (flag->kind != RAW_FLAG_EMPTY) {
+            logln("error: flag `$s` must not have value attached", name);
+            return false;
+        }
+        *output = true;
+        return true;
+    }
 }
 
-static inline void cmd_setup_build_obj(Cmd *cmd, char *output, char *entry) {
-    cmd->kind = CMD_BUILD;
-    cmd->build.kind = CMD_BUILD_OBJ;
-    cmd->build.output = output;
-    cmd->build.sources.entry = entry;
+static inline Slice *raw_cmd_resolve_opt_list(Mempool *mempool, RawCmd *cmd, const char *name) {
+    RawFlag *flag = keymap_get(cmd->flags_map, slice_from_cstr(name));
+    if (!flag) {
+        return vec_new_in(mempool, Slice);
+    } else {
+        switch (flag->kind) {
+            case RAW_FLAG_EMPTY:
+                logln("error: flag `$s` must be a list", name);
+                return NULL;
+            case RAW_FLAG_VALUE:
+                return vec_create_in(mempool, flag->value);
+            case RAW_FLAG_LIST:
+                return flag->list;
+        }
+        UNREACHABLE;
+    }
 }
 
-static inline void cmd_setup_emit(Cmd *cmd, CmdEmitKind kind, char *output, char *entry) {
-    cmd->kind = CMD_EMIT;
-    cmd->emit.kind = kind;
-    cmd->emit.output = output;
-    cmd->emit.sources.entry = entry;
+static inline bool cmd_sources_parse(Mempool *mempool, RawCmd *raw, CmdSources *sources) {
+    sources->entry = NOT_NULL(raw_cmd_take_pos_req(raw, "entry file path"));
+    sources->additional_lib_dirs = NOT_NULL(raw_cmd_resolve_opt_list(mempool, raw, "libDir"));
+    return true;
 }
 
-static inline void cmd_setup_help(Cmd *cmd) {
-    cmd->kind = CMD_HELP;
-}
+Cmd *cmd_parse(Mempool *mempool, RawCmd *raw) {
+    assert(raw->exe);
 
-Cmd *cmd_parse(Mempool *mempool, Args args) {
     Cmd *cmd = mempool_alloc(mempool, Cmd);
     memset(cmd, 0, sizeof(Cmd));
-    cmd->executable = NOT_NULL(args_take_req(&args, "executable"));
+    cmd->executable = raw->exe;
     
-    char *name = args_take(&args);
-    if (!name || !strcmp(name, "help")) {
+    if (!raw->command) {
         cmd_setup_help(cmd);
         return cmd;
     }
 
-    if (!strcmp(name, "build-obj")) {
-        char *input = NOT_NULL(args_take_req(&args, "entry file path"));
-        char *output = NOT_NULL(args_take_req(&args, "output path"));
-        cmd_setup_build_obj(cmd, output, input);
+    if (!strcmp(raw->command, "emit-llvm")) {
+        CmdSources sources;
+        NOT_NULL(cmd_sources_parse(mempool, raw, &sources));
+        char *output = NOT_NULL(raw_cmd_take_pos_req(raw, "output path"));
+        cmd_setup_emit(cmd, CMD_EMIT_IR, output, sources);
         return cmd;
     }
 
-    if (!strcmp(name, "build-exe")) {
-        char *input = NOT_NULL(args_take_req(&args, "entry file path"));
-        char *output = NOT_NULL(args_take_req(&args, "output path"));
-        char *run_flag = args_take(&args);
-        bool run = false;
-        if (run_flag) {
-            if (!strcmp(run_flag, "--run")) {
-                run = true;
-            } else {
-                logln("unexpected arg `$s`", run_flag);
-            }
-        }
-        cmd_setup_build_exe(cmd, output, input, run);
+    if (!strcmp(raw->command, "emit-hir")) {
+        CmdSources sources;
+        NOT_NULL(cmd_sources_parse(mempool, raw, &sources));
+        char *output = NOT_NULL(raw_cmd_take_pos_req(raw, "output path"));
+        cmd_setup_emit(cmd, CMD_EMIT_HIR, output, sources);
         return cmd;
     }
 
-    if (!strcmp(name, "emit-hir")) {
-        char *input = NOT_NULL(args_take_req(&args, "input file path"));
-        char *output = NOT_NULL(args_take_req(&args, "output path"));
-        cmd_setup_emit(cmd, CMD_EMIT_HIR, output, input);
+    if (!strcmp(raw->command, "build-obj")) {
+        CmdSources sources;
+        NOT_NULL(cmd_sources_parse(mempool, raw, &sources));
+        char *output = NOT_NULL(raw_cmd_take_pos_req(raw, "output path"));
+        cmd_setup_build_obj(cmd, output, sources);
         return cmd;
     }
 
-    if (!strcmp(name, "emit-llvm")) {
-        char *input = NOT_NULL(args_take_req(&args, "input file path"));
-        char *output = NOT_NULL(args_take_req(&args, "output path"));
-        cmd_setup_emit(cmd, CMD_EMIT_IR, output, input);
+    if (!strcmp(raw->command, "build-exe")) {
+        CmdSources sources;
+        NOT_NULL(cmd_sources_parse(mempool, raw, &sources));
+        char *output = NOT_NULL(raw_cmd_take_pos_req(raw, "output path"));
+        bool run;
+        NOT_NULL(raw_cmd_check_flag(raw, "run", &run));
+        cmd_setup_build_exe(cmd, output, sources, run);
         return cmd;
     }
     
-    logln("unknown command `$s`", name);
+    logln("unknown command `$s`", raw->command);
     return NULL;
 }

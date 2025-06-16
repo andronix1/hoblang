@@ -73,6 +73,9 @@ static bool cmd_build(CmdBuild *build) {
                 int status;
                 char **args = vec_new(char*);
                 result = process_run(build->output, args, &status);
+                if (result && status) {
+                    logln("program failed with status $l", status);
+                }
                 vec_free(args);
             }
             break;
@@ -128,13 +131,34 @@ static bool cmd_emit(CmdEmit *emit) {
     UNREACHABLE;
 }
 
-static bool cmd_help() {
-    logs(
-        "hoblang emit-hir <entry> <output>  - emit hoblang IR\n"
-        "hoblang emit-llvm <entry> <output> - emit LLVM IR\n"
-        "hoblang build-exe <entry> <output> - build executable\n"
-        "hoblang build-obj <entry> <output> - build object file\n"
-    );
+#define FLAG_EMPTY(NAME, DESCRIPTION) logln("  --" NAME " - "DESCRIPTION)
+#define FLAG_VALUE(NAME, VALUE, DESCRIPTION) logln("  --" NAME "=" VALUE " - "DESCRIPTION)
+
+#define HELP_COMMAND(NAME, POS, DESCRIPTION, ARGS) do { \
+        logln("$s " NAME " "POS" - "DESCRIPTION, exe); \
+        ARGS; \
+        logln(""); \
+    } while (0)
+
+static inline void cmd_help_sources() {
+    FLAG_VALUE("libDirs", "[lib1,lib2,...]", "add library search directories");
+}
+
+static bool cmd_help(char *exe) {
+    HELP_COMMAND("help", "", "print help", {});
+    HELP_COMMAND("emit-hir", "<entry> <output>", "emit hoblang IR", {
+        cmd_help_sources();
+    });
+    HELP_COMMAND("emit-llvm", "<entry> <output>", "emit LLVM IR", {
+        cmd_help_sources();
+    });
+    HELP_COMMAND("build-exe", "<entry> <output>", "emit executable", {
+        cmd_help_sources();
+    });
+    HELP_COMMAND("build-obj", "<entry> <output>", "emit executable", {
+        cmd_help_sources();
+        FLAG_EMPTY("run", "run executable after successful build");
+    });
     return true;
 }
 
@@ -146,7 +170,7 @@ static bool cmd_version() {
 static bool cmd_exec(Cmd *cmd) {
     switch (cmd->kind) {
         case CMD_VERSION: return cmd_version();
-        case CMD_HELP: return cmd_help();
+        case CMD_HELP: return cmd_help(cmd->executable);
         case CMD_BUILD: return cmd_build(&cmd->build);
         case CMD_EMIT: return cmd_emit(&cmd->emit);
     }
@@ -158,9 +182,9 @@ int main(int argc, char **argv) {
 
     Mempool *mempool = mempool_new(256);
 
-    Cmd *cmd = cmd_parse(mempool, args_new(argc, argv));
+    Cmd *cmd = cmd_parse(mempool, raw_cmd_parse(mempool, raw_args_new(argc, argv)));
     if (!cmd) {
-        cmd_help();
+        cmd_help(cmd->executable);
         mempool_free(mempool);
         return 1;
     }

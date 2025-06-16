@@ -47,10 +47,10 @@ global fun main() -> i32 {
 ### Compiling first program
 
 You can compile code using hoblang compiler now.
-Make sure, that you're running programm in `build` directory (to be fixed :P)
+Make sure, that you're running program in `build` directory (to be fixed :P)
 
 ```bash
-./hoblang build-exe main.hob test
+./hoblang build-exe main.hob ./hello-world --run
 ```
 
-This is all! You can run `test` and see "hello, world!"
+Now, you should see "hello, world" in console.

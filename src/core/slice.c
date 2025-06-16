@@ -10,11 +10,38 @@ inline Slice slice_new(const char *value, size_t length) {
     return result;
 }
 
-Slice subslice(Slice source, size_t start, size_t end) {
+inline Slice subslice(Slice source, size_t start, size_t end) {
     assert(start <= end);
     source.length = end - start;
     source.value += start;
     return source;
+}
+
+inline Slice subslice_from(Slice slice, size_t start) {
+    assert(slice.length >= start);
+    slice.value = &slice.value[start];
+    slice.length -= start;
+    return slice;
+}
+
+SplitSlice slice_lsplit(Slice slice, char pattern) {
+    SplitSlice result = {
+        .found = false,
+        .left = slice
+    };
+    size_t idx = 0;
+    for (; idx < slice.length; idx++) {
+        if (slice.value[idx] == pattern) {
+            result.found = true;
+            break;
+        }
+    }
+    if (!result.found) {
+        return result;
+    }
+    result.left = subslice(slice, 0, idx);
+    result.right = subslice_from(slice, idx + 1);
+    return result;
 }
 
 Slice slice_from_cstr(const char *value) {
