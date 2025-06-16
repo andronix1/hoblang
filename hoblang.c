@@ -14,7 +14,7 @@
 #include "llvm/module/api.h"
 
 static SemaProject *cmd_sema_project(Mempool *mempool, CmdSources *sources, Ir *ir) {
-    Path *lib_dirs = vec_create_in(mempool, (char*)"../libs", "./libs");
+    Path *lib_dirs = vec_create_in(mempool, (char*)"../libs", "./libs", "/opt/hob/libs");
     for (size_t i = 0; i < vec_len(sources->additional_lib_dirs); i++) {
         vec_push(lib_dirs, mempool_slice_to_cstr(mempool, sources->additional_lib_dirs[i]));
     }
