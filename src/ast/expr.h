@@ -21,6 +21,7 @@ typedef enum {
     AST_EXPR_AS,
     AST_EXPR_TAKE_REF,
     AST_EXPR_NOT,
+    AST_EXPR_NEG,
     AST_EXPR_IDX,
     AST_EXPR_INNER_PATH,
 } AstExprKind;
@@ -94,6 +95,7 @@ typedef struct AstExpr {
         AstPath *path;
         AstExpr *scope;
         AstExpr *not_inner;
+        AstExpr *neg_inner;
         AstExpr *take_ref_inner;
         AstExprArray array;
         AstExprIdx idx;
@@ -131,6 +133,7 @@ AstExpr *ast_expr_new_array(Mempool *mempool, Slice slice, AstType *type, AstExp
 AstExpr *ast_expr_new_inner_path(Mempool *mempool, Slice slice, AstExpr *inner, AstPath *path);
 AstExpr *ast_expr_new_take_ref(Mempool *mempool, Slice slice, AstExpr *inner);
 AstExpr *ast_expr_new_not(Mempool *mempool, Slice slice, AstExpr *inner);
+AstExpr *ast_expr_new_neg(Mempool *mempool, Slice slice, AstExpr *inner);
 AstExpr *ast_expr_new_idx(Mempool *mempool, Slice slice, AstExpr *inner, AstExpr *idx);
 AstExpr *ast_expr_new_as(Mempool *mempool, Slice slice, Slice as_slice, AstExpr *inner, AstType *as);
 AstExpr *ast_expr_new_integer(Mempool *mempool, Slice slice, uint64_t integer);

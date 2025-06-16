@@ -57,16 +57,12 @@ bool ast_expr_eq(const AstExpr *a, const AstExpr *b) {
                 if (!ast_expr_eq(a->array.elements[i], b->array.elements[i])) return false;
             }
             return true;
-        case AST_EXPR_AS:
-            return ast_expr_eq(a->as.inner, b->as.inner) && ast_type_eq(a->as.type, b->as.type);
-        case AST_EXPR_IDX:
-            return ast_expr_eq(a->idx.inner, b->idx.inner) && ast_expr_eq(a->idx.idx, b->idx.idx);
-        case AST_EXPR_NOT:
-            return ast_expr_eq(a->not_inner, b->not_inner);
-        case AST_EXPR_TAKE_REF:
-            return ast_expr_eq(a->take_ref_inner, b->take_ref_inner);
-        case AST_EXPR_FLOAT:
-            return a->float_value == b->float_value;
+        case AST_EXPR_AS: return ast_expr_eq(a->as.inner, b->as.inner) && ast_type_eq(a->as.type, b->as.type);
+        case AST_EXPR_IDX: return ast_expr_eq(a->idx.inner, b->idx.inner) && ast_expr_eq(a->idx.idx, b->idx.idx);
+        case AST_EXPR_NOT: return ast_expr_eq(a->not_inner, b->not_inner);
+        case AST_EXPR_NEG: return ast_expr_eq(a->neg_inner, b->neg_inner);
+        case AST_EXPR_TAKE_REF: return ast_expr_eq(a->take_ref_inner, b->take_ref_inner);
+        case AST_EXPR_FLOAT: return a->float_value == b->float_value;
     }
     UNREACHABLE;
 }
@@ -97,6 +93,9 @@ AstExpr *ast_expr_new_idx(Mempool *mempool, Slice slice, AstExpr *inner, AstExpr
         out->idx.inner = inner;
         out->idx.idx = idx;
     )
+
+AstExpr *ast_expr_new_neg(Mempool *mempool, Slice slice, AstExpr *inner)
+    CONSTRUCT(AST_EXPR_NEG, out->neg_inner = inner)
 
 AstExpr *ast_expr_new_not(Mempool *mempool, Slice slice, AstExpr *inner)
     CONSTRUCT(AST_EXPR_NOT, out->not_inner = inner)

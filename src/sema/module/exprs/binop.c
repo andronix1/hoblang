@@ -9,7 +9,7 @@
 #include "sema/module/type.h"
 #include "sema/module/value.h"
 
-static inline bool sema_type_to_ir_number_info(SemaType *type, IrNumberInfo *output) {
+inline bool sema_type_to_ir_number_info(SemaType *type, IrNumberInfo *output) {
     if (type->kind == SEMA_TYPE_INT) {
         *output = ir_number_info_new_int(type->integer.is_signed, sema_type_int_size_to_ir(type->integer.size));
         return true;

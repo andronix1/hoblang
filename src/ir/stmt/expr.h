@@ -49,6 +49,7 @@ typedef enum {
     IR_EXPR_STEP_IDX_POINTER,
     IR_EXPR_STEP_STRING,
     IR_EXPR_STEP_SIZEOF,
+    IR_EXPR_STEP_NEG,
     /*
     SEMA_PATH_SEGMENT_DECL,
     SEMA_PATH_SEGMENT_DEREF,
@@ -87,6 +88,11 @@ typedef struct {
             IrTypeId value;
             IrTypeId idx;
         } idx_array;
+
+        struct {
+            IrNumberInfo info;
+            size_t step;
+        } neg;
 
         struct {
             IrTypeId of;
@@ -128,6 +134,17 @@ static inline IrExprStep ir_expr_step_new_sizeof(IrTypeId of, IrTypeId type) {
         .size = {
             .type = type,
             .of = of,
+        }
+    };
+    return step;
+}
+
+static inline IrExprStep ir_expr_step_new_neg(size_t step_id, IrNumberInfo info) {
+    IrExprStep step = {
+        .kind = IR_EXPR_STEP_NEG,
+        .neg = {
+            .step = step_id,
+            .info = info 
         }
     };
     return step;

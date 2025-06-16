@@ -123,6 +123,9 @@ static void ir_expr_dump(IrExpr *expr, FILE *stream, size_t tabs) {
             case IR_EXPR_STEP_IDX_POINTER:
                 fprintf(stream, "idx step%lu of pointer step%lu", step->idx_pointer.idx, step->idx_pointer.value);
                 break;
+            case IR_EXPR_STEP_NEG:
+                fprintf(stream, "neg of step%lu", step->neg.step);
+                break;
         }
         fprintf(stream, "\n");
     }

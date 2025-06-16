@@ -91,6 +91,7 @@ static inline IrTypeId ir_get_expr_step_type(IrStmtCtx *ctx, IrTypeId *types, Ir
             assert(type->kind == IR_TYPE_POINTER);
             return type->pointer_to;
         }
+        case IR_EXPR_STEP_NEG: return types[step->neg.step];
     }
     UNREACHABLE;
 }

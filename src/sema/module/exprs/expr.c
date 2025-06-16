@@ -14,6 +14,7 @@
 #include "sema/module/exprs/float.h"
 #include "sema/module/exprs/idx.h"
 #include "sema/module/exprs/int.h"
+#include "sema/module/exprs/neg.h"
 #include "sema/module/exprs/not.h"
 #include "sema/module/exprs/path.h"
 #include "sema/module/exprs/inner_path.h"
@@ -36,6 +37,7 @@ SemaValue *sema_module_emit_expr(SemaModule *module, AstExpr *expr, SemaExprCtx 
         case AST_EXPR_BINOP: return sema_module_emit_expr_binop(module, &expr->binop, ctx);
         case AST_EXPR_AS: return sema_module_emit_expr_as(module, &expr->as, ctx);
         case AST_EXPR_NOT: return sema_module_emit_expr_not(module, expr->not_inner, ctx);
+        case AST_EXPR_NEG: return sema_module_emit_expr_neg(module, expr->neg_inner, ctx);
         case AST_EXPR_TAKE_REF: return sema_module_emit_expr_take_ref(module, expr->not_inner, ctx);
         case AST_EXPR_INNER_PATH: return sema_module_emit_expr_inner_path(module, &expr->inner_path, ctx);
         case AST_EXPR_STRUCT: return sema_module_emit_expr_struct(module, &expr->structure, ctx);

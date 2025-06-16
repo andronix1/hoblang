@@ -14,7 +14,7 @@ public fun Fd.putInt32(self, value: i32) {
     var i = buffer.length;
     var isNegative = value < 0;
     if isNegative {
-        value = 0 - value;
+        value = -value;
     }
     do {
         i -= 1;

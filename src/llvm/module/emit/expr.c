@@ -296,6 +296,15 @@ static LlvmEmitStepRes llvm_emit_expr_step(
         case IR_EXPR_STEP_NOT:
             return llvm_emit_step_res_new(LLVMBuildNot(module->builder, llvm_get_res_value(module,
                 &results[step->not_step]), ""), true);
+        case IR_EXPR_STEP_NEG:
+            switch (step->neg.info.kind) {
+                case IR_NUMBER_INT:
+                case IR_NUMBER_UINT: return llvm_emit_step_res_new(LLVMBuildNeg(module->builder,
+                    llvm_get_res_value(module, &results[step->neg.step]), ""), true);
+                case IR_NUMBER_FLOAT: return llvm_emit_step_res_new(LLVMBuildFNeg(module->builder,
+                    llvm_get_res_value(module, &results[step->neg.step]), ""), true);
+            }
+            UNREACHABLE;
         case IR_EXPR_STEP_SIZEOF: {
             LLVMValueRef indices[] = {
                 LLVMConstInt(LLVMInt32TypeInContext(module->context), 1, false),

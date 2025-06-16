@@ -15,7 +15,7 @@ global fun main() -> i32 {
     }
 
     io.out.putString("putInt32: ");
-    io.out.putInt32(0 - 1234);
+    io.out.putInt32(-1234);
     io.out.putString(", ");
 
     io.out.putInt32(1234);
