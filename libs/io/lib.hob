@@ -3,9 +3,29 @@ import std;
 public type Fd = i32;
 
 extern fun Fd.write(self, ptr: *u8, size: usize);
+public extern fun Fd.close(self);
 
 public fun Fd.putString(self, data: string) {
     self.write(data.raw, data.length);
+}
+
+public fun Fd.putInt32(self, value: i32) {
+    var buffer: [11]u8;
+    var i = buffer.length;
+    var isNegative = value < 0;
+    if isNegative {
+        value = 0 - value;
+    }
+    do {
+        i -= 1;
+        buffer[i] = '0' + (value % 10) as u8;
+        value /= 10;
+    } while value > 0;
+    if isNegative {
+        i -= 1;
+        buffer[i] = '-';
+    }
+    self.putString(std.str.new(&buffer[i], buffer.length - i));
 }
 
 public fun Fd.putChar(self, char: u8) {
