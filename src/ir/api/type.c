@@ -38,6 +38,8 @@ bool ir_type_eq(const IrType *a, const IrType *b) {
                 }
             }
             return true;
+        case IR_TYPE_ARRAY:
+            return a->array.length == b->array.length && a->array.of == b->array.of;
     }
     UNREACHABLE;
 }

@@ -5,12 +5,14 @@
 #include "core/vec.h"
 #include "ir/stmt/expr.h"
 #include "sema/module/api/value.h"
+#include "sema/module/exprs/array.h"
 #include "sema/module/exprs/as.h"
 #include "sema/module/exprs/binop.h"
 #include "sema/module/exprs/bool.h"
 #include "sema/module/exprs/call.h"
 #include "sema/module/exprs/char.h"
 #include "sema/module/exprs/float.h"
+#include "sema/module/exprs/idx.h"
 #include "sema/module/exprs/int.h"
 #include "sema/module/exprs/not.h"
 #include "sema/module/exprs/path.h"
@@ -38,6 +40,8 @@ SemaValue *sema_module_emit_expr(SemaModule *module, AstExpr *expr, SemaExprCtx 
         case AST_EXPR_INNER_PATH: return sema_module_emit_expr_inner_path(module, &expr->inner_path, ctx);
         case AST_EXPR_STRUCT: return sema_module_emit_expr_struct(module, &expr->structure, ctx);
         case AST_EXPR_STRING: return sema_module_emit_expr_string(module, expr->slice, expr->string, ctx);
+        case AST_EXPR_ARRAY: return sema_module_emit_expr_array(module, &expr->array, ctx);
+        case AST_EXPR_IDX: return sema_module_emit_expr_idx(module, &expr->idx, ctx);
     }
     UNREACHABLE;
 }

@@ -17,9 +17,11 @@ typedef enum {
     AST_EXPR_SCOPE,
     AST_EXPR_BINOP,
     AST_EXPR_STRUCT,
+    AST_EXPR_ARRAY,
     AST_EXPR_AS,
     AST_EXPR_TAKE_REF,
     AST_EXPR_NOT,
+    AST_EXPR_IDX,
     AST_EXPR_INNER_PATH,
 } AstExprKind;
 
@@ -56,6 +58,11 @@ typedef struct {
 } AstAs;
 
 typedef struct {
+    AstType *type;
+    AstExpr **elements;
+} AstExprArray;
+
+typedef struct {
     AstBinopKind kind;
     AstExpr *left, *right;
 } AstBinop;
@@ -74,6 +81,11 @@ typedef struct {
     AstPath *path;
 } AstExprInnerPath;
 
+typedef struct {
+    AstExpr *inner;
+    AstExpr *idx;
+} AstExprIdx;
+
 typedef struct AstExpr {
     AstExprKind kind;
     Slice slice;
@@ -83,6 +95,8 @@ typedef struct AstExpr {
         AstExpr *scope;
         AstExpr *not_inner;
         AstExpr *take_ref_inner;
+        AstExprArray array;
+        AstExprIdx idx;
         AstExprInnerPath inner_path;
         uint64_t integer;
         long double float_value;
@@ -113,9 +127,11 @@ static inline AstBinopKind ast_binop_kind_new(AstBinopKindKind kind, Slice slice
 AstExpr *ast_expr_new_char(Mempool *mempool, Slice slice, char c);
 AstExpr *ast_expr_new_bool(Mempool *mempool, Slice slice, bool value);
 AstExpr *ast_expr_new_path(Mempool *mempool, Slice slice, AstPath *path);
+AstExpr *ast_expr_new_array(Mempool *mempool, Slice slice, AstType *type, AstExpr **elements);
 AstExpr *ast_expr_new_inner_path(Mempool *mempool, Slice slice, AstExpr *inner, AstPath *path);
 AstExpr *ast_expr_new_take_ref(Mempool *mempool, Slice slice, AstExpr *inner);
 AstExpr *ast_expr_new_not(Mempool *mempool, Slice slice, AstExpr *inner);
+AstExpr *ast_expr_new_idx(Mempool *mempool, Slice slice, AstExpr *inner, AstExpr *idx);
 AstExpr *ast_expr_new_as(Mempool *mempool, Slice slice, Slice as_slice, AstExpr *inner, AstType *as);
 AstExpr *ast_expr_new_integer(Mempool *mempool, Slice slice, uint64_t integer);
 AstExpr *ast_expr_new_float(Mempool *mempool, Slice slice, long double float_value);

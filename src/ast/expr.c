@@ -50,8 +50,17 @@ bool ast_expr_eq(const AstExpr *a, const AstExpr *b) {
                 if (!slice_eq(af->key, bf->key) || !ast_expr_eq(af->value.expr, bf->value.expr)) return false;
             }
             return true;
+        case AST_EXPR_ARRAY:
+            if (!ast_type_eq(a->array.type, b->array.type)) return false;
+            if (vec_len(a->array.elements) != vec_len(b->array.elements)) return false;
+            for (size_t i = 0; i < vec_len(a->array.elements); i++) {
+                if (!ast_expr_eq(a->array.elements[i], b->array.elements[i])) return false;
+            }
+            return true;
         case AST_EXPR_AS:
             return ast_expr_eq(a->as.inner, b->as.inner) && ast_type_eq(a->as.type, b->as.type);
+        case AST_EXPR_IDX:
+            return ast_expr_eq(a->idx.inner, b->idx.inner) && ast_expr_eq(a->idx.idx, b->idx.idx);
         case AST_EXPR_NOT:
             return ast_expr_eq(a->not_inner, b->not_inner);
         case AST_EXPR_TAKE_REF:
@@ -61,6 +70,12 @@ bool ast_expr_eq(const AstExpr *a, const AstExpr *b) {
     }
     UNREACHABLE;
 }
+
+AstExpr *ast_expr_new_array(Mempool *mempool, Slice slice, AstType *type, AstExpr **elements)
+    CONSTRUCT(AST_EXPR_ARRAY,
+        out->array.elements = elements;
+        out->array.type = type;
+    )
 
 AstExpr *ast_expr_new_bool(Mempool *mempool, Slice slice, bool boolean)
     CONSTRUCT(AST_EXPR_BOOL, out->boolean = boolean)
@@ -75,6 +90,12 @@ AstExpr *ast_expr_new_inner_path(Mempool *mempool, Slice slice, AstExpr *inner, 
     CONSTRUCT(AST_EXPR_INNER_PATH,
         out->inner_path.inner = inner;
         out->inner_path.path = path;
+    )
+
+AstExpr *ast_expr_new_idx(Mempool *mempool, Slice slice, AstExpr *inner, AstExpr *idx)
+    CONSTRUCT(AST_EXPR_IDX,
+        out->idx.inner = inner;
+        out->idx.idx = idx;
     )
 
 AstExpr *ast_expr_new_not(Mempool *mempool, Slice slice, AstExpr *inner)

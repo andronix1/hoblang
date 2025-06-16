@@ -18,6 +18,9 @@ IrTypeId *ir_type_depends_on(Mempool *mempool, IrType *type) {
         case IR_TYPE_STRUCT:
             vec_extend(list, type->structure.fields);
             break;
+        case IR_TYPE_ARRAY:
+            vec_push(list, type->array.of);
+            break;
     }
     return list;
 }

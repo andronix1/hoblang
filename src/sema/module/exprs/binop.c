@@ -114,6 +114,7 @@ static SemaValue *sema_binop_bool(
 }
 
 SemaValue *sema_module_append_expr_binop(SemaModule *module, SemaType *type, size_t lss, size_t rss, AstBinopKind *kind, SemaExprOutput *output) {
+    type = sema_type_resolve(type);
     switch (kind->kind) {
         case AST_BINOP_ADD: return sema_binop_arithm(module, IR_BINOP_ARITHM_ADD, kind->slice, type, lss, rss, output);
         case AST_BINOP_SUBTRACT: return sema_binop_arithm(module, IR_BINOP_ARITHM_SUB, kind->slice, type, lss, rss, output);

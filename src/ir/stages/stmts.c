@@ -77,6 +77,20 @@ static inline IrTypeId ir_get_expr_step_type(IrStmtCtx *ctx, IrTypeId *types, Ir
         case IR_EXPR_STEP_NOT:
             return ir_add_simple_type(ir, ir_type_new_bool());
         case IR_EXPR_STEP_SIZEOF: return step->size.type;
+        case IR_EXPR_STEP_BUILD_ARRAY:
+            return ir_add_simple_type(ir, ir_type_new_array(step->build_array.type, vec_len(step->build_array.elements)));
+        case IR_EXPR_STEP_IDX_ARRAY: {
+            IrTypeId source_id = ir_type_record_resolve_simple(ir, types[step->idx_array.value]);
+            IrType *type = &ir->types[source_id].simple;
+            assert(type->kind == IR_TYPE_ARRAY);
+            return type->array.of;
+        }
+        case IR_EXPR_STEP_IDX_POINTER: {
+            IrTypeId source_id = ir_type_record_resolve_simple(ir, types[step->idx_pointer.value]);
+            IrType *type = &ir->types[source_id].simple;
+            assert(type->kind == IR_TYPE_POINTER);
+            return type->pointer_to;
+        }
     }
     UNREACHABLE;
 }

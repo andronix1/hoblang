@@ -1,4 +1,5 @@
 #include "type.h"
+#include "ast/expr.h"
 #include "ast/path.h"
 #include "core/assert.h"
 #include "core/keymap.h"
@@ -42,9 +43,17 @@ bool ast_type_eq(const AstType *a, const AstType *b) {
             return true;
         }
         case AST_TYPE_POINTER: return ast_type_eq(a->pointer_to, b->pointer_to);
+        case AST_TYPE_ARRAY:
+            return ast_expr_eq(a->array.length, a->array.length) && ast_type_eq(a->array.type, b->array.type);
     }
     UNREACHABLE;
 }
+
+AstType *ast_type_new_array(Mempool *mempool, AstExpr *length, AstType *type)
+    CONSTRUCT(AST_TYPE_ARRAY,
+        out->array.length = length;
+        out->array.type = type;
+    )
 
 AstType *ast_type_new_struct(Mempool *mempool, AstStructField *fields_map)
     CONSTRUCT(AST_TYPE_STRUCT, out->structure.fields_map = fields_map;)

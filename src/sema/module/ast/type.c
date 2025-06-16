@@ -1,10 +1,14 @@
 #include "type.h"
+#include "ast/expr.h"
 #include "ast/type.h"
 #include "core/assert.h"
 #include "core/keymap.h"
 #include "core/null.h"
+#include "sema/module/api/type.h"
 #include "sema/module/api/value.h"
 #include "sema/module/ast/path.h"
+#include "sema/module/const.h"
+#include "sema/module/exprs/expr.h"
 #include "sema/module/module.h"
 #include "sema/module/type.h"
 
@@ -16,6 +20,18 @@ SemaType *sema_module_type(SemaModule *module, AstType *type) {
         }
         case AST_TYPE_POINTER:
             return sema_type_new_pointer(module, NOT_NULL(sema_module_type(module, type->pointer_to)));
+        case AST_TYPE_ARRAY: {
+            SemaType *of = NOT_NULL(sema_module_type(module, type->array.type));
+            SemaType *usize = sema_module_std_usize(module, type->array.type->slice);
+            SemaConst *constant = NOT_NULL(sema_value_runtime_should_be_constant(module, type->slice,
+                sema_module_emit_runtime_expr(module, type->array.length, sema_expr_ctx_new(NULL, usize))));
+            if (!sema_type_eq(constant->type, usize)) {
+                sema_module_err(module, type->array.length->slice, "array size must be usize");
+                return NULL;
+            }
+            assert(constant->kind == SEMA_CONST_INT);
+            return sema_type_new_array(module, constant->integer, of);
+        }
         case AST_TYPE_STRUCT: {
             SemaTypeStructField *fields = keymap_new_in(module->mempool, SemaTypeStructField);
             for (size_t i = 0; i < vec_len(type->structure.fields_map); i++) {

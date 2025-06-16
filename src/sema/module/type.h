@@ -33,6 +33,7 @@ typedef enum {
     SEMA_TYPE_FUNCTION,
     SEMA_TYPE_POINTER,
     SEMA_TYPE_STRUCTURE,
+    SEMA_TYPE_ARRAY,
     SEMA_TYPE_RECORD,
 } SemaTypeKind;
 
@@ -72,6 +73,11 @@ typedef struct SemaType {
             SemaType *returns;
         } function;
 
+        struct {
+            size_t length;
+            SemaType *of;
+        } array;
+
         SemaType *pointer_to;
 
         struct {
@@ -92,5 +98,6 @@ SemaType *sema_type_new_int(SemaModule *module, SemaTypeIntSize size, bool is_si
 SemaType *sema_type_new_float(SemaModule *module, SemaTypeFloatSize size);
 SemaType *sema_type_new_pointer(SemaModule *module, SemaType *pointer_to);
 SemaType *sema_type_new_function(SemaModule *module, SemaType **args, SemaType *returns);
+SemaType *sema_type_new_array(SemaModule *module, size_t length, SemaType *of);
 
 SemaType *sema_type_new_alias(Mempool *mempool, SemaType *type, SemaTypeAlias *alias);

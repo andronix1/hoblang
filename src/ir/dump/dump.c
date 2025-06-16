@@ -43,6 +43,7 @@ static void ir_dump_types(IrTypeInfo *types, FILE *stream) {
                         fprintf(stream, ") -> type%lu", type->function.returns);
                         break;
                     case IR_TYPE_POINTER: fprintf(stream, "pointer to type%lu", type->pointer_to); break;
+                    case IR_TYPE_ARRAY: fprintf(stream, "type%lu[%lu]", type->array.of, type->array.length); break;
                     case IR_TYPE_STRUCT:
                         fprintf(stream, "structure {");
                         for (size_t i = 0; i < vec_len(type->structure.fields); i++) {

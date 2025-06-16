@@ -11,6 +11,7 @@ typedef enum {
     IR_TYPE_FLOAT,
     IR_TYPE_FUNCTION,
     IR_TYPE_POINTER,
+    IR_TYPE_ARRAY,
     IR_TYPE_STRUCT,
 } IrTypeKind;
 
@@ -32,6 +33,11 @@ typedef struct {
 } IrTypeInt;
 
 typedef struct {
+    size_t length;
+    IrTypeId of;
+} IrTypeArray;
+
+typedef struct {
     IrTypeId *fields;
 } IrTypeStruct;
 
@@ -47,6 +53,7 @@ typedef struct IrType {
         IrTypeInt integer;
         IrTypeFloatSize float_size;
         IrTypeFunction function;
+        IrTypeArray array;
         IrTypeId pointer_to;
         IrTypeStruct structure;
     };
@@ -64,6 +71,17 @@ static inline IrType ir_type_new_pointer(IrTypeId id) {
         .kind = IR_TYPE_POINTER,
         .pointer_to = id
     };   
+    return type;
+}
+
+static inline IrType ir_type_new_array(IrTypeId of, size_t length) {
+    IrType type = {
+        .kind = IR_TYPE_ARRAY,
+        .array = {
+            .of = of,
+            .length = length,
+        }
+    };
     return type;
 }
 

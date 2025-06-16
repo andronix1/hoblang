@@ -52,6 +52,7 @@ static inline IrType sema_type_to_ir(SemaModule* module, SemaType *type) {
             }
             return ir_type_new_struct(fields);
         }
+        case SEMA_TYPE_ARRAY: return ir_type_new_array(sema_type_ir_id(type->array.of), type->array.length);
         case SEMA_TYPE_RECORD: TODO;
     }
     UNREACHABLE;
@@ -97,6 +98,12 @@ SemaType *sema_type_new_int(SemaModule *module, SemaTypeIntSize size, bool is_si
 
 SemaType *sema_type_new_float(SemaModule *module, SemaTypeFloatSize size)
     SEMA_TYPE_CONSTRUCT(SEMA_TYPE_FLOAT, out->float_size = size)
+
+SemaType *sema_type_new_array(SemaModule *module, size_t length, SemaType *of)
+    SEMA_TYPE_CONSTRUCT(SEMA_TYPE_ARRAY,
+        out->array.of = of;
+        out->array.length = length;
+    )
 
 SemaType *sema_type_new_pointer(SemaModule *module, SemaType *pointer_to)
     SEMA_TYPE_CONSTRUCT(SEMA_TYPE_POINTER, out->pointer_to = pointer_to)

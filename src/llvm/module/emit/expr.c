@@ -305,6 +305,40 @@ static LlvmEmitStepRes llvm_emit_expr_step(
             return llvm_emit_step_res_new(
                 LLVMBuildBitCast(module->builder, pointer, module->types[step->size.type], ""), true);
         }
+        case IR_EXPR_STEP_BUILD_ARRAY: {
+            LLVMTypeRef llvm_type = module->types[step->type];
+            LLVMValueRef result = llvm_alloca(module, llvm_type);
+            for (size_t i = 0; i < vec_len(step->build_array.elements); i++) {
+                LLVMValueRef value = llvm_get_res_value(module, &results[step->build_array.elements[i]]);
+                LLVMValueRef indices[] = {
+                    LLVMConstInt(LLVMInt32TypeInContext(module->context), 0, false),
+                    LLVMConstInt(LLVMInt32TypeInContext(module->context), i, false),
+                };
+                LLVMValueRef field = LLVMBuildGEP2(module->builder, llvm_type, result, indices, 2, "");
+                LLVMBuildStore(module->builder, value, field);
+            }
+            return llvm_emit_step_res_new(LLVMBuildLoad2(module->builder, llvm_type, result, ""), true);
+        }
+        case IR_EXPR_STEP_IDX_ARRAY: {
+            LlvmEmitStepRes *res = &results[step->idx_array.value];
+            if (res->loaded) {
+                return llvm_emit_step_res_new(LLVMBuildExtractValue(module->builder, res->value,
+                    step->idx_array.idx, ""), true);
+            } else {
+                LLVMTypeRef type = module->types[steps[step->idx_array.value].type];
+                LLVMValueRef indices[] = {
+                    LLVMConstInt(LLVMInt32Type(), 0, false),
+                    llvm_get_res_value(module, &results[step->idx_array.idx])
+                };
+                return llvm_emit_step_res_new(LLVMBuildGEP2(module->builder, type, res->value, indices, 2, ""), false);
+            }
+        }
+        case IR_EXPR_STEP_IDX_POINTER: {
+            LLVMTypeRef type = module->types[step->type];
+            LLVMValueRef pointer = llvm_get_res_value(module, &results[step->ref_step]);
+            LLVMValueRef indices[] = { LLVMConstInt(LLVMInt32Type(), step->idx_array.idx, false) };
+            return llvm_emit_step_res_new(LLVMBuildGEP2(module->builder, type, pointer, indices, 1, ""), false);
+        }
     }
     UNREACHABLE;
 }

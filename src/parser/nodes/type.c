@@ -4,6 +4,7 @@
 #include "core/mempool.h"
 #include "core/null.h"
 #include "lexer/token.h"
+#include "parser/nodes/expr.h"
 #include "parser/nodes/path.h"
 #include "parser/parser.h"
 
@@ -23,6 +24,11 @@ AstType *parse_type(Parser *parser) {
                 if (!parser_check_list_sep(parser, TOKEN_CLOSING_FIGURE_BRACE)) return NULL;
             }
             return ast_type_new_struct(parser->mempool, fields);
+        }
+        case TOKEN_OPENING_SQUARE_BRACE: {
+            AstExpr *length = NOT_NULL(parse_expr(parser));
+            PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_SQUARE_BRACE);
+            return ast_type_new_array(parser->mempool, length, NOT_NULL(parse_type(parser)));
         }
         case TOKEN_IDENT:
             parser_skip_next(parser);

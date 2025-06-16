@@ -44,6 +44,9 @@ typedef enum {
     IR_EXPR_STEP_CAST_INT,
     IR_EXPR_STEP_NOT,
     IR_EXPR_STEP_BUILD_STRUCT,
+    IR_EXPR_STEP_BUILD_ARRAY,
+    IR_EXPR_STEP_IDX_ARRAY,
+    IR_EXPR_STEP_IDX_POINTER,
     IR_EXPR_STEP_STRING,
     IR_EXPR_STEP_SIZEOF,
     /*
@@ -67,8 +70,24 @@ typedef struct {
             size_t step;
         } struct_field;
 
+        struct {
+            size_t *elements;
+            IrTypeId type;
+        } build_array;
+
         IrLocalId local_id;
         IrDeclId decl_id;
+
+        struct {
+            IrTypeId value;
+            IrTypeId idx;
+        } idx_pointer;
+
+        struct {
+            IrTypeId value;
+            IrTypeId idx;
+        } idx_array;
+
         struct {
             IrTypeId of;
             IrTypeId type;
@@ -114,10 +133,43 @@ static inline IrExprStep ir_expr_step_new_sizeof(IrTypeId of, IrTypeId type) {
     return step;
 }
 
+static inline IrExprStep ir_expr_step_new_idx_pointer(size_t value, size_t idx) {
+    IrExprStep step = {
+        .kind = IR_EXPR_STEP_IDX_POINTER,
+        .idx_pointer = {
+            .value = value,
+            .idx = idx
+        }
+    };
+    return step;
+}
+
+static inline IrExprStep ir_expr_step_new_idx_array(size_t value, size_t idx) {
+    IrExprStep step = {
+        .kind = IR_EXPR_STEP_IDX_ARRAY,
+        .idx_array = {
+            .value = value,
+            .idx = idx
+        }
+    };
+    return step;
+}
+
 static inline IrExprStep ir_expr_step_new_not(size_t step_id) {
     IrExprStep step = {
         .kind = IR_EXPR_STEP_NOT,
         .not_step = step_id
+    };
+    return step;
+}
+
+static inline IrExprStep ir_expr_step_new_array(IrTypeId type, size_t *elements) {
+    IrExprStep step = {
+        .kind = IR_EXPR_STEP_BUILD_ARRAY,
+        .build_array = {
+            .elements = elements,
+            .type = type
+        }
     };
     return step;
 }

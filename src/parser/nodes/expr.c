@@ -21,6 +21,12 @@ static inline AstExpr *parse_expr_additions(Parser *parser, AstExpr *expr) {
     while (reading) {
         Token token = parser_take(parser);
         switch (token.kind) {
+            case TOKEN_OPENING_SQUARE_BRACE: {
+                AstExpr *idx = NOT_NULL(parse_expr(parser));
+                Slice slice = PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_SQUARE_BRACE).slice;
+                expr = ast_expr_new_idx(parser->mempool, slice_union(expr->slice, slice), expr, idx);
+                break;
+            }
             case TOKEN_OPENING_CIRCLE_BRACE: {
                 AstExpr **args = vec_new_in(parser->mempool, AstExpr*);
                 while (parser_next_is_not(parser, TOKEN_CLOSING_CIRCLE_BRACE)) {
@@ -105,8 +111,17 @@ static inline AstExpr *_parse_middle_expr(Parser *parser) {
                     return ast_expr_new_struct(parser->mempool,
                         slice_union(token.slice, closing.slice), type, fields_map);
                 }
+                case TOKEN_OPENING_SQUARE_BRACE: {
+                    AstExpr **elements = vec_new_in(parser->mempool, AstExpr*);
+                    while (parser_next_is_not(parser, TOKEN_CLOSING_SQUARE_BRACE)) {
+                        vec_push(elements, NOT_NULL(parse_expr(parser)));
+                        if (!parser_check_list_sep(parser, TOKEN_CLOSING_SQUARE_BRACE)) return false;
+                    }
+                    Token closing = PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_SQUARE_BRACE);
+                    return ast_expr_new_array(parser->mempool, slice_union(token.slice, closing.slice), type, elements);
+                }
                 default:
-                    parser_err(parser, begin_token.slice, "expected `{`");
+                    parser_err(parser, begin_token.slice, "expected `{` or `[`");
                     return NULL;
             }
             return ast_expr_new_integer(parser->mempool, token.slice, token.integer);

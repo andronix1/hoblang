@@ -47,6 +47,7 @@ static LLVMTypeRef _llvm_ir_type(LlvmModule *module, IrType *type) {
                 types, count, false);
         }
         case IR_TYPE_POINTER: return LLVMPointerTypeInContext(module->context, 0);
+        case IR_TYPE_ARRAY: return LLVMArrayType2(llvm_ir_type(module, type->array.of), type->array.length);
         case IR_TYPE_STRUCT: {
             size_t count = vec_len(type->structure.fields);
             LLVMTypeRef *types = alloca(sizeof(LLVMTypeRef) * count);

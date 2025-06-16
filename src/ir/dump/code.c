@@ -107,8 +107,21 @@ static void ir_expr_dump(IrExpr *expr, FILE *stream, size_t tabs) {
                 }
                 fprintf(stream, "}");
                 break;
+            case IR_EXPR_STEP_BUILD_ARRAY:
+                fprintf(stream, "type%lu [ ", step->build_array.type);
+                for (size_t i = 0; i < vec_len(step->build_array.elements); i++) {
+                    fprintf(stream, i == 0 ? "step%lu" : ", step%lu", step->build_array.elements[i]);
+                }
+                fprintf(stream, "]");
+                break;
             case IR_EXPR_STEP_SIZEOF:
                 fprintf(stream, "size of type type%lu of type%lu", step->size.of, step->size.type);
+                break;
+            case IR_EXPR_STEP_IDX_ARRAY:
+                fprintf(stream, "idx step%lu of array step%lu", step->idx_array.idx, step->idx_array.value);
+                break;
+            case IR_EXPR_STEP_IDX_POINTER:
+                fprintf(stream, "idx step%lu of pointer step%lu", step->idx_pointer.idx, step->idx_pointer.value);
                 break;
         }
         fprintf(stream, "\n");
