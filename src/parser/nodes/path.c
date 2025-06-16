@@ -16,6 +16,7 @@ AstPath *parse_path(Parser *parser) {
         switch (token.kind) {
             case TOKEN_IDENT: vec_push(segments, ast_path_segment_new_ident(token.slice)); break;
             case TOKEN_STAR: vec_push(segments, ast_path_segment_new_deref(token.slice)); break;
+            case TOKEN_SIZEOF: vec_push(segments, ast_path_segment_new_sizeof(token.slice)); break;
             case TOKEN_OPENING_ANGLE_BRACE: {
                 AstType **params = vec_new_in(parser->mempool, AstType*);
                 Slice slice = token.slice;

@@ -296,6 +296,15 @@ static LlvmEmitStepRes llvm_emit_expr_step(
         case IR_EXPR_STEP_NOT:
             return llvm_emit_step_res_new(LLVMBuildNot(module->builder, llvm_get_res_value(module,
                 &results[step->not_step]), ""), true);
+        case IR_EXPR_STEP_SIZEOF: {
+            LLVMValueRef indices[] = {
+                LLVMConstInt(LLVMInt32TypeInContext(module->context), 1, false),
+            };
+            LLVMValueRef pointer = LLVMBuildGEP2(module->builder, module->types[step->size.of],
+                LLVMConstPointerNull(LLVMPointerTypeInContext(module->context, 0)), indices, 1, "");
+            return llvm_emit_step_res_new(
+                LLVMBuildBitCast(module->builder, pointer, module->types[step->size.type], ""), true);
+        }
     }
     UNREACHABLE;
 }

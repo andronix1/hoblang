@@ -8,6 +8,7 @@
 #include "sema/module/ast/path.h"
 #include "sema/module/decl.h"
 #include "sema/module/exprs/expr.h"
+#include "sema/module/std.h"
 #include "sema/module/type.h"
 #include "sema/module/module.h"
 #include "sema/module/value.h"
@@ -65,6 +66,24 @@ SemaValue *sema_module_emit_expr_path_from(SemaModule *module, SemaValue *value,
             case AST_PATH_SEGMENT_DEREF:
                 value = NOT_NULL(sema_module_analyze_expr_path_deref(module, value, segment->slice, ctx.output));
                 break;
+            case AST_PATH_SEGMENT_SIZEOF: {
+                SemaType *type = sema_value_is_type(value);
+                if (!type) {
+                    SemaValueRuntime *runtime = sema_value_is_runtime(value);
+                    if (runtime) {
+                        type = runtime->type;
+                    }
+                }
+                if (!type) {
+                    sema_module_err(module, segment->slice, "cannot get size of $v", value);
+                    return NULL;
+                }
+                SemaType *usize = sema_module_std_usize(module, segment->slice);
+                size_t step_id = sema_expr_output_push_step(ctx.output, ir_expr_step_new_sizeof(
+                    sema_type_ir_id(type), sema_type_ir_id(usize)));
+                value = sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, usize, step_id);
+                break;
+            }
             case AST_PATH_SEGMENT_GENERIC_BUILD:
                 TODO;
         }

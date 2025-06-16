@@ -76,6 +76,7 @@ static inline IrTypeId ir_get_expr_step_type(IrStmtCtx *ctx, IrTypeId *types, Ir
         case IR_EXPR_STEP_BOOL_SKIP:
         case IR_EXPR_STEP_NOT:
             return ir_add_simple_type(ir, ir_type_new_bool());
+        case IR_EXPR_STEP_SIZEOF: return step->size.type;
     }
     UNREACHABLE;
 }

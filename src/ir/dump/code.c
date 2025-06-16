@@ -107,6 +107,9 @@ static void ir_expr_dump(IrExpr *expr, FILE *stream, size_t tabs) {
                 }
                 fprintf(stream, "}");
                 break;
+            case IR_EXPR_STEP_SIZEOF:
+                fprintf(stream, "size of type type%lu of type%lu", step->size.of, step->size.type);
+                break;
         }
         fprintf(stream, "\n");
     }

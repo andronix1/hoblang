@@ -45,6 +45,7 @@ typedef enum {
     IR_EXPR_STEP_NOT,
     IR_EXPR_STEP_BUILD_STRUCT,
     IR_EXPR_STEP_STRING,
+    IR_EXPR_STEP_SIZEOF,
     /*
     SEMA_PATH_SEGMENT_DECL,
     SEMA_PATH_SEGMENT_DEREF,
@@ -68,6 +69,10 @@ typedef struct {
 
         IrLocalId local_id;
         IrDeclId decl_id;
+        struct {
+            IrTypeId of;
+            IrTypeId type;
+        } size;
 
         Slice string;
 
@@ -97,6 +102,17 @@ typedef struct {
         size_t not_step;
     };
 } IrExprStep;
+
+static inline IrExprStep ir_expr_step_new_sizeof(IrTypeId of, IrTypeId type) {
+    IrExprStep step = {
+        .kind = IR_EXPR_STEP_SIZEOF,
+        .size = {
+            .type = type,
+            .of = of,
+        }
+    };
+    return step;
+}
 
 static inline IrExprStep ir_expr_step_new_not(size_t step_id) {
     IrExprStep step = {
