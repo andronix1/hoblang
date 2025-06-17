@@ -19,6 +19,16 @@ static LLVMTypeRef llvm_ir_type(LlvmModule *module, IrTypeId id) {
     UNREACHABLE;
 }
 
+LLVMTypeRef llvm_function_type(LlvmModule *module, IrTypeId type_id) {
+    IrType *type = &module->ir->types[ir_type_record_resolve_simple(module->ir, type_id)].simple;
+    size_t count = vec_len(type->function.args);
+    LLVMTypeRef *types = alloca(sizeof(LLVMTypeRef) * count);
+    for (size_t i = 0; i < count; i++) {
+        types[i] = llvm_ir_type(module, type->function.args[i]);
+    }
+    return LLVMFunctionType(llvm_ir_type(module, type->function.returns), types, count, false);
+}
+
 static LLVMTypeRef _llvm_ir_type(LlvmModule *module, IrType *type) {
     switch (type->kind) {
         case IR_TYPE_VOID: return LLVMVoidTypeInContext(module->context);
@@ -37,16 +47,9 @@ static LLVMTypeRef _llvm_ir_type(LlvmModule *module, IrType *type) {
                 case IR_TYPE_FLOAT_64: return LLVMDoubleTypeInContext(module->context);
             }
             UNREACHABLE;
-        case IR_TYPE_FUNCTION: {
-            size_t count = vec_len(type->function.args);
-            LLVMTypeRef *types = alloca(sizeof(LLVMTypeRef) * count);
-            for (size_t i = 0; i < count; i++) {
-                types[i] = llvm_ir_type(module, type->function.args[i]);
-            }
-            return LLVMFunctionType(llvm_ir_type(module, type->function.returns),
-                types, count, false);
-        }
-        case IR_TYPE_POINTER: return LLVMPointerTypeInContext(module->context, 0);
+        case IR_TYPE_FUNCTION: 
+        case IR_TYPE_POINTER:
+            return LLVMPointerTypeInContext(module->context, 0);
         case IR_TYPE_ARRAY: return LLVMArrayType2(llvm_ir_type(module, type->array.of), type->array.length);
         case IR_TYPE_STRUCT: {
             size_t count = vec_len(type->structure.fields);

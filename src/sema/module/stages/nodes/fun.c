@@ -1,5 +1,6 @@
 #include "fun.h"
 #include "core/null.h"
+#include "sema/module/const.h"
 #include "sema/module/decl.h"
 #include "sema/module/stages/nodes/fun_info.h"
 #include "sema/module/module.h"
@@ -17,7 +18,7 @@ bool sema_module_stage_fill_fun(SemaModule *module, AstFunDecl *fun_decl) {
     IrDeclId decl_id = ir_add_decl(module->ir);
     sema_module_push_fun_info_decl(module, fun_decl->info, sema_decl_new(module->mempool,
         fun_decl->info->is_public ? NULL : module,
-        sema_value_new_runtime_global(module->mempool, SEMA_RUNTIME_FINAL, type, decl_id)));
+        sema_value_new_runtime_const(module->mempool, sema_const_new_func(module->mempool, type, decl_id))));
     IrTypeId type_id = sema_type_ir_id(type);
     fun_decl->sema.func_id = ir_init_func(module->ir, args_mut, decl_id, fun_decl->global ? 
         ir_func_new_global(fun_decl->global->has_alias ? fun_decl->global->alias : fun_decl->info->name, type_id) :

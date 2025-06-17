@@ -79,7 +79,14 @@ bool sema_module_stage_fill_value(SemaModule *module, AstValueDecl *value_decl) 
     value_decl->sema.type = type;
     if (sema_module_is_global_scope(module)) {
         if (value_decl->info->kind == AST_VALUE_DECL_VAR) {
+            if (!type) {
+                sema_module_err(module, value_decl->info->name, "global variable type must be specified");
+                return false;
+            }
             value_decl->sema.decl_id = ir_add_decl(module->ir);
+            sema_module_push_decl(module, value_decl->info->name, sema_decl_new(module->mempool,
+                value_decl->info->is_public ? NULL : module, sema_value_new_runtime_global(module->mempool, 
+                    SEMA_RUNTIME_VAR, value_decl->sema.type, value_decl->sema.decl_id)));
             return true;
         } else if (value_decl->info->kind == AST_VALUE_DECL_CONST) {
             SemaValueRuntime *runtime = NOT_NULL(sema_value_decl_get_initializer(module, type, value_decl, NULL));
@@ -126,9 +133,6 @@ bool sema_module_stage_emit_value(SemaModule *module, AstValueDecl *value_decl) 
             IrVarId var_id = ir_init_var(module->ir, value_decl->sema.decl_id,
                 value_decl->global ? ir_var_new_global(type_id, value_decl->global->has_alias ?
                     value_decl->global->alias : value_decl->info->name) : ir_var_new(type_id));
-            sema_module_push_decl(module, value_decl->info->name, sema_decl_new(module->mempool,
-                value_decl->info->is_public ? NULL : module, sema_value_new_runtime_global(module->mempool, 
-                    SEMA_RUNTIME_VAR, value_decl->sema.type, value_decl->sema.decl_id)));
             SemaConst *constant = NOT_NULL(sema_value_runtime_should_be_constant(module, value_decl->initializer->slice, runtime));
             ir_set_var_initializer(module->ir, var_id, sema_const_to_ir(module->mempool, constant));
         }

@@ -21,7 +21,7 @@ void ir_const_dump(IrConst *constant, FILE *stream) {
             }
             fprintf(stream, "}");
             break;
-        case IR_CONST_DECL_PTR: fprintf(stream, "const pointer to decl%lu", constant->decl); break;
+        case IR_CONST_FUNC: fprintf(stream, "func decl%lu", constant->func_decl); break;
     }
 }
 

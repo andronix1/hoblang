@@ -17,7 +17,7 @@ static SemaType *sema_module_internal_type(SemaModule *module, SemaModule *inter
     return type;
 }
 
-static IrDeclId *sema_module_internal_value(SemaModule *module, SemaModule *internal, Slice at, Slice name, SemaType *type) {
+static SemaValueRuntime *sema_module_internal_value(SemaModule *module, SemaModule *internal, Slice at, Slice name, SemaType *type) {
     SemaDecl *decl = NOT_NULL(sema_module_resolve_req_decl_from_at(internal, internal, at, name));
     SemaValueRuntime *runtime = sema_value_is_runtime(decl->value);
     if (!runtime) {
@@ -30,8 +30,7 @@ static IrDeclId *sema_module_internal_value(SemaModule *module, SemaModule *inte
         return NULL;
     }
 
-    assert(runtime->val_kind == SEMA_VALUE_RUNTIME_GLOBAL);
-    return &runtime->global_id;
+    return runtime;
 }
 
 static inline bool _sema_module_std_load(SemaModule *module, Slice at) {
@@ -47,7 +46,7 @@ static inline bool _sema_module_std_load(SemaModule *module, Slice at) {
 
     SemaType *usize = NOT_NULL(sema_module_internal_type(module, internal_module, at, slice_from_cstr("usize")));
     SemaType *str = sema_module_internal_type(module, internal_module, at, slice_from_cstr("string"));
-    IrDeclId *newString = sema_module_internal_value(module, internal_module, at, slice_from_cstr("newString"),
+    SemaValueRuntime *newString = sema_module_internal_value(module, internal_module, at, slice_from_cstr("newString"),
         sema_type_new_function(module, vec_create_in(module->mempool, 
             sema_type_new_pointer(module, sema_type_new_int(module, SEMA_INT_8, false)),
             usize 
@@ -75,7 +74,7 @@ SemaType *sema_module_std_string(SemaModule *module, Slice at) {
     return module->std.string.type;
 }
 
-IrDeclId *sema_module_std_string_new(SemaModule *module, Slice at) {
+SemaValueRuntime *sema_module_std_string_new(SemaModule *module, Slice at) {
     NOT_NULL(sema_module_std_load(module, at));
     return module->std.string.new;
 }

@@ -1,0 +1,9 @@
+import "str.hob" as str;
+
+public type Handler = fun (str.Str);
+
+public fun defaultHandler(string: str.Str) {
+    while true {}
+}
+
+public var handler: Handler = defaultHandler;

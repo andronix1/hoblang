@@ -1,6 +1,7 @@
 #pragma once
 
 #include "sema/module/api/type.h"
+#include "sema/module/api/value.h"
 #include <stdbool.h>
 
 typedef enum {
@@ -14,7 +15,7 @@ typedef struct {
     SemaType *usize;
     struct {
         SemaType *type;
-        IrDeclId *new;
+        SemaValueRuntime *new;
     } string;
 } SemaStd;
 
@@ -25,6 +26,6 @@ static inline SemaStd sema_std_module_new() {
 
 bool sema_module_std_load(SemaModule *module, Slice at);
 SemaType *sema_module_std_string(SemaModule *module, Slice at);
-IrDeclId *sema_module_std_string_new(SemaModule *module, Slice at);
+SemaValueRuntime *sema_module_std_string_new(SemaModule *module, Slice at);
 SemaType *sema_module_std_usize(SemaModule *module, Slice at);
 

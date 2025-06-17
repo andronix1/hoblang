@@ -18,7 +18,7 @@ SemaValue *sema_module_emit_expr_call(SemaModule *module, AstCall *call, SemaExp
         is_ext = true;
         ext_step_id = runtime->in_expr_id.ext_of;
     }
-    SemaType *type = runtime->type;
+    SemaType *type = sema_type_resolve(runtime->type);
     if (type->kind != SEMA_TYPE_FUNCTION) {
         sema_module_err(module, call->inner->slice, "$t is not callable", type);
         return NULL;

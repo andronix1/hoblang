@@ -28,9 +28,9 @@ IrConst *ir_const_new_struct(Mempool *mempool, IrTypeId type, IrConst **fields)
         out->struct_fields = fields;
     )
 
-IrConst *ir_const_new_decl(Mempool *mempool, IrTypeId type, IrDeclId decl)
+IrConst *ir_const_new_func(Mempool *mempool, IrTypeId type, IrDeclId decl)
     MEMPOOL_CONSTRUCT(IrConst,
-        out->kind = IR_CONST_DECL_PTR;
+        out->kind = IR_CONST_FUNC;
         out->type = type;
-        out->decl = decl;
+        out->func_decl = decl;
     )

@@ -10,6 +10,7 @@
 #include <llvm-c/Core.h>
 #include <llvm-c/Target.h>
 #include <llvm-c/TargetMachine.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 static bool llvm_setup(LlvmModule *module) {

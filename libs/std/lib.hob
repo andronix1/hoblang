@@ -1,6 +1,7 @@
 public import "str.hob" as str;
 public import "slice.hob" as slice;
 public import "def.hob" as def;
+public import "panic.hob" as panic;
 
 use str.{
     Str as string,

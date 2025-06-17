@@ -7,6 +7,7 @@
 #include "ir/decls.h"
 #include "ir/stmt/expr.h"
 #include "llvm/module/module.h"
+#include "llvm/module/stages/types.h"
 #include "ir/ir.h"
 #include <alloca.h>
 #include <assert.h>
@@ -186,7 +187,7 @@ LLVMValueRef llvm_emit_const(LlvmModule *module, IrConst *constant) {
             }
             return LLVMConstStruct(fields, vec_len(constant->struct_fields), false);
         }
-        case IR_CONST_DECL_PTR: return module->decls[constant->decl];
+        case IR_CONST_FUNC: return module->decls[constant->func_decl];
     }
     UNREACHABLE;
 }
@@ -215,7 +216,7 @@ static LlvmEmitStepRes llvm_emit_expr_step(
             }
             return llvm_emit_step_res_new(LLVMBuildCall2(
                 module->builder,
-                module->types[steps[step->call.callable].type],
+                llvm_function_type(module, steps[step->call.callable].type),
                 llvm_get_res_value(module, &results[step->call.callable]),
                 args, vec_len(step->call.args),
                 ""

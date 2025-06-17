@@ -1,0 +1,16 @@
+import process;
+import io;
+import std;
+
+fun customPanic(message: string) {
+    io.out.putString("fatal error: ");
+    io.out.putString(message);
+    io.out.putString("\n");
+    process.exit(1);
+}
+
+global fun main() -> i32 {
+    std.panic.handler = customPanic;
+    std.panic.handler("i wanna panic!");
+    return 0;
+}
