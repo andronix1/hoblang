@@ -11,6 +11,7 @@
 #include "core/slice.h"
 #include "core/vec.h"
 #include "lexer/token.h"
+#include "parser/nodes/body.h"
 #include "parser/nodes/path.h"
 #include "parser/nodes/type.h"
 #include "parser/parser.h"
@@ -91,6 +92,19 @@ static inline AstExpr *_parse_middle_expr(Parser *parser) {
             return ast_expr_new_string(parser->mempool, token.slice, token.string);
         case TOKEN_INTEGER:
             return ast_expr_new_integer(parser->mempool, token.slice, token.integer);
+        case TOKEN_FUN: {
+            PARSER_EXPECT_NEXT(parser, TOKEN_OPENING_CIRCLE_BRACE);
+            AstExprFuncArg *args = vec_new_in(parser->mempool, AstExprFuncArg);
+            while (!parser_next_should_be(parser, TOKEN_CLOSING_CIRCLE_BRACE)) {
+                Slice arg_name = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
+                PARSER_EXPECT_NEXT(parser, TOKEN_COLON);
+                vec_push(args, ast_expr_func_arg_new(arg_name, NOT_NULL(parse_type(parser))));
+                if (!parser_check_list_sep(parser, TOKEN_CLOSING_CIRCLE_BRACE)) return NULL;
+            }
+            AstType *returns = parser_next_should_be(parser, TOKEN_FUN_RETURNS) ? NOT_NULL(parse_type(parser)) : NULL;
+            AstBody *body = NOT_NULL(parse_body(parser));
+            return ast_expr_new_function(parser->mempool, token.slice, args, returns, body);
+        }
         case TOKEN_FLOAT:
             return ast_expr_new_float(parser->mempool, token.slice, token.float_value);
         case TOKEN_CHAR:

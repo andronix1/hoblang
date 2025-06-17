@@ -12,6 +12,7 @@
 #include "sema/module/exprs/call.h"
 #include "sema/module/exprs/char.h"
 #include "sema/module/exprs/float.h"
+#include "sema/module/exprs/function.h"
 #include "sema/module/exprs/idx.h"
 #include "sema/module/exprs/int.h"
 #include "sema/module/exprs/neg.h"
@@ -44,6 +45,7 @@ SemaValue *sema_module_emit_expr(SemaModule *module, AstExpr *expr, SemaExprCtx 
         case AST_EXPR_STRING: return sema_module_emit_expr_string(module, expr->slice, expr->string, ctx);
         case AST_EXPR_ARRAY: return sema_module_emit_expr_array(module, &expr->array, ctx);
         case AST_EXPR_IDX: return sema_module_emit_expr_idx(module, &expr->idx, ctx);
+        case AST_EXPR_FUNCTION: return sema_module_emit_expr_function(module, &expr->func);
     }
     UNREACHABLE;
 }

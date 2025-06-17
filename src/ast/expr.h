@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ast/api/body.h"
 #include "ast/api/path.h"
 #include "ast/api/expr.h"
 #include "ast/api/type.h"
@@ -24,6 +25,7 @@ typedef enum {
     AST_EXPR_NEG,
     AST_EXPR_IDX,
     AST_EXPR_INNER_PATH,
+    AST_EXPR_FUNCTION,
 } AstExprKind;
 
 typedef struct {
@@ -83,6 +85,25 @@ typedef struct {
 } AstExprInnerPath;
 
 typedef struct {
+    Slice name;
+    AstType *type;
+} AstExprFuncArg;
+
+static inline AstExprFuncArg ast_expr_func_arg_new(Slice name, AstType *type) {
+    AstExprFuncArg arg = {
+        .name = name,
+        .type = type,
+    };
+    return arg;
+}
+
+typedef struct {
+    AstExprFuncArg *args;
+    AstType *returns;
+    AstBody *body;
+} AstExprFunc;
+
+typedef struct {
     AstExpr *inner;
     AstExpr *idx;
 } AstExprIdx;
@@ -98,6 +119,7 @@ typedef struct AstExpr {
         AstExpr *neg_inner;
         AstExpr *take_ref_inner;
         AstExprArray array;
+        AstExprFunc func;
         AstExprIdx idx;
         AstExprInnerPath inner_path;
         uint64_t integer;
@@ -130,6 +152,7 @@ AstExpr *ast_expr_new_char(Mempool *mempool, Slice slice, char c);
 AstExpr *ast_expr_new_bool(Mempool *mempool, Slice slice, bool value);
 AstExpr *ast_expr_new_path(Mempool *mempool, Slice slice, AstPath *path);
 AstExpr *ast_expr_new_array(Mempool *mempool, Slice slice, AstType *type, AstExpr **elements);
+AstExpr *ast_expr_new_function(Mempool *mempool, Slice slice, AstExprFuncArg *args, AstType *returns, AstBody *body);
 AstExpr *ast_expr_new_inner_path(Mempool *mempool, Slice slice, AstExpr *inner, AstPath *path);
 AstExpr *ast_expr_new_take_ref(Mempool *mempool, Slice slice, AstExpr *inner);
 AstExpr *ast_expr_new_not(Mempool *mempool, Slice slice, AstExpr *inner);

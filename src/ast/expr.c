@@ -4,6 +4,7 @@
 #include "core/mempool.h"
 #include "ast/path.h"
 #include "core/assert.h"
+#include "core/null.h"
 #include "core/slice.h"
 #include "core/vec.h"
 
@@ -20,14 +21,23 @@ bool ast_expr_eq(const AstExpr *a, const AstExpr *b) {
     switch (a->kind) {
         case AST_EXPR_PATH: return ast_path_eq(a->path, b->path);
         case AST_EXPR_INNER_PATH:
-            return 
-                    ast_path_eq(a->inner_path.path, b->inner_path.path) &&
+            return ast_path_eq(a->inner_path.path, b->inner_path.path) &&
                     ast_expr_eq(a->inner_path.inner, b->inner_path.inner);
         case AST_EXPR_CALL:
             if (!ast_expr_eq(a->call.inner, b->call.inner) ||
                 vec_len(a->call.args) != vec_len(b->call.args)) return false;
             for (size_t i = 0; i < vec_len(a->call.args); i++) {
                 if (!ast_expr_eq(a->call.args[i], b->call.args[i])) {
+                    return false;
+                }
+            }
+            return true;
+        case AST_EXPR_FUNCTION:
+            if (!equals_nullable(a->func.returns, b->func.returns, (EqFunc)ast_type_eq) ||
+                vec_len(a->func.args) != vec_len(b->func.args)) return false;
+            for (size_t i = 0; i < vec_len(a->func.args); i++) {
+                if (!ast_type_eq(a->func.args[i].type, b->func.args[i].type) ||
+                    !slice_eq(a->func.args[i].name, b->func.args[i].name)) {
                     return false;
                 }
             }
@@ -126,6 +136,13 @@ AstExpr *ast_expr_new_callable(Mempool *mempool, Slice slice, AstExpr *inner, As
     CONSTRUCT(AST_EXPR_CALL,
         out->call.inner = inner;
         out->call.args = args;
+    )
+
+AstExpr *ast_expr_new_function(Mempool *mempool, Slice slice, AstExprFuncArg *args, AstType *returns, AstBody *body)
+    CONSTRUCT(AST_EXPR_FUNCTION,
+        out->func.args = args;
+        out->func.returns = returns;
+        out->func.body = body;
     )
 
 AstExpr *ast_expr_new_binop(Mempool *mempool, Slice slice, AstBinopKind binop, AstExpr *left, AstExpr *right)
