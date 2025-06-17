@@ -1,5 +1,7 @@
 import std;
 
+use std.panic.assert;
+
 public type Fd = i32;
 
 extern fun Fd.write(self, ptr: *u8, size: usize);
@@ -17,11 +19,13 @@ public fun Fd.putInt32(self, value: i32) {
         value = -value;
     }
     do {
+        assert(i > 0, "buffer overflow");
         i -= 1;
         buffer[i] = '0' + (value % 10) as u8;
         value /= 10;
     } while value > 0;
     if isNegative {
+        assert(i > 0, "buffer overflow");
         i -= 1;
         buffer[i] = '-';
     }

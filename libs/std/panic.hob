@@ -2,8 +2,12 @@ import "str.hob" as str;
 
 public type Handler = fun (str.Str);
 
-public fun defaultHandler(string: str.Str) {
+public var handler: Handler = fun (string: str.Str) {
     while true {}
-}
+};
 
-public var handler: Handler = defaultHandler;
+public fun assert(ok: bool, message: str.Str) {
+    if !ok {
+        handler(message);
+    }
+}
