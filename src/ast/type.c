@@ -3,6 +3,7 @@
 #include "ast/path.h"
 #include "core/assert.h"
 #include "core/keymap.h"
+#include "core/null.h"
 #include "core/slice.h"
 #include "core/vec.h"
 #include "core/mempool.h"
@@ -45,9 +46,25 @@ bool ast_type_eq(const AstType *a, const AstType *b) {
         case AST_TYPE_POINTER: return ast_type_eq(a->pointer_to, b->pointer_to);
         case AST_TYPE_ARRAY:
             return ast_expr_eq(a->array.length, a->array.length) && ast_type_eq(a->array.type, b->array.type);
+        case AST_TYPE_FUNCTION:
+            if (vec_len(a->function.args) != vec_len(b->function.args)) {
+                return false;
+            }
+            for (size_t i = 0; i < vec_len(a->function.args); i++) {
+                if (!ast_type_eq(a->function.args[i], b->function.args[i])) {
+                    return false;
+                }
+            }
+            return equals_nullable(a->function.returns, b->function.returns, (EqFunc)ast_type_eq);
     }
     UNREACHABLE;
 }
+
+AstType *ast_type_new_function(Mempool *mempool, AstType **args, AstType *returns)
+    CONSTRUCT(AST_TYPE_FUNCTION,
+        out->function.args = args;
+        out->function.returns = returns;
+    )
 
 AstType *ast_type_new_array(Mempool *mempool, AstExpr *length, AstType *type)
     CONSTRUCT(AST_TYPE_ARRAY,

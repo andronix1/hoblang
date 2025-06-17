@@ -12,6 +12,7 @@ typedef enum {
     AST_TYPE_PATH,
     AST_TYPE_ARRAY,
     AST_TYPE_POINTER,
+    AST_TYPE_FUNCTION,
 } AstTypeKind;
 
 typedef struct {
@@ -22,6 +23,11 @@ typedef struct {
 typedef struct {
     AstStructField *fields_map;
 } AstStruct;
+
+typedef struct {
+    AstType **args;
+    AstType *returns;
+} AstFunction;
 
 typedef struct {
     AstExpr *length;
@@ -35,6 +41,7 @@ typedef struct AstType {
     union {
         AstStruct structure;
         AstArray array;
+        AstFunction function;
         AstPath *path;
         AstType *pointer_to;
         AstType *slice_of;
@@ -45,6 +52,7 @@ bool ast_type_eq(const AstType *a, const AstType *b);
 
 AstStructField ast_struct_field_new(bool is_public, AstType *type);
 AstType *ast_type_new_struct(Mempool *mempool, AstStructField *fields_map);
+AstType *ast_type_new_function(Mempool *mempool, AstType **args, AstType *returns);
 AstType *ast_type_new_array(Mempool *mempool, AstExpr *length, AstType *type);
 AstType *ast_type_new_path(Mempool *mempool, AstPath *path);
 AstType *ast_type_new_pointer(Mempool *mempool, AstType *of);

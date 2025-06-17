@@ -4,6 +4,7 @@
 #include "core/assert.h"
 #include "core/keymap.h"
 #include "core/null.h"
+#include "core/vec.h"
 #include "sema/module/api/type.h"
 #include "sema/module/api/value.h"
 #include "sema/module/ast/path.h"
@@ -20,6 +21,16 @@ SemaType *sema_module_type(SemaModule *module, AstType *type) {
         }
         case AST_TYPE_POINTER:
             return sema_type_new_pointer(module, NOT_NULL(sema_module_type(module, type->pointer_to)));
+        case AST_TYPE_FUNCTION: {
+            SemaType **args = vec_new_in(module->mempool, SemaType*);
+            for (size_t i = 0; i < vec_len(type->function.args); i++) {
+                vec_push(args, NOT_NULL(sema_module_type(module, type->function.args[i])));
+            }
+            SemaType *returns = type->function.returns ?
+                NOT_NULL(sema_module_type(module, type->function.returns)) :
+                sema_type_new_void(module);
+            return sema_type_new_function(module, args, returns);
+        }
         case AST_TYPE_ARRAY: {
             SemaType *of = NOT_NULL(sema_module_type(module, type->array.type));
             SemaType *usize = sema_module_std_usize(module, type->array.type->slice);

@@ -11,6 +11,15 @@
 AstType *parse_type(Parser *parser) {
     Token token = parser_take(parser);
     switch (token.kind) {
+        case TOKEN_FUN: {
+            PARSER_EXPECT_NEXT(parser, TOKEN_OPENING_CIRCLE_BRACE);
+            AstType **args = vec_new_in(parser->mempool, AstType*);
+            while (!parser_next_should_be(parser, TOKEN_CLOSING_CIRCLE_BRACE)) {
+                vec_push(args, NOT_NULL(parse_type(parser)));
+            }
+            AstType *returns = parser_next_should_be(parser, TOKEN_FUN_RETURNS) ? NOT_NULL(parse_type(parser)) : NULL;
+            return ast_type_new_function(parser->mempool, args, returns);
+        }
         case TOKEN_STRUCT: {
             PARSER_EXPECT_NEXT(parser, TOKEN_OPENING_FIGURE_BRACE);
             AstStructField *fields = keymap_new_in(parser->mempool, AstStructField);
