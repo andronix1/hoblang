@@ -57,3 +57,7 @@ SemaType *sema_module_type(SemaModule *module, AstType *type) {
     }
     UNREACHABLE;
 }
+
+SemaType *sema_module_opt_type(SemaModule *module, AstType *type) {
+    return type ? NOT_NULL(sema_module_type(module, type)) : sema_type_new_void(module);
+}

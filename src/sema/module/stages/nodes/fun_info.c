@@ -9,6 +9,7 @@
 SemaType *sema_func_info_type(SemaModule *module, AstFunInfo *info) {
     SemaType **args = vec_new_in(module->mempool, SemaType*);
     vec_reserve(args, vec_len(info->args) + info->ext.is);
+
     info->ext.sema.ext_type = NULL;
     if (info->ext.is) {
         AstType *of = ast_type_new_path(module->mempool, ast_path_new(module->mempool, vec_create_in(module->mempool,
@@ -16,12 +17,12 @@ SemaType *sema_func_info_type(SemaModule *module, AstFunInfo *info) {
         SemaType *ext_of = info->ext.sema.ext_type = NOT_NULL(sema_module_type(module, of));
         vec_push(args, info->ext.by_ref ? sema_type_new_pointer(module, ext_of) : ext_of);
     }
+
     for (size_t i = 0; i < vec_len(info->args); i++) {
         vec_push(args, NOT_NULL(sema_module_type(module, info->args[i].type)));
     }
-    SemaType *returns = info->returns ?
-        NOT_NULL(sema_module_type(module, info->returns)) :
-        sema_type_new_void(module);
+
+    SemaType *returns = NOT_NULL(sema_module_opt_type(module, info->returns));
     return sema_type_new_function(module, args, returns);
 }
 

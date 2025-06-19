@@ -17,8 +17,7 @@ SemaValue *sema_module_emit_expr_function(SemaModule *module, AstExprFunc *func)
     for (size_t i = 0; i < vec_len(func->args); i++) {
         args[i] = NOT_NULL(sema_module_type(module, func->args[i].type));
     }
-    SemaType *returns = func->returns ? NOT_NULL(sema_module_type(module, func->returns)) : sema_type_new_void(module);
-    SemaType *type = sema_type_new_function(module, args, returns);
+    SemaType *type = sema_type_new_function(module, args, NOT_NULL(sema_module_opt_type(module, func->returns)));
 
     HirMutability *args_mut = vec_new_in(module->mempool, HirMutability);
     vec_resize(args_mut, vec_len(type->function.args));
@@ -27,8 +26,7 @@ SemaValue *sema_module_emit_expr_function(SemaModule *module, AstExprFunc *func)
     }
 
     HirDeclId decl_id = hir_add_decl(module->hir);
-    HirTypeId type_id = sema_type_hir_id(type);
-    HirFuncId func_id = hir_register_fun(module->hir, type_id);
+    HirFuncId func_id = hir_register_fun(module->hir, sema_type_hir_id(type));
     hir_init_decl_func(module->hir, decl_id, func_id);
 
     SemaScopeStack *old_ss = sema_module_swap_ss(module, sema_scope_stack_new(module->mempool, func_id,
