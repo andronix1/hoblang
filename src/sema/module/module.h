@@ -3,7 +3,7 @@
 #include "ast/api/node.h"
 #include "core/mempool.h"
 #include "core/slice.h"
-#include "ir/api/ir.h"
+#include "hir/api/hir.h"
 #include "parser/api.h"
 #include "sema/api/project.h"
 #include "sema/module/api/decl.h"
@@ -14,14 +14,14 @@
 
 typedef struct SemaTypeInfo {
     SemaType *type;
-    IrTypeId id;
+    HirTypeId id;
 } SemaTypeInfo;
 
 typedef struct SemaModule {
     Mempool *mempool;
     Parser *parser;
     AstNode **nodes;
-    Ir *ir;
+    Hir *hir;
     SemaProject *project;
     bool no_std;
 
@@ -46,13 +46,13 @@ SemaDecl *sema_module_resolve_req_decl_from(SemaModule *module, SemaModule *from
 SemaDecl *sema_module_resolve_req_decl_from_at(SemaModule *module, SemaModule *from, Slice at, Slice name);
 SemaScopeStack *sema_module_swap_ss(SemaModule *module, SemaScopeStack *new_ss);
 
-void sema_module_add_defer(SemaModule *module, IrCode *code);
+void sema_module_add_defer(SemaModule *module, HirCode *code);
 void sema_module_scope_break(SemaModule *module);
 bool sema_module_scope_breaks(SemaModule *module);
 
 void sema_module_emit_defers(SemaModule *module);
 void sema_module_emit_current_defers(SemaModule *module);
-void sema_module_emit_defers_before_loop(SemaModule *module, IrLoopId id);
+void sema_module_emit_defers_before_loop(SemaModule *module, HirLoopId id);
 
 void sema_module_push_scope_looped(SemaModule *module, SemaLoop *loop);
 void sema_module_push_scope(SemaModule *module, SemaLoop *loop);
@@ -60,7 +60,7 @@ void sema_module_pop_scope(SemaModule *module);
 
 SemaTypeId sema_module_register_type_alias(SemaModule *module);
 void sema_module_init_type_alias(SemaModule *module, SemaTypeId id, SemaType *type);
-IrTypeId sema_module_get_type_id(SemaModule *module, SemaTypeId id);
+HirTypeId sema_module_get_type_id(SemaModule *module, SemaTypeId id);
 
 void sema_module_push_decl(SemaModule *module, Slice name, SemaDecl *decl);
 

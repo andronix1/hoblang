@@ -1,8 +1,8 @@
 #pragma once
 
 #include "core/mempool.h"
-#include "ir/api/decl.h"
-#include "ir/api/local.h"
+#include "hir/api/decl.h"
+#include "hir/api/func.h"
 #include "sema/module/api/module.h"
 #include "sema/module/api/type.h"
 #include "sema/module/api/value.h"
@@ -26,8 +26,8 @@ typedef struct SemaValue {
 
 SemaValue *sema_value_new_type(Mempool *mempool, SemaType *type);
 SemaValue *sema_value_new_module(Mempool *mempool, SemaModule *module);
-SemaValue *sema_value_new_runtime_global(Mempool *mempool, SemaRuntimeKind kind, SemaType *type, IrDeclId id);
-SemaValue *sema_value_new_runtime_local(Mempool *mempool, SemaRuntimeKind kind, SemaType *type, IrLocalId id);
+SemaValue *sema_value_new_runtime_global(Mempool *mempool, SemaRuntimeKind kind, SemaType *type, HirDeclId id);
+SemaValue *sema_value_new_runtime_local(Mempool *mempool, SemaRuntimeKind kind, SemaType *type, HirLocalId id);
 SemaValue *sema_value_new_runtime_expr_step(Mempool *mempool, SemaRuntimeKind kind, SemaType *type, size_t id);
 SemaValue *sema_value_new_runtime_const(Mempool *mempool, SemaConst *constant);
 SemaValue *sema_value_new_runtime_ext_expr_step(Mempool *mempool, SemaRuntimeKind kind, SemaType *type, size_t step_id, size_t of);

@@ -4,58 +4,52 @@
 #include "core/mempool.h"
 #include "core/process.h"
 #include "core/vec.h"
-#include "ir/api/ir.h"
-#include "ir/dump/dump.h"
-#include "ir/stages/checks.h"
-#include "ir/stages/stmts.h"
-#include "ir/stages/type_tree.h"
+#include "hir/api/dump/dump.h"
+#include "hir/api/hir.h"
 #include "print.h"
 #include "sema/api/project.h"
 #include "llvm/module/api.h"
 
-static SemaProject *cmd_sema_project(Mempool *mempool, CmdSources *sources, Ir *ir) {
-    Path *lib_dirs = vec_create_in(mempool, (char*)"../libs", "./libs", "/opt/hob/libs");
+static SemaProject *cmd_sema_project(Mempool *mempool, CmdSources *sources, Hir *hir) {
+    Path *lib_dhirs = vec_create_in(mempool, (char*)"../libs", "./libs", "/opt/hob/libs");
     for (size_t i = 0; i < vec_len(sources->additional_lib_dirs); i++) {
-        vec_push(lib_dirs, mempool_slice_to_cstr(mempool, sources->additional_lib_dirs[i]));
+        vec_push(lib_dhirs, mempool_slice_to_cstr(mempool, sources->additional_lib_dirs[i]));
     }
-    SemaProject *project = sema_project_new(ir, lib_dirs);
+    SemaProject *project = sema_project_new(hir, lib_dhirs);
     sema_project_add_module(project, NULL, sources->entry, false);
     return project;
 }
 
-static void complete_ir(Ir *ir) {
-    IrTypeCrossReference *crs = ir_type_check_tree(ir);
-    assert(vec_len(crs) == 0);
-    ir_fill_stmts(ir);
-    ir_check_cosistency(ir);
+static void complete_hir(Hir *hir) {
+    hir_postprocess(hir);
 }
 
 static bool cmd_build(Mempool *mempool, CmdBuild *build) {
-    Ir *ir = ir_new();
-    SemaProject *project = cmd_sema_project(mempool, &build->sources, ir);
+    Hir *hir = hir_new();
+    SemaProject *project = cmd_sema_project(mempool, &build->sources, hir);
     if (!project) {
-        ir_free(ir);
+        hir_free(hir);
         return false;
     }
     sema_project_emit(project);
 
     if (sema_project_failed(project)) {
         sema_project_free(project);
-        ir_free(ir);
+        hir_free(hir);
         return false;
     }
 
-    complete_ir(ir);
+    complete_hir(hir);
 
     LlvmModule *llvm = llvm_module_new();
-    llvm_module_emit(llvm, ir);
+    llvm_module_emit(llvm, hir);
 
     char *temp_obj_path = "/tmp/hoblang-obj.o";
 
     if (!llvm_module_write_obj(llvm, build->kind == CMD_BUILD_OBJ ? build->output : temp_obj_path)) {
         sema_project_free(project);
         llvm_module_free(llvm);
-        ir_free(ir);
+        hir_free(hir);
         return false;
     }
 
@@ -95,47 +89,47 @@ static bool cmd_build(Mempool *mempool, CmdBuild *build) {
 
     sema_project_free(project);
     llvm_module_free(llvm);
-    ir_free(ir);
+    hir_free(hir);
 
     return result;
 }
 
 static bool cmd_emit(Mempool *mempool, CmdEmit *emit) {
-    Ir *ir = ir_new();
-    SemaProject *project = cmd_sema_project(mempool, &emit->sources, ir);
+    Hir *hir = hir_new();
+    SemaProject *project = cmd_sema_project(mempool, &emit->sources, hir);
     if (!project) {
-        ir_free(ir);
+        hir_free(hir);
         return false;
     }
     sema_project_emit(project);
 
     if (sema_project_failed(project)) {
         sema_project_free(project);
-        ir_free(ir);
+        hir_free(hir);
         return false;
     }
-    complete_ir(ir);
 
     switch(emit->kind) {
         case CMD_EMIT_HIR: {
-            bool result = ir_dump(ir, emit->output);
+            bool result = hir_dump(hir, emit->output);
             sema_project_free(project);
-            ir_free(ir);
+            hir_free(hir);
             return result;
         }
         case CMD_EMIT_IR: {
+            complete_hir(hir);
             LlvmModule *llvm = llvm_module_new();
             if (!llvm) {
                 sema_project_free(project);
-                ir_free(ir);
+                hir_free(hir);
                 return false;
             }
-            llvm_module_emit(llvm, ir);
+            llvm_module_emit(llvm, hir);
 
             bool result = llvm_module_write_ir(llvm, emit->output);
             llvm_module_free(llvm);
             sema_project_free(project);
-            ir_free(ir);
+            hir_free(hir);
             return result;
         }
     }
@@ -152,12 +146,12 @@ static bool cmd_emit(Mempool *mempool, CmdEmit *emit) {
     } while (0)
 
 static inline void cmd_help_sources() {
-    FLAG_VALUE("libDirs", "lib1,lib2,...", "add library search directories");
+    FLAG_VALUE("libDhirs", "lib1,lib2,...", "add library search dhirectories");
 }
 
 static bool cmd_help(char *exe) {
     HELP_COMMAND("help", "", "print help", {});
-    HELP_COMMAND("emit-hir", "<entry> <output>", "emit hoblang IR", {
+    HELP_COMMAND("emit-hhir", "<entry> <output>", "emit hoblang IR", {
         cmd_help_sources();
     });
     HELP_COMMAND("emit-llvm", "<entry> <output>", "emit LLVM IR", {

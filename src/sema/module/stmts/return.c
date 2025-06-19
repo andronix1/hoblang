@@ -1,4 +1,5 @@
 #include "return.h"
+#include "core/assert.h"
 #include "core/null.h"
 #include "sema/module/module.h"
 #include "sema/module/scope.h"
@@ -6,7 +7,8 @@
 
 bool sema_module_emit_stmt_return(SemaModule *module, AstReturn *ret) {
     if (!ret->value) {
-        sema_ss_append_stmt(module->ss, ir_stmt_new_ret_void(module->mempool));
+        TODO;
+        sema_ss_append_stmt(module->ss, hir_stmt_new_ret_void());
         return true;
     }
 
@@ -19,7 +21,7 @@ bool sema_module_emit_stmt_return(SemaModule *module, AstReturn *ret) {
         return false;
     }
     sema_module_emit_defers(module);
-    sema_ss_append_stmt(module->ss, ir_stmt_new_ret(module->mempool, ir_expr_new(output.steps)));
+    sema_ss_append_stmt(module->ss, hir_stmt_new_ret(hir_expr_new(output.steps)));
     sema_module_scope_break(module);
     return true;
 }

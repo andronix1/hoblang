@@ -22,8 +22,8 @@ typedef struct {
     SemaType *type;
 
     union {
-        IrDeclId global_id;
-        IrLocalId local_id;
+        HirDeclId global_id;
+        HirLocalId local_id;
         SemaConst *constant;
         struct {
             size_t step_id;

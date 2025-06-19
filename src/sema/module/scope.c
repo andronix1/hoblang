@@ -7,7 +7,7 @@
 #include "sema/module/module.h"
 #include <stdio.h>
 
-SemaScopeStack *sema_scope_stack_new(Mempool *mempool, IrFuncId func_id, SemaType *returns)
+SemaScopeStack *sema_scope_stack_new(Mempool *mempool, HirFuncId func_id, SemaType *returns)
     MEMPOOL_CONSTRUCT(SemaScopeStack,
         out->returns = returns;
         out->func_id = func_id;
@@ -18,13 +18,13 @@ static inline SemaScope sema_scope_new(Mempool *mempool, SemaLoop *loop) {
     SemaScope scope = {
         .loop = loop,
         .decls_map = keymap_new_in(mempool, SemaDecl*),
-        .stmts = vec_new_in(mempool, IrStmt*),
-        .defers = vec_new_in(mempool, IrCode*),
+        .stmts = vec_new_in(mempool, HirStmt),
+        .defers = vec_new_in(mempool, HirCode*),
     };
     return scope;
 }
 
-IrLoopId *sema_ss_labeled_loop(SemaScopeStack *ss, Slice label) {
+HirLoopId *sema_ss_labeled_loop(SemaScopeStack *ss, Slice label) {
     for (ssize_t i = (ssize_t)vec_len(ss->scopes) - 1; i >= 0; i--) {
         SemaLoop *loop = ss->scopes[i].loop;
         if (!loop) continue;
@@ -35,7 +35,7 @@ IrLoopId *sema_ss_labeled_loop(SemaScopeStack *ss, Slice label) {
     return NULL;
 }
 
-IrLoopId *sema_ss_top_loop(SemaScopeStack *ss) {
+HirLoopId *sema_ss_top_loop(SemaScopeStack *ss) {
     for (ssize_t i = (ssize_t)vec_len(ss->scopes) - 1; i >= 0; i--) {
         SemaLoop *loop = ss->scopes[i].loop;
         if (loop) return &loop->id;
@@ -51,12 +51,12 @@ void sema_ss_pop_scope(SemaScopeStack *ss) {
     vec_pop(ss->scopes);
 }
 
-void sema_ss_append_stmt(SemaScopeStack *ss, IrStmt *stmt) {
+void sema_ss_append_stmt(SemaScopeStack *ss, HirStmt stmt) {
     assert(vec_len(ss->scopes));
     vec_push(vec_top(ss->scopes)->stmts, stmt);
 }
 
-IrStmt **sema_ss_get_stmts(SemaScopeStack *ss) {
+HirStmt *sema_ss_get_stmts(SemaScopeStack *ss) {
     assert(vec_len(ss->scopes));
     return vec_top(ss->scopes)->stmts;
 }
@@ -69,12 +69,12 @@ void sema_ss_push_decl(SemaModule *module, SemaScopeStack *ss, Slice name, SemaD
     }
 }
 
-void sema_ss_push_defer(SemaScopeStack *ss, IrCode *code) {
+void sema_ss_push_defer(SemaScopeStack *ss, HirCode *code) {
     assert(vec_len(ss->scopes) > 0);
     vec_push(vec_top(ss->scopes)->defers, code);
 }
 
-void sema_ss_append_body(SemaScopeStack *ss, IrCode *code) {
+void sema_ss_append_body(SemaScopeStack *ss, HirCode *code) {
     assert(vec_len(ss->scopes));
     vec_extend(vec_top(ss->scopes)->stmts, code->stmts);
 }

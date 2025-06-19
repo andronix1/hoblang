@@ -10,9 +10,11 @@ bool sema_module_stage_fill_external(SemaModule *module, AstExternalDecl *extern
     switch (external->kind) {
         case AST_EXTERNAL_DECL_FUN: {
             SemaType *type = NOT_NULL(sema_func_info_type(module, external->fun));
-            IrDeclId decl_id = ir_add_decl(module->ir);
-            ir_init_extern(module->ir, decl_id, ir_extern_new(IR_EXTERN_FUNC,
-                external->has_alias ? external->alias : external->fun->name, sema_type_ir_id(type)));
+            HirDeclId decl_id = hir_add_decl(module->hir);
+            HirExternId extern_id = hir_add_extern(module->hir,
+                external->has_alias ? external->alias : external->fun->name,
+                hir_extern_info_new(HIR_EXTERN_FUNC, sema_type_hir_id(type)));
+            hir_init_decl_extern(module->hir, decl_id, extern_id);
             sema_module_push_fun_info_decl(module, external->fun, sema_decl_new(module->mempool,
                 external->fun->is_public ? NULL : module,
                 sema_value_new_runtime_global(module->mempool, SEMA_RUNTIME_FINAL, type, decl_id)));

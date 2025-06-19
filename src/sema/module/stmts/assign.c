@@ -1,10 +1,7 @@
 #include "assign.h"
 #include "core/mempool.h"
 #include "core/null.h"
-#include "ir/api/ir.h"
-#include "ir/func.h"
-#include "ir/stmt/expr.h"
-#include "ir/stmt/stmt.h"
+#include "hir/api/hir.h"
 #include "sema/module/api/type.h"
 #include "sema/module/module.h"
 #include "sema/module/scope.h"
@@ -34,32 +31,32 @@ bool sema_module_emit_stmt_assign(SemaModule *module, AstAssign *assign) {
         sema_module_err(module, assign->what->slice, "cannot assign expression of type $t to assignable expression of type $t", rvalue->type, lvalue->type);
         return false;
     }
-    IrExpr value_expr = sema_expr_output_collect(&valueo);
+    HirExpr value_expr = sema_expr_output_collect(&valueo);
     if (assign->short_assign.is) {
-        IrTypeId type = sema_type_ir_id(lvalue->type);
+        HirTypeId type = sema_type_hir_id(lvalue->type);
         
-        IrLocalId temp = ir_func_add_local(module->ir, module->ss->func_id, ir_func_local_new(IR_IMMUTABLE, 
-            sema_type_ir_id(sema_type_new_pointer(module, lvalue->type))));
+        HirLocalId temp = hir_fun_add_local(module->hir, module->ss->func_id, hir_func_local_new(
+            sema_type_hir_id(sema_type_new_pointer(module, lvalue->type)), HIR_IMMUTABLE));
 
-        sema_expr_output_push_step(&dsto, ir_expr_step_new_take_ref(sema_expr_output_last_id(&dsto)));
-        sema_ss_append_stmt(module->ss, ir_stmt_new_init_final(module->mempool, temp, sema_expr_output_collect(&dsto)));
+        sema_expr_output_push_step(&dsto, hir_expr_step_new_take_ref(sema_expr_output_last_id(&dsto)));
+        sema_ss_append_stmt(module->ss, hir_stmt_new_init_final(temp, sema_expr_output_collect(&dsto)));
 
-        IrLocalId value = ir_func_add_local(module->ir, module->ss->func_id, ir_func_local_new(IR_IMMUTABLE, type));
-        sema_ss_append_stmt(module->ss, ir_stmt_new_init_final(module->mempool, value, value_expr));
+        HirLocalId value = hir_fun_add_local(module->hir, module->ss->func_id, hir_func_local_new(type, HIR_IMMUTABLE));
+        sema_ss_append_stmt(module->ss, hir_stmt_new_init_final(value, value_expr));
 
         SemaExprOutput output = sema_expr_output_new_with(vec_create_in(module->mempool,
-            ir_expr_step_new_get_local(temp),
-            ir_expr_step_new_deref(0),
-            ir_expr_step_new_get_local(value)
+            hir_expr_step_new_get_local(temp),
+            hir_expr_step_new_deref(0),
+            hir_expr_step_new_get_local(value)
         ));
         NOT_NULL(sema_module_append_expr_binop(module, lvalue->type, 1, 2, &assign->short_assign.kind, &output));
         
-        sema_ss_append_stmt(module->ss, ir_stmt_new_store(module->mempool, ir_expr_new(vec_create_in(module->mempool, 
-            ir_expr_step_new_get_local(temp),
-            ir_expr_step_new_deref(0),
+        sema_ss_append_stmt(module->ss, hir_stmt_new_store(hir_expr_new(vec_create_in(module->mempool, 
+            hir_expr_step_new_get_local(temp),
+            hir_expr_step_new_deref(0),
         )), sema_expr_output_collect(&output)));
         return true;
     }
-    sema_ss_append_stmt(module->ss, ir_stmt_new_store(module->mempool, sema_expr_output_collect(&dsto), value_expr));
+    sema_ss_append_stmt(module->ss, hir_stmt_new_store(sema_expr_output_collect(&dsto), value_expr));
     return true;
 }

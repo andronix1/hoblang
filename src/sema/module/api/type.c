@@ -8,11 +8,11 @@
 #include "sema/module/module.h"
 #include <stdio.h>
 
-IrTypeId sema_type_ir_id(SemaType *type) {
+HirTypeId sema_type_hir_id(SemaType *type) {
     if (type->aliases) {
         return (*vec_top(type->aliases))->id;
     }
-    return type->ir_id;
+    return type->hir_id;
 }
 
 void sema_type_print(va_list list) {

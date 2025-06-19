@@ -4,7 +4,6 @@
 #include "core/keymap.h"
 #include "core/log.h"
 #include "core/path.h"
-#include "ir/api/ir.h"
 #include "parser/parser.h"
 #include "lexer/lexer.h"
 #include "sema/module/api/decl.h"
@@ -14,7 +13,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-static inline SemaTypeInfo sema_type_info_new(IrTypeId id) {
+static inline SemaTypeInfo sema_type_info_new(HirTypeId id) {
     SemaTypeInfo info = {
         .id = id,
         .type = NULL
@@ -108,7 +107,7 @@ SemaScopeStack *sema_module_swap_ss(SemaModule *module, SemaScopeStack *new_ss) 
 }
 
 SemaTypeId sema_module_register_type_alias(SemaModule *module) {
-    vec_push(module->types, sema_type_info_new(ir_add_type_record(module->ir)));
+    vec_push(module->types, sema_type_info_new(hir_register_type(module->hir)));
     return vec_len(module->types) - 1;
 }
 
@@ -135,7 +134,7 @@ void sema_module_push_decl(SemaModule *module, Slice name, SemaDecl *decl) {
     }
 }
 
-static inline void sema_module_emit_defers_before_opt_loop(SemaModule *module, IrLoopId *id) {
+static inline void sema_module_emit_defers_before_opt_loop(SemaModule *module, HirLoopId *id) {
     for (ssize_t i = (ssize_t)vec_len(module->ss->scopes) - 1; i >= 0; i--) {
         SemaScope *scope = &module->ss->scopes[i];
         for (ssize_t j = (ssize_t)vec_len(scope->defers) - 1; j >= 0; j--) {
@@ -158,7 +157,7 @@ void sema_module_scope_break(SemaModule *module) {
     scope->breaks = true;
 }
 
-void sema_module_emit_defers_before_loop(SemaModule *module, IrLoopId id) {
+void sema_module_emit_defers_before_loop(SemaModule *module, HirLoopId id) {
     return sema_module_emit_defers_before_opt_loop(module, &id);
 }
 
@@ -174,11 +173,11 @@ void sema_module_emit_defers(SemaModule *module) {
     return sema_module_emit_defers_before_opt_loop(module, NULL);
 }
 
-void sema_module_add_defer(SemaModule *module, IrCode *code) {
+void sema_module_add_defer(SemaModule *module, HirCode *code) {
     assert(module->ss);
     sema_ss_push_defer(module->ss, code);
 }
 
-IrTypeId sema_module_get_type_id(SemaModule *module, SemaTypeId id) {
+HirTypeId sema_module_get_type_id(SemaModule *module, SemaTypeId id) {
     return module->types[id].id;
 }

@@ -14,7 +14,7 @@ SemaConst *sema_const_new_integer(Mempool *mempool, SemaType *type, uint64_t int
         out->integer = integer;
     )
 
-SemaConst *sema_const_new_func(Mempool *mempool, SemaType *type, IrDeclId decl)
+SemaConst *sema_const_new_func(Mempool *mempool, SemaType *type, HirDeclId decl)
     MEMPOOL_CONSTRUCT(SemaConst, 
         out->kind = SEMA_CONST_FUNC;
         out->type = type;

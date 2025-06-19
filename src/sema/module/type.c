@@ -2,63 +2,61 @@
 #include "core/assert.h"
 #include "core/mempool.h"
 #include "core/vec.h"
-#include "ir/api/ir.h"
-#include "ir/api/type.h"
-#include "ir/type/type.h"
+#include "hir/api/type.h"
 #include "sema/module/api/type.h"
 #include "sema/module/module.h"
 #include "sema/module/api/module.h"
 #include <string.h>
 
-IrTypeFloatSize sema_type_float_size_to_ir(SemaTypeFloatSize size) {
+HirTypeFloatSize sema_type_float_size_to_hir(SemaTypeFloatSize size) {
     switch (size) {
-        case SEMA_FLOAT_32: return IR_TYPE_FLOAT_32;
-        case SEMA_FLOAT_64: return IR_TYPE_FLOAT_64;
+        case SEMA_FLOAT_32: return HIR_TYPE_FLOAT_32;
+        case SEMA_FLOAT_64: return HIR_TYPE_FLOAT_64;
     }
     UNREACHABLE;
 }
 
-IrTypeIntSize sema_type_int_size_to_ir(SemaTypeIntSize size) {
+HirTypeIntSize sema_type_int_size_to_hir(SemaTypeIntSize size) {
     switch (size) {
-        case SEMA_INT_8: return IR_TYPE_INT_8;
-        case SEMA_INT_16: return IR_TYPE_INT_16;
-        case SEMA_INT_32: return IR_TYPE_INT_32;
-        case SEMA_INT_64: return IR_TYPE_INT_64;
+        case SEMA_INT_8: return HIR_TYPE_INT_8;
+        case SEMA_INT_16: return HIR_TYPE_INT_16;
+        case SEMA_INT_32: return HIR_TYPE_INT_32;
+        case SEMA_INT_64: return HIR_TYPE_INT_64;
     }
     UNREACHABLE;
 }
 
-static inline IrType sema_type_to_ir(SemaModule* module, SemaType *type) {
+static inline HirType sema_type_to_hir(SemaModule* module, SemaType *type) {
     switch (type->kind) {
-        case SEMA_TYPE_VOID: return ir_type_new_void();
-        case SEMA_TYPE_INT: return ir_type_new_int(sema_type_int_size_to_ir(type->integer.size), type->integer.is_signed);
-        case SEMA_TYPE_FLOAT: return ir_type_new_float(sema_type_float_size_to_ir(type->float_size));
-        case SEMA_TYPE_BOOL: return ir_type_new_bool();
+        case SEMA_TYPE_VOID: return hir_type_new_void();
+        case SEMA_TYPE_INT: return hir_type_new_int(sema_type_int_size_to_hir(type->integer.size), type->integer.is_signed);
+        case SEMA_TYPE_FLOAT: return hir_type_new_float(sema_type_float_size_to_hir(type->float_size));
+        case SEMA_TYPE_BOOL: return hir_type_new_bool();
         case SEMA_TYPE_FUNCTION: {
-            IrTypeId *args = vec_new_in(module->mempool, IrTypeId);
+            HirTypeId *args = vec_new_in(module->mempool, HirTypeId);
             vec_resize(args, vec_len(type->function.args));
             for (size_t i = 0; i < vec_len(type->function.args); i++) {
-                args[i] = sema_type_ir_id(type->function.args[i]);
+                args[i] = sema_type_hir_id(type->function.args[i]);
             }
-            return ir_type_new_function(args, sema_type_ir_id(type->function.returns));
+            return hir_type_new_function(args, sema_type_hir_id(type->function.returns));
         }
-        case SEMA_TYPE_POINTER: return ir_type_new_pointer(sema_type_ir_id(type->pointer_to));
+        case SEMA_TYPE_POINTER: return hir_type_new_pointer(sema_type_hir_id(type->pointer_to));
         case SEMA_TYPE_STRUCTURE: {
-            IrTypeId *fields = vec_new_in(module->mempool, IrTypeId);
+            HirTypeStructField *fields = vec_new_in(module->mempool, HirTypeStructField);
             vec_resize(fields, vec_len(type->structure.fields_map));
             for (size_t i = 0; i < vec_len(type->structure.fields_map); i++) {
                 keymap_at(type->structure.fields_map, i, field);
-                fields[i] = sema_type_ir_id(field->value.type);
+                fields[i] = hir_type_struct_field_new(sema_type_hir_id(field->value.type));
             }
-            return ir_type_new_struct(fields);
+            return hir_type_new_struct(fields);
         }
-        case SEMA_TYPE_ARRAY: return ir_type_new_array(sema_type_ir_id(type->array.of), type->array.length);
+        case SEMA_TYPE_ARRAY: return hir_type_new_array(sema_type_hir_id(type->array.of), type->array.length);
         case SEMA_TYPE_RECORD: TODO;
     }
     UNREACHABLE;
 }
 
-SemaTypeAlias *sema_type_alias_new(Mempool *mempool, IrTypeId id)
+SemaTypeAlias *sema_type_alias_new(Mempool *mempool, HirTypeId id)
     MEMPOOL_CONSTRUCT(SemaTypeAlias,
         out->id = id;
         out->decls_map = keymap_new_in(mempool, SemaDecl*);
@@ -69,9 +67,9 @@ SemaTypeAlias *sema_type_alias_new(Mempool *mempool, IrTypeId id)
         out->kind = KIND; \
         FIELDS; \
         out->aliases = NULL; \
-        out->ir_id = KIND == SEMA_TYPE_RECORD ? \
+        out->hir_id = KIND == SEMA_TYPE_RECORD ? \
             sema_module_get_type_id(module, out->record.id) : \
-            ir_add_simple_type(module->ir, sema_type_to_ir(module, out)); \
+            hir_add_type(module->hir, sema_type_to_hir(module, out)); \
         return out; \
     }
 

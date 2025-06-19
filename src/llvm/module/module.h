@@ -1,15 +1,10 @@
 #pragma once
 
 #include "core/mempool.h"
-#include "ir/api/ir.h"
+#include "hir/api/hir.h"
 #include "llvm/module/api.h"
 #include <llvm-c/TargetMachine.h>
 #include <llvm-c/Types.h>
-
-typedef struct {
-    LLVMValueRef func;
-    LLVMBasicBlockRef code, defs;
-} LlvmState;
 
 typedef struct {
     LLVMBasicBlockRef begin;
@@ -25,37 +20,31 @@ static inline LlvmLoopInfo llvm_loop_info_new(LLVMBasicBlockRef begin, LLVMBasic
 }
 
 typedef struct {
-    IrFuncId id;
+    HirFuncId id;
     LLVMValueRef *locals;
     LlvmLoopInfo *loops;
     LLVMValueRef value;
+    LLVMBasicBlockRef code, defs;
+    bool in_loop;
 } LlvmFuncCtx;
-
-void llvm_func_ctx_set(LlvmModule *module, IrFuncId id, LLVMValueRef value);
 
 typedef struct LlvmModule {
     Mempool *mempool;
 
-    Ir *ir;
+    Hir *hir;
     LLVMValueRef *decls;
-    LLVMTypeRef *types;
     LlvmFuncCtx func;
 
     LLVMTargetMachineRef machine;
     LLVMModuleRef module;
     LLVMBuilderRef builder;
     LLVMContextRef context;
-    LlvmState state;
 } LlvmModule;
 
-LlvmState llvm_switch_state(LlvmModule *module, LlvmState state);
+void llvm_func_ctx_set(LlvmModule *module, HirFuncId id, LLVMValueRef value);
 LLVMValueRef llvm_alloca(LlvmModule *module, LLVMTypeRef type);
 
-static inline LlvmState llvm_state_new(LLVMValueRef func, LLVMBasicBlockRef code, LLVMBasicBlockRef defs) {
-    LlvmState result = {
-        .func = func,
-        .code = code,
-        .defs = defs
-    };
-    return result;
-}
+void llvm_module_set_block(LlvmModule *module, LLVMBasicBlockRef block);
+
+bool llvm_module_begin_loop(LlvmModule *module);
+void llvm_module_end_loop(LlvmModule *module);

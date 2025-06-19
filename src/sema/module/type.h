@@ -1,17 +1,17 @@
 #pragma once
 
-#include "ir/api/type.h"
+#include "hir/api/type.h"
 #include "sema/module/api/decl.h"
 #include "sema/module/api/module.h"
 #include "sema/module/api/type.h"
 #include <stdbool.h>
 
 typedef struct SemaTypeAlias {
-    IrTypeId id;
+    HirTypeId id;
     SemaDecl **decls_map;
 } SemaTypeAlias;
 
-SemaTypeAlias *sema_type_alias_new(Mempool *mempool, IrTypeId id);
+SemaTypeAlias *sema_type_alias_new(Mempool *mempool, HirTypeId id);
 
 typedef enum {
     SEMA_FLOAT_32,
@@ -54,7 +54,7 @@ typedef struct SemaType {
     SemaTypeKind kind;
 
     SemaTypeAlias **aliases;
-    IrTypeId ir_id;
+    HirTypeId hir_id;
 
     union {
         SemaTypeFloatSize float_size;
@@ -87,8 +87,8 @@ typedef struct SemaType {
     };
 } SemaType;
 
-IrTypeIntSize sema_type_int_size_to_ir(SemaTypeIntSize size);
-IrTypeFloatSize sema_type_float_size_to_ir(SemaTypeFloatSize size);
+HirTypeIntSize sema_type_int_size_to_hir(SemaTypeIntSize size);
+HirTypeFloatSize sema_type_float_size_to_hir(SemaTypeFloatSize size);
 
 SemaType *sema_type_new_void(SemaModule *module);
 SemaType *sema_type_new_bool(SemaModule *module);

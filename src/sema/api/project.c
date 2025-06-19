@@ -16,11 +16,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-SemaProject *sema_project_new(Ir *ir, Path *lib_dirs) {
+SemaProject *sema_project_new(Hir *ir, Path *lib_dirs) {
     SemaProject *project = malloc(sizeof(SemaProject));
     project->mempool = mempool_new(1024);
     project->modules_map = keymap_new_in(project->mempool, SemaModule*);
-    project->ir = ir;
+    project->hir = ir;
     project->lib_dirs = lib_dirs;
     return project;
 }
@@ -45,7 +45,7 @@ inline SemaModule *sema_project_add_module(SemaProject *project, Path from, Path
         logln("failed to read file `$S`", path);
         return NULL;
     }
-    SemaModule *new_module = sema_module_new(project->ir, parser_new(lexer_new(content)));
+    SemaModule *new_module = sema_module_new(project->hir, parser_new(lexer_new(content)));
     keymap_insert(project->modules_map, path_slice, new_module);
     sema_module_link_project(new_module, project);
     if (force_internal) {

@@ -1,11 +1,7 @@
 #include "while.h"
 #include "core/mempool.h"
 #include "core/null.h"
-#include "ir/api/ir.h"
-#include "ir/api/stmt/code.h"
-#include "ir/stmt/code.h"
-#include "ir/stmt/expr.h"
-#include "ir/stmt/stmt.h"
+#include "hir/api/hir.h"
 #include "sema/module/api/value.h"
 #include "sema/module/module.h"
 #include "sema/module/scope.h"
@@ -22,31 +18,29 @@ bool sema_module_emit_stmt_while(SemaModule *module, AstWhile *while_loop) {
         return false;
     }
 
-    IrLoopId id = ir_func_add_loop(module->ir, module->ss->func_id);
+    HirLoopId id = hir_fun_add_loop(module->hir, module->ss->func_id);
     SemaLoop loop = while_loop->label.has ?
         sema_loop_new_labeled(id, while_loop->label.name) :
         sema_loop_new(id);
-    IrCode *code = NOT_NULL(sema_module_emit_code(module, while_loop->body, &loop));
+    HirCode *code = NOT_NULL(sema_module_emit_code(module, while_loop->body, &loop));
 
-    IrCode *break_loop = ir_code_new(module->mempool, vec_create_in(module->mempool, 
-        ir_stmt_new_break(module->mempool, id)
-    ));
+    HirCode *break_loop = hir_code_new(module->mempool, vec_create_in(module->mempool, hir_stmt_new_break(id)));
 
     if (while_loop->is_do_while) {
-        sema_expr_output_push_step(&output, ir_expr_step_new_not(sema_expr_output_last_id(&output)));
+        sema_expr_output_push_step(&output, hir_expr_step_new_not(sema_expr_output_last_id(&output)));
         vec_push(code->stmts, 
-            ir_stmt_new_cond_jmp(module->mempool, vec_create_in(module->mempool,
-                ir_stmt_cond_jmp_block(sema_expr_output_collect(&output), break_loop),
+            hir_stmt_new_cond_jmp(vec_create_in(module->mempool,
+                hir_stmt_cond_jmp_block(sema_expr_output_collect(&output), break_loop),
             ), NULL)
         );
     } else {
-        IrStmtCondJmpBlock *conds = vec_create_in(module->mempool,
-            ir_stmt_cond_jmp_block(sema_expr_output_collect(&output), code),
+        HirStmtCondJmpBlock *conds = vec_create_in(module->mempool,
+            hir_stmt_cond_jmp_block(sema_expr_output_collect(&output), code),
         );
-        code = ir_code_new(module->mempool, vec_create_in(module->mempool, 
-            ir_stmt_new_cond_jmp(module->mempool, conds, break_loop)
+        code = hir_code_new(module->mempool, vec_create_in(module->mempool, 
+            hir_stmt_new_cond_jmp(conds, break_loop)
         ));
     }
-    sema_ss_append_stmt(module->ss, ir_stmt_new_loop(module->mempool, id, code));
+    sema_ss_append_stmt(module->ss, hir_stmt_new_loop(id, code));
     return true;
 }

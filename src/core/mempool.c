@@ -1,5 +1,6 @@
 #include "core/mempool.h"
 #include "core/arena.h"
+#include "core/opt_slice.h"
 #include "core/vec.h"
 #include <stdalign.h>
 #include <stdlib.h>
@@ -41,12 +42,16 @@ void mempool_add_keymap(Mempool *mempool, void *keymap) {
     }
 }
 
-char *mempool_slice_to_cstr(Mempool *mempool, Slice slice) {
+inline char *mempool_slice_to_cstr(Mempool *mempool, Slice slice) {
     char *result = vec_new_in(mempool, char);
     vec_resize(result, slice.length + 1);
     memcpy(result, slice.value, slice.length);
     result[slice.length] = '\0';
     return result;
+}
+
+char *mempool_opt_slice_to_cstr_or(Mempool *mempool, OptSlice opt, char *or) {
+    return opt.has_value ? mempool_slice_to_cstr(mempool, opt.slice) : or;
 }
 
 void *__mempool_alloc(Mempool *mempool, size_t size, size_t align) {

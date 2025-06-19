@@ -17,6 +17,25 @@
 #include "parser/parser.h"
 #include <stdio.h>
 
+static inline AstExpr *parse_binop_additions(Parser *parser, AstExpr *expr) {
+    bool reading = true;
+    while (reading) {
+        Token token = parser_take(parser);
+        switch (token.kind) {
+            case TOKEN_AS: {
+                AstType *type = NOT_NULL(parse_type(parser));
+                expr = ast_expr_new_as(parser->mempool, slice_union(expr->slice, type->slice), token.slice, expr, type);
+                break;
+            }
+            default:
+                parser_skip_next(parser);
+                reading = false;
+                break;
+        }
+    }
+    return expr;
+}
+
 static inline AstExpr *parse_expr_additions(Parser *parser, AstExpr *expr) {
     bool reading = true;
     while (reading) {
@@ -38,11 +57,6 @@ static inline AstExpr *parse_expr_additions(Parser *parser, AstExpr *expr) {
                 }
                 Slice slice = PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_CIRCLE_BRACE).slice;
                 expr = ast_expr_new_callable(parser->mempool, slice_union(expr->slice, slice), expr, args);
-                break;
-            }
-            case TOKEN_AS: {
-                AstType *type = NOT_NULL(parse_type(parser));
-                expr = ast_expr_new_as(parser->mempool, slice_union(expr->slice, type->slice), token.slice, expr, type);
                 break;
             }
             case TOKEN_DOT: {
@@ -154,6 +168,10 @@ static AstExpr *parse_middle_expr(Parser *parser) {
     return parse_expr_additions(parser, NOT_NULL(_parse_middle_expr(parser)));
 }
 
+static AstExpr *parse_simple_expr(Parser *parser) {
+    return parse_binop_additions(parser, NOT_NULL(parse_middle_expr(parser)));
+}
+
 static int get_binop_kind_priority(AstBinopKindKind kind) {
     switch (kind) {
         case AST_BINOP_OR: return -100;
@@ -200,7 +218,7 @@ static inline void swap_binop_prioritized(AstExpr *expr) {
 }
 
 static inline AstExpr *create_expr_lprioritized(Parser *parser, Slice slice, AstBinopKindKind kind, AstExpr *left) {
-    AstExpr *right = NOT_NULL(parse_middle_expr(parser));
+    AstExpr *right = NOT_NULL(parse_simple_expr(parser));
     AstExpr *result = ast_expr_new_binop(parser->mempool, slice_union(left->slice, right->slice),
         ast_binop_kind_new(kind, slice), left, right);
     swap_binop_prioritized(result);
@@ -239,5 +257,5 @@ static inline AstExpr *parse_post_expr(Parser *parser, AstExpr *expr) {
 }
 
 AstExpr *parse_expr(Parser *parser) {
-    return parse_post_expr(parser, NOT_NULL(parse_middle_expr(parser)));
+    return parse_post_expr(parser, NOT_NULL(parse_simple_expr(parser)));
 }

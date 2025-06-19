@@ -1,11 +1,10 @@
 #include "body.h"
 #include "ast/body.h"
 #include "ast/node.h"
-#include "ir/stmt/code.h"
 #include "sema/module/module.h"
 #include "sema/module/stages/stages.h"
 
-IrCode *sema_module_emit_code(SemaModule *module, AstBody *body, SemaLoop *loop) {
+HirCode *sema_module_emit_code(SemaModule *module, AstBody *body, SemaLoop *loop) {
     sema_module_push_scope(module, loop);
     Slice unreachable;
     bool is_unreachable = false;
@@ -30,7 +29,7 @@ IrCode *sema_module_emit_code(SemaModule *module, AstBody *body, SemaLoop *loop)
     if (!sema_module_scope_breaks(module)) {
         sema_module_emit_current_defers(module);
     }
-    IrStmt **stmts = sema_ss_get_stmts(module->ss);
+    HirStmt *stmts = sema_ss_get_stmts(module->ss);
     sema_module_pop_scope(module);
-    return ir_code_new(module->mempool, stmts);
+    return hir_code_new(module->mempool, stmts);
 }

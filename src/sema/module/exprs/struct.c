@@ -31,7 +31,7 @@ SemaValue *sema_module_emit_expr_struct(SemaModule *module, AstExprStructConstru
                 sema_module_err(module, field->value.expr->slice,
                     "cannot set expression of type $t to field struct of type $t", runtime->type, field_type);
             }
-            fields[i] = sema_module_expr_emit_runtime(module->mempool, runtime, ctx.output);
+            fields[i] = sema_module_expr_emit_runtime(runtime, ctx.output);
         } else {
             sema_module_err(module, field->key, "there is no such field in specified struct");
         }
@@ -40,7 +40,7 @@ SemaValue *sema_module_emit_expr_struct(SemaModule *module, AstExprStructConstru
         sema_module_err(module, structure->type->slice, "there is $l fields in structure, but only $l were initialized",
                 vec_len(type->structure.fields_map), vec_len(structure->fields_map));
     }
-    size_t step_id = sema_expr_output_push_step(ctx.output, ir_expr_step_new_build_struct(sema_type_ir_id(type), fields));
+    size_t step_id = sema_expr_output_push_step(ctx.output, hir_expr_step_new_build_struct(sema_type_hir_id(type), fields));
     return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, type, step_id);
 }
 

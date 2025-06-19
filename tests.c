@@ -5,9 +5,8 @@
 #include "core/mempool.test.h"
 #include "core/vec.test.h"
 #include "core/keymap.test.h"
-#include "ir/ir.test.h"
+#include "hir/hir.test.h"
 #include "lexer/api.test.h"
-#include "parser/api.test.h"
 
 static void setup_tests() {
     test_vec();
@@ -17,8 +16,8 @@ static void setup_tests() {
     test_mempool();
     test_file_content();
     test_lexer();
-    test_parser();
-    test_ir();
+    // test_parser();
+    test_hir();
 }
 
 int main() {

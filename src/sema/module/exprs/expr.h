@@ -2,11 +2,11 @@
 
 #include "ast/api/expr.h"
 #include "core/mempool.h"
-#include "ir/stmt/expr.h"
+#include "hir/api/expr.h"
 #include "sema/module/api/value.h"
 
 typedef struct {
-    IrExprStep *steps;
+    HirExprStep *steps;
 } SemaExprOutput;
 
 typedef struct {
@@ -14,13 +14,13 @@ typedef struct {
     SemaType *expectation;
 } SemaExprCtx;
 
-static inline SemaExprOutput sema_expr_output_new_with(IrExprStep *steps) {
+static inline SemaExprOutput sema_expr_output_new_with(HirExprStep *steps) {
     SemaExprOutput output = { .steps = steps };
     return output;
 }
 
 static inline SemaExprOutput sema_expr_output_new(Mempool *mempool) {
-    return sema_expr_output_new_with(vec_new_in(mempool, IrExprStep));
+    return sema_expr_output_new_with(vec_new_in(mempool, HirExprStep));
 }
 
 static inline SemaExprCtx sema_expr_ctx_new(SemaExprOutput *output, SemaType *expectation) {
@@ -31,10 +31,10 @@ static inline SemaExprCtx sema_expr_ctx_new(SemaExprOutput *output, SemaType *ex
     return ctx;
 }
 
-size_t sema_module_expr_emit_runtime(Mempool *mempool, SemaValueRuntime *runtime, SemaExprOutput *output);
-size_t sema_expr_output_push_step(SemaExprOutput *output, IrExprStep step);
+size_t sema_module_expr_emit_runtime(SemaValueRuntime *runtime, SemaExprOutput *output);
+size_t sema_expr_output_push_step(SemaExprOutput *output, HirExprStep step);
 size_t sema_expr_output_last_id(SemaExprOutput *output);
-IrExpr sema_expr_output_collect(SemaExprOutput *output);
+HirExpr sema_expr_output_collect(SemaExprOutput *output);
 
 SemaValue *sema_module_emit_expr(SemaModule *module, AstExpr *expr, SemaExprCtx ctx);
 SemaValueRuntime *sema_module_emit_runtime_expr(SemaModule *module, AstExpr *expr, SemaExprCtx ctx);

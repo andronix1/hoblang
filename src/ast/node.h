@@ -9,8 +9,7 @@
 #include "ast/type.h"
 #include "core/mempool.h"
 #include "core/slice.h"
-#include "ir/api/func.h"
-#include "ir/api/local.h"
+#include "hir/api/func.h"
 #include "sema/module/api/type.h"
 
 typedef enum {
@@ -64,7 +63,7 @@ typedef struct {
     AstBody *body;
 
     struct {
-        IrFuncId func_id;
+        HirFuncId func_id;
         SemaType *type;
     } sema;
 } AstFunDecl;
@@ -90,8 +89,8 @@ typedef struct {
     struct {
         SemaType *type;
         union {
-            IrLocalId local_id;
-            IrDeclId decl_id;
+            HirLocalId local_id;
+            HirDeclId decl_id;
         };
     } sema;
 } AstValueDecl;

@@ -9,10 +9,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-SemaModule *sema_module_new(Ir *ir, Parser *parser) {
+SemaModule *sema_module_new(Hir *ir, Parser *parser) {
     AstNode **nodes = NOT_NULL(parser_parse(parser));
     SemaModule *module = malloc(sizeof(SemaModule));
-    module->ir = ir;
+    module->hir = ir;
     module->parser = parser;
     module->nodes = nodes;
     module->failed = false;

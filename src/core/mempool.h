@@ -2,6 +2,7 @@
 
 #include <stddef.h>
 #include <stdalign.h>
+#include "core/opt_slice.h"
 #include "core/vec.h"
 #include "core/keymap.h"
 
@@ -11,6 +12,7 @@ Mempool *mempool_new(size_t cap);
 void mempool_add_vec(Mempool *mempool, void *vec);
 void mempool_add_keymap(Mempool *mempool, void *keymap);
 char *mempool_slice_to_cstr(Mempool *mempool, Slice slice);
+char *mempool_opt_slice_to_cstr_or(Mempool *mempool, OptSlice opt, char *or);
 void *__mempool_alloc(Mempool *mempool, size_t size, size_t align);
 void mempool_free(Mempool *mempool);
 

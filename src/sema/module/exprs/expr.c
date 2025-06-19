@@ -3,7 +3,6 @@
 #include "core/assert.h"
 #include "core/null.h"
 #include "core/vec.h"
-#include "ir/stmt/expr.h"
 #include "sema/module/api/value.h"
 #include "sema/module/exprs/array.h"
 #include "sema/module/exprs/as.h"
@@ -50,22 +49,21 @@ SemaValue *sema_module_emit_expr(SemaModule *module, AstExpr *expr, SemaExprCtx 
     UNREACHABLE;
 }
 
-size_t sema_module_expr_emit_runtime(Mempool *mempool, SemaValueRuntime *runtime, SemaExprOutput *output) {
+size_t sema_module_expr_emit_runtime(SemaValueRuntime *runtime, SemaExprOutput *output) {
     switch (runtime->val_kind) {
         case SEMA_VALUE_RUNTIME_GLOBAL:
-            return sema_expr_output_push_step(output, ir_expr_step_new_get_decl(runtime->global_id));
+            return sema_expr_output_push_step(output, hir_expr_step_new_get_decl(runtime->global_id));
         case SEMA_VALUE_RUNTIME_LOCAL:
-            return sema_expr_output_push_step(output, ir_expr_step_new_get_local(runtime->global_id));
+            return sema_expr_output_push_step(output, hir_expr_step_new_get_local(runtime->global_id));
         case SEMA_VALUE_RUNTIME_CONST:
-            return sema_expr_output_push_step(output, ir_expr_step_new_const(sema_const_to_ir(mempool,
-                runtime->constant)));
+            return sema_expr_output_push_step(output, hir_expr_step_new_const(sema_const_to_hir(runtime->constant)));
         case SEMA_VALUE_RUNTIME_EXPR_STEP:
             return runtime->in_expr_id.step_id;
     }
     UNREACHABLE;
 }
 
-size_t sema_expr_output_push_step(SemaExprOutput *output, IrExprStep step) {
+size_t sema_expr_output_push_step(SemaExprOutput *output, HirExprStep step) {
     if (!output) return 0;
     vec_push(output->steps, step);
     return vec_len(output->steps) - 1;
@@ -76,14 +74,14 @@ size_t sema_expr_output_last_id(SemaExprOutput *output) {
     return vec_len(output->steps) - 1;
 }
 
-IrExpr sema_expr_output_collect(SemaExprOutput *output) {
+HirExpr sema_expr_output_collect(SemaExprOutput *output) {
     assert(output);
-    return ir_expr_new(output->steps);
+    return hir_expr_new(output->steps);
 }
 
 SemaValueRuntime *sema_module_emit_runtime_expr(SemaModule *module, AstExpr *expr, SemaExprCtx ctx) {
     SemaValue *value = NOT_NULL(sema_module_emit_expr(module, expr, ctx)); 
     SemaValueRuntime *runtime = NOT_NULL(sema_value_should_be_runtime(module, expr->slice, value));
-    sema_module_expr_emit_runtime(module->mempool, runtime, ctx.output);
+    sema_module_expr_emit_runtime(runtime, ctx.output);
     return runtime;
 }

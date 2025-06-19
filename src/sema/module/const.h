@@ -15,10 +15,10 @@ typedef struct SemaConst {
     union {
         uint64_t integer;
         long double float_value;
-        IrDeclId func_decl;
+        HirDeclId func_decl;
     };
 } SemaConst;
 
 SemaConst *sema_const_new_integer(Mempool *mempool, SemaType *type, uint64_t integer);
 SemaConst *sema_const_new_float(Mempool *mempool, SemaType *type, long double value);
-SemaConst *sema_const_new_func(Mempool *mempool, SemaType *type, IrDeclId decl);
+SemaConst *sema_const_new_func(Mempool *mempool, SemaType *type, HirDeclId decl);

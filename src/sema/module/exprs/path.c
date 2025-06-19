@@ -3,7 +3,6 @@
 #include "core/assert.h"
 #include "core/null.h"
 #include "core/vec.h"
-#include "ir/stmt/expr.h"
 #include "sema/module/api/value.h"
 #include "sema/module/ast/path.h"
 #include "sema/module/const.h"
@@ -22,7 +21,7 @@ static SemaValue *sema_module_analyze_expr_path_deref(SemaModule *module, SemaVa
         return NULL;
     }
     size_t step_id = sema_expr_output_push_step(output,
-        ir_expr_step_new_deref(sema_module_expr_emit_runtime(module->mempool, runtime, output)));
+        hir_expr_step_new_deref(sema_module_expr_emit_runtime(runtime, output)));
     return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_VAR, runtime->type->pointer_to, step_id);
 }
 
@@ -33,12 +32,12 @@ static SemaValue *sema_module_analyze_expr_path_ident(SemaModule *module, SemaVa
     }
     SemaValueRuntime *runtime = sema_value_is_runtime(value);
     if (runtime) {
-        size_t of = sema_module_expr_emit_runtime(module->mempool, runtime, output);
+        size_t of = sema_module_expr_emit_runtime(runtime, output);
         SemaType *type = sema_type_resolve(runtime->type);
         if (type->kind == SEMA_TYPE_STRUCTURE) {
             size_t idx = keymap_get_idx(type->structure.fields_map, ident);
             if (idx != (size_t)-1) {
-                size_t step_id = sema_expr_output_push_step(output, ir_expr_step_new_struct_field(idx, of));
+                size_t step_id = sema_expr_output_push_step(output, hir_expr_step_new_struct_field(idx, of));
                 keymap_at(type->structure.fields_map, idx, field);
                 return sema_value_new_runtime_expr_step(module->mempool, runtime->kind, field->value.type, step_id);
             }
@@ -53,11 +52,13 @@ static SemaValue *sema_module_analyze_expr_path_ident(SemaModule *module, SemaVa
         if (decl) {
             SemaValueRuntime *decl_runtime = sema_value_is_runtime(decl->value);
             if (decl_runtime) {
-                size_t step_id = sema_module_expr_emit_runtime(module->mempool, decl_runtime, output);
+                size_t step_id = sema_module_expr_emit_runtime(decl_runtime, output);
                 return sema_value_new_runtime_ext_expr_step(module->mempool, decl_runtime->kind,
                     decl_runtime->type, step_id, of);
             }
         }
+        sema_module_err(module, ident, "cannot find `$S` in value of type $t", ident, runtime->type);
+        return NULL;
     }
     sema_module_err(module, ident, "cannot find `$S` in $v", ident, value);
     return NULL;
@@ -86,8 +87,8 @@ SemaValue *sema_module_emit_expr_path_from(SemaModule *module, SemaValue *value,
                     return NULL;
                 }
                 SemaType *usize = sema_module_std_usize(module, segment->slice);
-                size_t step_id = sema_expr_output_push_step(ctx.output, ir_expr_step_new_sizeof(
-                    sema_type_ir_id(type), sema_type_ir_id(usize)));
+                size_t step_id = sema_expr_output_push_step(ctx.output, hir_expr_step_new_sizeof(
+                    sema_type_hir_id(type), sema_type_hir_id(usize)));
                 value = sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, usize, step_id);
                 break;
             }

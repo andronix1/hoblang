@@ -2,4 +2,5 @@
 
 #include "llvm/module/api.h"
 
-void llvm_emit_func_body(LlvmModule *module, IrFuncId id);
+void llvm_setup_func(LlvmModule *module, HirFuncId id, HirDeclId decl);
+void llvm_emit_func(LlvmModule *module, HirFuncId id, HirDeclId decl);
