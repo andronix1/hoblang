@@ -146,7 +146,7 @@ static bool cmd_emit(Mempool *mempool, CmdEmit *emit) {
     } while (0)
 
 static inline void cmd_help_sources() {
-    FLAG_VALUE("libDhirs", "lib1,lib2,...", "add library search dhirectories");
+    FLAG_VALUE("libDirs", "lib1,lib2,...", "add library search dhirectories");
 }
 
 static bool cmd_help(char *exe) {
