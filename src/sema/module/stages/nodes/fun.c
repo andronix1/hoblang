@@ -1,5 +1,6 @@
 #include "fun.h"
 #include "core/null.h"
+#include "sema/module/ast/global.h"
 #include "sema/module/const.h"
 #include "sema/module/decl.h"
 #include "sema/module/stages/nodes/fun_info.h"
@@ -27,10 +28,8 @@ bool sema_module_stage_fill_fun(SemaModule *module, AstFunDecl *func) {
 
     HirFuncId func_id = func->sema.func_id;
     hir_init_decl_func(module->hir, decl_id, func_id);
-    hir_init_fun(module->hir, func_id, args_mut,
-        hir_func_info_new(module->mempool, func->global ?
-            opt_slice_new_value(func->global->has_alias ? func->global->alias : func->info->name) :
-            opt_slice_new_null()));
+    hir_init_fun(module->hir, func_id, args_mut, hir_func_info_new(module->mempool,
+        sema_global_to_opt_slice(func->global, func->info->name)));
     return true;
 }
 

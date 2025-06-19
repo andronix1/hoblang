@@ -43,10 +43,7 @@ typedef struct {
     AstExpr *cond;
     AstBody *body;
     bool is_do_while;
-    struct {
-        bool has;
-        Slice name;
-    } label;
+    OptSlice label;
 } AstWhile;
 
 typedef struct {
@@ -122,5 +119,4 @@ AstStmt *ast_stmt_new_assign(Mempool *mempool, AstExpr *dst, AstExpr *what);
 AstStmt *ast_stmt_new_short_assign(Mempool *mempool, AstExpr *dst, AstExpr *what, AstBinopKind binop);
 AstStmt *ast_stmt_new_return(Mempool *mempool, Slice slice, AstExpr *value);
 AstStmt *ast_stmt_new_if(Mempool *mempool, AstCondBlock *conds, AstBody *else_body);
-AstStmt *ast_stmt_new_while(Mempool *mempool, AstExpr *expr, AstBody *body, bool is_do_while);
-AstStmt *ast_stmt_new_while_labeled(Mempool *mempool, AstExpr *expr, AstBody *body, bool is_do_while, Slice label);
+AstStmt *ast_stmt_new_while(Mempool *mempool, AstExpr *expr, AstBody *body, bool is_do_while, OptSlice label);

@@ -9,23 +9,13 @@
 
 typedef struct {
     HirLoopId id;
-    bool is_labeled;
-    Slice label;
+    OptSlice label;
 } SemaLoop;
 
-static inline SemaLoop sema_loop_new(HirLoopId id) {
+static inline SemaLoop sema_loop_new(HirLoopId id, OptSlice label) {
     SemaLoop loop = {
         .id = id,
-        .is_labeled = false,
-    };
-    return loop;
-}
-
-static inline SemaLoop sema_loop_new_labeled(HirLoopId id, Slice label) {
-    SemaLoop loop = {
-        .id = id,
-        .is_labeled = true,
-        .label = label
+        .label = label,
     };
     return loop;
 }

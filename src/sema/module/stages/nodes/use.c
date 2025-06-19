@@ -16,7 +16,7 @@ static void sema_module_push_module_path(SemaModule *module, SemaModule *current
     } else {
         SemaDecl *decl = RET_ON_NULL(sema_module_resolve_req_decl_from(current_module, module, path->single.decl_name));
         SemaDecl *aliased = sema_decl_new(module->mempool, is_public ? NULL : module, decl->value);
-        sema_module_push_decl(module, path->single.has_alias ? path->single.alias : path->single.decl_name, aliased);
+        sema_module_push_decl(module, opt_slice_unwrap_or(path->single.alias, path->single.decl_name), aliased);
     }
 }
 

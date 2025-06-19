@@ -1,12 +1,12 @@
 #include "value.h"
 #include "core/assert.h"
 #include "core/null.h"
-#include "core/opt_slice.h"
 #include "hir/api/hir.h"
 #include "hir/api/var.h"
 #include "sema/module/api/const.h"
 #include "sema/module/api/type.h"
 #include "sema/module/api/value.h"
+#include "sema/module/ast/global.h"
 #include "sema/module/ast/type.h"
 #include "sema/module/decl.h"
 #include "sema/module/exprs/expr.h"
@@ -54,9 +54,9 @@ bool sema_module_stage_fill_global(SemaModule *module, AstValueDecl *value_decl)
     switch (info->kind) {
         case AST_VALUE_DECL_VAR: {
             HirDeclId decl_id = hir_add_decl(module->hir);
-            HirVarId var_id = value_decl->sema.var_id = hir_add_var(module->hir, hir_var_info_new(value_decl->global ?
-                opt_slice_new_value(value_decl->global->has_alias ? value_decl->global->alias : value_decl->info->name) :
-                opt_slice_new_null(), sema_type_hir_id(value_decl->sema.type)));
+            HirVarId var_id = value_decl->sema.var_id = hir_add_var(module->hir, hir_var_info_new(
+                sema_global_to_opt_slice(value_decl->global, value_decl->info->name),
+                sema_type_hir_id(value_decl->sema.type)));
             hir_init_decl_var(module->hir, decl_id, var_id);
             sema_module_push_decl(module, value_decl->info->name, sema_decl_new(module->mempool,
                 value_decl->info->is_public ? NULL : module, sema_value_new_runtime_global(module->mempool, 

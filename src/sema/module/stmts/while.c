@@ -19,9 +19,7 @@ bool sema_module_emit_stmt_while(SemaModule *module, AstWhile *while_loop) {
     }
 
     HirLoopId id = hir_fun_add_loop(module->hir, module->ss->func_id);
-    SemaLoop loop = while_loop->label.has ?
-        sema_loop_new_labeled(id, while_loop->label.name) :
-        sema_loop_new(id);
+    SemaLoop loop = sema_loop_new(id, while_loop->label);
     HirCode *code = NOT_NULL(sema_module_emit_code(module, while_loop->body, &loop));
 
     HirCode *break_loop = hir_code_new(module->mempool, vec_create_in(module->mempool, hir_stmt_new_break(id)));

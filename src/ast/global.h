@@ -1,12 +1,10 @@
 #pragma once
 
 #include "core/mempool.h"
-#include "core/slice.h"
+#include "core/opt_slice.h"
 
 typedef struct AstGlobal {
-    bool has_alias;
-    Slice alias;
+    OptSlice alias;
 } AstGlobal;
 
-AstGlobal *ast_global_new(Mempool *mempool);
-AstGlobal *ast_global_new_with_alias(Mempool *mempool, Slice alias);
+AstGlobal *ast_global_new(Mempool *mempool, OptSlice alias);

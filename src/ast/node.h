@@ -103,8 +103,7 @@ typedef struct {
     bool is_public;
     AstExternalDeclKind kind;
 
-    bool has_alias;
-    Slice alias;
+    OptSlice alias;
 
     union {
         AstValueInfo *value;
@@ -123,14 +122,12 @@ typedef struct AstModulePath {
 
         struct {
             Slice decl_name;
-            bool has_alias;
-            Slice alias;
+            OptSlice alias;
         } single;
     };
 } AstModulePath;
 
-AstModulePath *ast_module_path_single(Mempool *mempool, Slice *module_path, Slice decl_name);
-AstModulePath *ast_module_path_single_alias(Mempool *mempool, Slice *module_path, Slice decl_name, Slice alias);
+AstModulePath *ast_module_path_single(Mempool *mempool, Slice *module_path, Slice decl_name, OptSlice alias);
 AstModulePath *ast_module_path_combined(Mempool *mempool, Slice *module_path, AstModulePath **paths);
 
 typedef struct {
@@ -195,8 +192,8 @@ AstValueInfo *ast_value_info_new(Mempool *mempool,
 AstNode *ast_node_new_type_decl(Mempool *mempool, bool is_public, Slice name, AstGeneric *generics, AstType *type);
 AstNode *ast_node_new_fun_decl(Mempool *mempool, AstGlobal *global, AstFunInfo *info, AstBody *body);
 AstNode *ast_node_new_value_decl(Mempool *mempool, AstGlobal *global, AstValueInfo *info, AstExpr *initializer);
-AstNode *ast_node_new_external_value(Mempool *mempool, AstValueInfo *info, bool has_alias, Slice alias);
-AstNode *ast_node_new_external_fun(Mempool *mempool, AstFunInfo *info, bool has_alias, Slice alias);
+AstNode *ast_node_new_external_value(Mempool *mempool, AstValueInfo *info, OptSlice alias);
+AstNode *ast_node_new_external_fun(Mempool *mempool, AstFunInfo *info, OptSlice alias);
 AstNode *ast_node_new_use(Mempool *mempool, bool is_public, AstModulePath *path);
 AstNode *ast_node_new_import_module(Mempool *mempool, bool is_public, Slice path_slice, Slice path);
 AstNode *ast_node_new_import_module_alias(Mempool *mempool, bool is_public, Slice path_slice, Slice path, Slice alias);

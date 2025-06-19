@@ -8,6 +8,7 @@
 #include "core/assert.h"
 #include "core/mempool.h"
 #include "core/null.h"
+#include "core/opt_slice.h"
 #include "core/slice.h"
 #include "core/vec.h"
 #include "lexer/token.h"
@@ -59,9 +60,9 @@ static AstModulePath *parse_module_path(Parser *parser) {
     }
     if (parser_next_should_be(parser, TOKEN_AS)) {
         Slice alias = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
-        return ast_module_path_single_alias(parser->mempool, module_path, ident, alias);
+        return ast_module_path_single(parser->mempool, module_path, ident, opt_slice_new_value(alias));
     }
-    return ast_module_path_single(parser->mempool, module_path, ident);
+    return ast_module_path_single(parser->mempool, module_path, ident, opt_slice_new_null());
 }
 
 static AstNode *parser_next_maybe_public(Parser *parser, Token token, bool is_public) {
@@ -154,20 +155,15 @@ static AstNode *parser_next_full(Parser *parser, Token token) {
             PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
             return ast_node_new_stmt(parser->mempool, stmt);
         case TOKEN_DO: {
-            bool labeled = parser_next_should_be(parser, TOKEN_DOT);
-            Slice label;
-            if (labeled) {
-                label = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
+            OptSlice label = opt_slice_new_null();
+            if (parser_next_should_be(parser, TOKEN_DOT)) {
+                label = opt_slice_new_value(PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice);
             }
             AstBody *body = NOT_NULL(parse_body(parser));
             PARSER_EXPECT_NEXT(parser, TOKEN_WHILE);
             AstExpr *cond = NOT_NULL(parse_expr(parser));
             PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
-            return ast_node_new_stmt(parser->mempool,
-                labeled ?
-                    ast_stmt_new_while_labeled(parser->mempool, cond, body, true, label) :
-                    ast_stmt_new_while(parser->mempool, cond, body, true)
-            );
+            return ast_node_new_stmt(parser->mempool, ast_stmt_new_while(parser->mempool, cond, body, true, label));
         }
         case TOKEN_RETURN: {
             AstExpr *value = parser_next_is(parser, TOKEN_SEMICOLON) ? NULL : NOT_NULL(parse_expr(parser));
@@ -185,18 +181,13 @@ static AstNode *parser_next_full(Parser *parser, Token token) {
         }
         case TOKEN_IF: return parse_if(parser);
         case TOKEN_WHILE: {
-            bool labeled = parser_next_should_be(parser, TOKEN_DOT);
-            Slice label;
-            if (labeled) {
-                label = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
+            OptSlice label = opt_slice_new_null();
+            if (parser_next_should_be(parser, TOKEN_DOT)) {
+                label = opt_slice_new_value(PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice);
             }
             AstExpr *cond = NOT_NULL(parse_expr(parser));
             AstBody *body = NOT_NULL(parse_body(parser));
-            return ast_node_new_stmt(parser->mempool,
-                labeled ?
-                    ast_stmt_new_while_labeled(parser->mempool, cond, body, false, label) :
-                    ast_stmt_new_while(parser->mempool, cond, body, false)
-            );
+            return ast_node_new_stmt(parser->mempool, ast_stmt_new_while(parser->mempool, cond, body, false, label));
         }
         case TOKEN_CONTINUE: {
             AstLoopControl output;

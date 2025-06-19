@@ -12,23 +12,6 @@
 #include "core/vec.h"
 #include "core/mempool.h"
 #include <stdio.h>
-
-AstModulePath *ast_module_path_single(Mempool *mempool, Slice *module_path, Slice decl_name)
-    MEMPOOL_CONSTRUCT(AstModulePath,
-        out->module_path = module_path;
-        out->is_combined = false;
-        out->single.has_alias = false;
-        out->single.decl_name = decl_name;
-    )
-
-AstModulePath *ast_module_path_single_alias(Mempool *mempool, Slice *module_path, Slice decl_name, Slice alias)
-    MEMPOOL_CONSTRUCT(AstModulePath,
-        out->module_path = module_path;
-        out->is_combined = false;
-        out->single.has_alias = true;
-        out->single.decl_name = decl_name;
-        out->single.alias = alias;
-    )
     
 AstModulePath *ast_module_path_combined(Mempool *mempool, Slice *module_path, AstModulePath **paths)
     MEMPOOL_CONSTRUCT(AstModulePath,
@@ -37,15 +20,21 @@ AstModulePath *ast_module_path_combined(Mempool *mempool, Slice *module_path, As
         out->paths = paths;
     )
 
+AstModulePath *ast_module_path_single(Mempool *mempool, Slice *module_path, Slice decl_name, OptSlice alias)
+    MEMPOOL_CONSTRUCT(AstModulePath,
+        out->module_path = module_path;
+        out->is_combined = false;
+        out->single.alias = alias;
+        out->single.decl_name = decl_name;
+    )
+
 #define CONSTRUCT(KIND, FIELDS) MEMPOOL_CONSTRUCT(AstNode, { \
     out->kind = KIND; \
     FIELDS; \
 })
 
 bool ast_global_eq(const AstGlobal *a, const AstGlobal *b) {
-    return
-        a->has_alias == b->has_alias &&
-        (!a->has_alias || slice_eq(a->alias, b->alias));
+    return opt_slice_eq(&a->alias, &b->alias);
 }
 
 bool ast_generic_eq(const AstGeneric *a, const AstGeneric *b) {
@@ -101,10 +90,7 @@ bool ast_module_paths_eq(const AstModulePath *a, const AstModulePath *b) {
         }
         return true;
     } else {
-        if (a->single.has_alias != b->single.has_alias || !slice_eq(a->single.decl_name, b->single.decl_name)) {
-            return false;
-        }
-        return !a->single.has_alias || slice_eq(a->single.alias, b->single.alias);
+        return opt_slice_eq(&a->single.alias, &b->single.alias);
     }
 }
 
@@ -277,18 +263,16 @@ AstNode *ast_node_new_value_decl(Mempool *mempool,
         out->value_decl.initializer = initializer;
     )
 
-AstNode *ast_node_new_external_value(Mempool *mempool, AstValueInfo *info, bool has_alias, Slice alias)
+AstNode *ast_node_new_external_value(Mempool *mempool, AstValueInfo *info, OptSlice alias)
     CONSTRUCT(AST_NODE_EXTERNAL_DECL,
         out->external_decl.kind = AST_EXTERNAL_DECL_VALUE;
         out->external_decl.value = info;
-        out->external_decl.has_alias = has_alias;
         out->external_decl.alias = alias;
     )
 
-AstNode *ast_node_new_external_fun(Mempool *mempool, AstFunInfo *info, bool has_alias, Slice alias)
+AstNode *ast_node_new_external_fun(Mempool *mempool, AstFunInfo *info, OptSlice alias)
     CONSTRUCT(AST_NODE_EXTERNAL_DECL,
         out->external_decl.kind = AST_EXTERNAL_DECL_FUN;
         out->external_decl.fun = info;
-        out->external_decl.has_alias = has_alias;
         out->external_decl.alias = alias;
     )

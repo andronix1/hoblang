@@ -28,7 +28,7 @@ HirLoopId *sema_ss_labeled_loop(SemaScopeStack *ss, Slice label) {
     for (ssize_t i = (ssize_t)vec_len(ss->scopes) - 1; i >= 0; i--) {
         SemaLoop *loop = ss->scopes[i].loop;
         if (!loop) continue;
-        if (loop->is_labeled && slice_eq(label, loop->label)) {
+        if (loop->label.has_value && slice_eq(label, loop->label.slice)) {
             return &loop->id;
         }
     }

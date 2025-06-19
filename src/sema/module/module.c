@@ -88,8 +88,8 @@ SemaDecl *sema_module_resolve_req_decl_from(SemaModule *module, SemaModule *from
 
 void sema_module_push_scope(SemaModule *module, SemaLoop *loop) {
     assert(module->ss);
-    if (loop && loop->is_labeled && sema_ss_labeled_loop(module->ss, loop->label)) {
-        sema_module_err(module, loop->label, "labeled loop `$S` already exists", loop->label);
+    if (loop && loop->label.has_value && sema_ss_labeled_loop(module->ss, loop->label.slice)) {
+        sema_module_err(module, loop->label.slice, "labeled loop `$S` already exists", loop->label);
         loop = NULL;
     }
     sema_ss_push_scope(module->ss, loop, module->mempool);
