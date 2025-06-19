@@ -16,7 +16,7 @@ bool sema_module_emit_stmt_if(SemaModule *module, AstIf *if_else) {
         AstCondBlock *block = &if_else->conds[i];
         SemaExprOutput output = sema_expr_output_new(module->mempool);
         SemaType *boolean = sema_type_new_bool(module);
-        SemaValueRuntime *runtime = NOT_NULL(sema_module_emit_runtime_expr(module,
+        SemaValueRuntime *runtime = NOT_NULL(sema_module_emit_runtime_expr_full(module,
             block->cond, sema_expr_ctx_new(&output, boolean)));
         if (!sema_type_eq(boolean, runtime->type)) {
             sema_module_err(module, block->cond->slice, "only booleans can be used in if statement conditions, but $t passed", runtime->type);

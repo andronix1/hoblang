@@ -13,7 +13,7 @@ bool sema_module_emit_stmt_return(SemaModule *module, AstReturn *ret) {
     }
 
     SemaExprOutput output = sema_expr_output_new(module->mempool);
-    SemaValueRuntime *runtime = NOT_NULL(sema_module_emit_runtime_expr(module, ret->value,
+    SemaValueRuntime *runtime = NOT_NULL(sema_module_emit_runtime_expr_full(module, ret->value,
         sema_expr_ctx_new(&output, module->ss->returns)));
 
     if (!sema_type_eq(module->ss->returns, runtime->type)) {

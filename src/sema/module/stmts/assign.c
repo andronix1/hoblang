@@ -13,7 +13,7 @@
 
 bool sema_module_emit_stmt_assign(SemaModule *module, AstAssign *assign) {
     SemaExprOutput dsto = sema_expr_output_new(module->mempool);
-    SemaValueRuntime *lvalue = NOT_NULL(sema_module_emit_runtime_expr(module,
+    SemaValueRuntime *lvalue = NOT_NULL(sema_module_emit_runtime_expr_full(module,
         assign->dst, sema_expr_ctx_new(&dsto, NULL)));
 
     if (lvalue->kind != SEMA_RUNTIME_VAR) {
@@ -21,7 +21,7 @@ bool sema_module_emit_stmt_assign(SemaModule *module, AstAssign *assign) {
     }
 
     SemaExprOutput valueo = sema_expr_output_new(module->mempool);
-    SemaValueRuntime *rvalue = NOT_NULL(sema_module_emit_runtime_expr(module,
+    SemaValueRuntime *rvalue = NOT_NULL(sema_module_emit_runtime_expr_full(module,
         assign->what, sema_expr_ctx_new(&valueo, lvalue->type)));
     if (lvalue->kind != SEMA_RUNTIME_VAR) {
         sema_module_err(module, assign->dst->slice, "this expression is not assignable");

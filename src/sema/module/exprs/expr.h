@@ -36,5 +36,6 @@ size_t sema_expr_output_push_step(SemaExprOutput *output, HirExprStep step);
 size_t sema_expr_output_last_id(SemaExprOutput *output);
 HirExpr sema_expr_output_collect(SemaExprOutput *output);
 
+SemaValueRuntime *sema_module_emit_runtime_expr_full(SemaModule *module, AstExpr *expr, SemaExprCtx ctx);
 SemaValue *sema_module_emit_expr(SemaModule *module, AstExpr *expr, SemaExprCtx ctx);
 SemaValueRuntime *sema_module_emit_runtime_expr(SemaModule *module, AstExpr *expr, SemaExprCtx ctx);

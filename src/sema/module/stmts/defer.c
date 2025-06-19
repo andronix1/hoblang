@@ -10,7 +10,7 @@ static HirCode *sema_module_defer_body(SemaModule *module, AstDefer *defer) {
         case AST_DEFER_BODY: return sema_module_emit_code(module, defer->body, NULL);
         case AST_DEFER_EXPR: {
             SemaExprOutput output = sema_expr_output_new(module->mempool);
-            sema_module_emit_runtime_expr(module, defer->expr, sema_expr_ctx_new(&output, NULL));
+            sema_module_emit_runtime_expr_full(module, defer->expr, sema_expr_ctx_new(&output, NULL));
             return hir_code_new(module->mempool, vec_create_in(module->mempool, 
                 hir_stmt_new_expr(sema_expr_output_collect(&output))));
         }

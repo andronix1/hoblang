@@ -56,7 +56,7 @@ static bool sema_module_emit_local_value(SemaModule *module, AstValueDecl *value
 }
 
 static SemaValueRuntime *sema_value_decl_get_initializer(SemaModule *module, SemaType *type, AstValueDecl *value_decl, SemaExprOutput *output) {
-    SemaValueRuntime *value = NOT_NULL(sema_module_emit_runtime_expr(module, value_decl->initializer,
+    SemaValueRuntime *value = NOT_NULL(sema_module_emit_runtime_expr_full(module, value_decl->initializer,
         sema_expr_ctx_new(output, type)));
     if (type && !sema_type_eq(type, value->type)) {
         sema_module_err(module, value_decl->initializer->slice, 

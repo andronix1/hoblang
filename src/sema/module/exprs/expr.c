@@ -82,6 +82,11 @@ HirExpr sema_expr_output_collect(SemaExprOutput *output) {
 SemaValueRuntime *sema_module_emit_runtime_expr(SemaModule *module, AstExpr *expr, SemaExprCtx ctx) {
     SemaValue *value = NOT_NULL(sema_module_emit_expr(module, expr, ctx)); 
     SemaValueRuntime *runtime = NOT_NULL(sema_value_should_be_runtime(module, expr->slice, value));
+    return runtime;
+}
+
+SemaValueRuntime *sema_module_emit_runtime_expr_full(SemaModule *module, AstExpr *expr, SemaExprCtx ctx) {
+    SemaValueRuntime *runtime = NOT_NULL(sema_module_emit_runtime_expr(module, expr, ctx));
     sema_module_expr_emit_runtime(runtime, ctx.output);
     return runtime;
 }
