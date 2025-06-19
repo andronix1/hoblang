@@ -11,11 +11,11 @@
 #include "llvm/module/api.h"
 
 static SemaProject *cmd_sema_project(Mempool *mempool, CmdSources *sources, Hir *hir) {
-    Path *lib_dhirs = vec_create_in(mempool, (char*)"../libs", "./libs", "/opt/hob/libs");
+    Path *lib_dirs = vec_create_in(mempool, (char*)"../libs", "./libs", "/opt/hob/libs");
     for (size_t i = 0; i < vec_len(sources->additional_lib_dirs); i++) {
-        vec_push(lib_dhirs, mempool_slice_to_cstr(mempool, sources->additional_lib_dirs[i]));
+        vec_push(lib_dirs, mempool_slice_to_cstr(mempool, sources->additional_lib_dirs[i]));
     }
-    SemaProject *project = sema_project_new(hir, lib_dhirs);
+    SemaProject *project = sema_project_new(hir, lib_dirs);
     sema_project_add_module(project, NULL, sources->entry, false);
     return project;
 }
@@ -146,12 +146,12 @@ static bool cmd_emit(Mempool *mempool, CmdEmit *emit) {
     } while (0)
 
 static inline void cmd_help_sources() {
-    FLAG_VALUE("libDirs", "lib1,lib2,...", "add library search dhirectories");
+    FLAG_VALUE("libDirs", "lib1,lib2,...", "add library search directories");
 }
 
 static bool cmd_help(char *exe) {
     HELP_COMMAND("help", "", "print help", {});
-    HELP_COMMAND("emit-hhir", "<entry> <output>", "emit hoblang IR", {
+    HELP_COMMAND("emit-hir", "<entry> <output>", "emit hoblang IR", {
         cmd_help_sources();
     });
     HELP_COMMAND("emit-llvm", "<entry> <output>", "emit LLVM IR", {
