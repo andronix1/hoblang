@@ -1,0 +1,16 @@
+import io;
+
+type B = A.<i32>;
+
+type A<T> = struct {
+    inner: T
+};
+
+global fun main() -> i32 {
+    io.out.putString(<(A.<string>)> {
+        inner: "asdassd\n"
+    }.inner);
+    return <B> {
+        inner: 123
+    }.inner;
+}

@@ -11,6 +11,7 @@ void sema_value_print(va_list list) {
         case SEMA_VALUE_TYPE: printf("type"); break;
         case SEMA_VALUE_RUNTIME: printf("value"); break;
         case SEMA_VALUE_MODULE: printf("module"); break;
+        case SEMA_VALUE_GENERIC: printf("generic"); break;
     }
 }
 
@@ -60,6 +61,12 @@ SemaValue *sema_value_new_runtime_ext_expr_step(Mempool *mempool, SemaRuntimeKin
         out->runtime.in_expr_id.step_id = step_id;
         out->runtime.in_expr_id.is_ext = true;
         out->runtime.in_expr_id.ext_of = of;
+    );
+
+SemaValue *sema_value_new_generic(Mempool *mempool, SemaGeneric *generic)
+    MEMPOOL_CONSTRUCT(SemaValue,
+        out->kind = SEMA_VALUE_GENERIC;
+        out->generic = generic; 
     );
 
 SemaValue *sema_value_new_module(Mempool *mempool, SemaModule *module)

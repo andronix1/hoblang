@@ -10,6 +10,7 @@
 #include "core/mempool.h"
 #include "core/slice.h"
 #include "hir/api/func.h"
+#include "sema/module/api/generic.h"
 #include "sema/module/api/type.h"
 
 typedef enum {
@@ -30,7 +31,10 @@ typedef struct {
 
     struct {
         SemaTypeId type_id;
-        SemaType *type;
+        union {
+            SemaType *type;
+            SemaGeneric *generic;
+        };
     } sema;
 } AstTypeDecl;
 

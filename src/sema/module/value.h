@@ -3,6 +3,7 @@
 #include "core/mempool.h"
 #include "hir/api/decl.h"
 #include "hir/api/func.h"
+#include "sema/module/api/generic.h"
 #include "sema/module/api/module.h"
 #include "sema/module/api/type.h"
 #include "sema/module/api/value.h"
@@ -12,6 +13,7 @@ typedef enum {
     SEMA_VALUE_TYPE,
     SEMA_VALUE_MODULE,
     SEMA_VALUE_RUNTIME,
+    SEMA_VALUE_GENERIC,
 } SemaValueKind;
 
 typedef struct SemaValue {
@@ -21,11 +23,13 @@ typedef struct SemaValue {
         SemaType *type;
         SemaModule *module;
         SemaValueRuntime runtime;
+        SemaGeneric *generic;
     };
 } SemaValue;
 
 SemaValue *sema_value_new_type(Mempool *mempool, SemaType *type);
 SemaValue *sema_value_new_module(Mempool *mempool, SemaModule *module);
+SemaValue *sema_value_new_generic(Mempool *mempool, SemaGeneric *generic);
 SemaValue *sema_value_new_runtime_global(Mempool *mempool, SemaRuntimeKind kind, SemaType *type, HirDeclId id);
 SemaValue *sema_value_new_runtime_local(Mempool *mempool, SemaRuntimeKind kind, SemaType *type, HirLocalId id);
 SemaValue *sema_value_new_runtime_expr_step(Mempool *mempool, SemaRuntimeKind kind, SemaType *type, size_t id);

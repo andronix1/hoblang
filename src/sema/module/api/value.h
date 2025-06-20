@@ -3,6 +3,7 @@
 #include "sema/module/api/const.h"
 #include "sema/module/api/module.h"
 #include "sema/module/api/type.h"
+#include "sema/module/api/generic.h"
 
 typedef enum {
     SEMA_RUNTIME_FINAL,
@@ -38,6 +39,7 @@ typedef struct SemaValue SemaValue;
 SemaType *sema_value_should_be_type(SemaModule *module, Slice where, SemaValue *value);
 SemaConst *sema_value_runtime_should_be_constant(SemaModule *module, Slice where, SemaValueRuntime *runtime);
 SemaValueRuntime *sema_value_should_be_runtime(SemaModule *module, Slice where, SemaValue *value);
+SemaGeneric *sema_value_should_be_generic(SemaModule *module, Slice where, SemaValue *value);
 SemaType *sema_value_is_type(SemaValue *value);
 SemaModule *sema_value_is_module(SemaValue *value);
 SemaValueRuntime *sema_value_is_runtime(SemaValue *value);

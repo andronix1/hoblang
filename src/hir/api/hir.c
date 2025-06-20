@@ -16,6 +16,8 @@ Hir *hir_new() {
     hir->decls = vec_new_in(hir->mempool, HirDeclInfo);
     hir->funcs = vec_new_in(hir->mempool, HirFuncRecord);
     hir->vars = vec_new_in(hir->mempool, HirVarInfo);
+    hir->gen_params= vec_new_in(hir->mempool, HirTypeId);
+    hir->gen_types = vec_new_in(hir->mempool, HirGenTypeInfo);
     hir->externs_map = keymap_new_in(hir->mempool, HirExternInfo);
     return hir;
 }
@@ -172,4 +174,18 @@ const HirVarInfo *hir_get_var_info(const Hir *hir, HirVarId id) {
 
 size_t hir_get_vars_count(const Hir *hir) {
     return vec_len(hir->vars);
+}
+
+HirGenParamId hir_add_gen_param(Hir *hir) {
+    vec_push(hir->gen_params, 0);
+    return vec_len(hir->gen_types) - 1;
+}
+
+HirGenTypeId hir_register_gen_type(Hir *hir, HirGenParamId *ids) {
+    vec_push(hir->gen_types, hir_gen_type_info_new(ids, 0));
+    return vec_len(hir->gen_types) - 1;
+}
+
+void hir_init_gen_type(Hir *hir, HirGenTypeId id, HirTypeId type) {
+    hir->gen_types[id].type = type;
 }

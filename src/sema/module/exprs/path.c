@@ -1,13 +1,18 @@
 #include "path.h"
+#include "ast/api/generic.h"
+#include "ast/generic.h"
 #include "ast/path.h"
-#include "core/assert.h"
+#include "core/mempool.h"
 #include "core/null.h"
 #include "core/vec.h"
+#include "sema/module/api/generic.h"
 #include "sema/module/api/value.h"
 #include "sema/module/ast/path.h"
+#include "sema/module/ast/type.h"
 #include "sema/module/const.h"
 #include "sema/module/decl.h"
 #include "sema/module/exprs/expr.h"
+#include "sema/module/generic.h"
 #include "sema/module/std.h"
 #include "sema/module/type.h"
 #include "sema/module/module.h"
@@ -92,8 +97,21 @@ SemaValue *sema_module_emit_expr_path_from(SemaModule *module, SemaValue *value,
                 value = sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, usize, step_id);
                 break;
             }
-            case AST_PATH_SEGMENT_GENERIC_BUILD:
-                TODO;
+            case AST_PATH_SEGMENT_GENERIC_BUILD: {
+                SemaGeneric *generic = NOT_NULL(sema_value_should_be_generic(module, segment->slice, value));
+                if (vec_len(generic->params) != vec_len(segment->generic->params)) {
+                    sema_module_err(module, segment->slice, "expected $l generic parameter, but $l passed",
+                        vec_len(generic->params));
+                    return NULL;
+                }
+                SemaType **input = vec_new_in(module->mempool, SemaType*);
+                vec_resize(input, vec_len(generic->params));
+                for (size_t i = 0; i < vec_len(generic->params); i++) {
+                    input[i] = NOT_NULL(sema_module_type(module, segment->generic->params[i]));
+                }
+                value = NOT_NULL(sema_generate(generic, input));
+                break;
+            }
         }
     }
     return value;

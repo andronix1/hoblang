@@ -31,6 +31,14 @@ SemaConst *sema_value_runtime_should_be_constant(SemaModule *module, Slice where
     return runtime->constant;
 }
 
+SemaGeneric *sema_value_should_be_generic(SemaModule *module, Slice where, SemaValue *value) {
+    if (value->kind != SEMA_VALUE_GENERIC) {
+        sema_module_err(module, where, "value is not a generic");
+        return NULL;
+    }
+    return value->generic;
+}
+
 SemaType *sema_value_should_be_type(SemaModule *module, Slice where, SemaValue *value) {
     SemaType *type = sema_value_is_type(value);
     if (!type) {

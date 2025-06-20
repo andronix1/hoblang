@@ -69,7 +69,10 @@ typedef struct HirType {
         HirTypeArray array;
         HirTypeId pointer_to;
         HirTypeStruct structure;
-        HirGenTypeId gen_id;
+        struct {
+            HirGenTypeId id;
+            HirTypeId *params;
+        } gen;
         HirGenParamId gen_param_id;
     };
 } HirType;
@@ -84,10 +87,13 @@ static inline HirType hir_type_new_gen_param(HirGenParamId param_id) {
     return type;
 }
 
-static inline HirType hir_type_new_gen(HirGenTypeId id) {
+static inline HirType hir_type_new_gen(HirGenTypeId id, HirTypeId *params) {
     HirType type = {
         .kind = HIR_TYPE_GEN,
-        .gen_id = id,
+        .gen = {
+            .id = id,
+            .params = params
+        },
     };
     return type;
 }

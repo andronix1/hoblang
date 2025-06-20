@@ -20,6 +20,11 @@ AstType *parse_type(Parser *parser) {
             AstType *returns = parser_next_should_be(parser, TOKEN_FUN_RETURNS) ? NOT_NULL(parse_type(parser)) : NULL;
             return ast_type_new_function(parser->mempool, args, returns);
         }
+        case TOKEN_OPENING_CIRCLE_BRACE: {
+            AstType *type = NOT_NULL(parse_type(parser));
+            PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_CIRCLE_BRACE);
+            return type;
+        }
         case TOKEN_STRUCT: {
             PARSER_EXPECT_NEXT(parser, TOKEN_OPENING_FIGURE_BRACE);
             AstStructField *fields = keymap_new_in(parser->mempool, AstStructField);

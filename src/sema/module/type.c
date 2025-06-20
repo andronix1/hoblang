@@ -52,6 +52,15 @@ static inline HirType sema_type_to_hir(SemaModule* module, SemaType *type) {
         }
         case SEMA_TYPE_ARRAY: return hir_type_new_array(sema_type_hir_id(type->array.of), type->array.length);
         case SEMA_TYPE_RECORD: TODO;
+        case SEMA_TYPE_GENERIC: return hir_type_new_gen_param(type->gen_param_id);
+        case SEMA_TYPE_GENERATE: {
+            HirTypeId *params = vec_new_in(module->mempool, HirTypeId);
+            vec_resize(params, vec_len(type->generate.params));
+            for (size_t i = 0; i < vec_len(type->generate.params); i++) {
+                params[i] = sema_type_hir_id(type->generate.params[i]);
+            }
+            return hir_type_new_gen(type->gen_param_id, params);
+        }
     }
     UNREACHABLE;
 }
@@ -110,6 +119,15 @@ SemaType *sema_type_new_function(SemaModule *module, SemaType **args, SemaType *
     SEMA_TYPE_CONSTRUCT(SEMA_TYPE_FUNCTION,
         out->function.args = args;
         out->function.returns = returns;
+    )
+
+SemaType *sema_type_new_generic(SemaModule *module, HirGenParamId id)
+    SEMA_TYPE_CONSTRUCT(SEMA_TYPE_GENERIC, out->gen_param_id = id)
+
+SemaType *sema_type_new_generate(SemaModule *module, SemaGeneric *generic, SemaType **params)
+    SEMA_TYPE_CONSTRUCT(SEMA_TYPE_GENERATE,
+        out->generate.generic = generic;
+        out->generate.params = params;
     )
 
 SemaType *sema_type_new_alias(Mempool *mempool, SemaType *type, SemaTypeAlias *alias) {

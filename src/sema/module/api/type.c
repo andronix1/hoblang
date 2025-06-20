@@ -4,6 +4,7 @@
 #include "core/log.h"
 #include "core/vec.h"
 #include "sema/module/decl.h"
+#include "sema/module/generic.h"
 #include "sema/module/type.h"
 #include "sema/module/module.h"
 #include <stdio.h>
@@ -52,12 +53,68 @@ void sema_type_print(va_list list) {
         case SEMA_TYPE_STRUCTURE:
             logs("structure", type->pointer_to);
             break;
+        case SEMA_TYPE_GENERIC:
+            logs("generic");
+            break;
+        case SEMA_TYPE_GENERATE:
+            logs("generator");
+            break;
     }
 }
 
+static SemaType *sema_type_generate(SemaModule *module, SemaType *source, SemaType **params, SemaType **input) {
+    for (size_t i = 0; i < vec_len(params); i++) {
+        if (params[i] == source) return input[i];
+    }
+    switch (source->kind) {
+        case SEMA_TYPE_VOID:
+        case SEMA_TYPE_INT:
+        case SEMA_TYPE_FLOAT:
+        case SEMA_TYPE_BOOL:
+            return source;
+        case SEMA_TYPE_FUNCTION: {
+            SemaType **args = vec_new_in(module->mempool, SemaType*);
+            vec_resize(args, vec_len(source->function.args));
+            for (size_t i = 0; i < vec_len(source->function.args); i++) {
+                args[i] = sema_type_generate(module, source->function.args[i], params, input);
+            }
+            return sema_type_new_function(module, args,
+                sema_type_generate(module, source->function.returns, params, input));
+        }
+        case SEMA_TYPE_POINTER:
+            return sema_type_new_pointer(module, sema_type_generate(module, source->pointer_to, params, input));
+        case SEMA_TYPE_STRUCTURE: {
+            SemaTypeStructField *fields = keymap_new_in(module->mempool, SemaTypeStructField);
+            for (size_t i = 0; i < vec_len(source->structure.fields_map); i++) {
+                keymap_at(source->structure.fields_map, i, field); 
+                keymap_insert(fields, field->key, sema_type_struct_field_new(
+                    sema_type_generate(module, field->value.type, params, input),
+                    field->value.module
+                ));
+            }
+            return sema_type_new_structure(module, fields);
+        }
+        case SEMA_TYPE_ARRAY:
+            return sema_type_new_array(module, source->array.length, sema_type_generate(module, source->array.of,
+                params, input));
+        case SEMA_TYPE_RECORD: return sema_type_generate(module, sema_type_resolve(source), params, input);
+        case SEMA_TYPE_GENERATE: case SEMA_TYPE_GENERIC: return source;
+    }
+    UNREACHABLE;
+}
+
 SemaType *sema_type_resolve(SemaType *type) {
-    while (type->kind == SEMA_TYPE_RECORD) {
-        type = type->record.module->types[type->record.id].type;
+    while (true) {
+        if (type->kind == SEMA_TYPE_RECORD) {
+            type = type->record.module->types[type->record.id].type;
+        } else if (type->kind == SEMA_TYPE_GENERATE) {
+            SemaGeneric *generic = type->generate.generic;
+            assert(generic->kind == SEMA_GENERIC_TYPE);
+            type = sema_type_generate(generic->module, type->generate.generic->type,
+                    type->generate.generic->params, type->generate.params);
+        } else {
+            break;
+        }
     }
     return type;
 }
@@ -73,7 +130,7 @@ bool sema_type_eq(SemaType *a, SemaType *b) {
         case SEMA_TYPE_BOOL:
             return true;
         case SEMA_TYPE_RECORD: UNREACHABLE;
-        case SEMA_TYPE_STRUCTURE: return a == b;
+        case SEMA_TYPE_GENERIC: case SEMA_TYPE_STRUCTURE: return a == b;
         case SEMA_TYPE_INT:
             return
                 a->integer.size == b->integer.size &&
@@ -94,6 +151,16 @@ bool sema_type_eq(SemaType *a, SemaType *b) {
             return sema_type_eq(a->array.of, b->array.of) && a->array.length == b->array.length;
         case SEMA_TYPE_FLOAT:
             return a->float_size == b->float_size;
+        case SEMA_TYPE_GENERATE:
+            if (vec_len(a->generate.params) != vec_len(b->generate.params)) {
+                return false;
+            }
+            for (size_t i = 0; i < vec_len(a->generate.params); i++) {
+                if (!sema_type_eq(a->generate.params[i], b->generate.params[i])) {
+                    return false;
+                }
+            }
+            return a->generate.generic == b->generate.generic;
     }
     UNREACHABLE;
 }

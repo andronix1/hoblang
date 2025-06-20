@@ -19,7 +19,7 @@ HirTypeId hir_register_type(Hir *hir);
 void hir_init_type(Hir *hir, HirTypeId id, HirTypeId type);
 
 HirGenParamId hir_add_gen_param(Hir *hir);
-HirGenTypeId hir_register_gen_type(HirGenParamId *ids);
+HirGenTypeId hir_register_gen_type(Hir *hir, HirGenParamId *ids);
 void hir_init_gen_type(Hir *hir, HirGenTypeId id, HirTypeId type);
 
 HirDeclId hir_add_decl(Hir *hir);
