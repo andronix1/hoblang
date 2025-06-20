@@ -75,13 +75,7 @@ static bool cmd_build(Mempool *mempool, CmdBuild *build) {
             }
 
             if (build->exe.run) {
-                int status;
-                char **args = vec_new(char*);
-                result = process_run(build->output, args, &status);
-                if (result && status) {
-                    logln("program failed with status $l", status);
-                }
-                vec_free(args);
+                process_run_attached(build->output, vec_new(char*));
             }
             break;
         }

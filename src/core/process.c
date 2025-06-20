@@ -6,11 +6,20 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-bool process_run(char *file, char **args, int *status) {
+static char **process_get_args(char *file, char **args) {
     char **real_args = vec_new(char*);
     vec_push(real_args, file);
     vec_extend(real_args, args);
     vec_push(real_args, NULL);
+    return real_args;
+}
+
+void process_run_attached(char *file, char **args) {
+    execv(file, process_get_args(file, args));
+}
+
+bool process_run(char *file, char **args, int *status) {
+    char **real_args = process_get_args(file, args);
 
     pid_t pid = fork();
     assert(pid >= 0);
