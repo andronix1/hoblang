@@ -40,17 +40,6 @@ bool hir_type_eq(const HirType *a, const HirType *b) {
             return true;
         case HIR_TYPE_ARRAY:
             return a->array.length == b->array.length && a->array.of == b->array.of;
-        case HIR_TYPE_GEN:
-            if (vec_len(a->gen.params) != vec_len(b->gen.params)) {
-                return false;
-            }
-            for (size_t i = 0; i < vec_len(a->gen.params); i++) {
-                if (a->gen.params[i] != b->gen.params[i]) {
-                    return false;
-                }
-            }
-            return a->gen.id == b->gen.id;
-        case HIR_TYPE_GEN_PARAM: return a->gen_param_id == b->gen_param_id;
     }
     UNREACHABLE;
 }

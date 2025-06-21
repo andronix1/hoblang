@@ -10,6 +10,12 @@
 #include <stdio.h>
 
 HirTypeId sema_type_hir_id(SemaType *type) {
+    if (type->kind == SEMA_TYPE_GENERIC) {
+        return -1;
+    }
+    if (type->kind == SEMA_TYPE_GENERATE) {
+        return sema_type_hir_id(sema_type_resolve(type));
+    }
     if (type->aliases) {
         return (*vec_top(type->aliases))->id;
     }
@@ -120,6 +126,9 @@ SemaType *sema_type_resolve(SemaType *type) {
 }
 
 bool sema_type_eq(SemaType *a, SemaType *b) {
+    if (a == b) {
+        return true;
+    }
     a = sema_type_resolve(a);
     b = sema_type_resolve(b);
     if (a->kind != b->kind) {

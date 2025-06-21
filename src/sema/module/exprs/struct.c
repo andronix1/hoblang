@@ -8,7 +8,8 @@
 #include "sema/module/value.h"
 
 SemaValue *sema_module_emit_expr_struct(SemaModule *module, AstExprStructConstructor *structure, SemaExprCtx ctx) {
-    SemaType *type = sema_type_resolve(NOT_NULL(sema_module_type(module, structure->type)));
+    SemaType *source_type = NOT_NULL(sema_module_type(module, structure->type));
+    SemaType *type = sema_type_resolve(source_type);
     if (type->kind != SEMA_TYPE_STRUCTURE) {
         sema_module_err(module, structure->type->slice, "type is not a structure");
         return NULL;
@@ -41,7 +42,7 @@ SemaValue *sema_module_emit_expr_struct(SemaModule *module, AstExprStructConstru
                 vec_len(type->structure.fields_map), vec_len(structure->fields_map));
     }
     size_t step_id = sema_expr_output_push_step(ctx.output, hir_expr_step_new_build_struct(sema_type_hir_id(type), fields));
-    return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, type, step_id);
+    return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, source_type, step_id);
 }
 
 

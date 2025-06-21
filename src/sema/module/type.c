@@ -4,6 +4,7 @@
 #include "core/vec.h"
 #include "hir/api/type.h"
 #include "sema/module/api/type.h"
+#include "sema/module/generic.h"
 #include "sema/module/module.h"
 #include "sema/module/api/module.h"
 #include <string.h>
@@ -52,15 +53,13 @@ static inline HirType sema_type_to_hir(SemaModule* module, SemaType *type) {
         }
         case SEMA_TYPE_ARRAY: return hir_type_new_array(sema_type_hir_id(type->array.of), type->array.length);
         case SEMA_TYPE_RECORD: TODO;
-        case SEMA_TYPE_GENERIC: return hir_type_new_gen_param(type->gen_param_id);
+
         case SEMA_TYPE_GENERATE: {
-            HirTypeId *params = vec_new_in(module->mempool, HirTypeId);
-            vec_resize(params, vec_len(type->generate.params));
-            for (size_t i = 0; i < vec_len(type->generate.params); i++) {
-                params[i] = sema_type_hir_id(type->generate.params[i]);
-            }
-            return hir_type_new_gen(type->gen_param_id, params);
+            SemaType *generated = sema_value_is_type(sema_generate(type->generate.generic, type->generate.params));
+            assert(generated);
+            return sema_type_to_hir(module, generated);
         }
+        case SEMA_TYPE_GENERIC: UNREACHABLE;
     }
     UNREACHABLE;
 }
@@ -70,6 +69,14 @@ SemaTypeAlias *sema_type_alias_new(Mempool *mempool, HirTypeId id)
         out->id = id;
         out->decls_map = keymap_new_in(mempool, SemaDecl*);
     )
+
+#define SEMA_TYPE_CONSTRUCT_SIMPLE(KIND, FIELDS) { \
+        SemaType *out = mempool_alloc(module->mempool, SemaType); \
+        out->kind = KIND; \
+        FIELDS; \
+        out->aliases = NULL; \
+        return out; \
+    }
 
 #define SEMA_TYPE_CONSTRUCT(KIND, FIELDS) { \
         SemaType *out = mempool_alloc(module->mempool, SemaType); \
@@ -122,10 +129,10 @@ SemaType *sema_type_new_function(SemaModule *module, SemaType **args, SemaType *
     )
 
 SemaType *sema_type_new_generic(SemaModule *module, HirGenParamId id)
-    SEMA_TYPE_CONSTRUCT(SEMA_TYPE_GENERIC, out->gen_param_id = id)
+    SEMA_TYPE_CONSTRUCT_SIMPLE(SEMA_TYPE_GENERIC, out->gen_param_id = id)
 
 SemaType *sema_type_new_generate(SemaModule *module, SemaGeneric *generic, SemaType **params)
-    SEMA_TYPE_CONSTRUCT(SEMA_TYPE_GENERATE,
+    SEMA_TYPE_CONSTRUCT_SIMPLE(SEMA_TYPE_GENERATE,
         out->generate.generic = generic;
         out->generate.params = params;
     )

@@ -1,14 +1,15 @@
 public import "def.hob" as def;
 
-public type Slice = struct {
-    public raw: *u8,
+public type Slice<T> = struct {
+    public raw: *T,
     public length: def.Size,
 };
 
+#`
 public fun new(raw: *u8, length: def.Size) -> Slice {
     return <Slice> {
         raw: raw,
         length: length,
     };
 }
-
+`#

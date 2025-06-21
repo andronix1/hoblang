@@ -50,14 +50,6 @@ static void hir_dump_types(HirTypeInfo *types, FILE *stream) {
                         }
                         fprintf(stream, " }");
                         break;
-                    case HIR_TYPE_GEN_PARAM: fprintf(stream, "genParam%lu", type->gen_param_id); break;
-                    case HIR_TYPE_GEN:
-                        fprintf(stream, "genType%lu<", type->gen.id);
-                        for (size_t i = 0; i < vec_len(type->gen.params); i++) {
-                            fprintf(stream, i == 0 ? " type%lu" : ", type%lu", type->gen.params[i]);
-                        }
-                        fprintf(stream, ">");
-                        break;
                 }
                 break;
             }

@@ -15,8 +15,6 @@ typedef enum {
     HIR_TYPE_POINTER,
     HIR_TYPE_ARRAY,
     HIR_TYPE_STRUCT,
-    HIR_TYPE_GEN_PARAM,
-    HIR_TYPE_GEN,
 } HirTypeKind;
 
 typedef enum {
@@ -78,25 +76,6 @@ typedef struct HirType {
 } HirType;
 
 bool hir_type_eq(const HirType *a, const HirType *b);
-
-static inline HirType hir_type_new_gen_param(HirGenParamId param_id) {
-    HirType type = {
-        .kind = HIR_TYPE_GEN_PARAM,
-        .gen_param_id = param_id,
-    };
-    return type;
-}
-
-static inline HirType hir_type_new_gen(HirGenTypeId id, HirTypeId *params) {
-    HirType type = {
-        .kind = HIR_TYPE_GEN,
-        .gen = {
-            .id = id,
-            .params = params
-        },
-    };
-    return type;
-}
 
 static inline HirType hir_type_new_void() {
     HirType type = { .kind = HIR_TYPE_VOID };
