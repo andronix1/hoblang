@@ -28,11 +28,17 @@ typedef struct {
     bool in_loop;
 } LlvmFuncCtx;
 
+typedef struct {
+    LLVMValueRef **funcs;
+} LlvmGenScopeInfo;
+
 typedef struct LlvmModule {
     Mempool *mempool;
 
     Hir *hir;
     LLVMValueRef *decls;
+    LLVMTypeRef *gen_params;
+    LlvmGenScopeInfo *gen_scopes;
     LlvmFuncCtx func;
 
     LLVMTargetMachineRef machine;

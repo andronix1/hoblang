@@ -42,6 +42,7 @@ static void hir_dump_types(HirTypeInfo *types, FILE *stream) {
                         fprintf(stream, ") -> type%lu", type->function.returns);
                         break;
                     case HIR_TYPE_POINTER: fprintf(stream, "pointer to type%lu", type->pointer_to); break;
+                    case HIR_TYPE_GEN: fprintf(stream, "genParam%lu", type->gen_param); break;
                     case HIR_TYPE_ARRAY: fprintf(stream, "type%lu[%lu]", type->array.of, type->array.length); break;
                     case HIR_TYPE_STRUCT:
                         fprintf(stream, "structure {");

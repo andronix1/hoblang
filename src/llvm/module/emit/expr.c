@@ -343,6 +343,9 @@ static LlvmEmitStepRes llvm_emit_expr_step(
             LLVMValueRef indices[] = { LLVMConstInt(LLVMInt32Type(), step->idx_array.idx, false) };
             return llvm_emit_step_res_new(LLVMBuildGEP2(module->builder, type, pointer, indices, 1, ""), false);
         }
+        case HIR_EXPR_STEP_GEN_FUNC:
+            return llvm_emit_step_res_new(
+                module->gen_scopes[step->gen_func.scope].funcs[step->gen_func.func][step->gen_func.usage], true);
     }
     UNREACHABLE;
 }

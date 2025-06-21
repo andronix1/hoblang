@@ -4,6 +4,7 @@
 #include "hir/api/decl.h"
 #include "hir/api/expr/binop.h"
 #include "hir/api/func.h"
+#include "hir/api/gen.h"
 #include <stddef.h>
 
 typedef size_t HirExprStepId;
@@ -27,6 +28,7 @@ typedef enum {
     HIR_EXPR_STEP_STRING,
     HIR_EXPR_STEP_SIZEOF,
     HIR_EXPR_STEP_NEG,
+    HIR_EXPR_STEP_GEN_FUNC,
 } HirExprStepKind;
 
 typedef struct {
@@ -95,11 +97,33 @@ typedef struct {
             size_t *fields;
         } build_struct;
 
+        struct {
+            HirTypeId type;
+            HirTypeId *params;
+            HirGenScopeId scope;
+            HirGenFuncId func;
+
+            HirGenUsageId usage;
+        } gen_func;
+
         size_t ref_step;
         size_t deref_step;
         size_t not_step;
     };
 } HirExprStep;
+
+static inline HirExprStep hir_expr_step_new_gen_func(HirTypeId type, HirGenScopeId scope, HirGenFuncId func, HirTypeId *params) {
+    HirExprStep step = {
+        .kind = HIR_EXPR_STEP_GEN_FUNC,
+        .gen_func = {
+            .type = type,
+            .scope = scope,
+            .func = func,
+            .params = params,
+        }
+    };
+    return step;
+}
 
 static inline HirExprStep hir_expr_step_new_sizeof(HirTypeId of, HirTypeId type) {
     HirExprStep step = {

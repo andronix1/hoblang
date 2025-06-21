@@ -86,6 +86,9 @@ static HirTypeId hir_get_expr_step_type(Hir *hir, HirFuncId func, HirExprStep *s
             return type->pointer_to;
         }
         case HIR_EXPR_STEP_NEG: return steps[step->neg.step].type;
+        case HIR_EXPR_STEP_GEN_FUNC:
+            step->gen_func.usage = hir_add_gen_scope_usage(hir, step->gen_func.scope, step->gen_func.params);
+            return step->gen_func.type;
     }
     UNREACHABLE;
 }

@@ -47,6 +47,11 @@ LLVMTypeRef llvm_runtime_type(LlvmModule *module, HirTypeId type_id) {
             }
             return LLVMStructTypeInContext(module->context, types, count, false);
         }
+        case HIR_TYPE_GEN: {
+            LLVMTypeRef result = module->gen_params[type->gen_param];
+            assert(result);
+            return result;
+        }
     }
     UNREACHABLE;
 }

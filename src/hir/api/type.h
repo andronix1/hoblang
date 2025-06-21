@@ -1,5 +1,6 @@
 #pragma once
 
+#include "hir/api/gen.h"
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -14,6 +15,7 @@ typedef enum {
     HIR_TYPE_POINTER,
     HIR_TYPE_ARRAY,
     HIR_TYPE_STRUCT,
+    HIR_TYPE_GEN,
 } HirTypeKind;
 
 typedef enum {
@@ -66,10 +68,19 @@ typedef struct HirType {
         HirTypeArray array;
         HirTypeId pointer_to;
         HirTypeStruct structure;
+        HirGenParamId gen_param;
     };
 } HirType;
 
 bool hir_type_eq(const HirType *a, const HirType *b);
+
+static inline HirType hir_type_new_gen(HirGenParamId gen_param) {
+    HirType type = {
+        .kind = HIR_TYPE_GEN,
+        .gen_param = gen_param
+    };
+    return type;
+}
 
 static inline HirType hir_type_new_void() {
     HirType type = { .kind = HIR_TYPE_VOID };
@@ -128,6 +139,7 @@ static inline HirType hir_type_new_struct(HirTypeStructField *fields) {
     };
     return type;
 }
+
 static inline HirType hir_type_new_function(HirTypeId *args, HirTypeId returns) {
     HirType type = {
         .kind = HIR_TYPE_FUNCTION,

@@ -7,15 +7,13 @@
 #include "llvm/module/types.h"
 #include <llvm-c/Core.h>
 
-void llvm_setup_func(LlvmModule *module, HirFuncId id, HirDeclId decl) {
+LLVMValueRef llvm_setup_func(LlvmModule *module, HirFuncId id) {
     const HirFuncInfo *info = hir_get_func_info(module->hir, id);
-    module->decls[decl] = LLVMAddFunction(module->module, 
-        mempool_opt_slice_to_cstr_or(module->mempool, info->global_name, ""),
+    return LLVMAddFunction(module->module, mempool_opt_slice_to_cstr_or(module->mempool, info->global_name, ""),
         llvm_function_type(module, info->type));
 }
 
-void llvm_emit_func(LlvmModule *module, HirFuncId id, HirDeclId decl) {
-    LLVMValueRef func = module->decls[decl];
+void llvm_emit_func(LlvmModule *module, HirFuncId id, LLVMValueRef func) {
     const HirFuncInfo *info = hir_get_func_info(module->hir, id);
 
     llvm_func_ctx_set(module, id, func);

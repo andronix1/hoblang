@@ -12,6 +12,8 @@ bool hir_type_eq(const HirType *a, const HirType *b) {
             return true;
         case HIR_TYPE_POINTER:
             return a->pointer_to == b->pointer_to;
+        case HIR_TYPE_GEN:
+            return a->gen_param == b->gen_param;
         case HIR_TYPE_INT:
             return
                 a->integer.is_signed == b->integer.is_signed && 

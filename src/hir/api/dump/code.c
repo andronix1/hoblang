@@ -123,6 +123,13 @@ static void hir_expr_dump(HirExpr *expr, FILE *stream, size_t tabs) {
             case HIR_EXPR_STEP_NEG:
                 fprintf(stream, "neg of step%lu", step->neg.step);
                 break;
+            case HIR_EXPR_STEP_GEN_FUNC:
+                fprintf(stream, "genScope%lu.genFunc%lu.<", step->gen_func.scope, step->gen_func.func);
+                for (size_t i = 0; i < vec_len(step->build_array.elements); i++) {
+                    fprintf(stream, i == 0 ? "type%lu" : ", type%lu", step->gen_func.params[i]);
+                }
+                fprintf(stream, "> of type type%lu", step->gen_func.type);
+                break;
         }
         fprintf(stream, "\n");
     }

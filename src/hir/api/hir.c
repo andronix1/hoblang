@@ -17,6 +17,9 @@ Hir *hir_new() {
     hir->funcs = vec_new_in(hir->mempool, HirFuncRecord);
     hir->vars = vec_new_in(hir->mempool, HirVarInfo);
     hir->externs_map = keymap_new_in(hir->mempool, HirExternInfo);
+    hir->gen_scopes = keymap_new_in(hir->mempool, HirGenScope);
+    hir->root_gen_scopes = keymap_new_in(hir->mempool, HirGenScopeId);
+    hir->gen_params_count = 0;
     return hir;
 }
 
@@ -172,4 +175,42 @@ const HirVarInfo *hir_get_var_info(const Hir *hir, HirVarId id) {
 
 size_t hir_get_vars_count(const Hir *hir) {
     return vec_len(hir->vars);
+}
+
+HirGenParamId hir_add_gen_param(Hir *hir) {
+    return hir->gen_params_count++;
+}
+
+HirGenScopeId hir_add_gen_scope(Hir *hir) {
+    vec_push(hir->gen_scopes, hir_gen_scope_new(hir->mempool));
+    return vec_len(hir->gen_scopes) - 1;
+}
+
+void hir_gen_scope_add_param(Hir *hir, HirGenScopeId id, HirGenParamId param) {
+    vec_push(hir->gen_scopes[id].params, param);
+}
+
+HirGenFuncId hir_gen_scope_add_func(Hir *hir, HirGenScopeId id, HirFuncId func) {
+    vec_push(hir->gen_scopes[id].funcs, func);
+    return vec_len(hir->gen_scopes[id].funcs) - 1;
+}
+
+void hir_gen_scope_add_scope(Hir *hir, HirGenScopeId id, HirGenScopeId scope) {
+    vec_push(hir->gen_scopes[id].scopes, scope);
+}
+
+void hir_add_root_gen_scope(Hir *hir, HirGenScopeId id) {
+    vec_push(hir->root_gen_scopes, id);
+}
+
+const HirGenScope *hir_get_gen_scope(const Hir *hir, HirGenScopeId id) {
+    return &hir->gen_scopes[id];
+}
+
+const HirGenScopeId *hir_get_root_gen_scopes(const Hir *hir) {
+    return hir->root_gen_scopes;
+}
+
+size_t hir_get_gen_params_count(const Hir *hir) {
+    return hir->gen_params_count;
 }
