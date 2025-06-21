@@ -1,6 +1,5 @@
 #pragma once
 
-#include "hir/api/gen.h"
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -67,11 +66,6 @@ typedef struct HirType {
         HirTypeArray array;
         HirTypeId pointer_to;
         HirTypeStruct structure;
-        struct {
-            HirGenTypeId id;
-            HirTypeId *params;
-        } gen;
-        HirGenParamId gen_param_id;
     };
 } HirType;
 

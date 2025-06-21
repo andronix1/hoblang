@@ -101,7 +101,7 @@ bool ast_node_eq(const AstNode *a, const AstNode *b) {
     switch (a->kind) {
         case AST_NODE_TYPE_DECL:
             return a->type_decl.is_public == b->type_decl.is_public &&
-                equals_nullable(a->type_decl.generics, b->type_decl.generics, (EqFunc)ast_generic_eq) &&
+                equals_nullable(a->type_decl.generic, b->type_decl.generic, (EqFunc)ast_generic_eq) &&
                 slice_eq(a->type_decl.name, b->type_decl.name) &&
                 ast_type_eq(a->type_decl.type, b->type_decl.type);
         case AST_NODE_FUN_DECL: {
@@ -153,22 +153,24 @@ AstFunArg ast_fun_arg_new(Slice name, AstType *type) {
 }
 
 AstFunInfo *ast_fun_info_new(Mempool *mempool,
-    bool is_public, Slice name,
+    bool is_public, Slice name, AstGeneric *generic,
     AstFunArg *args, AstType *returns
 ) MEMPOOL_CONSTRUCT(AstFunInfo,
     out->is_public = is_public;
     out->ext.is = false;
+    out->generic = generic;
     out->name = name;
     out->args = args;
     out->returns = returns;
 )
 
 AstFunInfo *ast_ext_fun_info_new(Mempool *mempool,
-    bool is_public, Slice name,
+    bool is_public, Slice name, AstGeneric *generic,
     AstFunArg *args, AstType *returns,
     Slice of, bool by_ref, Slice self_name
 ) MEMPOOL_CONSTRUCT(AstFunInfo,
     out->is_public = is_public;
+    out->generic = generic;
     out->ext.is = true;
     out->ext.of = of;
     out->ext.self_name = self_name;
@@ -198,7 +200,7 @@ AstNode *ast_node_new_type_decl(Mempool *mempool, bool is_public, Slice name, As
     CONSTRUCT(AST_NODE_TYPE_DECL,
         out->type_decl.name = name;
         out->type_decl.type = type;
-        out->type_decl.generics = generics;
+        out->type_decl.generic = generics;
         out->type_decl.is_public = is_public;
     )
 

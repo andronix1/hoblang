@@ -27,7 +27,7 @@ typedef struct {
     bool is_public;
     Slice name;
     AstType *type;
-    AstGeneric *generics;
+    AstGeneric *generic;
 
     struct {
         SemaTypeId type_id;
@@ -46,6 +46,7 @@ typedef struct {
 typedef struct AstFunInfo {
     bool is_public;
     Slice name;
+    AstGeneric *generic;
     AstFunArg *args;
     AstType *returns;
 
@@ -180,11 +181,11 @@ bool ast_node_eq(const AstNode *a, const AstNode *b);
 
 AstFunArg ast_fun_arg_new(Slice name, AstType *type);
 AstFunInfo *ast_fun_info_new(Mempool *mempool,
-    bool is_public, Slice name,
+    bool is_public, Slice name, AstGeneric *generic,
     AstFunArg *args, AstType *returns
 );
 AstFunInfo *ast_ext_fun_info_new(Mempool *mempool,
-    bool is_public, Slice name,
+    bool is_public, Slice name, AstGeneric *generic,
     AstFunArg *args, AstType *returns,
     Slice of, bool by_ref, Slice self_name
 );
@@ -193,7 +194,7 @@ AstValueInfo *ast_value_info_new(Mempool *mempool,
     AstType *explicit_type
 );
 
-AstNode *ast_node_new_type_decl(Mempool *mempool, bool is_public, Slice name, AstGeneric *generics, AstType *type);
+AstNode *ast_node_new_type_decl(Mempool *mempool, bool is_public, Slice name, AstGeneric *generic, AstType *type);
 AstNode *ast_node_new_fun_decl(Mempool *mempool, AstGlobal *global, AstFunInfo *info, AstBody *body);
 AstNode *ast_node_new_value_decl(Mempool *mempool, AstGlobal *global, AstValueInfo *info, AstExpr *initializer);
 AstNode *ast_node_new_external_value(Mempool *mempool, AstValueInfo *info, OptSlice alias);

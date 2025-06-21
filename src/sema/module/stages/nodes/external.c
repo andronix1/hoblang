@@ -9,6 +9,9 @@
 bool sema_module_stage_fill_external(SemaModule *module, AstExternalDecl *external) {
     switch (external->kind) {
         case AST_EXTERNAL_DECL_FUN: {
+            if (external->fun->generic) {
+                sema_module_err(module, external->fun->name, "extern functions cannot be generic");
+            }
             SemaType *type = NOT_NULL(sema_func_info_type(module, external->fun));
             HirDeclId decl_id = hir_add_decl(module->hir);
             HirExternId extern_id = hir_add_extern(module->hir, opt_slice_unwrap_or(external->alias, external->fun->name),

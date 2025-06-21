@@ -1,7 +1,6 @@
 #include "generic.h"
 #include "ast/generic.h"
 #include "core/mempool.h"
-#include "hir/api/hir.h"
 #include "sema/module/api/type.h"
 #include "sema/module/decl.h"
 #include "sema/module/generic.h"
@@ -13,7 +12,7 @@
 SemaGeneric *sema_module_generic(SemaModule *module, SemaGenericKind kind, AstGeneric *generic) {
     SemaType **params = vec_new_in(module->mempool, SemaType*);
     for (size_t i = 0; i < vec_len(generic->params); i++) {
-        vec_push(params, sema_type_new_generic(module, hir_add_gen_param(module->hir)));
+        vec_push(params, sema_type_new_generic(module));
     }
     return sema_generic_new(module->mempool, kind, module, params);
 }

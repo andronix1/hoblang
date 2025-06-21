@@ -1,0 +1,10 @@
+import io;
+import std;
+
+fun sizeOfSlice<T>() -> usize {
+    return std.slice.Slice.<T>.sizeof;
+}
+
+global fun main() -> i32 {
+    return sizeOfSlice.<usize>();
+}

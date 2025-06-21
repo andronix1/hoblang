@@ -18,10 +18,6 @@ HirTypeId hir_add_type(Hir *hir, HirType type);
 HirTypeId hir_register_type(Hir *hir);
 void hir_init_type(Hir *hir, HirTypeId id, HirTypeId type);
 
-HirGenParamId hir_add_gen_param(Hir *hir);
-HirGenTypeId hir_register_gen_type(Hir *hir, HirGenParamId *ids);
-void hir_init_gen_type(Hir *hir, HirGenTypeId id, HirTypeId type);
-
 HirDeclId hir_add_decl(Hir *hir);
 void hir_init_decl_func(Hir *hir, HirDeclId id, HirFuncId func);
 void hir_init_decl_extern(Hir *hir, HirDeclId id, HirExternId type);

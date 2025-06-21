@@ -11,8 +11,8 @@
 
 bool sema_module_stage_init_type_decl(SemaModule *module, AstTypeDecl *type_decl) {
     SemaModule *scope_module = type_decl->is_public ? NULL : module;
-    if (type_decl->generics) {
-        SemaGeneric *generic = NOT_NULL(sema_module_generic(module, SEMA_GENERIC_TYPE, type_decl->generics));
+    if (type_decl->generic) {
+        SemaGeneric *generic = NOT_NULL(sema_module_generic(module, SEMA_GENERIC_TYPE, type_decl->generic));
         sema_module_push_decl(module, type_decl->name, sema_decl_new(module->mempool, scope_module,
             sema_value_new_generic(module->mempool, generic)));
         type_decl->sema.generic = generic;
@@ -31,8 +31,8 @@ bool sema_module_stage_init_type_decl(SemaModule *module, AstTypeDecl *type_decl
 }
 
 bool sema_module_stage_fill_type_generics(SemaModule *module, AstTypeDecl *type_decl) {
-    if (type_decl->generics) {
-        SemaGenericCtx ctx = sema_module_generic_ctx_setup(module, type_decl->generics, type_decl->sema.generic);
+    if (type_decl->generic) {
+        SemaGenericCtx ctx = sema_module_generic_ctx_setup(module, type_decl->generic, type_decl->sema.generic);
         SemaType *type = NOT_NULL(sema_module_type(module, type_decl->type));
         sema_module_generic_ctx_clean(module, ctx);
         sema_generic_fill_type(type_decl->sema.generic, type);
@@ -41,7 +41,7 @@ bool sema_module_stage_fill_type_generics(SemaModule *module, AstTypeDecl *type_
 }
 
 bool sema_module_stage_fill_type_decl(SemaModule *module, AstTypeDecl *type_decl) {
-    if (!type_decl->generics){
+    if (!type_decl->generic){
         SemaType *source_type = NOT_NULL(sema_module_type(module, type_decl->type));
         SemaTypeInfo *type_info = &module->types[type_decl->sema.type_id];
         type_info->type = source_type;

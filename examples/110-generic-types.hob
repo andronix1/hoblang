@@ -12,7 +12,7 @@ fun extractInner(arg: Wrapper.<i32>) -> i32 {
 }
 
 global fun main() -> i32 {
-    # Unfortunately, `>>` token is reserved as shr operation, to, these types should be wrapped in circle braces
+    # Unfortunately, `>>` token is reserved for shr operation. So, these types should be wrapped in circle braces
     io.out.putString(<(Wrapper.<WrappedString>)> {
         inner: "Hello using generics\n" as WrappedString
     }.inner);

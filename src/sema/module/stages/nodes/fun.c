@@ -10,6 +10,9 @@
 #include "sema/module/value.h"
 
 bool sema_module_stage_fill_fun(SemaModule *module, AstFunDecl *func) {
+    if (func->info->generic) {
+        sema_module_err(module, func->info->name, "generic functions are not supported");
+    }
     SemaType *type = NOT_NULL(sema_func_info_type(module, func->info));
     func->sema.type = type;
 

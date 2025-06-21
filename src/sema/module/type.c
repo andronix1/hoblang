@@ -130,8 +130,8 @@ SemaType *sema_type_new_function(SemaModule *module, SemaType **args, SemaType *
         out->function.returns = returns;
     )
 
-SemaType *sema_type_new_generic(SemaModule *module, HirGenParamId id)
-    SEMA_TYPE_CONSTRUCT_SIMPLE(SEMA_TYPE_GENERIC, out->gen_param_id = id)
+SemaType *sema_type_new_generic(SemaModule *module)
+    SEMA_TYPE_CONSTRUCT_SIMPLE(SEMA_TYPE_GENERIC,)
 
 SemaType *sema_type_new_generate(SemaModule *module, SemaGeneric *generic, SemaType **params)
     SEMA_TYPE_CONSTRUCT_SIMPLE(SEMA_TYPE_GENERATE,

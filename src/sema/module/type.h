@@ -93,8 +93,6 @@ typedef struct SemaType {
             SemaGeneric *generic;
             SemaType **params;
         } generate;
-
-        HirGenParamId gen_param_id;
     };
 } SemaType;
 
@@ -110,7 +108,7 @@ SemaType *sema_type_new_float(SemaModule *module, SemaTypeFloatSize size);
 SemaType *sema_type_new_pointer(SemaModule *module, SemaType *pointer_to);
 SemaType *sema_type_new_function(SemaModule *module, SemaType **args, SemaType *returns);
 SemaType *sema_type_new_array(SemaModule *module, size_t length, SemaType *of);
-SemaType *sema_type_new_generic(SemaModule *module, HirGenParamId id);
+SemaType *sema_type_new_generic(SemaModule *module);
 SemaType *sema_type_new_generate(SemaModule *module, SemaGeneric *generic, SemaType **params);
 
 SemaType *sema_type_new_alias(Mempool *mempool, SemaType *type, SemaTypeAlias *alias);

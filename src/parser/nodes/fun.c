@@ -8,6 +8,7 @@
 #include "core/vec.h"
 #include "lexer/token.h"
 #include "parser/nodes/body.h"
+#include "parser/nodes/generic.h"
 #include "parser/nodes/type.h"
 #include "parser/parser.h"
 #include <stdio.h>
@@ -20,6 +21,7 @@ AstFunInfo *parse_fun_info(Parser *parser, bool is_public) {
         ext_of = name;
         name = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
     }
+    AstGeneric *generic = parser_next_is(parser, TOKEN_OPENING_ANGLE_BRACE) ? parse_generic(parser) : NULL;
     PARSER_EXPECT_NEXT(parser, TOKEN_OPENING_CIRCLE_BRACE);
     bool by_ref = false;
     Slice self_name = slice_new(NULL, 0);
@@ -42,8 +44,8 @@ AstFunInfo *parse_fun_info(Parser *parser, bool is_public) {
     }
     AstType *returns = parser_next_should_be(parser, TOKEN_FUN_RETURNS) ? NOT_NULL(parse_type(parser)) : NULL;
     return is_ext ?
-        ast_ext_fun_info_new(parser->mempool, is_public, name, args, returns, ext_of, by_ref, self_name):
-        ast_fun_info_new(parser->mempool, is_public, name, args, returns);
+        ast_ext_fun_info_new(parser->mempool, is_public, name, generic, args, returns, ext_of, by_ref, self_name):
+        ast_fun_info_new(parser->mempool, is_public, name, generic, args, returns);
 }
 
 AstNode *parse_fun_decl_node(Parser *parser, AstGlobal *global, bool is_public) {
