@@ -21,6 +21,7 @@ SemaModule *sema_module_new(Hir *ir, Parser *parser) {
     module->mempool = mempool_new(1024);
     module->std = sema_std_module_new();
     
+    module->gen_scopes = vec_new_in(module->mempool, HirGenScopeId);
     module->types = vec_new_in(module->mempool, SemaTypeInfo);
     module->local_decls_map = keymap_new_in(module->mempool, SemaDecl*);
 

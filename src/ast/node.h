@@ -70,6 +70,7 @@ typedef struct {
     struct {
         HirFuncId func_id;
         SemaType *type;
+        SemaGeneric *generic;
     } sema;
 } AstFunDecl;
 

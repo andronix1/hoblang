@@ -10,6 +10,8 @@ HirConst sema_const_to_hir(SemaConst *constant) {
         case SEMA_CONST_INT: return hir_const_new_int(sema_type_hir_id(constant->type), constant->integer);
         case SEMA_CONST_FLOAT: return hir_const_new_real(sema_type_hir_id(constant->type), constant->float_value);
         case SEMA_CONST_FUNC: return hir_const_new_func(sema_type_hir_id(constant->type), constant->func_decl);
+        case SEMA_CONST_GEN_FUNC: return hir_const_new_gen_func(sema_type_hir_id(constant->type), constant->gen_func.scope,
+                constant->gen_func.func, constant->gen_func.params);
     }
     UNREACHABLE;
 }

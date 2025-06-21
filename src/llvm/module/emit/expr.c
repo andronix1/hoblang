@@ -181,6 +181,8 @@ LLVMValueRef llvm_emit_const(LlvmModule *module, const HirConst *constant) {
             return LLVMConstStruct(fields, vec_len(constant->struct_fields), false);
         }
         case HIR_CONST_FUNC: return module->decls[constant->func_decl];
+        case HIR_CONST_GEN_FUNC:
+            return module->gen_scopes[constant->gen_func.scope].funcs[constant->gen_func.func][constant->gen_func.usage];
     }
     UNREACHABLE;
 }
@@ -343,9 +345,6 @@ static LlvmEmitStepRes llvm_emit_expr_step(
             LLVMValueRef indices[] = { LLVMConstInt(LLVMInt32Type(), step->idx_array.idx, false) };
             return llvm_emit_step_res_new(LLVMBuildGEP2(module->builder, type, pointer, indices, 1, ""), false);
         }
-        case HIR_EXPR_STEP_GEN_FUNC:
-            return llvm_emit_step_res_new(
-                module->gen_scopes[step->gen_func.scope].funcs[step->gen_func.func][step->gen_func.usage], true);
     }
     UNREACHABLE;
 }

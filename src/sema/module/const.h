@@ -6,6 +6,7 @@ typedef enum {
     SEMA_CONST_INT,
     SEMA_CONST_FLOAT,
     SEMA_CONST_FUNC,
+    SEMA_CONST_GEN_FUNC,
 } SemaConstKind;
 
 typedef struct SemaConst {
@@ -16,9 +17,15 @@ typedef struct SemaConst {
         uint64_t integer;
         long double float_value;
         HirDeclId func_decl;
+        struct {
+            HirTypeId *params;
+            HirGenScopeId scope;
+            HirGenFuncId func;
+        } gen_func;
     };
 } SemaConst;
 
 SemaConst *sema_const_new_integer(Mempool *mempool, SemaType *type, uint64_t integer);
 SemaConst *sema_const_new_float(Mempool *mempool, SemaType *type, long double value);
 SemaConst *sema_const_new_func(Mempool *mempool, SemaType *type, HirDeclId decl);
+SemaConst *sema_const_new_gen_func(Mempool *mempool, SemaType *type, HirGenScopeId scope, HirGenFuncId func, HirTypeId *params);

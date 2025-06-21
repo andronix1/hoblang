@@ -10,6 +10,7 @@ typedef enum {
     HIR_CONST_REAL,
     HIR_CONST_STRUCT,
     HIR_CONST_FUNC,
+    HIR_CONST_GEN_FUNC,
 } HirConstKind;
 
 typedef struct HirConst HirConst;
@@ -24,9 +25,30 @@ typedef struct HirConst {
         uint64_t integer;
         HirConst **struct_fields;
         HirDeclId func_decl;
+
+        struct {
+            HirTypeId *params;
+            HirGenScopeId scope;
+            HirGenFuncId func;
+
+            HirGenUsageId usage;
+        } gen_func;
     };
     long double real; // Because of ABI warning :(
 } HirConst;
+
+static inline HirConst hir_const_new_gen_func(HirTypeId type, HirGenScopeId scope, HirGenFuncId func, HirTypeId *params) {
+    HirConst constant = {
+        .kind = HIR_CONST_GEN_FUNC,
+        .type = type,
+        .gen_func = {
+            .scope = scope,
+            .func = func,
+            .params = params,
+        }
+    };
+    return constant;
+}
 
 static inline HirConst hir_const_new_int(HirTypeId type, uint64_t value) {
     HirConst constant = {

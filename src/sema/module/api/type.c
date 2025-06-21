@@ -64,15 +64,14 @@ void sema_type_print(va_list list) {
             logs("structure", type->pointer_to);
             break;
         case SEMA_TYPE_GENERIC:
-            logs("generic");
+        case SEMA_TYPE_GEN_PARAM:
+            logs("generic parameter");
             break;
         case SEMA_TYPE_GENERATE:
             logs("generator");
             break;
     }
 }
-
-static SemaType *sema_type_generate(SemaModule *module, SemaType *source, SemaType **params, SemaType **input);
 
 static inline SemaType *_sema_type_generate(SemaModule *module, SemaType *source, SemaType **params, SemaType **input) {
     for (size_t i = 0; i < vec_len(params); i++) {
@@ -83,6 +82,7 @@ static inline SemaType *_sema_type_generate(SemaModule *module, SemaType *source
         case SEMA_TYPE_INT:
         case SEMA_TYPE_FLOAT:
         case SEMA_TYPE_BOOL:
+        case SEMA_TYPE_GEN_PARAM:
             return source;
         case SEMA_TYPE_FUNCTION: {
             SemaType **args = vec_new_in(module->mempool, SemaType*);
@@ -114,7 +114,7 @@ static inline SemaType *_sema_type_generate(SemaModule *module, SemaType *source
     UNREACHABLE;
 }
 
-static SemaType *sema_type_generate(SemaModule *module, SemaType *source, SemaType **params, SemaType **input) {
+SemaType *sema_type_generate(SemaModule *module, SemaType *source, SemaType **params, SemaType **input) {
     SemaType *result = _sema_type_generate(module, source, params, input);
     if (result != source) {
         result->alias = source->alias;
@@ -193,12 +193,10 @@ bool sema_type_eq(const SemaType *a, const SemaType *b) {
                 }
             }
             return sema_type_eq(a->function.returns, b->function.returns);
-        case SEMA_TYPE_POINTER:
-            return sema_type_eq(a->pointer_to, b->pointer_to);
-        case SEMA_TYPE_ARRAY:
-            return sema_type_eq(a->array.of, b->array.of) && a->array.length == b->array.length;
-        case SEMA_TYPE_FLOAT:
-            return a->float_size == b->float_size;
+        case SEMA_TYPE_POINTER: return sema_type_eq(a->pointer_to, b->pointer_to);
+        case SEMA_TYPE_ARRAY: return sema_type_eq(a->array.of, b->array.of) && a->array.length == b->array.length;
+        case SEMA_TYPE_FLOAT: return a->float_size == b->float_size;
+        case SEMA_TYPE_GEN_PARAM: return a->gen_param == b->gen_param;
         case SEMA_TYPE_GENERATE:
             if (vec_len(a->generate.params) != vec_len(b->generate.params)) {
                 return false;

@@ -12,7 +12,7 @@ typedef struct SemaTypeAlias SemaTypeAlias;
 typedef size_t SemaTypeId;
 typedef struct SemaType SemaType;
 
-// bool sema_type_deep_eq(SemaType *a, SemaType *b);
+SemaType *sema_type_generate(SemaModule *module, SemaType *source, SemaType **params, SemaType **input);
 bool sema_type_eq(const SemaType *a, const SemaType *b);
 
 /*

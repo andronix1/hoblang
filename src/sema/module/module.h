@@ -28,6 +28,7 @@ typedef struct SemaModule {
     bool failed;
 
     SemaStd std;
+    HirGenScopeId *gen_scopes;
     SemaScopeStack *ss;
     SemaDecl **local_decls_map;
     SemaTypeInfo *types;

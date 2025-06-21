@@ -54,6 +54,7 @@ static inline HirType sema_type_to_hir(SemaModule* module, SemaType *type) {
         }
         case SEMA_TYPE_ARRAY: return hir_type_new_array(sema_type_hir_id(type->array.of), type->array.length);
         case SEMA_TYPE_RECORD: TODO;
+        case SEMA_TYPE_GEN_PARAM: return hir_type_new_gen(type->gen_param);
 
         case SEMA_TYPE_GENERATE: {
             SemaType *generated = sema_value_is_type(sema_generate(type->generate.generic, type->generate.params));
@@ -137,6 +138,11 @@ SemaType *sema_type_new_generate(SemaModule *module, SemaGeneric *generic, SemaT
     SEMA_TYPE_CONSTRUCT_SIMPLE(SEMA_TYPE_GENERATE,
         out->generate.generic = generic;
         out->generate.params = params;
+    )
+
+SemaType *sema_type_new_gen_param(SemaModule *module, HirGenParamId gen_param)
+    SEMA_TYPE_CONSTRUCT(SEMA_TYPE_GEN_PARAM,
+        out->gen_param = gen_param;
     )
 
 SemaType *sema_type_new_alias(Mempool *mempool, SemaType *type, SemaTypeAlias *alias) {

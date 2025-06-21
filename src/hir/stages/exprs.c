@@ -48,7 +48,18 @@ static HirTypeId hir_get_expr_step_type(Hir *hir, HirFuncId func, HirExprStep *s
             assert(type->kind == HIR_TYPE_FUNCTION);
             return type->function.returns;
         }
-        case HIR_EXPR_STEP_CONST: return step->constant.type;
+        case HIR_EXPR_STEP_CONST: {
+            HirConst *constant = &step->constant;
+            switch (constant->kind) {
+                case HIR_CONST_BOOL: case HIR_CONST_INT: case HIR_CONST_REAL: case HIR_CONST_STRUCT: case HIR_CONST_FUNC:
+                    break;
+                case HIR_CONST_GEN_FUNC:
+                    constant->gen_func.usage = hir_add_gen_scope_usage(hir, constant->gen_func.scope,
+                        constant->gen_func.params);
+                    break;
+            }
+            return constant->type;
+        }
         case HIR_EXPR_STEP_BINOP: return hir_get_binop_type(hir, steps, &step->binop);
         case HIR_EXPR_STEP_TAKE_REF: return hir_add_type(hir, hir_type_new_pointer(steps[step->ref_step].type));
         case HIR_EXPR_STEP_DEREF: {
@@ -86,9 +97,6 @@ static HirTypeId hir_get_expr_step_type(Hir *hir, HirFuncId func, HirExprStep *s
             return type->pointer_to;
         }
         case HIR_EXPR_STEP_NEG: return steps[step->neg.step].type;
-        case HIR_EXPR_STEP_GEN_FUNC:
-            step->gen_func.usage = hir_add_gen_scope_usage(hir, step->gen_func.scope, step->gen_func.params);
-            return step->gen_func.type;
     }
     UNREACHABLE;
 }

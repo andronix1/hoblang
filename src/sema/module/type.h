@@ -39,6 +39,7 @@ typedef enum {
     SEMA_TYPE_GENERIC,
     SEMA_TYPE_GENERATE,
     SEMA_TYPE_RECORD,
+    SEMA_TYPE_GEN_PARAM,
 } SemaTypeKind;
 
 typedef struct {
@@ -93,6 +94,8 @@ typedef struct SemaType {
             SemaGeneric *generic;
             SemaType **params;
         } generate;
+
+        HirGenParamId gen_param;
     };
 } SemaType;
 
@@ -102,6 +105,7 @@ HirTypeFloatSize sema_type_float_size_to_hir(SemaTypeFloatSize size);
 SemaType *sema_type_new_void(SemaModule *module);
 SemaType *sema_type_new_bool(SemaModule *module);
 SemaType *sema_type_new_record(SemaModule *module, size_t type_id);
+SemaType *sema_type_new_gen_param(SemaModule *module, HirGenParamId gen_param);
 SemaType *sema_type_new_structure(SemaModule *module, SemaTypeStructField *fields);
 SemaType *sema_type_new_int(SemaModule *module, SemaTypeIntSize size, bool is_signed);
 SemaType *sema_type_new_float(SemaModule *module, SemaTypeFloatSize size);

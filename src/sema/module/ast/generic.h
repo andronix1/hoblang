@@ -8,9 +8,11 @@
 
 typedef struct {
     bool is_global;
+    bool is_gen_scope;
     SemaScopeStack *ss;
 } SemaGenericCtx;
 
-SemaGeneric *sema_module_generic(SemaModule *module, SemaGenericKind kind, AstGeneric *generic);
+SemaGeneric *sema_module_generic_type(SemaModule *module, AstGeneric *generic);
+SemaGeneric *sema_module_generic_func(SemaModule *module, AstGeneric *generic);
 SemaGenericCtx sema_module_generic_ctx_setup(SemaModule *module, AstGeneric *generic, SemaGeneric *source);
 void sema_module_generic_ctx_clean(SemaModule *module, SemaGenericCtx ctx);

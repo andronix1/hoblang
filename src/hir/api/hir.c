@@ -17,8 +17,8 @@ Hir *hir_new() {
     hir->funcs = vec_new_in(hir->mempool, HirFuncRecord);
     hir->vars = vec_new_in(hir->mempool, HirVarInfo);
     hir->externs_map = keymap_new_in(hir->mempool, HirExternInfo);
-    hir->gen_scopes = keymap_new_in(hir->mempool, HirGenScope);
-    hir->root_gen_scopes = keymap_new_in(hir->mempool, HirGenScopeId);
+    hir->gen_scopes = vec_new_in(hir->mempool, HirGenScope);
+    hir->root_gen_scopes = vec_new_in(hir->mempool, HirGenScopeId);
     hir->gen_params_count = 0;
     return hir;
 }
