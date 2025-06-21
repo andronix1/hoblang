@@ -122,10 +122,18 @@ static SemaType *sema_type_generate(SemaModule *module, SemaType *source, SemaTy
     return result;
 }
 
+static inline SemaType *sema_type_root_ungenerated(SemaType *type) {
+    while (type->kind == SEMA_TYPE_RECORD) {
+        type = type->record.module->types[type->record.id].type;
+    }
+    return type;
+}
+
 SemaType *sema_type_root(SemaType *type) {
     while (true) {
-        if (type->kind == SEMA_TYPE_RECORD) {
-            type = type->record.module->types[type->record.id].type;
+        SemaType *new = sema_type_root_ungenerated(type);
+        if (type != new) {
+            type = new;
         } else if (type->kind == SEMA_TYPE_GENERATE) {
             SemaGeneric *generic = type->generate.generic;
             assert(generic->kind == SEMA_GENERIC_TYPE);
@@ -143,7 +151,7 @@ inline bool sema_type_can_be_downcasted(SemaType *type, SemaType *to) {
         return true;
     }
     if (!to->alias) {
-        return sema_type_eq(sema_type_root(type), to);
+        return sema_type_eq(sema_type_root_ungenerated(type), to);
     }
     while (type->kind == SEMA_TYPE_RECORD) {
         if (type->alias == to->alias) {

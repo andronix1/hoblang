@@ -8,10 +8,17 @@ type A<T> = struct {
 
 type Asd = string;
 
+fun lol(arg: A.<i32>) -> i32 {
+    return arg.inner;
+}
+
 global fun main() -> i32 {
     io.out.putString(<(A.<Asd>)> {
         inner: "asdassd\n" as Asd
     }.inner);
+    lol(<B> {
+        inner: 1
+    });
     return <B> {
         inner: 123
     }.inner;
