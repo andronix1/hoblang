@@ -7,6 +7,7 @@
 #include "sema/module/generic.h"
 #include "sema/module/module.h"
 #include "sema/module/api/module.h"
+#include <stdio.h>
 #include <string.h>
 
 HirTypeFloatSize sema_type_float_size_to_hir(SemaTypeFloatSize size) {
@@ -64,9 +65,10 @@ static inline HirType sema_type_to_hir(SemaModule* module, SemaType *type) {
     UNREACHABLE;
 }
 
-SemaTypeAlias *sema_type_alias_new(Mempool *mempool, HirTypeId id)
+SemaTypeAlias *sema_type_alias_new(Mempool *mempool, Slice name, HirTypeId id)
     MEMPOOL_CONSTRUCT(SemaTypeAlias,
         out->id = id;
+        out->name = name;
         out->decls_map = keymap_new_in(mempool, SemaDecl*);
     )
 
@@ -74,7 +76,7 @@ SemaTypeAlias *sema_type_alias_new(Mempool *mempool, HirTypeId id)
         SemaType *out = mempool_alloc(module->mempool, SemaType); \
         out->kind = KIND; \
         FIELDS; \
-        out->aliases = NULL; \
+        out->alias = NULL; \
         return out; \
     }
 
@@ -82,7 +84,7 @@ SemaTypeAlias *sema_type_alias_new(Mempool *mempool, HirTypeId id)
         SemaType *out = mempool_alloc(module->mempool, SemaType); \
         out->kind = KIND; \
         FIELDS; \
-        out->aliases = NULL; \
+        out->alias = NULL; \
         out->hir_id = KIND == SEMA_TYPE_RECORD ? \
             sema_module_get_type_id(module, out->record.id) : \
             hir_add_type(module->hir, sema_type_to_hir(module, out)); \
@@ -140,11 +142,8 @@ SemaType *sema_type_new_generate(SemaModule *module, SemaGeneric *generic, SemaT
 SemaType *sema_type_new_alias(Mempool *mempool, SemaType *type, SemaTypeAlias *alias) {
     SemaType *result = mempool_alloc(mempool, SemaType);
     memcpy(result, type, sizeof(SemaType));
-    result->aliases = vec_new_in(mempool, SemaTypeAlias*);
-    if (type->aliases) {
-        vec_extend(result->aliases, type->aliases);
-    }
-    vec_push(result->aliases, alias);
+    assert(!type->alias);
+    result->alias = alias;
     return result;
 }
 

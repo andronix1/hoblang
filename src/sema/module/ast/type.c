@@ -36,7 +36,7 @@ SemaType *sema_module_type(SemaModule *module, AstType *type) {
             SemaType *usize = sema_module_std_usize(module, type->array.type->slice);
             SemaConst *constant = NOT_NULL(sema_value_runtime_should_be_constant(module, type->slice,
                 sema_module_emit_runtime_expr_full(module, type->array.length, sema_expr_ctx_new(NULL, usize))));
-            if (!sema_type_eq(constant->type, usize)) {
+            if (!sema_type_can_be_casted(constant->type, usize)) {
                 sema_module_err(module, type->array.length->slice, "array size must be usize");
                 return NULL;
             }

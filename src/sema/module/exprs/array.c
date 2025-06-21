@@ -1,6 +1,7 @@
 #include "array.h"
 #include "core/null.h"
 #include "core/vec.h"
+#include "sema/module/api/type.h"
 #include "sema/module/ast/type.h"
 #include "sema/module/module.h"
 #include "sema/module/type.h"
@@ -12,7 +13,7 @@ SemaValue *sema_module_emit_expr_array(SemaModule *module, AstExprArray *array, 
     for (size_t i = 0; i < vec_len(array->elements); i++) {
         SemaValueRuntime *runtime = NOT_NULL(sema_module_emit_runtime_expr(module, array->elements[i],
             sema_expr_ctx_new(ctx.output, type)));
-        if (!sema_type_eq(runtime->type, type)) {
+        if (!sema_type_can_be_downcasted(runtime->type, type)) {
             sema_module_err(module, array->elements[i]->slice,
                 "expects elements of type $t but expression of type $t passed", type, runtime->type);
         }

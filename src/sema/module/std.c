@@ -25,7 +25,7 @@ static SemaValueRuntime *sema_module_internal_value(SemaModule *module, SemaModu
         return NULL;
     }
 
-    if (!sema_type_eq(runtime->type, type)) {
+    if (!sema_type_can_be_downcasted(runtime->type, type)) {
         sema_module_err(module, at, "`$S` in `"MODULE_NAME"` module is not matching type $t", name, type);
         return NULL;
     }

@@ -9,6 +9,7 @@
 #include "sema/module/value.h"
 
 bool sema_type_to_hir_number_info(SemaType *type, HirNumberInfo *output) {
+    type = sema_type_root(type);
     if (type->kind == SEMA_TYPE_INT) {
         *output = hir_number_info_new_int(type->integer.is_signed, sema_type_int_size_to_hir(type->integer.size));
         return true;
@@ -113,7 +114,6 @@ static SemaValue *sema_binop_bool(
 }
 
 SemaValue *sema_module_append_expr_binop(SemaModule *module, SemaType *type, size_t lss, size_t rss, AstBinopKind *kind, SemaExprOutput *output) {
-    type = sema_type_resolve(type);
     switch (kind->kind) {
         case AST_BINOP_ADD: return sema_binop_arithm(module, HIR_BINOP_ARITHM_ADD, kind->slice, type, lss, rss, output);
         case AST_BINOP_SUBTRACT: return sema_binop_arithm(module, HIR_BINOP_ARITHM_SUB, kind->slice, type, lss, rss, output);
@@ -152,7 +152,7 @@ SemaValue *sema_module_emit_expr_binop(SemaModule *module, AstBinop *binop, Sema
     SemaValueRuntime *rs = NOT_NULL(sema_module_emit_runtime_expr(module, binop->right,
         sema_expr_ctx_new(ctx.output, ls->type)));
     size_t rss = sema_module_expr_emit_runtime(rs, ctx.output);
-    if (!sema_type_eq(rs->type, ls->type)) {
+    if (!sema_type_can_be_casted(rs->type, ls->type)) {
         sema_module_err(module, binop->kind.slice, "binop can be applied to equal types only, but $t != $t", ls->type, rs->type);
         return NULL;
     }

@@ -16,7 +16,7 @@ bool sema_module_emit_stmt_return(SemaModule *module, AstReturn *ret) {
     SemaValueRuntime *runtime = NOT_NULL(sema_module_emit_runtime_expr_full(module, ret->value,
         sema_expr_ctx_new(&output, module->ss->returns)));
 
-    if (!sema_type_eq(module->ss->returns, runtime->type)) {
+    if (!sema_type_can_be_downcasted(module->ss->returns, runtime->type)) {
         sema_module_err(module, ret->value->slice, "expected to return $t, got $t", module->ss->returns, runtime->type);
         return false;
     }

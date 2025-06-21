@@ -17,7 +17,7 @@ HirConst sema_const_to_hir(SemaConst *constant) {
 SemaConst *sema_const_nest(Mempool *mempool, SemaConst *constant, SemaType *type) {
     SemaConst *result = mempool_alloc(mempool, SemaConst);
     memcpy(result, constant, sizeof(SemaConst));
-    assert(sema_type_eq(type, result->type));
+    assert(sema_type_can_be_casted(type, result->type));
     result->type = type;
     return result;
 }

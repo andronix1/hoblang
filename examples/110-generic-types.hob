@@ -6,9 +6,11 @@ type A<T> = struct {
     inner: T
 };
 
+type Asd = string;
+
 global fun main() -> i32 {
-    io.out.putString(<(A.<string>)> {
-        inner: "asdassd\n"
+    io.out.putString(<(A.<Asd>)> {
+        inner: "asdassd\n" as Asd
     }.inner);
     return <B> {
         inner: 123

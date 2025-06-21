@@ -38,19 +38,19 @@ static SemaValue *sema_module_analyze_expr_path_ident(SemaModule *module, SemaVa
     SemaValueRuntime *runtime = sema_value_is_runtime(value);
     if (runtime) {
         size_t of = sema_module_expr_emit_runtime(runtime, output);
-        SemaType *type = sema_type_resolve(runtime->type);
-        if (type->kind == SEMA_TYPE_STRUCTURE) {
-            size_t idx = keymap_get_idx(type->structure.fields_map, ident);
+        SemaType *root = sema_type_root(runtime->type);
+        if (root->kind == SEMA_TYPE_STRUCTURE) {
+            size_t idx = keymap_get_idx(root->structure.fields_map, ident);
             if (idx != (size_t)-1) {
                 size_t step_id = sema_expr_output_push_step(output, hir_expr_step_new_struct_field(idx, of));
-                keymap_at(type->structure.fields_map, idx, field);
+                keymap_at(root->structure.fields_map, idx, field);
                 return sema_value_new_runtime_expr_step(module->mempool, runtime->kind, field->value.type, step_id);
             }
         }
-        if (type->kind == SEMA_TYPE_ARRAY) {
+        if (root->kind == SEMA_TYPE_ARRAY) {
             if (slice_eq(ident, slice_from_cstr("length"))) {
                 return sema_value_new_runtime_const(module->mempool, sema_const_new_integer(module->mempool,
-                    sema_module_std_usize(module, ident), type->array.length));
+                    sema_module_std_usize(module, ident), root->array.length));
             }
         }
         SemaDecl *decl = sema_type_search_ext(module, runtime->type, ident);

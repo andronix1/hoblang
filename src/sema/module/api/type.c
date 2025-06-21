@@ -14,16 +14,20 @@ HirTypeId sema_type_hir_id(SemaType *type) {
         return -1;
     }
     if (type->kind == SEMA_TYPE_GENERATE) {
-        return sema_type_hir_id(sema_type_resolve(type));
+        return sema_type_hir_id(sema_type_root(type));
     }
-    if (type->aliases) {
-        return (*vec_top(type->aliases))->id;
+    if (type->alias) {
+        return type->alias->id;
     }
     return type->hir_id;
 }
 
 void sema_type_print(va_list list) {
     SemaType *type = va_arg(list, SemaType*);
+    if (type->alias) {
+        logs("$S", type->alias->name);
+        return;
+    }
     switch (type->kind) {
         case SEMA_TYPE_VOID: logs("void"); break;
         case SEMA_TYPE_ARRAY: logs("[$l]$t", type->array.length, type->array.of); break;
@@ -51,7 +55,7 @@ void sema_type_print(va_list list) {
             logs(") -> $t", type->function.returns);
             break;
         case SEMA_TYPE_RECORD:
-            logs("<alias>", type->pointer_to);
+            logs("$t", type->record.module->types[type->record.id]);
             break;
         case SEMA_TYPE_POINTER:
             logs("*$t", type->pointer_to);
@@ -68,7 +72,9 @@ void sema_type_print(va_list list) {
     }
 }
 
-static SemaType *sema_type_generate(SemaModule *module, SemaType *source, SemaType **params, SemaType **input) {
+static SemaType *sema_type_generate(SemaModule *module, SemaType *source, SemaType **params, SemaType **input);
+
+static inline SemaType *_sema_type_generate(SemaModule *module, SemaType *source, SemaType **params, SemaType **input) {
     for (size_t i = 0; i < vec_len(params); i++) {
         if (params[i] == source) return input[i];
     }
@@ -103,13 +109,20 @@ static SemaType *sema_type_generate(SemaModule *module, SemaType *source, SemaTy
         case SEMA_TYPE_ARRAY:
             return sema_type_new_array(module, source->array.length, sema_type_generate(module, source->array.of,
                 params, input));
-        case SEMA_TYPE_RECORD: return sema_type_generate(module, sema_type_resolve(source), params, input);
-        case SEMA_TYPE_GENERATE: case SEMA_TYPE_GENERIC: return source;
+        case SEMA_TYPE_RECORD: case SEMA_TYPE_GENERATE: case SEMA_TYPE_GENERIC: return source;
     }
     UNREACHABLE;
 }
 
-SemaType *sema_type_resolve(SemaType *type) {
+static SemaType *sema_type_generate(SemaModule *module, SemaType *source, SemaType **params, SemaType **input) {
+    SemaType *result = _sema_type_generate(module, source, params, input);
+    if (result != source) {
+        result->alias = source->alias;
+    }
+    return result;
+}
+
+SemaType *sema_type_root(SemaType *type) {
     while (true) {
         if (type->kind == SEMA_TYPE_RECORD) {
             type = type->record.module->types[type->record.id].type;
@@ -125,12 +138,27 @@ SemaType *sema_type_resolve(SemaType *type) {
     return type;
 }
 
-bool sema_type_eq(SemaType *a, SemaType *b) {
-    if (a == b) {
+inline bool sema_type_can_be_downcasted(SemaType *type, SemaType *to) {
+    if (type == to) {
         return true;
     }
-    a = sema_type_resolve(a);
-    b = sema_type_resolve(b);
+    if (!to->alias) {
+        return sema_type_eq(sema_type_root(type), to);
+    }
+    while (type->kind == SEMA_TYPE_RECORD) {
+        if (type->alias == to->alias) {
+            return true;
+        }
+        type = type->record.module->types[type->record.id].type;
+    }
+    return false;
+}
+
+bool sema_type_can_be_casted(SemaType *type, SemaType *to) {
+    return sema_type_can_be_downcasted(type, to) || sema_type_can_be_downcasted(to, type);
+}
+
+bool sema_type_eq(const SemaType *a, const SemaType *b) {
     if (a->kind != b->kind) {
         return false;
     }
@@ -138,7 +166,10 @@ bool sema_type_eq(SemaType *a, SemaType *b) {
         case SEMA_TYPE_VOID:
         case SEMA_TYPE_BOOL:
             return true;
-        case SEMA_TYPE_RECORD: UNREACHABLE;
+        case SEMA_TYPE_RECORD:
+            return
+                a->record.module == b->record.module &&
+                a->record.id == b->record.id;
         case SEMA_TYPE_GENERIC: case SEMA_TYPE_STRUCTURE: return a == b;
         case SEMA_TYPE_INT:
             return
@@ -175,18 +206,16 @@ bool sema_type_eq(SemaType *a, SemaType *b) {
 }
 
 SemaDecl *sema_type_search_ext(SemaModule *module, SemaType *type, Slice name) {
-    if (!type->aliases) {
+    if (!type->alias) {
         return NULL;
     }
-    for (ssize_t i = vec_len(type->aliases) - 1; i >= 0; i--) {
-        SemaDecl **decl = keymap_get(type->aliases[i]->decls_map, name);
-        if (decl) {
-            if ((*decl)->module != NULL && (*decl)->module != module) {
-                sema_module_err(module, name, "`$S` is private", name);
-                return NULL;
-            }
-            return *decl;
+    SemaDecl **decl = keymap_get(type->alias->decls_map, name);
+    if (decl) {
+        if ((*decl)->module != NULL && (*decl)->module != module) {
+            sema_module_err(module, name, "`$S` is private", name);
+            return NULL;
         }
+        return *decl;
     }
     if (type->kind == SEMA_TYPE_RECORD) {
         return sema_type_search_ext(module, type->record.module->types[type->record.id].type, name);

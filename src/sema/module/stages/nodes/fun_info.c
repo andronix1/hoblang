@@ -29,11 +29,11 @@ SemaType *sema_func_info_type(SemaModule *module, AstFunInfo *info) {
 void sema_module_push_fun_info_decl(SemaModule *module, AstFunInfo *info, SemaDecl *decl) {
     if (info->ext.is) {
         SemaType *ext_type = info->ext.sema.ext_type;
-        if (!ext_type->aliases) {
+        if (!ext_type->alias) {
             sema_module_err(module, info->ext.of, "only type aliases can be extended");
             return;
         }
-        if (keymap_insert((*vec_top(ext_type->aliases))->decls_map, info->name, decl)) {
+        if (keymap_insert(ext_type->alias->decls_map, info->name, decl)) {
             sema_module_err(module, info->name, "`$S` already declared in type alias", info->name);
             return;
         }

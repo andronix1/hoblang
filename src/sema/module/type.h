@@ -9,10 +9,11 @@
 
 typedef struct SemaTypeAlias {
     HirTypeId id;
+    Slice name;
     SemaDecl **decls_map;
 } SemaTypeAlias;
 
-SemaTypeAlias *sema_type_alias_new(Mempool *mempool, HirTypeId id);
+SemaTypeAlias *sema_type_alias_new(Mempool *mempool, Slice name, HirTypeId id);
 
 typedef enum {
     SEMA_FLOAT_32,
@@ -56,7 +57,7 @@ static inline SemaTypeStructField sema_type_struct_field_new(SemaType *type, Sem
 typedef struct SemaType {
     SemaTypeKind kind;
 
-    SemaTypeAlias **aliases;
+    SemaTypeAlias *alias;
     HirTypeId hir_id;
 
     union {

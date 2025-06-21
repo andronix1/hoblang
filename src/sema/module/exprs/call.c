@@ -19,7 +19,7 @@ SemaValue *sema_module_emit_expr_call(SemaModule *module, AstCall *call, SemaExp
         ext_step_id = runtime->in_expr_id.ext_of;
     }
 
-    SemaType *type = sema_type_resolve(runtime->type);
+    SemaType *type = sema_type_root(runtime->type);
     if (type->kind != SEMA_TYPE_FUNCTION) {
         sema_module_err(module, call->inner->slice, "$t is not callable", type);
         return NULL;
@@ -41,7 +41,7 @@ SemaValue *sema_module_emit_expr_call(SemaModule *module, AstCall *call, SemaExp
     for (size_t i = 0; i < vec_len(call->args); i++) {
         SemaValueRuntime *runtime = NOT_NULL(sema_module_emit_runtime_expr(module,
             call->args[i], sema_expr_ctx_new(ctx.output, type->function.args[i + is_ext])));
-        if (!sema_type_eq(runtime->type, type->function.args[i + is_ext])) {
+        if (!sema_type_can_be_downcasted(runtime->type, type->function.args[i + is_ext])) {
             sema_module_err(module, call->args[i]->slice, "expected $t, but $t was passed",
                 type->function.args[i + is_ext], runtime->type);
         }

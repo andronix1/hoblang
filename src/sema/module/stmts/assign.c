@@ -27,7 +27,7 @@ bool sema_module_emit_stmt_assign(SemaModule *module, AstAssign *assign) {
         sema_module_err(module, assign->dst->slice, "this expression is not assignable");
         return false;
     }
-    if (!sema_type_eq(lvalue->type, rvalue->type)) {
+    if (!sema_type_can_be_downcasted(lvalue->type, rvalue->type)) {
         sema_module_err(module, assign->what->slice, "cannot assign expression of type $t to assignable expression of type $t", rvalue->type, lvalue->type);
         return false;
     }

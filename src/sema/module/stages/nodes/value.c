@@ -34,7 +34,7 @@ static SemaValueRuntime *sema_value_decl_get_initializer(SemaModule *module, Ast
     SemaType *type = value_decl->sema.type;
     SemaValueRuntime *value = NOT_NULL(sema_module_emit_runtime_expr_full(module, value_decl->initializer,
         sema_expr_ctx_new(output, type)));
-    if (type && !sema_type_eq(type, value->type)) {
+    if (type && !sema_type_can_be_downcasted(type, value->type)) {
         sema_module_err(module, value_decl->initializer->slice, 
             "trying to initialize declaration with exlicit type $t with expression of type $t", type, value->type);
         return NULL;

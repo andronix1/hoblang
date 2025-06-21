@@ -8,7 +8,7 @@
 SemaValue *sema_module_emit_expr_float(SemaModule *module, long double val, SemaExprCtx ctx) {
     SemaType *type = NULL;
     if (ctx.expectation) {
-        ctx.expectation = sema_type_resolve(ctx.expectation);
+        ctx.expectation = sema_type_root(ctx.expectation);
         if (ctx.expectation->kind == SEMA_TYPE_FLOAT) {
             type = ctx.expectation;
         }
