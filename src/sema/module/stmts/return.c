@@ -1,13 +1,15 @@
 #include "return.h"
-#include "core/assert.h"
 #include "core/null.h"
 #include "sema/module/module.h"
 #include "sema/module/scope.h"
 #include "sema/module/exprs/expr.h"
+#include "sema/module/type.h"
 
 bool sema_module_emit_stmt_return(SemaModule *module, AstReturn *ret) {
     if (!ret->value) {
-        TODO;
+        if (!sema_type_can_be_downcasted(module->ss->returns, sema_type_new_void(module))) {
+            sema_module_err(module, ret->slice, "expected function to return $t", module->ss->returns);
+        }
         sema_ss_append_stmt(module->ss, hir_stmt_new_ret_void());
         return true;
     }

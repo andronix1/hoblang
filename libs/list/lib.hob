@@ -1,0 +1,55 @@
+import std;
+import mem;
+
+public type List<T> = struct {
+    data: std.slice.Slice.<T>,
+    capacity: usize
+};
+
+public fun newWithCapacity<T>(capacity: usize) -> List.<T> {
+    return <(List.<T>)> {
+        data: std.slice.new.<T>(mem.allocate(T.sizeof * capacity) as *T, 0),
+        capacity: capacity,
+    };
+}
+
+public fun newFromSlice<T>(slice: std.slice.Slice.<T>) -> List.<T> {
+    var result = newWithCapacity.<T>(slice.length);
+    appendSlice.<T>(&result, slice);
+    return result;
+}
+
+public fun appendSlice<T>(list: *List.<T>, slice: std.slice.Slice.<T>) {
+    reserve.<T>(list, list.*.data.length + slice.length);
+
+    var i: usize = 0;
+    while i < slice.length {
+        push.<T>(list, slice.raw[i]);
+        i += 1;
+    }
+}
+
+public fun reserve<T>(list: *List.<T>, capacity: usize) {
+    if list.*.capacity >= capacity {
+        return;
+    }
+    list.*.data.raw = mem.reallocate(list.*.data.raw as *void, capacity) as *T;
+    list.*.capacity = capacity;
+}
+
+public fun push<T>(list: *List.<T>, value: T) {
+    if list.*.data.length + 1 > list.*.capacity {
+        var newCapacity = list.*.data.length * 2;
+        if newCapacity < list.*.data.length + 1 {
+            newCapacity = list.*.data.length + 1;
+        }
+        reserve.<T>(list, newCapacity);
+    }
+    list.*.data.raw[list.*.data.length] = value;
+    list.*.data.length += 1;
+}
+
+public fun free<T>(list: *List.<T>) {
+    mem.free(list.*.data.raw as *void);
+}
+

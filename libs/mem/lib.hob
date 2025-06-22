@@ -1,0 +1,4 @@
+public extern(malloc) fun allocate(size: usize) -> *void;
+public extern(realloc) fun reallocate(ptr: *void, size: usize) -> *void;
+public extern(free) fun free(ptr: *void);
+

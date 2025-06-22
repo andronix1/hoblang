@@ -309,7 +309,7 @@ static LlvmEmitStepRes llvm_emit_expr_step(
             LLVMValueRef pointer = LLVMBuildGEP2(module->builder, llvm_runtime_type(module, step->size.of),
                 LLVMConstPointerNull(LLVMPointerTypeInContext(module->context, 0)), indices, 1, "");
             return llvm_emit_step_res_new(
-                LLVMBuildBitCast(module->builder, pointer, llvm_runtime_type(module, step->size.type), ""), true);
+                LLVMBuildPtrToInt(module->builder, pointer, llvm_runtime_type(module, step->size.type), ""), true);
         }
         case HIR_EXPR_STEP_BUILD_ARRAY: {
             LLVMTypeRef llvm_type = llvm_runtime_type(module, step->type);
@@ -341,14 +341,14 @@ static LlvmEmitStepRes llvm_emit_expr_step(
         }
         case HIR_EXPR_STEP_IDX_POINTER: {
             LLVMTypeRef type = llvm_runtime_type(module, step->type);
-            LLVMValueRef pointer = llvm_get_res_value(module, &results[step->ref_step]);
-            LLVMValueRef indices[] = { LLVMConstInt(LLVMInt32Type(), step->idx_array.idx, false) };
-            return llvm_emit_step_res_new(LLVMBuildGEP2(module->builder, type, pointer, indices, 1, ""), false);
+            LLVMValueRef pointer = llvm_get_res_value(module, &results[step->idx_pointer.value]);
+            LLVMValueRef idx = llvm_get_res_value(module, &results[step->idx_pointer.idx]);
+            return llvm_emit_step_res_new(LLVMBuildGEP2(module->builder, type, pointer, &idx, 1, ""), false);
         }
         case HIR_EXPR_STEP_CAST_PTR: {
             LLVMTypeRef type = llvm_runtime_type(module, step->type);
             LLVMValueRef pointer = llvm_get_res_value(module, &results[step->cast_ptr.step_id]);
-            return llvm_emit_step_res_new(LLVMBuildBitCast(module->builder, pointer, type, ""), false);
+            return llvm_emit_step_res_new(LLVMBuildBitCast(module->builder, pointer, type, ""), true);
         }
     }
     UNREACHABLE;

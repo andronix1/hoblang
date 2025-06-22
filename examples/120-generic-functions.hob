@@ -1,27 +1,17 @@
-import io;
 import std;
+import io;
+import list;
 
-type List<T> = struct {
-    data: std.slice.Slice.<T>,
-    capacity: usize
-};
-
-extern fun malloc(size: usize) -> *void;
-
-fun new<T>(capacity: usize) -> List.<T> {
-    return <(List.<T>)> {
-        data: std.slice.new.<T>(malloc(T.sizeof * capacity) as *T, 0),
-        capacity: capacity,
-    };
-}
-
-fun push<T>(list: *List.<T>, value: T) {
-    list.*.data.raw[list.*.data.length] = value;
-    list.*.data.length += 1;
-}
+use list.{ List, newFromSlice, free, appendSlice, push };
 
 global fun main() -> i32 {
-    var list = new.<u8>(4);
-    io.out.putString(list.data as string);
+    var hi = newFromSlice.<u8>("hello");
+    defer free.<u8>(&hi);
+
+    appendSlice.<u8>(&hi, ", ");
+    appendSlice.<u8>(&hi, "world!");
+    push.<u8>(&hi, '\n');
+
+    io.out.putString(hi.data as string);
     return 0;
 }
