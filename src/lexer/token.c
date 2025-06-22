@@ -58,6 +58,7 @@ void token_print(va_list list) {
         case TOKEN_TRUE: printf("`true`"); return;
         case TOKEN_FALSE: printf("`false`"); return;
         case TOKEN_USE: printf("`use`"); return;
+        case TOKEN_UNDEFINED: printf("`undefined`"); return;
         case TOKEN_FAILED: printf("<fail>"); return;
         case TOKEN_EOI: printf("<end of input>"); return;
         case TOKEN_EQUALS: printf("`==`"); return;

@@ -107,7 +107,7 @@ SemaValue *sema_module_emit_expr_path_from(SemaModule *module, SemaValue *value,
                 SemaGeneric *generic = NOT_NULL(sema_value_should_be_generic(module, segment->slice, value));
                 if (vec_len(generic->params) != vec_len(segment->generic->params)) {
                     sema_module_err(module, segment->slice, "expected $l generic parameter, but $l passed",
-                        vec_len(generic->params));
+                        vec_len(generic->params), vec_len(segment->generic->params));
                     return NULL;
                 }
                 SemaType **input = vec_new_in(module->mempool, SemaType*);

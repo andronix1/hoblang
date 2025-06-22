@@ -11,6 +11,7 @@ HirConst sema_const_to_hir(SemaModule *module, SemaConst *constant) {
         case SEMA_CONST_INT: return hir_const_new_int(sema_type_hir_id(constant->type), constant->integer);
         case SEMA_CONST_FLOAT: return hir_const_new_real(sema_type_hir_id(constant->type), constant->float_value);
         case SEMA_CONST_FUNC: return hir_const_new_func(sema_type_hir_id(constant->type), constant->func_decl);
+        case SEMA_CONST_UNDEFINED: return hir_const_new_undefined(sema_type_hir_id(constant->type));
         case SEMA_CONST_GEN_FUNC: {
             HirTypeId type_id = sema_type_hir_id(constant->type);
             return vec_len(module->gen_scopes) ?

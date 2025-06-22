@@ -51,7 +51,12 @@ static HirTypeId hir_get_expr_step_type(Hir *hir, HirFuncId func, HirExprStep *s
         case HIR_EXPR_STEP_CONST: {
             HirConst *constant = &step->constant;
             switch (constant->kind) {
-                case HIR_CONST_BOOL: case HIR_CONST_INT: case HIR_CONST_REAL: case HIR_CONST_STRUCT: case HIR_CONST_FUNC:
+                case HIR_CONST_BOOL:
+                case HIR_CONST_INT:
+                case HIR_CONST_REAL:
+                case HIR_CONST_STRUCT:
+                case HIR_CONST_FUNC:
+                case HIR_CONST_UNDEFINED:
                     break;
                 case HIR_CONST_GEN_FUNC:
                     constant->gen_func.usage = hir_add_gen_scope_usage(hir, constant->gen_func.scope,

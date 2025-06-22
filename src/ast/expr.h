@@ -26,6 +26,7 @@ typedef enum {
     AST_EXPR_IDX,
     AST_EXPR_INNER_PATH,
     AST_EXPR_FUNCTION,
+    AST_EXPR_UNDEFINED,
 } AstExprKind;
 
 typedef struct {
@@ -148,6 +149,7 @@ static inline AstBinopKind ast_binop_kind_new(AstBinopKindKind kind, Slice slice
     return bkind;
 }
 
+AstExpr *ast_expr_new_undefined(Mempool *mempool, Slice slice);
 AstExpr *ast_expr_new_char(Mempool *mempool, Slice slice, char c);
 AstExpr *ast_expr_new_bool(Mempool *mempool, Slice slice, bool value);
 AstExpr *ast_expr_new_path(Mempool *mempool, Slice slice, AstPath *path);

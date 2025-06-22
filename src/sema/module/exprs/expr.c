@@ -21,6 +21,7 @@
 #include "sema/module/exprs/string.h"
 #include "sema/module/exprs/struct.h"
 #include "sema/module/exprs/take_ref.h"
+#include "sema/module/exprs/undefined.h"
 #include "sema/module/module.h"
 #include "sema/module/value.h"
 #include <assert.h>
@@ -45,6 +46,7 @@ SemaValue *sema_module_emit_expr(SemaModule *module, AstExpr *expr, SemaExprCtx 
         case AST_EXPR_ARRAY: return sema_module_emit_expr_array(module, &expr->array, ctx);
         case AST_EXPR_IDX: return sema_module_emit_expr_idx(module, &expr->idx, ctx);
         case AST_EXPR_FUNCTION: return sema_module_emit_expr_function(module, &expr->func);
+        case AST_EXPR_UNDEFINED: return sema_module_emit_expr_undefined(module, expr->slice, ctx);
     }
     UNREACHABLE;
 }

@@ -19,6 +19,7 @@ void hir_const_dump(HirConst *constant, FILE *stream) {
             fprintf(stream, "}");
             break;
         case HIR_CONST_FUNC: fprintf(stream, "func decl%lu", constant->func_decl); break;
+        case HIR_CONST_UNDEFINED: fprintf(stream, "undefined type%lu", constant->type); break;
         case HIR_CONST_GEN_FUNC:
             fprintf(stream, "genScope%lu.genFunc%lu.<", constant->gen_func.scope, constant->gen_func.func);
             for (size_t i = 0; i < vec_len(constant->gen_func.params); i++) {

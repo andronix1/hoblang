@@ -73,9 +73,13 @@ bool ast_expr_eq(const AstExpr *a, const AstExpr *b) {
         case AST_EXPR_NEG: return ast_expr_eq(a->neg_inner, b->neg_inner);
         case AST_EXPR_TAKE_REF: return ast_expr_eq(a->take_ref_inner, b->take_ref_inner);
         case AST_EXPR_FLOAT: return a->float_value == b->float_value;
+        case AST_EXPR_UNDEFINED: return true;
     }
     UNREACHABLE;
 }
+
+AstExpr *ast_expr_new_undefined(Mempool *mempool, Slice slice)
+    CONSTRUCT(AST_EXPR_UNDEFINED,)
 
 AstExpr *ast_expr_new_array(Mempool *mempool, Slice slice, AstType *type, AstExpr **elements)
     CONSTRUCT(AST_EXPR_ARRAY,

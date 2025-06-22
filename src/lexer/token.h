@@ -22,6 +22,7 @@ typedef enum {
     TOKEN_USE,
     TOKEN_SIZEOF,
     TOKEN_DEFER,
+    TOKEN_UNDEFINED,
     TOKEN_TRUE, TOKEN_FALSE,
     // Extended
     TOKEN_IDENT,

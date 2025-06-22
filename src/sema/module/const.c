@@ -1,5 +1,11 @@
 #include "const.h"
 
+SemaConst *sema_const_new_undefined(Mempool *mempool, SemaType *type)
+    MEMPOOL_CONSTRUCT(SemaConst, 
+        out->kind = SEMA_CONST_UNDEFINED;
+        out->type = type;
+    )
+
 SemaConst *sema_const_new_float(Mempool *mempool, SemaType *type, long double value)
     MEMPOOL_CONSTRUCT(SemaConst, 
         out->kind = SEMA_CONST_FLOAT;

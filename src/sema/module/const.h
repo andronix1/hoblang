@@ -7,6 +7,7 @@ typedef enum {
     SEMA_CONST_FLOAT,
     SEMA_CONST_FUNC,
     SEMA_CONST_GEN_FUNC,
+    SEMA_CONST_UNDEFINED,
 } SemaConstKind;
 
 typedef struct SemaConst {
@@ -25,6 +26,7 @@ typedef struct SemaConst {
     };
 } SemaConst;
 
+SemaConst *sema_const_new_undefined(Mempool *mempool, SemaType *type);
 SemaConst *sema_const_new_integer(Mempool *mempool, SemaType *type, uint64_t integer);
 SemaConst *sema_const_new_float(Mempool *mempool, SemaType *type, long double value);
 SemaConst *sema_const_new_func(Mempool *mempool, SemaType *type, HirDeclId decl);

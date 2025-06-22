@@ -170,9 +170,10 @@ LLVMValueRef llvm_emit_const(LlvmModule *module, const HirConst *constant) {
             return LLVMConstInt(llvm_runtime_type(module, constant->type), constant->integer, false);
         case HIR_CONST_BOOL:
             return LLVMConstInt(LLVMInt1TypeInContext(module->context), constant->boolean, false);
-        case HIR_CONST_REAL: {
+        case HIR_CONST_REAL:
             return LLVMConstReal(llvm_runtime_type(module, constant->type), constant->real);
-        }
+        case HIR_CONST_UNDEFINED:
+            return LLVMGetUndef(llvm_runtime_type(module, constant->type));
         case HIR_CONST_STRUCT: {
             LLVMValueRef *fields = alloca(sizeof(LLVMValueRef) * vec_len(constant->struct_fields));
             for (size_t i = 0; i < vec_len(constant->struct_fields); i++) {
