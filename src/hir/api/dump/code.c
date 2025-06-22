@@ -130,6 +130,9 @@ static void hir_expr_dump(HirExpr *expr, FILE *stream, size_t tabs) {
             case HIR_EXPR_STEP_NEG:
                 fprintf(stream, "neg of step%lu", step->neg.step);
                 break;
+            case HIR_EXPR_STEP_CAST_PTR:
+                fprintf(stream, "cast pointer step%lu to type%lu", step->cast_ptr.step_id, step->cast_ptr.type);
+                break;
         }
         fprintf(stream, "\n");
     }

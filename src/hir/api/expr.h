@@ -27,6 +27,7 @@ typedef enum {
     HIR_EXPR_STEP_STRING,
     HIR_EXPR_STEP_SIZEOF,
     HIR_EXPR_STEP_NEG,
+    HIR_EXPR_STEP_CAST_PTR,
 } HirExprStepKind;
 
 typedef struct {
@@ -78,6 +79,11 @@ typedef struct {
             size_t callable;
             size_t *args;
         } call;
+
+        struct {
+            size_t step_id;
+            HirTypeId type;
+        } cast_ptr;
 
         struct {
             size_t step_id;
@@ -179,6 +185,17 @@ static inline HirExprStep hir_expr_step_new_bool_skip(size_t condition, bool exp
             .condition = condition,
             .expect = expect,
             .result = result 
+        }
+    };
+    return step;
+}
+
+static inline HirExprStep hir_expr_step_new_cast_ptr(size_t step_id, HirTypeId type) {
+    HirExprStep step = {
+        .kind = HIR_EXPR_STEP_CAST_PTR,
+        .cast_ptr = {
+            .step_id = step_id,
+            .type = type,
         }
     };
     return step;

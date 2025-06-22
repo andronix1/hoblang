@@ -345,6 +345,11 @@ static LlvmEmitStepRes llvm_emit_expr_step(
             LLVMValueRef indices[] = { LLVMConstInt(LLVMInt32Type(), step->idx_array.idx, false) };
             return llvm_emit_step_res_new(LLVMBuildGEP2(module->builder, type, pointer, indices, 1, ""), false);
         }
+        case HIR_EXPR_STEP_CAST_PTR: {
+            LLVMTypeRef type = llvm_runtime_type(module, step->type);
+            LLVMValueRef pointer = llvm_get_res_value(module, &results[step->cast_ptr.step_id]);
+            return llvm_emit_step_res_new(LLVMBuildBitCast(module->builder, pointer, type, ""), false);
+        }
     }
     UNREACHABLE;
 }
