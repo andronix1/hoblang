@@ -1,0 +1,28 @@
+import std;
+import io;
+import result;
+import process;
+
+use result.Result;
+
+global fun main() -> i32 {
+    std.panic.handler = fun (message: string) {
+        io.out.putString("fatal error: ");
+        io.out.putString(message);
+        io.out.putString("\n");
+        process.exit(1);
+    };
+
+    io.out.putString(result.ok.<string, string>("hello").unwrap());
+    io.out.putString(result.err.<string, string>(", ").unwrapErr());
+    io.out.putString(result.ok.<string, string>("noooooooo").map(fun (a: string) -> string {
+        return "how";
+    }).unwrap());
+    io.out.putString(result.ok.<string, string>(" are").mapErr(fun (a: string) -> string {
+        return "noooo";
+    }).unwrap());
+    io.out.putString(result.err.<string, string>("---").mapErr(fun (a: string) -> string {
+        return " you?\n";
+    }).unwrapErr());
+    return 0;
+}

@@ -1,0 +1,47 @@
+import std;
+
+public type Result<T, E> = struct {
+    isOk: bool, # TODO: unions
+    ok: T,
+    err: E
+};
+
+public fun err<T, E>(err: E) -> Result.<T, E> {
+    return <(Result.<T, E>)> {
+        isOk: false,
+        ok: undefined,
+        err: err
+    };
+}
+
+public fun ok<T, E>(value: T) -> Result.<T, E> {
+    return <(Result.<T, E>)> {
+        isOk: true,
+        ok: value,
+        err: undefined
+    };
+}
+
+public fun Result.unwrapErr(self) -> E {
+    std.panic.assert(!self.isOk, "Result.unwrapErr failed");
+    return self.err;
+}
+
+public fun Result.unwrap(self) -> T {
+    std.panic.assert(self.isOk, "Result.unwrap failed");
+    return self.ok;
+}
+
+public fun Result.map(self, mapper: fun (T) -> T) -> Result.<T, E> {
+    if self.isOk {
+        return ok.<T, E>(mapper(self.ok));
+    }
+    return self;
+}
+
+public fun Result.mapErr(self, mapper: fun (E) -> E) -> Result.<T, E> {
+    if !self.isOk {
+        return err.<T, E>(mapper(self.err));
+    }
+    return self;
+}
