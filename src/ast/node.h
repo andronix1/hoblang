@@ -57,7 +57,9 @@ typedef struct AstFunInfo {
         Slice self_name;
 
         struct {
-            SemaType *ext_type;
+            SemaType *type;
+            SemaGeneric *generic;
+            SemaGeneric *func_generic;
         } sema;
     } ext;
 } AstFunInfo;

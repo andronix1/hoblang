@@ -30,7 +30,7 @@ SemaGeneric *sema_module_generic_type(SemaModule *module, AstGeneric *generic, S
     for (size_t i = 0; i < vec_len(generic->params); i++) {
         vec_push(params, sema_type_new_generic(module));
     }
-    return sema_generic_new_type(module->mempool, module, name, params);
+    return sema_generic_new_type(module->mempool, module, name, params, generic);
 }
 
 SemaGenericCtx sema_module_generic_ctx_setup(SemaModule *module, AstGeneric *generic, SemaGeneric *source) {

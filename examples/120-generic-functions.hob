@@ -2,15 +2,15 @@ import std;
 import io;
 import list;
 
-use list.{ List, newFromSlice, free, appendSlice, push };
+use list.{ List, newFromSlice };
 
 global fun main() -> i32 {
-    var hi = newFromSlice.<u8>("hello");
-    defer free.<u8>(&hi);
+    var hi: List.<u8> = newFromSlice.<u8>("hello");
+    defer hi.free();
 
-    appendSlice.<u8>(&hi, ", ");
-    appendSlice.<u8>(&hi, "world!");
-    push.<u8>(&hi, '\n');
+    hi.appendSlice(", ");
+    hi.appendSlice("world!");
+    hi.push('\n');
 
     io.out.putString(hi.data as string);
     return 0;

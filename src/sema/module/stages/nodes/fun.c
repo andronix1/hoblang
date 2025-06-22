@@ -10,15 +10,37 @@
 #include "sema/module/type.h"
 #include "sema/module/value.h"
 
+static inline void sema_module_push_func_ctx(SemaModule *module, AstFunDecl *func, SemaGenericCtx *ctx) {
+    if (func->info->generic) {
+        *ctx = sema_module_generic_ctx_setup(module, func->info->generic, func->sema.generic);
+    }
+
+    if (func->info->ext.sema.func_generic) {
+        *ctx = sema_module_generic_ctx_setup(module, func->info->ext.sema.generic->type.source,
+            func->info->ext.sema.func_generic);
+    }
+}
+
+static inline SemaGeneric *sema_module_func_get_gen(AstFunDecl *func) {
+    SemaGeneric *generic = func->sema.generic;
+    if (!generic) {
+        generic = func->info->ext.sema.func_generic;
+    }
+    return generic;
+}
+
 bool sema_module_stage_fill_fun(SemaModule *module, AstFunDecl *func) {
     func->sema.generic = NULL;
     SemaGenericCtx ctx;
+
+    NOT_NULL(sema_func_info_setup(module, func->info));
+
     if (func->info->generic) {
         SemaGeneric *generic = NOT_NULL(sema_module_generic_func(module, func->info->generic, func->info->name));
         func->sema.generic = generic;
-        sema_module_push_fun_info_decl(module, func->info, sema_value_new_generic(module->mempool, generic));
-        ctx = sema_module_generic_ctx_setup(module, func->info->generic, generic);
     }
+
+    sema_module_push_func_ctx(module, func, &ctx);
 
     SemaType *type = NOT_NULL(sema_func_info_type(module, func->info));
     func->sema.type = type;
@@ -26,9 +48,10 @@ bool sema_module_stage_fill_fun(SemaModule *module, AstFunDecl *func) {
     HirFuncId func_id = hir_register_fun(module->hir, sema_type_hir_id(type));
     func->sema.func_id = func_id;
 
-    if (func->info->generic) {
-        HirGenFuncId id = hir_gen_scope_add_func(module->hir, func->sema.generic->func.scope, func_id);
-        sema_generic_fill_func(func->sema.generic, type, id);
+    SemaGeneric *generic = sema_module_func_get_gen(func);
+    if (generic) {
+        HirGenFuncId id = hir_gen_scope_add_func(module->hir, generic->func.scope, func_id);
+        sema_generic_fill_func(generic, type, id);
         sema_module_generic_ctx_clean(module, ctx);
     }
 
@@ -38,11 +61,13 @@ bool sema_module_stage_fill_fun(SemaModule *module, AstFunDecl *func) {
         args_mut[i] = i == 0 && func->info->ext.is ? HIR_IMMUTABLE : HIR_MUTABLE;
     }
 
-    if (!func->info->generic) {
+    if (!generic) {
         HirDeclId decl_id = hir_add_decl(module->hir);
         sema_module_push_fun_info_decl(module, func->info, sema_value_new_runtime_const(module->mempool,
             sema_const_new_func(module->mempool, type, decl_id)));
         hir_init_decl_func(module->hir, decl_id, func_id);
+    } else {
+        sema_module_push_fun_info_decl(module, func->info, sema_value_new_generic(module->mempool, generic));
     }
 
     hir_init_fun(module->hir, func_id, args_mut, hir_func_info_new(module->mempool,
@@ -60,9 +85,7 @@ bool sema_module_stage_emit_fun(SemaModule *module, AstFunDecl *func) {
         type->function.returns));
 
     SemaGenericCtx ctx;
-    if (func->info->generic) {
-        ctx = sema_module_generic_ctx_setup(module, func->info->generic, func->sema.generic);
-    }
+    sema_module_push_func_ctx(module, func, &ctx);
 
     sema_module_push_scope(module, NULL);
     if (func->info->ext.is) {
@@ -79,7 +102,8 @@ bool sema_module_stage_emit_fun(SemaModule *module, AstFunDecl *func) {
     hir_init_fun_body(module->hir, func_id, sema_module_emit_code(module, func->body, NULL));
 
     sema_module_pop_scope(module);
-    if (func->info->generic) {
+
+    if (sema_module_func_get_gen(func)) {
         sema_module_generic_ctx_clean(module, ctx);
     }
 

@@ -160,6 +160,17 @@ bool sema_type_search_ext(SemaModule *module, SemaType *type, Slice name, SemaEx
             return true;
         }
     }
+    if (type->kind == SEMA_TYPE_GENERATE) {
+        assert(type->generate.generic->kind == SEMA_GENERIC_TYPE);
+        SemaExtDecl *decl = keymap_get(type->generate.generic->type.type->alias->decls_map, name);
+        if (decl) {
+            *output = *decl;
+            SemaGeneric *generic = sema_value_is_generic(output->function);
+            assert(generic);
+            output->function = sema_generate(generic, type->generate.params);
+            return true;
+        }
+    }
     if (!type->alias) {
         return false;
     }

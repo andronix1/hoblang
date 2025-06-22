@@ -75,7 +75,7 @@ void sema_type_print(va_list list) {
     }
 }
 
-static inline SemaType *_sema_type_generate(SemaModule *module, SemaType *source, SemaType **params, SemaType **input) {
+SemaType *sema_type_generate(SemaModule *module, SemaType *source, SemaType **params, SemaType **input) {
     for (size_t i = 0; i < vec_len(params); i++) {
         if (params[i] == source) return input[i];
     }
@@ -124,14 +124,6 @@ static inline SemaType *_sema_type_generate(SemaModule *module, SemaType *source
     UNREACHABLE;
 }
 
-SemaType *sema_type_generate(SemaModule *module, SemaType *source, SemaType **params, SemaType **input) {
-    SemaType *result = _sema_type_generate(module, source, params, input);
-    if (result != source) {
-        result->alias = source->alias;
-    }
-    return result;
-}
-
 static inline SemaType *sema_type_root_ungenerated(SemaType *type) {
     while (type->kind == SEMA_TYPE_RECORD) {
         type = type->record.module->types[type->record.id].type;
@@ -147,8 +139,8 @@ SemaType *sema_type_root(SemaType *type) {
         } else if (type->kind == SEMA_TYPE_GENERATE) {
             SemaGeneric *generic = type->generate.generic;
             assert(generic->kind == SEMA_GENERIC_TYPE);
-            type = sema_type_generate(generic->module, type->generate.generic->type,
-                    type->generate.generic->params, type->generate.params);
+            type = sema_type_generate(generic->module, type->generate.generic->type.type, type->generate.generic->params,
+                type->generate.params);
         } else {
             break;
         }

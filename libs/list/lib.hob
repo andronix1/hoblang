@@ -15,41 +15,41 @@ public fun newWithCapacity<T>(capacity: usize) -> List.<T> {
 
 public fun newFromSlice<T>(slice: std.slice.Slice.<T>) -> List.<T> {
     var result = newWithCapacity.<T>(slice.length);
-    appendSlice.<T>(&result, slice);
+    result.appendSlice(slice);
     return result;
 }
 
-public fun appendSlice<T>(list: *List.<T>, slice: std.slice.Slice.<T>) {
-    reserve.<T>(list, list.*.data.length + slice.length);
+public fun List.appendSlice(&self, slice: std.slice.Slice.<T>) {
+    self.reserve(self.*.data.length + slice.length);
 
     var i: usize = 0;
     while i < slice.length {
-        push.<T>(list, slice.raw[i]);
+        self.push(slice.raw[i]);
         i += 1;
     }
 }
 
-public fun reserve<T>(list: *List.<T>, capacity: usize) {
-    if list.*.capacity >= capacity {
+public fun List.reserve(&self, capacity: usize) {
+    if self.*.capacity >= capacity {
         return;
     }
-    list.*.data.raw = mem.reallocate(list.*.data.raw as *void, capacity) as *T;
-    list.*.capacity = capacity;
+    self.*.data.raw = mem.reallocate(self.*.data.raw as *void, capacity) as *T;
+    self.*.capacity = capacity;
 }
 
-public fun push<T>(list: *List.<T>, value: T) {
-    if list.*.data.length + 1 > list.*.capacity {
-        var newCapacity = list.*.data.length * 2;
-        if newCapacity < list.*.data.length + 1 {
-            newCapacity = list.*.data.length + 1;
+public fun List.push(&self, value: T) {
+    if self.*.data.length + 1 > self.*.capacity {
+        var newCapacity = self.*.data.length * 2;
+        if newCapacity < self.*.data.length + 1 {
+            newCapacity = self.*.data.length + 1;
         }
-        reserve.<T>(list, newCapacity);
+        self.reserve(newCapacity);
     }
-    list.*.data.raw[list.*.data.length] = value;
-    list.*.data.length += 1;
+    self.*.data.raw[self.*.data.length] = value;
+    self.*.data.length += 1;
 }
 
-public fun free<T>(list: *List.<T>) {
-    mem.free(list.*.data.raw as *void);
+public fun List.free(self) {
+    mem.free(self.data.raw as *void);
 }
 

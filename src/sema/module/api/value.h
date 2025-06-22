@@ -40,6 +40,7 @@ SemaType *sema_value_should_be_type(SemaModule *module, Slice where, SemaValue *
 SemaConst *sema_value_runtime_should_be_constant(SemaModule *module, Slice where, SemaValueRuntime *runtime);
 SemaValueRuntime *sema_value_should_be_runtime(SemaModule *module, Slice where, SemaValue *value);
 SemaGeneric *sema_value_should_be_generic(SemaModule *module, Slice where, SemaValue *value);
+SemaGeneric *sema_value_is_generic(SemaValue *value);
 SemaType *sema_value_is_type(SemaValue *value);
 SemaModule *sema_value_is_module(SemaValue *value);
 SemaValueRuntime *sema_value_is_runtime(SemaValue *value);
