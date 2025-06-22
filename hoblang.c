@@ -145,6 +145,7 @@ static inline void cmd_help_sources() {
 
 static bool cmd_help(char *exe) {
     HELP_COMMAND("help", "", "print help", {});
+    HELP_COMMAND("version", "", "print version", {});
     HELP_COMMAND("emit-hir", "<entry> <output>", "emit hoblang IR", {
         cmd_help_sources();
     });
