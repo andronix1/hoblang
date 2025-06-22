@@ -14,7 +14,7 @@ bool sema_module_stage_fill_fun(SemaModule *module, AstFunDecl *func) {
     func->sema.generic = NULL;
     SemaGenericCtx ctx;
     if (func->info->generic) {
-        SemaGeneric *generic = NOT_NULL(sema_module_generic_func(module, func->info->generic));
+        SemaGeneric *generic = NOT_NULL(sema_module_generic_func(module, func->info->generic, func->info->name));
         func->sema.generic = generic;
         sema_module_push_fun_info_decl(module, func->info, sema_decl_new(module->mempool,
             func->info->is_public ? NULL : module,

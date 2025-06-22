@@ -2,6 +2,7 @@
 #include "core/assert.h"
 #include "core/keymap.h"
 #include "core/log.h"
+#include "core/mempool.h"
 #include "core/vec.h"
 #include "sema/module/decl.h"
 #include "sema/module/generic.h"
@@ -63,12 +64,14 @@ void sema_type_print(va_list list) {
         case SEMA_TYPE_STRUCTURE:
             logs("structure", type->pointer_to);
             break;
-        case SEMA_TYPE_GENERIC:
-        case SEMA_TYPE_GEN_PARAM:
-            logs("generic parameter");
-            break;
+        case SEMA_TYPE_GENERIC: logs("generic function parameter"); break;
+        case SEMA_TYPE_GEN_PARAM: logs("generic type parameter"); break;
         case SEMA_TYPE_GENERATE:
-            logs("generator");
+            logs("$S.<", type->generate.generic->name);
+            for (size_t i = 0; i < vec_len(type->generate.generic->params); i++) {
+                logs(i == 0 ? "$t" : ", $t", type->generate.generic->params[i]);
+            }
+            logs(">");
             break;
     }
 }
@@ -109,7 +112,15 @@ static inline SemaType *_sema_type_generate(SemaModule *module, SemaType *source
         case SEMA_TYPE_ARRAY:
             return sema_type_new_array(module, source->array.length, sema_type_generate(module, source->array.of,
                 params, input));
-        case SEMA_TYPE_RECORD: case SEMA_TYPE_GENERATE: case SEMA_TYPE_GENERIC: return source;
+        case SEMA_TYPE_GENERATE: {
+            SemaType **new_params = vec_new_in(module->mempool, SemaType*);
+            vec_resize(new_params, vec_len(source->generate.params));
+            for (size_t i = 0; i < vec_len(new_params); i++) {
+                new_params[i] = sema_type_generate(module, source->generate.params[i], params, input);
+            }
+            return sema_type_new_generate(module, source->generate.generic, new_params);
+        }
+        case SEMA_TYPE_RECORD: case SEMA_TYPE_GENERIC: return source;
     }
     UNREACHABLE;
 }

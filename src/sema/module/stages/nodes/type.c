@@ -12,7 +12,7 @@
 bool sema_module_stage_init_type_decl(SemaModule *module, AstTypeDecl *type_decl) {
     SemaModule *scope_module = type_decl->is_public ? NULL : module;
     if (type_decl->generic) {
-        SemaGeneric *generic = NOT_NULL(sema_module_generic_type(module, type_decl->generic));
+        SemaGeneric *generic = NOT_NULL(sema_module_generic_type(module, type_decl->generic, type_decl->name));
         sema_module_push_decl(module, type_decl->name, sema_decl_new(module->mempool, scope_module,
             sema_value_new_generic(module->mempool, generic)));
         type_decl->sema.generic = generic;

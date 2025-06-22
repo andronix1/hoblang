@@ -9,7 +9,7 @@
 #include "sema/module/value.h"
 #include <stdio.h>
 
-SemaGeneric *sema_module_generic_func(SemaModule *module, AstGeneric *generic) {
+SemaGeneric *sema_module_generic_func(SemaModule *module, AstGeneric *generic, Slice name) {
     SemaType **params = vec_new_in(module->mempool, SemaType*);
     HirGenScopeId gen_scope = hir_add_gen_scope(module->hir);
     if (vec_len(module->gen_scopes) > 0) {
@@ -22,15 +22,15 @@ SemaGeneric *sema_module_generic_func(SemaModule *module, AstGeneric *generic) {
         hir_gen_scope_add_param(module->hir, gen_scope, param);
         vec_push(params, sema_type_new_gen_param(module, param));
     }
-    return sema_generic_new_func(module->mempool, module, params, gen_scope);
+    return sema_generic_new_func(module->mempool, module, name, params, gen_scope);
 }
 
-SemaGeneric *sema_module_generic_type(SemaModule *module, AstGeneric *generic) {
+SemaGeneric *sema_module_generic_type(SemaModule *module, AstGeneric *generic, Slice name) {
     SemaType **params = vec_new_in(module->mempool, SemaType*);
     for (size_t i = 0; i < vec_len(generic->params); i++) {
         vec_push(params, sema_type_new_generic(module));
     }
-    return sema_generic_new_type(module->mempool, module, params);
+    return sema_generic_new_type(module->mempool, module, name, params);
 }
 
 SemaGenericCtx sema_module_generic_ctx_setup(SemaModule *module, AstGeneric *generic, SemaGeneric *source) {

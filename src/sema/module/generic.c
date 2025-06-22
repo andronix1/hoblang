@@ -28,17 +28,19 @@ SemaValue *sema_generate(SemaGeneric *generic, SemaType **input) {
     UNREACHABLE;
 }
 
-SemaGeneric *sema_generic_new_type(Mempool *mempool, SemaModule *module, SemaType **params)
+SemaGeneric *sema_generic_new_type(Mempool *mempool, SemaModule *module, Slice name, SemaType **params)
     MEMPOOL_CONSTRUCT(SemaGeneric,
         out->kind = SEMA_GENERIC_TYPE;
         out->params = params;
+        out->name = name;
         out->module = module;
     )
 
-SemaGeneric *sema_generic_new_func(Mempool *mempool, SemaModule *module, SemaType **params, HirGenScopeId scope)
+SemaGeneric *sema_generic_new_func(Mempool *mempool, SemaModule *module, Slice name, SemaType **params, HirGenScopeId scope)
     MEMPOOL_CONSTRUCT(SemaGeneric,
         out->kind = SEMA_GENERIC_FUNC;
         out->params = params;
+        out->name = name;
         out->module = module;
         out->func.scope = scope;
     )

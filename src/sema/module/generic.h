@@ -12,6 +12,7 @@ typedef enum {
 typedef struct SemaGeneric {
     SemaGenericKind kind;
 
+    Slice name;
     SemaModule *module;
     SemaType **params;
 
@@ -34,6 +35,6 @@ static inline void sema_generic_fill_func(SemaGeneric *generic, SemaType *type, 
     generic->func.id = id;
 }
 
-SemaGeneric *sema_generic_new_type(Mempool *mempool, SemaModule *module, SemaType **params);
-SemaGeneric *sema_generic_new_func(Mempool *mempool, SemaModule *module, SemaType **params, HirGenScopeId scope);
+SemaGeneric *sema_generic_new_type(Mempool *mempool, SemaModule *module, Slice name, SemaType **params);
+SemaGeneric *sema_generic_new_func(Mempool *mempool, SemaModule *module, Slice name, SemaType **params, HirGenScopeId scope);
 SemaValue *sema_generate(SemaGeneric *generic, SemaType **input);

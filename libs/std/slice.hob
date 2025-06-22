@@ -5,11 +5,9 @@ public type Slice<T> = struct {
     public length: def.Size,
 };
 
-#`
-public fun new(raw: *u8, length: def.Size) -> Slice {
-    return <Slice> {
+public fun new<T>(raw: *T, length: def.Size) -> Slice.<T> {
+    return <(Slice.<T>)> {
         raw: raw,
         length: length,
     };
 }
-`#

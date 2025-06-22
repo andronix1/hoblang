@@ -4,10 +4,7 @@ public import "def.hob" as def;
 public type Str = slice.Slice.<u8>;
 
 public fun new(raw: *u8, length: def.Size) -> Str {
-    return <Str> {
-        raw: raw,
-        length: length,
-    };
+    return slice.new.<u8>(raw, length) as Str;
 }
 
 

@@ -68,7 +68,7 @@ void llvm_module_emit(LlvmModule *module, Hir *hir) {
         const HirGenScope *scope = hir_get_gen_scope(hir, gen_scopes[i]);
         LLVMValueRef **funcs = vec_new_in(module->mempool, LLVMValueRef*);
         vec_resize(funcs, vec_len(scope->funcs));
-        for (size_t j = 0; j < vec_len(gen_scopes); j++) {
+        for (size_t j = 0; j < vec_len(funcs); j++) {
             LLVMValueRef *usages = vec_new_in(module->mempool, LLVMValueRef);
             vec_resize(usages, vec_len(scope->usages));
             funcs[j] = usages;
