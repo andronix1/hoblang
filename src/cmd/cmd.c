@@ -107,6 +107,11 @@ Cmd *cmd_parse(Mempool *mempool, RawCmd *raw) {
         return cmd;
     }
 
+    if (!strcmp(raw->command, "version")) {
+        cmd_setup_version(cmd);
+        return cmd;
+    }
+
     if (!strcmp(raw->command, "build-exe")) {
         CmdSources sources;
         NOT_NULL(cmd_sources_parse(mempool, raw, &sources));

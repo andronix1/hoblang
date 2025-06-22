@@ -71,6 +71,10 @@ static inline void cmd_setup_build_exe(
     cmd->build.exe.linker.flags = linker_flags;
 }
 
+static inline void cmd_setup_version(Cmd *cmd) {
+    cmd->kind = CMD_VERSION;
+}
+
 static inline void cmd_setup_build_obj(Cmd *cmd, char *output, CmdSources sources) {
     cmd->kind = CMD_BUILD;
     cmd->build.kind = CMD_BUILD_OBJ;

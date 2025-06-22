@@ -164,7 +164,7 @@ static bool cmd_help(char *exe) {
 }
 
 static bool cmd_version() {
-    logln("hoblang :P");
+    logln("1.0.0-preview");
     return true;
 }
 
@@ -179,13 +179,14 @@ static bool cmd_exec(Mempool *mempool, Cmd *cmd) {
 }
 
 int main(int argc, char **argv) {
+    assert(argc > 0);
     setup_log();
 
     Mempool *mempool = mempool_new(256);
 
     Cmd *cmd = cmd_parse(mempool, raw_cmd_parse(mempool, raw_args_new(argc, argv)));
     if (!cmd) {
-        cmd_help(cmd->executable);
+        cmd_help(argv[0]);
         mempool_free(mempool);
         return 1;
     }
