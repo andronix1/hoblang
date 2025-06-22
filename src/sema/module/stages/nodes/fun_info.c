@@ -2,6 +2,7 @@
 #include "ast/path.h"
 #include "core/null.h"
 #include "sema/module/ast/type.h"
+#include "sema/module/decl.h"
 #include "sema/module/module.h"
 #include "ast/node.h"
 #include "sema/module/type.h"
@@ -26,18 +27,19 @@ SemaType *sema_func_info_type(SemaModule *module, AstFunInfo *info) {
     return sema_type_new_function(module, args, returns);
 }
 
-void sema_module_push_fun_info_decl(SemaModule *module, AstFunInfo *info, SemaDecl *decl) {
+void sema_module_push_fun_info_decl(SemaModule *module, AstFunInfo *info, SemaValue *value) {
+    SemaModule *source_module = info->is_public ? NULL : module;
     if (info->ext.is) {
         SemaType *ext_type = info->ext.sema.ext_type;
         if (!ext_type->alias) {
             sema_module_err(module, info->ext.of, "only type aliases can be extended");
             return;
         }
-        if (keymap_insert(ext_type->alias->decls_map, info->name, decl)) {
+        if (keymap_insert(ext_type->alias->decls_map, info->name, sema_alias_decl_new(value, module, info->ext.by_ref))) {
             sema_module_err(module, info->name, "`$S` already declared in type alias", info->name);
             return;
         }
     } else {
-        sema_module_push_decl(module, info->name, decl);
+        sema_module_push_decl(module, info->name, sema_decl_new(module->mempool, source_module, value));
     }
 }

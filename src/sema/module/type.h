@@ -1,16 +1,31 @@
 #pragma once
 
 #include "hir/api/type.h"
-#include "sema/module/api/decl.h"
 #include "sema/module/api/generic.h"
 #include "sema/module/api/module.h"
 #include "sema/module/api/type.h"
+#include "sema/module/api/value.h"
 #include <stdbool.h>
+
+typedef struct {
+    SemaValue *function;
+    SemaModule *module;
+    bool by_ref;
+} SemaExtDecl;
+
+static inline SemaExtDecl sema_alias_decl_new(SemaValue *function, SemaModule *module, bool by_ref) {
+    SemaExtDecl decl = {
+        .function = function,
+        .module = module,
+        .by_ref = by_ref,
+    };
+    return decl;
+}
 
 typedef struct SemaTypeAlias {
     HirTypeId id;
     Slice name;
-    SemaDecl **decls_map;
+    SemaExtDecl *decls_map;
 } SemaTypeAlias;
 
 SemaTypeAlias *sema_type_alias_new(Mempool *mempool, Slice name, HirTypeId id);
@@ -116,3 +131,5 @@ SemaType *sema_type_new_generic(SemaModule *module);
 SemaType *sema_type_new_generate(SemaModule *module, SemaGeneric *generic, SemaType **params);
 
 SemaType *sema_type_new_alias(Mempool *mempool, SemaType *type, SemaTypeAlias *alias);
+
+bool sema_type_search_ext(SemaModule *module, SemaType *type, Slice name, SemaExtDecl *decl);

@@ -53,13 +53,19 @@ static SemaValue *sema_module_analyze_expr_path_ident(SemaModule *module, SemaVa
                     sema_module_std_usize(module, ident), root->array.length));
             }
         }
-        SemaDecl *decl = sema_type_search_ext(module, runtime->type, ident);
-        if (decl) {
-            SemaValueRuntime *decl_runtime = sema_value_is_runtime(decl->value);
-            if (decl_runtime) {
-                size_t step_id = sema_module_expr_emit_runtime(module, decl_runtime, output);
-                return sema_value_new_runtime_ext_expr_step(module->mempool, decl_runtime->kind,
-                    decl_runtime->type, step_id, of);
+        SemaExtDecl ext;
+        if (sema_type_search_ext(module, runtime->type, ident, &ext)) {
+            if (ext.by_ref) {
+                if (runtime->kind != SEMA_RUNTIME_VAR) {
+                    sema_module_err(module, ident, "cannot find `$S` in value of type $t", ident, runtime->type);
+                }
+                of = sema_expr_output_push_step(output, hir_expr_step_new_take_ref(of));
+            }
+            SemaValueRuntime *ext_runtime = sema_value_is_runtime(ext.function);
+            if (ext_runtime) {
+                size_t step_id = sema_module_expr_emit_runtime(module, ext_runtime, output);
+                return sema_value_new_runtime_ext_expr_step(module->mempool, ext_runtime->kind,
+                    ext_runtime->type, step_id, of);
             }
         }
         sema_module_err(module, ident, "cannot find `$S` in value of type $t", ident, runtime->type);

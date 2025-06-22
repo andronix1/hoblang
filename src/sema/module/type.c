@@ -70,7 +70,7 @@ SemaTypeAlias *sema_type_alias_new(Mempool *mempool, Slice name, HirTypeId id)
     MEMPOOL_CONSTRUCT(SemaTypeAlias,
         out->id = id;
         out->name = name;
-        out->decls_map = keymap_new_in(mempool, SemaDecl*);
+        out->decls_map = keymap_new_in(mempool, SemaExtDecl);
     )
 
 #define SEMA_TYPE_CONSTRUCT_SIMPLE(KIND, FIELDS) { \
@@ -153,3 +153,27 @@ SemaType *sema_type_new_alias(Mempool *mempool, SemaType *type, SemaTypeAlias *a
     return result;
 }
 
+bool sema_type_search_ext(SemaModule *module, SemaType *type, Slice name, SemaExtDecl *output) {
+    if (type->kind == SEMA_TYPE_POINTER) {
+        if (sema_type_search_ext(module, type->pointer_to, name, output) && output->by_ref) {
+            output->by_ref = false;
+            return true;
+        }
+    }
+    if (!type->alias) {
+        return false;
+    }
+    SemaExtDecl *decl = keymap_get(type->alias->decls_map, name);
+    if (decl) {
+        if (decl->module != NULL && decl->module != module) {
+            sema_module_err(module, name, "`$S` is private", name);
+            return false;
+        }
+        *output = *decl;
+        return true;
+    }
+    if (type->kind == SEMA_TYPE_RECORD) {
+        return sema_type_search_ext(module, type->record.module->types[type->record.id].type, name, output);
+    }
+    return false;
+}

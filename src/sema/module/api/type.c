@@ -4,7 +4,6 @@
 #include "core/log.h"
 #include "core/mempool.h"
 #include "core/vec.h"
-#include "sema/module/decl.h"
 #include "sema/module/generic.h"
 #include "sema/module/type.h"
 #include "sema/module/module.h"
@@ -220,22 +219,4 @@ bool sema_type_eq(const SemaType *a, const SemaType *b) {
             return a->generate.generic == b->generate.generic;
     }
     UNREACHABLE;
-}
-
-SemaDecl *sema_type_search_ext(SemaModule *module, SemaType *type, Slice name) {
-    if (!type->alias) {
-        return NULL;
-    }
-    SemaDecl **decl = keymap_get(type->alias->decls_map, name);
-    if (decl) {
-        if ((*decl)->module != NULL && (*decl)->module != module) {
-            sema_module_err(module, name, "`$S` is private", name);
-            return NULL;
-        }
-        return *decl;
-    }
-    if (type->kind == SEMA_TYPE_RECORD) {
-        return sema_type_search_ext(module, type->record.module->types[type->record.id].type, name);
-    }
-    return NULL;
 }

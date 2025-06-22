@@ -27,7 +27,7 @@ AstFunInfo *parse_fun_info(Parser *parser, bool is_public) {
     Slice self_name = slice_new(NULL, 0);
     bool was_arg = false;
     if (is_ext) {
-        by_ref = parser_next_should_be(parser, TOKEN_AND);
+        by_ref = parser_next_should_be(parser, TOKEN_BITAND);
         self_name = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
         was_arg = true;
     }

@@ -16,9 +16,7 @@ bool sema_module_stage_fill_fun(SemaModule *module, AstFunDecl *func) {
     if (func->info->generic) {
         SemaGeneric *generic = NOT_NULL(sema_module_generic_func(module, func->info->generic, func->info->name));
         func->sema.generic = generic;
-        sema_module_push_fun_info_decl(module, func->info, sema_decl_new(module->mempool,
-            func->info->is_public ? NULL : module,
-            sema_value_new_generic(module->mempool, generic)));
+        sema_module_push_fun_info_decl(module, func->info, sema_value_new_generic(module->mempool, generic));
         ctx = sema_module_generic_ctx_setup(module, func->info->generic, generic);
     }
 
@@ -42,9 +40,8 @@ bool sema_module_stage_fill_fun(SemaModule *module, AstFunDecl *func) {
 
     if (!func->info->generic) {
         HirDeclId decl_id = hir_add_decl(module->hir);
-        sema_module_push_fun_info_decl(module, func->info, sema_decl_new(module->mempool,
-            func->info->is_public ? NULL : module,
-            sema_value_new_runtime_const(module->mempool, sema_const_new_func(module->mempool, type, decl_id))));
+        sema_module_push_fun_info_decl(module, func->info, sema_value_new_runtime_const(module->mempool,
+            sema_const_new_func(module->mempool, type, decl_id)));
         hir_init_decl_func(module->hir, decl_id, func_id);
     }
 

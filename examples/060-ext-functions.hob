@@ -15,6 +15,16 @@ fun Fd.putChar(self, char: u8) {
     self.write(&char, 1);
 }
 
+type Char = u8;
+
+#`
+    Extension function can take pointer. In this case, extension function can be called on 
+    variable or pointer
+`#
+fun Char.increment(&self) {
+    self.* += 1;
+}
+
 global fun main() -> i32 {
     var stdout = 0 as Fd;
     (&stdout as *i32).* += 1;
@@ -28,11 +38,24 @@ global fun main() -> i32 {
 
         But, when you call it, it automatically appends first argument for `self`.
     `#
+    var stdoutVar = stdout;
+    final stdoutRef = &stdoutVar;
+
     final justPutChar = stdout.putChar;
     justPutChar(stdout, 'a');
-    stdout.putChar('b');
-    stdout.putChar('c');
-    stdout.putChar('d');
+
+    var c = 'b' as Char;
+    while c <= 'd' {
+        stdout.putChar(c);
+        c.increment();
+    }
+
+    var cRef = &c;
+    while c <= 'h' {
+        stdout.putChar(c);
+        cRef.increment();
+    }
+
     stdout.putChar('\n');
     return 0;
 }

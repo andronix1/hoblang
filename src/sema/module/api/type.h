@@ -1,9 +1,7 @@
 #pragma once
 
-#include "core/slice.h"
 #include "hir/api/type.h"
 #include "hir/api/type.h"
-#include "sema/module/api/decl.h"
 #include "sema/module/api/module.h"
 #include <stddef.h>
 #include <stdarg.h>
@@ -39,6 +37,5 @@ bool sema_type_can_be_casted(SemaType *type, SemaType *to);
 
 HirTypeId sema_type_hir_id(SemaType *type);
 SemaType *sema_type_root(SemaType *type);
-SemaDecl *sema_type_search_ext(SemaModule *module, SemaType *type, Slice name);
 
 void sema_type_print(va_list list);
