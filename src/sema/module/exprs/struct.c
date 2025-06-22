@@ -32,7 +32,7 @@ SemaValue *sema_module_emit_expr_struct(SemaModule *module, AstExprStructConstru
                 sema_module_err(module, field->value.expr->slice,
                     "cannot set expression of type $t to field struct of type $t", runtime->type, field_type);
             }
-            fields[i] = sema_module_expr_emit_runtime(runtime, ctx.output);
+            fields[i] = sema_module_expr_emit_runtime(module, runtime, ctx.output);
         } else {
             sema_module_err(module, field->key, "there is no such field in specified struct");
         }

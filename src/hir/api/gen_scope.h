@@ -6,10 +6,34 @@
 #include <stddef.h>
 
 typedef struct {
+    bool is_from;
+    HirGenScopeId from;
+    HirTypeId *params;
+} HirGenScopeUsage;
+
+static inline HirGenScopeUsage hir_gen_scope_usage_new(HirTypeId *params) {
+    HirGenScopeUsage usage = {
+        .is_from = false,
+        .params = params,
+    };
+    return usage;
+}
+
+static inline HirGenScopeUsage hir_gen_scope_usage_new_from(HirTypeId *params, HirGenScopeId from) {
+    HirGenScopeUsage usage = {
+        .is_from = true,
+        .from = from,
+        .params = params
+    };
+    return usage;
+}
+
+typedef struct {
     HirGenParamId *params;
     HirGenScopeId *scopes;
+    HirGenScopeId *linked_scopes;
     HirFuncId *funcs;
-    HirTypeId **usages;
+    HirGenScopeUsage *usages;
 } HirGenScope;
 
 HirGenScope hir_gen_scope_new(Mempool *mempool);

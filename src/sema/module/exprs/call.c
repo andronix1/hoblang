@@ -31,7 +31,7 @@ SemaValue *sema_module_emit_expr_call(SemaModule *module, AstCall *call, SemaExp
         return NULL;
     }
 
-    size_t callable = sema_module_expr_emit_runtime(runtime, ctx.output);
+    size_t callable = sema_module_expr_emit_runtime(module, runtime, ctx.output);
     size_t *args = vec_new_in(module->mempool, size_t);
     vec_reserve(args, vec_len(type->function.args) + is_ext);
     if (is_ext) {
@@ -45,7 +45,7 @@ SemaValue *sema_module_emit_expr_call(SemaModule *module, AstCall *call, SemaExp
             sema_module_err(module, call->args[i]->slice, "expected $t, but $t was passed",
                 type->function.args[i + is_ext], runtime->type);
         }
-        vec_push(args, sema_module_expr_emit_runtime(runtime, ctx.output));
+        vec_push(args, sema_module_expr_emit_runtime(module, runtime, ctx.output));
     }
     size_t step_id = sema_expr_output_push_step(ctx.output, hir_expr_step_new_call(callable, args));
     return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, type->function.returns, step_id);

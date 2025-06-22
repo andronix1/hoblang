@@ -30,6 +30,8 @@ typedef struct HirConst {
             HirTypeId *params;
             HirGenScopeId scope;
             HirGenFuncId func;
+            bool is_from;
+            HirGenScopeId from;
 
             HirGenUsageId usage;
         } gen_func;
@@ -45,6 +47,22 @@ static inline HirConst hir_const_new_gen_func(HirTypeId type, HirGenScopeId scop
             .scope = scope,
             .func = func,
             .params = params,
+            .is_from = false,
+        }
+    };
+    return constant;
+}
+
+static inline HirConst hir_const_new_gen_func_from(HirTypeId type, HirGenScopeId scope, HirGenFuncId func, HirTypeId *params, HirGenScopeId from) {
+    HirConst constant = {
+        .kind = HIR_CONST_GEN_FUNC,
+        .type = type,
+        .gen_func = {
+            .scope = scope,
+            .func = func,
+            .params = params,
+            .is_from = true,
+            .from = from,
         }
     };
     return constant;

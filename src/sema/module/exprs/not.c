@@ -12,7 +12,8 @@ SemaValue *sema_module_emit_expr_not(SemaModule *module, AstExpr *inner, SemaExp
     if (runtime->type->kind != SEMA_TYPE_BOOL) {
         sema_module_err(module, inner->slice, "not operator can be applied to boolean expressions only, but it's of type $t", runtime->type);
     }
-    size_t step_id = sema_expr_output_push_step(ctx.output, hir_expr_step_new_not(sema_module_expr_emit_runtime(runtime, ctx.output)));
+    size_t step_id = sema_expr_output_push_step(ctx.output, hir_expr_step_new_not(
+        sema_module_expr_emit_runtime(module, runtime, ctx.output)));
     return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, runtime->type, step_id);
 }
 

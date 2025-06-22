@@ -31,7 +31,7 @@ static inline SemaExprCtx sema_expr_ctx_new(SemaExprOutput *output, SemaType *ex
     return ctx;
 }
 
-size_t sema_module_expr_emit_runtime(SemaValueRuntime *runtime, SemaExprOutput *output);
+size_t sema_module_expr_emit_runtime(SemaModule *module, SemaValueRuntime *runtime, SemaExprOutput *output);
 size_t sema_expr_output_push_step(SemaExprOutput *output, HirExprStep step);
 size_t sema_expr_output_last_id(SemaExprOutput *output);
 HirExpr sema_expr_output_collect(SemaExprOutput *output);

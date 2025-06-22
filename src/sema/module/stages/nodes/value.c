@@ -85,7 +85,7 @@ bool sema_module_stage_emit_global(SemaModule *module, AstValueDecl *value_decl)
             SemaValueRuntime *runtime = NOT_NULL(sema_value_decl_get_initializer(module, value_decl, NULL));
             SemaConst *constant = NOT_NULL(sema_value_runtime_should_be_constant(module, value_decl->initializer->slice,
                 runtime));
-            hir_set_var_initializer(module->hir, value_decl->sema.var_id, sema_const_to_hir(constant));
+            hir_set_var_initializer(module->hir, value_decl->sema.var_id, sema_const_to_hir(module, constant));
             return true;
         }
         case AST_VALUE_DECL_CONST: return true;

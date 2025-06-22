@@ -52,8 +52,10 @@ LlvmModule *llvm_module_new() {
 void llvm_module_emit(LlvmModule *module, Hir *hir) {
     module->hir = hir;
 
+    module->curr_gen_scopes = vec_new_in(module->mempool, HirGenScopeId);
+
     module->decls = vec_new_in(module->mempool, LLVMValueRef);
-    vec_reserve(module->decls, vec_len(hir_get_decls(hir)));
+    vec_resize(module->decls, vec_len(hir_get_decls(hir)));
 
     module->gen_params = vec_new_in(module->mempool, LLVMTypeRef);
     vec_resize(module->gen_params, hir_get_gen_params_count(hir));
@@ -71,6 +73,7 @@ void llvm_module_emit(LlvmModule *module, Hir *hir) {
         for (size_t j = 0; j < vec_len(funcs); j++) {
             LLVMValueRef *usages = vec_new_in(module->mempool, LLVMValueRef);
             vec_resize(usages, vec_len(scope->usages));
+            memset(usages, 0, sizeof(LLVMValueRef) * vec_len(scope->usages));
             funcs[j] = usages;
         }
         module->gen_scopes[i].funcs = funcs;

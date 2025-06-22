@@ -21,6 +21,6 @@ typedef struct Hir {
     size_t gen_params_count;
 } Hir;
 
-HirGenUsageId hir_add_gen_scope_usage(Hir *hir, HirGenScopeId id, HirTypeId *params);
+HirGenUsageId hir_add_gen_scope_usage(Hir *hir, HirGenScopeId id, HirTypeId *params, HirGenScopeId *from);
 HirTypeId hir_resolve_decl_type_id(Hir *hir, HirDeclId id);
 HirType *hir_resolve_simple_type(Hir *hir, HirTypeId id);

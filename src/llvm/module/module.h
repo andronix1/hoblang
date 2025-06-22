@@ -40,6 +40,7 @@ typedef struct LlvmModule {
     LLVMTypeRef *gen_params;
     LlvmGenScopeInfo *gen_scopes;
     LlvmFuncCtx func;
+    HirGenScopeId *curr_gen_scopes;
 
     LLVMTargetMachineRef machine;
     LLVMModuleRef module;

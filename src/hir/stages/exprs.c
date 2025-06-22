@@ -55,7 +55,7 @@ static HirTypeId hir_get_expr_step_type(Hir *hir, HirFuncId func, HirExprStep *s
                     break;
                 case HIR_CONST_GEN_FUNC:
                     constant->gen_func.usage = hir_add_gen_scope_usage(hir, constant->gen_func.scope,
-                        constant->gen_func.params);
+                        constant->gen_func.params, constant->gen_func.is_from ? &constant->gen_func.from : NULL);
                     break;
             }
             return constant->type;
