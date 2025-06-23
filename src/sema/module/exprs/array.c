@@ -7,8 +7,16 @@
 #include "sema/module/type.h"
 #include "sema/module/value.h"
 
-SemaValue *sema_module_emit_expr_array(SemaModule *module, AstExprArray *array, SemaExprCtx ctx) {
-    SemaType *type = NOT_NULL(sema_module_type(module, array->type));
+SemaValue *sema_module_emit_expr_array(SemaModule *module, AstExprArray *array, Slice where, SemaExprCtx ctx) {
+    SemaType *type = NULL;
+    if (array->type) {
+        type = NOT_NULL(sema_module_type(module, array->type));
+    } else if (ctx.expectation) {
+        type = ctx.expectation;
+    } else {
+        sema_module_err(module, where, "implicit type with no type expected");
+        return NULL;
+    }
     size_t *elements = vec_new_in(module->mempool, size_t);
     for (size_t i = 0; i < vec_len(array->elements); i++) {
         SemaValueRuntime *runtime = NOT_NULL(sema_module_emit_runtime_expr(module, array->elements[i],

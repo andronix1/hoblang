@@ -7,11 +7,21 @@
 #include "ast/type.h"
 #include "sema/module/value.h"
 
-SemaValue *sema_module_emit_expr_struct(SemaModule *module, AstExprStructConstructor *structure, SemaExprCtx ctx) {
-    SemaType *type = NOT_NULL(sema_module_type(module, structure->type));
+SemaValue *sema_module_emit_expr_struct(SemaModule *module, AstExprStructConstructor *structure, Slice where, SemaExprCtx ctx) {
+    SemaType *type = NULL;
+    Slice type_slice = where;
+    if (structure->type) {
+        type = NOT_NULL(sema_module_type(module, structure->type));
+        type_slice = structure->type->slice;
+    } else if (ctx.expectation) {
+        type = ctx.expectation;
+    } else {
+        sema_module_err(module, where, "implicit type with no type expected");
+        return NULL;
+    }
     SemaType *root = sema_type_root(type);
     if (root->kind != SEMA_TYPE_STRUCTURE) {
-        sema_module_err(module, structure->type->slice, "type is not a structure");
+        sema_module_err(module, type_slice, "type is not a structure");
         return NULL;
     }
     size_t *fields = vec_new_in(module->mempool, size_t);

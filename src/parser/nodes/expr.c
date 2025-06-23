@@ -128,8 +128,11 @@ static inline AstExpr *_parse_middle_expr(Parser *parser) {
         case TOKEN_CHAR:
             return ast_expr_new_char(parser->mempool, token.slice, token.character);
         case TOKEN_OPENING_ANGLE_BRACE: {
-            AstType *type = NOT_NULL(parse_type(parser));
-            PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_ANGLE_BRACE);
+            AstType *type = NULL;
+            if (!parser_next_should_be(parser, TOKEN_CLOSING_ANGLE_BRACE)) {
+                type = NOT_NULL(parse_type(parser));
+                PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_ANGLE_BRACE);
+            }
             Token begin_token = parser_take(parser);
             switch (begin_token.kind) {
                 case TOKEN_OPENING_FIGURE_BRACE: {
