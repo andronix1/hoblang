@@ -1,7 +1,7 @@
 import std;
 
-public type Result<T, E> = struct {
-    isOk: bool, # TODO: unions
+public type Result<T, E> = struct { # TODO: unions
+    isOk: bool,
     ok: T,
     err: E
 };
