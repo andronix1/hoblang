@@ -6,6 +6,7 @@
 #include "core/null.h"
 #include "core/vec.h"
 #include "sema/module/api/generic.h"
+#include "sema/module/api/type.h"
 #include "sema/module/api/value.h"
 #include "sema/module/ast/path.h"
 #include "sema/module/ast/type.h"
@@ -30,6 +31,24 @@ static SemaValue *sema_module_analyze_expr_path_deref(SemaModule *module, SemaVa
     return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_VAR, runtime->type->pointer_to, step_id);
 }
 
+static SemaValue *sema_value_analyze_expr_simple_ident(SemaModule *module, SemaType *root, size_t of, SemaRuntimeKind runtime, Slice ident, SemaExprOutput *output) {
+    if (root->kind == SEMA_TYPE_STRUCTURE) {
+        size_t idx = keymap_get_idx(root->structure.fields_map, ident);
+        if (idx != (size_t)-1) {
+            size_t step_id = sema_expr_output_push_step(output, hir_expr_step_new_struct_field(idx, of));
+            keymap_at(root->structure.fields_map, idx, field);
+            return sema_value_new_runtime_expr_step(module->mempool, runtime, field->value.type, step_id);
+        }
+    }
+    if (root->kind == SEMA_TYPE_ARRAY) {
+        if (slice_eq(ident, slice_from_cstr("length"))) {
+            return sema_value_new_runtime_const(module->mempool, sema_const_new_integer(module->mempool,
+                sema_module_std_usize(module, ident), root->array.length));
+        }
+    }
+    return NULL;
+}
+
 static SemaValue *sema_module_analyze_expr_path_ident(SemaModule *module, SemaValue *value, Slice ident, SemaExprOutput *output) {
     SemaModule *in_module = sema_value_is_module(value);
     if (in_module) {
@@ -39,6 +58,10 @@ static SemaValue *sema_module_analyze_expr_path_ident(SemaModule *module, SemaVa
     if (runtime) {
         size_t of = sema_module_expr_emit_runtime(module, runtime, output);
         SemaType *root = sema_type_root(runtime->type);
+        SemaValue *simple_value = sema_value_analyze_expr_simple_ident(module, root, of, runtime->kind, ident, output);
+        if (simple_value) {
+            return simple_value;
+        }
         if (root->kind == SEMA_TYPE_STRUCTURE) {
             size_t idx = keymap_get_idx(root->structure.fields_map, ident);
             if (idx != (size_t)-1) {
@@ -57,7 +80,7 @@ static SemaValue *sema_module_analyze_expr_path_ident(SemaModule *module, SemaVa
         if (sema_type_search_ext(module, runtime->type, ident, &ext)) {
             if (ext.by_ref) {
                 if (runtime->kind != SEMA_RUNTIME_VAR) {
-                    sema_module_err(module, ident, "cannot find `$S` in value of type $t", ident, runtime->type);
+                    sema_module_err(module, ident, "`$S` is defined for variables $t", ident, runtime->type);
                 }
                 of = sema_expr_output_push_step(output, hir_expr_step_new_take_ref(of));
             }
@@ -66,6 +89,14 @@ static SemaValue *sema_module_analyze_expr_path_ident(SemaModule *module, SemaVa
                 size_t step_id = sema_module_expr_emit_runtime(module, ext_runtime, output);
                 return sema_value_new_runtime_ext_expr_step(module->mempool, ext_runtime->kind,
                     ext_runtime->type, step_id, of);
+            }
+        }
+        if (root->kind == SEMA_TYPE_POINTER) {
+            size_t deref_of = sema_expr_output_push_step(output, hir_expr_step_new_deref(of));
+            SemaValue *simple_value = sema_value_analyze_expr_simple_ident(module, sema_type_root(root->pointer_to),
+                deref_of, SEMA_RUNTIME_VAR, ident, output);
+            if (simple_value) {
+                return simple_value;
             }
         }
         sema_module_err(module, ident, "cannot find `$S` in value of type $t", ident, runtime->type);
