@@ -112,8 +112,11 @@ static inline AstExpr *_parse_middle_expr(Parser *parser) {
             AstExprFuncArg *args = vec_new_in(parser->mempool, AstExprFuncArg);
             while (!parser_next_should_be(parser, TOKEN_CLOSING_CIRCLE_BRACE)) {
                 Slice arg_name = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
-                PARSER_EXPECT_NEXT(parser, TOKEN_COLON);
-                vec_push(args, ast_expr_func_arg_new(arg_name, NOT_NULL(parse_type(parser))));
+                AstType *type = NULL;
+                if (parser_next_should_be(parser, TOKEN_COLON)) {
+                    type = NOT_NULL(parse_type(parser));
+                }
+                vec_push(args, ast_expr_func_arg_new(arg_name, type));
                 if (!parser_check_list_sep(parser, TOKEN_CLOSING_CIRCLE_BRACE)) return NULL;
             }
             AstType *returns = parser_next_should_be(parser, TOKEN_FUN_RETURNS) ? NOT_NULL(parse_type(parser)) : NULL;

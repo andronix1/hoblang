@@ -1,6 +1,5 @@
 #include "type.h"
 #include "core/assert.h"
-#include "core/log.h"
 #include "core/mempool.h"
 #include "core/vec.h"
 #include "hir/api/type.h"

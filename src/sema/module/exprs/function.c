@@ -11,13 +11,36 @@
 #include "sema/module/type.h"
 #include "sema/module/value.h"
 
-SemaValue *sema_module_emit_expr_function(SemaModule *module, AstExprFunc *func) {
+SemaValue *sema_module_emit_expr_function(SemaModule *module, AstExprFunc *func, Slice where, SemaExprCtx ctx) {
     SemaType **args = vec_new_in(module->mempool, SemaType*);
     vec_resize(args, vec_len(func->args));
-    for (size_t i = 0; i < vec_len(func->args); i++) {
-        args[i] = NOT_NULL(sema_module_type(module, func->args[i].type));
+    SemaType *expecting = ctx.expectation;
+    if (expecting) {
+        expecting = sema_type_root(expecting);
     }
-    SemaType *type = sema_type_new_function(module, args, NOT_NULL(sema_module_opt_type(module, func->returns)));
+    if (expecting && (expecting->kind != SEMA_TYPE_FUNCTION ||
+            vec_len(expecting->function.args) != vec_len(func->args))) {
+        expecting = NULL;
+    }
+    for (size_t i = 0; i < vec_len(func->args); i++) {
+        AstType *type = func->args[i].type;
+        if (!type) {
+            if (!expecting) {
+                sema_module_err(module, where, "type infering specified but there is no type expected");
+                return NULL;
+            }
+            args[i] = expecting->function.args[i];
+        } else {
+            args[i] = NOT_NULL(sema_module_type(module, type));
+        }
+    }
+    SemaType *returns = NULL;
+    if (expecting && !func->returns) {
+        returns = expecting->function.returns;
+    } else {
+        returns = NOT_NULL(sema_module_opt_type(module, func->returns));
+    }
+    SemaType *type = sema_type_new_function(module, args, returns);
 
     HirMutability *args_mut = vec_new_in(module->mempool, HirMutability);
     vec_resize(args_mut, vec_len(type->function.args));
