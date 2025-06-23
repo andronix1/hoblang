@@ -1,0 +1,26 @@
+import io;
+import std;
+import list;
+import process;
+
+use std.slice.Slice;
+
+public fun main(argc: i32, argv: **u8, entry: fun (Slice.<string>) -> i32) -> i32 {
+    std.panic.handler = fun (message: string) {
+        io.out.putString("fatal error: ");
+        io.out.putString(message);
+        io.out.putString("\n");
+        process.exit(1);
+    };
+
+    var args = list.newWithCapacity.<string>(argc as usize); 
+    defer args.free();
+
+    var i: usize = 0;
+    while i < argc as usize {
+        args.push(std.str.fromCString(argv[i]));
+        i += 1;
+    }
+
+    return entry(args.data);
+}

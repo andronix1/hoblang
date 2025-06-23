@@ -49,6 +49,18 @@ public fun List.push(&self, value: T) {
     self.*.data.length += 1;
 }
 
+public fun List.at(self, idx: usize) -> T {
+    return self.data.raw[idx];
+}
+
+public fun List.atRef(&self, idx: usize) -> *T {
+    return &self.*.data.raw[idx];
+}
+
+public fun List.length(self) -> usize {
+    return self.data.length;
+}
+
 public fun List.free(self) {
     mem.free(self.data.raw as *void);
 }

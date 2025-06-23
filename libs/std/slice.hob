@@ -11,3 +11,12 @@ public fun new<T>(raw: *T, length: def.Size) -> Slice.<T> {
         length: length,
     };
 }
+
+public fun Slice.at(self, idx: def.Size) -> T {
+    return self.raw[idx];
+}
+
+public fun Slice.atRef(&self, idx: def.Size) -> *T {
+    return &self.*.raw[idx];
+}
+

@@ -1,7 +1,6 @@
-import std;
+import os;
 import io;
 import result;
-import process;
 
 use result.Result;
 
@@ -10,24 +9,31 @@ type ResultConstructor = fun (string) -> Result.<string, string>;
 const ok: ResultConstructor = result.ok.<string, string>;
 const err: ResultConstructor = result.err.<string, string>;
 
-global fun main() -> i32 {
-    std.panic.handler = fun (message: string) {
-        io.out.putString("fatal error: ");
-        io.out.putString(message);
+global fun main(argc: i32, argv: **u8) -> i32 {
+    import std;
+    
+    return os.main(argc, argv, fun (args: std.slice.Slice.<string>) -> i32 {
+        var i: usize = 0;
+        while i < args.length {
+            if i != 0 {
+                io.out.putString(" ");
+            }
+            io.out.putString(args.raw[i]);
+            i += 1;
+        }
         io.out.putString("\n");
-        process.exit(1);
-    };
 
-    io.out.putString(ok("hello").unwrap());
-    io.out.putString(err(", ").unwrapErr());
-    io.out.putString(ok("noooooooo").map(fun (a: string) -> string {
-        return "how";
-    }).unwrap());
-    io.out.putString(ok(" are").mapErr(fun (a: string) -> string {
-        return "noooo";
-    }).unwrap());
-    io.out.putString(err("---").mapErr(fun (a: string) -> string {
-        return " you?\n";
-    }).unwrapErr());
-    return 0;
+        io.out.putString(ok("hello").unwrap());
+        io.out.putString(err(", ").unwrapErr());
+        io.out.putString(ok("noooooooo").map(fun (a: string) -> string {
+            return "how";
+        }).unwrap());
+        io.out.putString(ok(" are").mapErr(fun (a: string) -> string {
+            return "noooo";
+        }).unwrap());
+        io.out.putString(err("---").mapErr(fun (a: string) -> string {
+            return " you?\n";
+        }).unwrapErr());
+        return 0;
+    });
 }
