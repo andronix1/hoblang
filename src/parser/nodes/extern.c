@@ -20,6 +20,7 @@ AstNode *parse_extern_node(Parser *parser, bool is_public) {
             return ast_node_new_external_fun(parser->mempool, info, alias);
         }
         case TOKEN_VAR: {
+            parser_skip_next(parser);
             AstValueInfo *info = NOT_NULL(parse_value_info(parser, is_public));
             PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
             return ast_node_new_external_value(parser->mempool, info, alias);

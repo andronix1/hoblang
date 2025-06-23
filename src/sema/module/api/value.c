@@ -1,4 +1,5 @@
 #include "value.h"
+#include "core/null.h"
 #include "sema/module/module.h"
 #include "sema/module/value.h"
 
@@ -7,6 +8,13 @@ inline SemaGeneric *sema_value_is_generic(SemaValue *value) {
         return NULL;
     }
     return value->generic;
+}
+
+inline SemaConst *sema_value_runtime_is_const(SemaValueRuntime *runtime) {
+    if (runtime->val_kind == SEMA_VALUE_RUNTIME_CONST) {
+        return runtime->constant;
+    }
+    return NULL;
 }
 
 inline SemaType *sema_value_is_type(SemaValue *value) {
