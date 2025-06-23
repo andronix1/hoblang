@@ -102,6 +102,13 @@ static SemaValue *sema_module_analyze_expr_path_ident(SemaModule *module, SemaVa
         sema_module_err(module, ident, "cannot find `$S` in value of type $t", ident, runtime->type);
         return NULL;
     }
+    SemaType *type = sema_value_is_type(value);
+    if (type) {
+        SemaExtDecl ext;
+        if (sema_type_search_ext(module, type, ident, &ext)) {
+            return ext.function;
+        }
+    }
     sema_module_err(module, ident, "cannot find `$S` in $v", ident, value);
     return NULL;
 }
