@@ -101,6 +101,12 @@ static void hir_expr_dump(HirExpr *expr, FILE *stream, size_t tabs) {
                 break;
             case HIR_EXPR_STEP_TAKE_REF: fprintf(stream, "take ref of step%lu", step->ref_step); break;
             case HIR_EXPR_STEP_DEREF: fprintf(stream, "dereference step%lu", step->ref_step); break;
+            case HIR_EXPR_STEP_PTR_TO_INT:
+                fprintf(stream, "cast ptr step%lu to int type%lu", step->ptr_to_int.step_id, step->ptr_to_int.type);
+                break;
+            case HIR_EXPR_STEP_INT_TO_PTR:
+                fprintf(stream, "cast int step%lu to ptr type%lu", step->ptr_to_int.step_id, step->ptr_to_int.type);
+                break;
             case HIR_EXPR_STEP_CAST_INT:
                 fprintf(stream, "cast int step%lu to type%lu", step->cast_int.step_id, step->cast_int.dest);
                 break;

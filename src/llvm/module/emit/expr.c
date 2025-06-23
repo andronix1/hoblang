@@ -351,6 +351,16 @@ static LlvmEmitStepRes llvm_emit_expr_step(
             LLVMValueRef pointer = llvm_get_res_value(module, &results[step->cast_ptr.step_id]);
             return llvm_emit_step_res_new(LLVMBuildBitCast(module->builder, pointer, type, ""), true);
         }
+        case HIR_EXPR_STEP_INT_TO_PTR: {
+            LLVMTypeRef type = llvm_runtime_type(module, step->int_to_ptr.type);
+            LLVMValueRef value = llvm_get_res_value(module, &results[step->int_to_ptr.step_id]);
+            return llvm_emit_step_res_new(LLVMBuildIntToPtr(module->builder, value, type, ""), true);
+        }
+        case HIR_EXPR_STEP_PTR_TO_INT: {
+            LLVMTypeRef type = llvm_runtime_type(module, step->ptr_to_int.type);
+            LLVMValueRef value = llvm_get_res_value(module, &results[step->ptr_to_int.step_id]);
+            return llvm_emit_step_res_new(LLVMBuildBitCast(module->builder, value, type, ""), true);
+        }
     }
     UNREACHABLE;
 }

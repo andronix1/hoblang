@@ -103,6 +103,8 @@ static HirTypeId hir_get_expr_step_type(Hir *hir, HirFuncId func, HirExprStep *s
             return type->pointer_to;
         }
         case HIR_EXPR_STEP_NEG: return steps[step->neg.step].type;
+        case HIR_EXPR_STEP_PTR_TO_INT: return step->ptr_to_int.type;
+        case HIR_EXPR_STEP_INT_TO_PTR: return step->int_to_ptr.type;
     }
     UNREACHABLE;
 }

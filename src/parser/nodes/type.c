@@ -16,6 +16,7 @@ AstType *parse_type(Parser *parser) {
             AstType **args = vec_new_in(parser->mempool, AstType*);
             while (!parser_next_should_be(parser, TOKEN_CLOSING_CIRCLE_BRACE)) {
                 vec_push(args, NOT_NULL(parse_type(parser)));
+                if (!parser_check_list_sep(parser, TOKEN_CLOSING_CIRCLE_BRACE)) return NULL;
             }
             AstType *returns = parser_next_should_be(parser, TOKEN_FUN_RETURNS) ? NOT_NULL(parse_type(parser)) : NULL;
             return ast_type_new_function(parser->mempool, args, returns);

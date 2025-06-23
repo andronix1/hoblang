@@ -45,12 +45,13 @@ static inline bool _sema_module_std_load(SemaModule *module, Slice at) {
     }
 
     SemaType *usize = NOT_NULL(sema_module_internal_type(module, internal_module, at, slice_from_cstr("usize")));
-    SemaType *str = sema_module_internal_type(module, internal_module, at, slice_from_cstr("string"));
-    SemaValueRuntime *newString = sema_module_internal_value(module, internal_module, at, slice_from_cstr("newString"),
+    SemaType *str = NOT_NULL(sema_module_internal_type(module, internal_module, at, slice_from_cstr("string")));
+    SemaValueRuntime *newString = NOT_NULL(sema_module_internal_value(module, internal_module, at,
+        slice_from_cstr("newString"),
         sema_type_new_function(module, vec_create_in(module->mempool, 
             sema_type_new_pointer(module, sema_type_new_int(module, SEMA_INT_8, false)),
             usize 
-        ), str));
+        ), str)));
 
     module->std.usize = usize;
     module->std.string.type = str;

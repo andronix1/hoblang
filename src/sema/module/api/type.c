@@ -152,14 +152,27 @@ inline bool sema_type_can_be_downcasted(SemaType *type, SemaType *to) {
     if (type == to) {
         return true;
     }
+    if (type->kind == SEMA_TYPE_GENERATE) {
+        SemaGeneric *generic = type->generate.generic;
+        assert(generic->kind == SEMA_GENERIC_TYPE);
+        SemaType *new_type = sema_type_generate(generic->module, type->generate.generic->type.type,
+            type->generate.generic->params, type->generate.params);
+        if (sema_type_eq(new_type, to) || sema_type_can_be_downcasted(new_type, to)) {
+            return true;
+        }
+    }
     if (!to->alias) {
         return sema_type_eq(sema_type_root_ungenerated(type), to);
     }
-    while (type->kind == SEMA_TYPE_RECORD) {
+    while (true) {
         if (type->alias == to->alias) {
             return true;
         }
-        type = type->record.module->types[type->record.id].type;
+        if (type->kind == SEMA_TYPE_RECORD) {
+            type = type->record.module->types[type->record.id].type;
+        } else {
+            break;
+        }
     }
     return false;
 }
@@ -190,11 +203,11 @@ bool sema_type_eq(const SemaType *a, const SemaType *b) {
                 return false;
             }
             for (size_t i = 0; i < vec_len(a->function.args); i++) {
-                if (!sema_type_eq(a->function.args[i], b->function.args[i])) {
+                if (!sema_type_can_be_downcasted(a->function.args[i], b->function.args[i])) {
                     return false;
                 }
             }
-            return sema_type_eq(a->function.returns, b->function.returns);
+            return sema_type_can_be_downcasted(a->function.returns, b->function.returns);
         case SEMA_TYPE_POINTER: return sema_type_eq(a->pointer_to, b->pointer_to);
         case SEMA_TYPE_ARRAY: return sema_type_eq(a->array.of, b->array.of) && a->array.length == b->array.length;
         case SEMA_TYPE_FLOAT: return a->float_size == b->float_size;
@@ -204,7 +217,7 @@ bool sema_type_eq(const SemaType *a, const SemaType *b) {
                 return false;
             }
             for (size_t i = 0; i < vec_len(a->generate.params); i++) {
-                if (!sema_type_eq(a->generate.params[i], b->generate.params[i])) {
+                if (!sema_type_can_be_downcasted(a->generate.params[i], b->generate.params[i])) {
                     return false;
                 }
             }

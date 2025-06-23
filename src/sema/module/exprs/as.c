@@ -24,13 +24,32 @@ SemaValue *sema_module_emit_expr_as(SemaModule *module, AstAs *as, SemaExprCtx c
     SemaType *root_source = sema_type_root(source);
     SemaType *root_dest = sema_type_root(dest);
 
+    if (root_source->kind == SEMA_TYPE_POINTER && root_dest->kind == SEMA_TYPE_INT) {
+        size_t step_id = sema_expr_output_push_step(ctx.output, hir_expr_step_new_ptr_to_int(source_id,
+            sema_type_hir_id(root_dest)));
+        return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, dest, step_id);
+    }
+
+    if (root_source->kind == SEMA_TYPE_INT && root_dest->kind == SEMA_TYPE_POINTER) {
+        size_t step_id = sema_expr_output_push_step(ctx.output, hir_expr_step_new_int_to_ptr(source_id,
+            sema_type_hir_id(root_dest)));
+        return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, dest, step_id);
+    }
+
     if (root_source->kind == SEMA_TYPE_INT && root_dest->kind == SEMA_TYPE_INT) {
         size_t step_id = sema_expr_output_push_step(ctx.output, hir_expr_step_new_cast_int(source_id,
             sema_type_hir_id(root_source), sema_type_hir_id(root_dest)));
         return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, dest, step_id);
     }
 
-    if (root_source->kind == SEMA_TYPE_POINTER && root_dest->kind == SEMA_TYPE_POINTER) {
+    if (root_source->kind == SEMA_TYPE_INT && root_dest->kind == SEMA_TYPE_INT) {
+        size_t step_id = sema_expr_output_push_step(ctx.output, hir_expr_step_new_cast_int(source_id,
+            sema_type_hir_id(root_source), sema_type_hir_id(root_dest)));
+        return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, dest, step_id);
+    }
+
+    if ((root_source->kind == SEMA_TYPE_POINTER && root_dest->kind == SEMA_TYPE_POINTER) || 
+        (root_source->kind == SEMA_TYPE_FUNCTION && root_dest->kind == SEMA_TYPE_FUNCTION)) {
         size_t step_id = sema_expr_output_push_step(ctx.output, hir_expr_step_new_cast_ptr(source_id,
             sema_type_hir_id(root_dest)));
         return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, dest, step_id);

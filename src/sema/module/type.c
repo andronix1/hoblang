@@ -1,5 +1,6 @@
 #include "type.h"
 #include "core/assert.h"
+#include "core/log.h"
 #include "core/mempool.h"
 #include "core/vec.h"
 #include "hir/api/type.h"
@@ -170,6 +171,8 @@ bool sema_type_search_ext(SemaModule *module, SemaType *type, Slice name, SemaEx
             output->function = sema_generate(generic, type->generate.params);
             return true;
         }
+        return sema_type_search_ext(module, sema_type_generate(module, type->generate.generic->type.type,
+            type->generate.generic->params, type->generate.params), name, output);
     }
     if (!type->alias) {
         return false;

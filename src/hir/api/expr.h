@@ -27,6 +27,8 @@ typedef enum {
     HIR_EXPR_STEP_STRING,
     HIR_EXPR_STEP_SIZEOF,
     HIR_EXPR_STEP_NEG,
+    HIR_EXPR_STEP_PTR_TO_INT,
+    HIR_EXPR_STEP_INT_TO_PTR,
     HIR_EXPR_STEP_CAST_PTR,
 } HirExprStepKind;
 
@@ -87,6 +89,16 @@ typedef struct {
 
         struct {
             size_t step_id;
+            HirTypeId type;
+        } int_to_ptr;
+
+        struct {
+            size_t step_id;
+            HirTypeId type;
+        } ptr_to_int;
+
+        struct {
+            size_t step_id;
             HirTypeId source, dest;
         } cast_int;
 
@@ -106,6 +118,28 @@ typedef struct {
         size_t not_step;
     };
 } HirExprStep;
+
+static inline HirExprStep hir_expr_step_new_ptr_to_int(size_t step_id, HirTypeId dest) {
+    HirExprStep step = {
+        .kind = HIR_EXPR_STEP_PTR_TO_INT,
+        .ptr_to_int = {
+            .type = dest,
+            .step_id = step_id,
+        }
+    };
+    return step;
+}
+
+static inline HirExprStep hir_expr_step_new_int_to_ptr(size_t step_id, HirTypeId dest) {
+    HirExprStep step = {
+        .kind = HIR_EXPR_STEP_INT_TO_PTR,
+        .int_to_ptr = {
+            .type = dest,
+            .step_id = step_id,
+        }
+    };
+    return step;
+}
 
 static inline HirExprStep hir_expr_step_new_sizeof(HirTypeId of, HirTypeId type) {
     HirExprStep step = {
