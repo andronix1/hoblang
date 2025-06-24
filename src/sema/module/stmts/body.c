@@ -26,7 +26,8 @@ HirCode *sema_module_emit_code(SemaModule *module, AstBody *body, SemaLoop *loop
     if (is_unreachable) {
         sema_module_err(module, unreachable, "code is unreachable");
     }
-    if (!sema_module_scope_breaks(module)) {
+    body->sema.breaks = sema_module_scope_breaks(module);
+    if (!body->sema.breaks) {
         sema_module_emit_current_defers(module);
     }
     HirStmt *stmts = sema_ss_get_stmts(module->ss);

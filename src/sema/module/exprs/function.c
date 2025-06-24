@@ -1,4 +1,5 @@
 #include "function.h"
+#include "ast/body.h"
 #include "core/mempool.h"
 #include "core/null.h"
 #include "core/vec.h"
@@ -68,6 +69,9 @@ SemaValue *sema_module_emit_expr_function(SemaModule *module, AstExprFunc *func,
         ));
     }
     hir_init_fun_body(module->hir, func_id, sema_module_emit_code(module, func->body, NULL));
+    if (!func->body->sema.breaks && !sema_type_eq(type->function.returns, sema_type_new_void(module))) {
+        sema_module_err(module, where, "expected function to return value but its body passes");
+    }
     sema_module_pop_scope(module);
     sema_module_swap_ss(module, old_ss);
 
