@@ -159,6 +159,11 @@ SemaValue *sema_module_emit_expr_path_from(SemaModule *module, SemaValue *value,
                 value = NOT_NULL(sema_generate(generic, input));
                 break;
             }
+            case AST_PATH_SEGMENT_TYPEOF: {
+                SemaValueRuntime *runtime = NOT_NULL(sema_value_should_be_runtime(module, segment->slice, value));
+                value = sema_value_new_type(module->mempool, runtime->type);
+                break;
+            }
         }
     }
     return value;

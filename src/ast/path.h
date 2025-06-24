@@ -10,6 +10,7 @@ typedef enum {
     AST_PATH_SEGMENT_GENERIC_BUILD,
     AST_PATH_SEGMENT_DEREF,
     AST_PATH_SEGMENT_SIZEOF,
+    AST_PATH_SEGMENT_TYPEOF,
 } AstPathSegmentKind;
 
 typedef struct AstPathSegment {
@@ -28,6 +29,7 @@ typedef struct AstPath {
 
 bool ast_path_eq(const AstPath *a, const AstPath *b);
 
+AstPathSegment ast_path_segment_new_typeof(Slice slice);
 AstPathSegment ast_path_segment_new_ident(Slice ident);
 AstPathSegment ast_path_segment_new_deref(Slice slice);
 AstPathSegment ast_path_segment_new_sizeof(Slice slice);

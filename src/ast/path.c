@@ -24,6 +24,7 @@ bool ast_path_eq(const AstPath *a, const AstPath *b) {
                 break;
             case AST_PATH_SEGMENT_SIZEOF: break;
             case AST_PATH_SEGMENT_DEREF: break;
+            case AST_PATH_SEGMENT_TYPEOF: break;
         }
     }
     return true;
@@ -35,6 +36,14 @@ AstPathSegment ast_path_segment_new_generic_build(Slice slice, AstGenericBuilder
         .kind = AST_PATH_SEGMENT_GENERIC_BUILD,
         .slice = slice,
         .generic = builder,
+    };
+    return result;
+}
+
+AstPathSegment ast_path_segment_new_typeof(Slice slice) {
+    AstPathSegment result = {
+        .kind = AST_PATH_SEGMENT_TYPEOF,
+        .slice = slice,
     };
     return result;
 }
