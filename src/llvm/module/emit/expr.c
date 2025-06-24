@@ -215,8 +215,8 @@ static LlvmEmitStepRes llvm_emit_expr_step(
             ), true);
         }
         case HIR_EXPR_STEP_STRING: {
-            LLVMValueRef str_global = LLVMAddGlobal(module->module, 
-                LLVMArrayType(LLVMInt8TypeInContext(module->context), step->string.length), "");
+            LLVMValueRef str_global = LLVMAddGlobal(module->module, LLVMArrayType(LLVMInt8Type(), step->string.length),
+                "");
             LLVMSetInitializer(str_global, LLVMConstString(step->string.value, step->string.length, true));
             LLVMValueRef str_ptr = LLVMBuildBitCast(module->builder, str_global,
                 LLVMPointerTypeInContext(module->context, 0), "");
