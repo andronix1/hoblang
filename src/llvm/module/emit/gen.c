@@ -35,7 +35,14 @@ static void llvm_setup_gen_usage(LlvmModule *module, HirGenScopeId id, HirGenUsa
     if (llvm_usage_should_be_skipped(module, &scope->usages[usage])) return;
     llvm_setup_gen_params(module, scope->params, scope->usages[usage].params);
     for (size_t i = 0; i < vec_len(scope->funcs); i++) {
-        module->gen_scopes[id].funcs[i][usage] = llvm_setup_func(module, scope->funcs[i]);
+        LLVMValueRef value = llvm_setup_func(module, scope->funcs[i]);
+        module->gen_scopes[id].funcs[i][usage] = value;
+        for (size_t j = 0; j < vec_len(scope->usages); j++) {
+            HirGenScopeUsage *inner = &scope->usages[j];
+            if (inner->is_from && inner->from == id) {
+                module->gen_scopes[id].funcs[i][j] = value;
+            }
+        }
     }
     llvm_clean_gen_params(module, scope->params);
 }
@@ -47,6 +54,7 @@ static void llvm_emit_usage(LlvmModule *module, HirGenScopeId id, HirGenUsageId 
 
     vec_push(module->curr_gen_scopes, id);
     for (size_t i = 0; i < vec_len(scope->linked_scopes); i++) {
+        if (scope->linked_scopes[i] == id) continue;
         llvm_setup_gen(module, scope->linked_scopes[i]);
         llvm_emit_gen(module, scope->linked_scopes[i]);
     }
