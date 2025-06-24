@@ -37,6 +37,9 @@ static SemaValue *sema_value_analyze_expr_simple_ident(SemaModule *module, SemaT
         if (idx != (size_t)-1) {
             size_t step_id = sema_expr_output_push_step(output, hir_expr_step_new_struct_field(idx, of));
             keymap_at(root->structure.fields_map, idx, field);
+            if (field->value.module && field->value.module != module) {
+                sema_module_err(module, ident, "field is private");
+            }
             return sema_value_new_runtime_expr_step(module->mempool, runtime, field->value.type, step_id);
         }
     }
