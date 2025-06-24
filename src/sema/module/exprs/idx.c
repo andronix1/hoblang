@@ -12,13 +12,14 @@ SemaValue *sema_module_emit_expr_idx(SemaModule *module, AstExprIdx *idx, SemaEx
     size_t value_step = sema_module_expr_emit_runtime(module, inner_runtime, ctx.output);
     size_t idx_step = sema_module_expr_emit_runtime(module, idx_runtime, ctx.output);
     SemaType *type = inner_runtime->type;
-    if (type->kind == SEMA_TYPE_ARRAY) {
+    SemaType *root_type = sema_type_root(type);
+    if (root_type->kind == SEMA_TYPE_ARRAY) {
         size_t step_id = sema_expr_output_push_step(ctx.output, hir_expr_step_new_idx_array(value_step, idx_step));
-        return sema_value_new_runtime_expr_step(module->mempool, inner_runtime->kind, type->array.of, step_id);
+        return sema_value_new_runtime_expr_step(module->mempool, inner_runtime->kind, root_type->array.of, step_id);
     }
-    if (type->kind == SEMA_TYPE_POINTER) {
+    if (root_type->kind == SEMA_TYPE_POINTER) {
         size_t step_id = sema_expr_output_push_step(ctx.output, hir_expr_step_new_idx_pointer(value_step, idx_step));
-        return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_VAR, type->pointer_to, step_id);
+        return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_VAR, root_type->pointer_to, step_id);
     }
     sema_module_err(module, idx->inner->slice, "only array or pointers can be indexed, not $t", type);
     return NULL;
