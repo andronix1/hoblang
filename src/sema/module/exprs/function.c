@@ -49,9 +49,18 @@ SemaValue *sema_module_emit_expr_function(SemaModule *module, AstExprFunc *func,
         args_mut[i] = HIR_MUTABLE;
     }
 
-    HirDeclId decl_id = hir_add_decl(module->hir);
+    SemaValue *value = NULL;
     HirFuncId func_id = hir_register_fun(module->hir, sema_type_hir_id(type));
-    hir_init_decl_func(module->hir, decl_id, func_id);
+    if (vec_len(module->gen_scopes)) {
+        HirGenScopeId scope = *vec_top(module->gen_scopes);
+        HirGenFuncId gen_func_id = hir_gen_scope_add_func(module->hir, scope, func_id);
+        value = sema_value_new_runtime_const(module->mempool, sema_const_new_gen_func(module->mempool, type, scope,
+            gen_func_id, hir_get_gen_scope(module->hir, scope)->params));
+    } else {
+        HirDeclId decl_id = hir_add_decl(module->hir);
+        hir_init_decl_func(module->hir, decl_id, func_id);
+        value = sema_value_new_runtime_const(module->mempool, sema_const_new_func(module->mempool, type, decl_id));
+    }
 
     SemaScopeStack *old_ss = sema_module_swap_ss(module, sema_scope_stack_new(module->mempool, func_id,
         type->function.returns));
@@ -75,6 +84,6 @@ SemaValue *sema_module_emit_expr_function(SemaModule *module, AstExprFunc *func,
     sema_module_pop_scope(module);
     sema_module_swap_ss(module, old_ss);
 
-    return sema_value_new_runtime_const(module->mempool, sema_const_new_func(module->mempool, type, decl_id));
+    return value;
 }
 
