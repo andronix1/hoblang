@@ -75,6 +75,39 @@ static inline AstExpr *parse_expr_additions(Parser *parser, AstExpr *expr) {
 
 static AstExpr *parse_middle_expr(Parser *parser);
 
+static inline AstExpr *parse_after_angle_brace(Parser *parser, Slice token_slice, AstType *type) {
+    Token begin_token = parser_take(parser);
+    switch (begin_token.kind) {
+        case TOKEN_OPENING_FIGURE_BRACE: {
+            AstExprStructField *fields_map = keymap_new_in(parser->mempool, AstExprStructField);
+            while (parser_next_is_not(parser, TOKEN_CLOSING_FIGURE_BRACE)) {
+                Slice name = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
+                PARSER_EXPECT_NEXT(parser, TOKEN_COLON);
+                AstExpr *expr = NOT_NULL(parse_expr(parser));
+                if (keymap_insert(fields_map, name, ast_expr_struct_field_new(expr))) {
+                    parser_err(parser, name, "duplication of field `$S`", name);
+                }
+                if (!parser_check_list_sep(parser, TOKEN_CLOSING_FIGURE_BRACE)) return false;
+            }
+            Token closing = PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_FIGURE_BRACE);
+            return ast_expr_new_struct(parser->mempool, slice_union(token_slice, closing.slice), type, fields_map);
+        }
+        case TOKEN_OPENING_SQUARE_BRACE: {
+            AstExpr **elements = vec_new_in(parser->mempool, AstExpr*);
+            while (parser_next_is_not(parser, TOKEN_CLOSING_SQUARE_BRACE)) {
+                vec_push(elements, NOT_NULL(parse_expr(parser)));
+                if (!parser_check_list_sep(parser, TOKEN_CLOSING_SQUARE_BRACE)) return false;
+            }
+            Token closing = PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_SQUARE_BRACE);
+            return ast_expr_new_array(parser->mempool, slice_union(token_slice, closing.slice), type, elements);
+        }
+        default:
+            parser_err(parser, begin_token.slice, "expected `{` or `[`");
+            return NULL;
+    }
+    UNREACHABLE;
+}
+
 static inline AstExpr *_parse_middle_expr(Parser *parser) {
     Token token = parser_take(parser);
     switch (token.kind) {
@@ -127,43 +160,14 @@ static inline AstExpr *_parse_middle_expr(Parser *parser) {
             return ast_expr_new_float(parser->mempool, token.slice, token.float_value);
         case TOKEN_CHAR:
             return ast_expr_new_char(parser->mempool, token.slice, token.character);
+        case TOKEN_OPENING_SQUARE_BRACE:
+        case TOKEN_OPENING_FIGURE_BRACE:
+            parser_skip_next(parser);
+            return parse_after_angle_brace(parser, token.slice, NULL);
         case TOKEN_OPENING_ANGLE_BRACE: {
-            AstType *type = NULL;
-            if (!parser_next_should_be(parser, TOKEN_CLOSING_ANGLE_BRACE)) {
-                type = NOT_NULL(parse_type(parser));
-                PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_ANGLE_BRACE);
-            }
-            Token begin_token = parser_take(parser);
-            switch (begin_token.kind) {
-                case TOKEN_OPENING_FIGURE_BRACE: {
-                    AstExprStructField *fields_map = keymap_new_in(parser->mempool, AstExprStructField);
-                    while (parser_next_is_not(parser, TOKEN_CLOSING_FIGURE_BRACE)) {
-                        Slice name = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
-                        PARSER_EXPECT_NEXT(parser, TOKEN_COLON);
-                        AstExpr *expr = NOT_NULL(parse_expr(parser));
-                        if (keymap_insert(fields_map, name, ast_expr_struct_field_new(expr))) {
-                            parser_err(parser, name, "duplication of field `$S`", name);
-                        }
-                        if (!parser_check_list_sep(parser, TOKEN_CLOSING_FIGURE_BRACE)) return false;
-                    }
-                    Token closing = PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_FIGURE_BRACE);
-                    return ast_expr_new_struct(parser->mempool,
-                        slice_union(token.slice, closing.slice), type, fields_map);
-                }
-                case TOKEN_OPENING_SQUARE_BRACE: {
-                    AstExpr **elements = vec_new_in(parser->mempool, AstExpr*);
-                    while (parser_next_is_not(parser, TOKEN_CLOSING_SQUARE_BRACE)) {
-                        vec_push(elements, NOT_NULL(parse_expr(parser)));
-                        if (!parser_check_list_sep(parser, TOKEN_CLOSING_SQUARE_BRACE)) return false;
-                    }
-                    Token closing = PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_SQUARE_BRACE);
-                    return ast_expr_new_array(parser->mempool, slice_union(token.slice, closing.slice), type, elements);
-                }
-                default:
-                    parser_err(parser, begin_token.slice, "expected `{` or `[`");
-                    return NULL;
-            }
-            return ast_expr_new_integer(parser->mempool, token.slice, token.integer);
+            AstType *type = NOT_NULL(parse_type(parser));
+            PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_ANGLE_BRACE);
+            return parse_after_angle_brace(parser, token.slice, type);
         }
         default:
             parser_err(parser, token.slice, "expected expression");
