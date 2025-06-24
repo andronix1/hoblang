@@ -154,6 +154,17 @@ static AstNode *parser_next_full(Parser *parser, Token token) {
             assert(stmt);
             PARSER_EXPECT_NEXT(parser, TOKEN_SEMICOLON);
             return ast_node_new_stmt(parser->mempool, stmt);
+        case TOKEN_FOR: {
+            OptSlice label = opt_slice_new_null();
+            if (parser_next_should_be(parser, TOKEN_DOT)) {
+                label = opt_slice_new_value(PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice);
+            }
+            Slice name = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
+            PARSER_EXPECT_NEXT(parser, TOKEN_IN);
+            AstExpr *expr = NOT_NULL(parse_expr(parser));
+            AstBody *body = NOT_NULL(parse_body(parser));
+            return ast_node_new_stmt(parser->mempool, ast_stmt_new_for(parser->mempool, name, expr, body, label));
+        }
         case TOKEN_DO: {
             OptSlice label = opt_slice_new_null();
             if (parser_next_should_be(parser, TOKEN_DOT)) {

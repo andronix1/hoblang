@@ -15,6 +15,7 @@ typedef enum {
     AST_STMT_CONTINUE,
     AST_STMT_BREAK,
     AST_STMT_DEFER,
+    AST_STMT_FOR,
 } AstStmtKind;
 
 typedef struct {
@@ -50,6 +51,14 @@ typedef struct {
     Slice slice;
     AstExpr *value;
 } AstReturn;
+
+typedef struct {
+    Slice iter;
+    AstType *type;
+    AstExpr *iterator;
+    AstBody *body;
+    OptSlice label;
+} AstFor;
 
 typedef enum {
     AST_DEFER_BODY,
@@ -95,6 +104,7 @@ typedef struct AstStmt {
         AstAssign assign;
         AstIf if_else;
         AstWhile while_loop;
+        AstFor for_loop;
         AstLoopControl break_loop;
         AstLoopControl continue_loop;
     };
@@ -120,3 +130,4 @@ AstStmt *ast_stmt_new_short_assign(Mempool *mempool, AstExpr *dst, AstExpr *what
 AstStmt *ast_stmt_new_return(Mempool *mempool, Slice slice, AstExpr *value);
 AstStmt *ast_stmt_new_if(Mempool *mempool, AstCondBlock *conds, AstBody *else_body);
 AstStmt *ast_stmt_new_while(Mempool *mempool, AstExpr *expr, AstBody *body, bool is_do_while, OptSlice label);
+AstStmt *ast_stmt_new_for(Mempool *mempool, Slice iter_name, AstExpr *iterator, AstBody *body, OptSlice label);

@@ -4,6 +4,7 @@
 #include "sema/module/stmts/assign.h"
 #include "sema/module/stmts/defer.h"
 #include "sema/module/stmts/expr.h"
+#include "sema/module/stmts/for.h"
 #include "sema/module/stmts/if.h"
 #include "sema/module/stmts/loop_control.h"
 #include "sema/module/stmts/return.h"
@@ -19,6 +20,7 @@ bool sema_module_emit_stmt(SemaModule *module, AstStmt *stmt) {
         case AST_STMT_WHILE: return sema_module_emit_stmt_while(module, &stmt->while_loop);
         case AST_STMT_CONTINUE: return sema_module_emit_stmt_continue(module, &stmt->continue_loop);
         case AST_STMT_BREAK: return sema_module_emit_stmt_break(module, &stmt->break_loop);
+        case AST_STMT_FOR: return sema_module_emit_stmt_for(module, &stmt->for_loop);
     }
     UNREACHABLE;
 }

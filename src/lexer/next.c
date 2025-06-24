@@ -234,6 +234,8 @@ static Token lexer_try_next(Lexer *lexer) {
                 else if (slice_eq(slice, slice_from_cstr("sizeof"))) return token_simple(TOKEN_SIZEOF);
                 else if (slice_eq(slice, slice_from_cstr("defer"))) return token_simple(TOKEN_DEFER);
                 else if (slice_eq(slice, slice_from_cstr("undefined"))) return token_simple(TOKEN_UNDEFINED);
+                else if (slice_eq(slice, slice_from_cstr("for"))) return token_simple(TOKEN_FOR);
+                else if (slice_eq(slice, slice_from_cstr("in"))) return token_simple(TOKEN_IN);
                 else return token_simple(TOKEN_IDENT);
             }
             return token_simple(TOKEN_FAILED);

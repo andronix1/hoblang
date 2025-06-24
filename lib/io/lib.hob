@@ -7,6 +7,10 @@ public type Fd = i32;
 extern fun Fd.write(self, ptr: *u8, size: usize);
 public extern fun Fd.close(self);
 
+public fun Fd.putByte(self, byte: u8) {
+    self.write(&byte, 1);
+}
+
 public fun Fd.putString(self, data: string) {
     self.write(data.raw, data.length);
 }

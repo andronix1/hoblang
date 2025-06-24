@@ -1,6 +1,7 @@
 #include "stmt.h"
 #include "ast/body.h"
 #include "ast/expr.h"
+#include "ast/type.h"
 #include "core/mempool.h"
 #include "core/assert.h"
 #include "core/null.h"
@@ -28,6 +29,14 @@ bool ast_stmt_eq(const AstStmt *a, const AstStmt *b) {
     switch (a->kind) {
         case AST_STMT_EXPR: return ast_expr_eq(a->expr, b->expr);
         case AST_STMT_RETURN: return equals_nullable(a->ret.value, b->ret.value, (EqFunc)ast_expr_eq);
+        case AST_STMT_FOR:
+            return
+                ast_expr_eq(a->for_loop.iterator, b->for_loop.iterator) &&
+                slice_eq(a->for_loop.iter, b->for_loop.iter) &&
+                opt_slice_eq(&a->for_loop.label, &b->for_loop.label) &&
+                ast_type_eq(a->for_loop.type, b->for_loop.type) &&
+                ast_body_eq(a->for_loop.body, b->for_loop.body);
+            return equals_nullable(a->ret.value, b->ret.value, (EqFunc)ast_expr_eq);
         case AST_STMT_ASSIGN: return
             a->assign.short_assign.is == b->assign.short_assign.is &&
             (
@@ -50,6 +59,7 @@ bool ast_stmt_eq(const AstStmt *a, const AstStmt *b) {
             return equals_nullable(a->if_else.else_body, b->if_else.else_body, (EqFunc)ast_body_eq);
         case AST_STMT_WHILE:
             return ast_expr_eq(a->while_loop.cond, b->while_loop.cond) &&
+                opt_slice_eq(&a->while_loop.label, &b->while_loop.label) &&
                 ast_body_eq(a->while_loop.body, b->while_loop.body);
         case AST_STMT_CONTINUE:
             return loop_controls_eq(&a->continue_loop, &b->continue_loop);
@@ -73,6 +83,14 @@ AstStmt *ast_stmt_new_continue(Mempool *mempool, AstLoopControl control)
 
 AstStmt *ast_stmt_new_break(Mempool *mempool, AstLoopControl control)
     CONSTRUCT(AST_STMT_BREAK, out->break_loop = control;)
+
+AstStmt *ast_stmt_new_for(Mempool *mempool, Slice iter_name, AstExpr *iterator, AstBody *body, OptSlice label)
+    CONSTRUCT(AST_STMT_FOR,
+        out->for_loop.iter = iter_name;
+        out->for_loop.body = body;
+        out->for_loop.label = label;
+        out->for_loop.iterator = iterator;
+    )
 
 AstStmt *ast_stmt_new_defer_expr(Mempool *mempool, AstExpr *expr)
     CONSTRUCT(AST_STMT_DEFER,
