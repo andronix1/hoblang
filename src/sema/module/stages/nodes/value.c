@@ -1,4 +1,5 @@
 #include "value.h"
+#include "ast/type.h"
 #include "core/assert.h"
 #include "core/null.h"
 #include "hir/api/hir.h"
@@ -11,6 +12,7 @@
 #include "sema/module/decl.h"
 #include "sema/module/exprs/expr.h"
 #include "sema/module/module.h"
+#include "sema/module/type.h"
 #include "sema/module/value.h"
 
 static inline SemaRuntimeKind ast_value_kind_to_sema(AstValueDeclKind kind) {
@@ -30,6 +32,14 @@ static inline HirMutability ast_value_kind_to_hir(AstValueDeclKind kind) {
     UNREACHABLE;
 }
 
+static inline bool check_value_type_validity(SemaModule *module, Slice where, SemaType *type) {
+    if (type->kind == SEMA_TYPE_VOID) {
+        sema_module_err(module, where, "void cannot be used as value type");
+        return false;
+    }
+    return true;
+}
+
 static SemaValueRuntime *sema_value_decl_get_initializer(SemaModule *module, AstValueDecl *value_decl, SemaExprOutput *output) {
     SemaType *type = value_decl->sema.type;
     SemaValueRuntime *value = NOT_NULL(sema_module_emit_runtime_expr_full(module, value_decl->initializer,
@@ -41,6 +51,7 @@ static SemaValueRuntime *sema_value_decl_get_initializer(SemaModule *module, Ast
     }
     if (!type) {
         value_decl->sema.type = type = value->type;
+        check_value_type_validity(module, value_decl->initializer->slice, value_decl->sema.type);
     }
     return value;
 }
@@ -163,7 +174,11 @@ bool sema_module_stage_emit_local(SemaModule *module, AstValueDecl *value_decl) 
 
 bool sema_module_stage_fill_value(SemaModule *module, AstValueDecl *value_decl) {
     AstValueInfo *info = value_decl->info;
-    value_decl->sema.type = info->explicit_type ? NOT_NULL(sema_module_type(module, info->explicit_type)) : NULL;
+    value_decl->sema.type = NULL;
+    if (info->explicit_type) {
+        check_value_type_validity(module, info->explicit_type->slice,
+            value_decl->sema.type = NOT_NULL(sema_module_type(module, info->explicit_type)));
+    }
     if (sema_module_is_global_scope(module)) {
         return sema_module_stage_fill_global(module, value_decl);
     } else {

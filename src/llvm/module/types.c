@@ -4,6 +4,7 @@
 #include "llvm/module/module.h"
 #include <alloca.h>
 #include <llvm-c/Core.h>
+#include <stdio.h>
 
 LLVMTypeRef llvm_function_type(LlvmModule *module, HirTypeId type_id) {
     HirType *type = hir_resolve_simple_type(module->hir, type_id);
@@ -35,9 +36,7 @@ LLVMTypeRef llvm_runtime_type(LlvmModule *module, HirTypeId type_id) {
                 case HIR_TYPE_FLOAT_64: return LLVMDoubleTypeInContext(module->context);
             }
             UNREACHABLE;
-        case HIR_TYPE_FUNCTION: 
-        case HIR_TYPE_POINTER:
-            return LLVMPointerTypeInContext(module->context, 0);
+        case HIR_TYPE_FUNCTION: case HIR_TYPE_POINTER: return LLVMPointerTypeInContext(module->context, 0);
         case HIR_TYPE_ARRAY: return LLVMArrayType2(llvm_runtime_type(module, type->array.of), type->array.length);
         case HIR_TYPE_STRUCT: {
             size_t count = vec_len(type->structure.fields);

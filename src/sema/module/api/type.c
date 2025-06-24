@@ -186,18 +186,10 @@ bool sema_type_eq(const SemaType *a, const SemaType *b) {
         return false;
     }
     switch (a->kind) {
-        case SEMA_TYPE_VOID:
-        case SEMA_TYPE_BOOL:
-            return true;
-        case SEMA_TYPE_RECORD:
-            return
-                a->record.module == b->record.module &&
-                a->record.id == b->record.id;
+        case SEMA_TYPE_VOID: case SEMA_TYPE_BOOL: return true;
+        case SEMA_TYPE_RECORD: return a->record.module == b->record.module && a->record.id == b->record.id;
         case SEMA_TYPE_GENERIC: case SEMA_TYPE_STRUCTURE: return a == b;
-        case SEMA_TYPE_INT:
-            return
-                a->integer.size == b->integer.size &&
-                a->integer.is_signed == b->integer.is_signed;
+        case SEMA_TYPE_INT: return a->integer.size == b->integer.size && a->integer.is_signed == b->integer.is_signed;
         case SEMA_TYPE_FUNCTION:
             if (vec_len(a->function.args) != vec_len(b->function.args)) {
                 return false;
@@ -208,8 +200,9 @@ bool sema_type_eq(const SemaType *a, const SemaType *b) {
                 }
             }
             return sema_type_can_be_downcasted(a->function.returns, b->function.returns);
-        case SEMA_TYPE_POINTER: return sema_type_eq(a->pointer_to, b->pointer_to);
-        case SEMA_TYPE_ARRAY: return sema_type_eq(a->array.of, b->array.of) && a->array.length == b->array.length;
+        case SEMA_TYPE_POINTER: return sema_type_can_be_downcasted(a->pointer_to, b->pointer_to);
+        case SEMA_TYPE_ARRAY:
+            return sema_type_can_be_downcasted(a->array.of, b->array.of) && a->array.length == b->array.length;
         case SEMA_TYPE_FLOAT: return a->float_size == b->float_size;
         case SEMA_TYPE_GEN_PARAM: return a->gen_param == b->gen_param;
         case SEMA_TYPE_GENERATE:
