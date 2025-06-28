@@ -40,7 +40,7 @@ HirType *sema_type_to_hir(SemaModule* module, SemaType *type) {
         case SEMA_TYPE_GENERATE: {
             assert(type->generate.generic->kind == SEMA_GENERIC_TYPE);
             SemaType *generated = sema_type_generate(module->mempool, type->generate.generic->type.type,
-                type->generate.generic->params, type->generate.params);
+                type->generate.generic->gen_params, sema_generic_get_input(type->generate.generic, type->generate.params));
             return sema_type_to_hir(module, generated);
         }
         case SEMA_TYPE_GENERIC: UNREACHABLE;
@@ -93,8 +93,8 @@ void sema_type_print(va_list list) {
         case SEMA_TYPE_GEN_PARAM: logs("generic type parameter"); break;
         case SEMA_TYPE_GENERATE:
             logs("$S.<", type->generate.generic->name);
-            for (size_t i = 0; i < vec_len(type->generate.generic->params); i++) {
-                logs(i == 0 ? "$t" : ", $t", type->generate.generic->params[i]);
+            for (size_t i = 0; i < vec_len(type->generate.generic->gen_params); i++) {
+                logs(i == 0 ? "$t" : ", $t", type->generate.generic->gen_params[i]);
             }
             logs(">");
             break;
@@ -165,8 +165,8 @@ SemaType *sema_type_root(SemaType *type) {
         } else if (type->kind == SEMA_TYPE_GENERATE) {
             SemaGeneric *generic = type->generate.generic;
             assert(generic->kind == SEMA_GENERIC_TYPE);
-            type = sema_type_generate(generic->module->mempool, type->generate.generic->type.type, type->generate.generic->params,
-                type->generate.params);
+            type = sema_type_generate(generic->module->mempool, type->generate.generic->type.type,
+                type->generate.generic->gen_params, sema_generic_get_input(type->generate.generic, type->generate.params));
         } else {
             break;
         }
@@ -182,7 +182,7 @@ inline bool sema_type_can_be_downcasted(SemaType *type, SemaType *to) {
         SemaGeneric *generic = type->generate.generic;
         assert(generic->kind == SEMA_GENERIC_TYPE);
         SemaType *new_type = sema_type_generate(generic->module->mempool, type->generate.generic->type.type,
-            type->generate.generic->params, type->generate.params);
+            type->generate.generic->gen_params, sema_generic_get_input(type->generate.generic, type->generate.params));
         if (sema_type_eq(new_type, to) || sema_type_can_be_downcasted(new_type, to)) {
             return true;
         }

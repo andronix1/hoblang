@@ -187,14 +187,15 @@ SemaValue *sema_module_emit_expr_path_from(SemaModule *module, SemaValue *value,
             }
             case AST_PATH_SEGMENT_GENERIC_BUILD: {
                 SemaGeneric *generic = NOT_NULL(sema_value_should_be_generic(module, segment->slice, value));
-                if (vec_len(generic->params) != vec_len(segment->generic->params)) {
+                size_t expected_params = sema_generic_input_count(generic);
+                if (expected_params != vec_len(segment->generic->params)) {
                     sema_module_err(module, segment->slice, "expected $l generic parameter, but $l passed",
-                        vec_len(generic->params), vec_len(segment->generic->params));
+                        expected_params, vec_len(segment->generic->params));
                     return NULL;
                 }
                 SemaType **input = vec_new_in(module->mempool, SemaType*);
-                vec_resize(input, vec_len(generic->params));
-                for (size_t i = 0; i < vec_len(generic->params); i++) {
+                vec_resize(input, expected_params);
+                for (size_t i = 0; i < expected_params; i++) {
                     input[i] = NOT_NULL(sema_module_type(module, segment->generic->params[i]));
                 }
                 value = NOT_NULL(sema_generate(generic, input));

@@ -22,7 +22,7 @@ bool sema_func_info_setup(SemaModule *module, AstFunInfo *info) {
             SemaGeneric *generic = sema_value_is_generic(decl->value);
             if (generic && generic->kind == SEMA_GENERIC_TYPE) {
                 SemaGeneric *func_generic = NOT_NULL(sema_module_generic_func(module, generic->type.source, info->name));
-                ext_of = sema_value_is_type(sema_generate(generic, func_generic->params));
+                ext_of = sema_value_is_type(sema_generate(generic, func_generic->gen_params));
                 assert(ext_of);
                 info->ext.sema.func_generic = func_generic;
                 info->ext.sema.generic = generic;
@@ -60,8 +60,7 @@ void sema_module_push_fun_info_decl(SemaModule *module, AstFunInfo *info, SemaVa
         SemaType *ext_type = info->ext.sema.type;
         if (info->ext.sema.generic) {
             sema_generic_add_ext_function(module, info->ext.sema.generic, info->name,
-                sema_alias_decl_new(sema_value_new_generic(module->mempool, info->ext.sema.func_generic), source_module,
-                    info->ext.by_ref));
+                sema_alias_decl_new(value, source_module, info->ext.by_ref));
         } else {
             if (!ext_type->alias) {
                 sema_module_err(module, info->ext.of, "only type aliases can be extended");

@@ -42,13 +42,13 @@ SemaGenericCtx sema_module_generic_ctx_setup(SemaModule *module, AstGeneric *gen
     }
 
     if (source->kind == SEMA_GENERIC_FUNC) {
-        vec_push(module->gen_scopes, sema_gen_scope_info_new(source->func.scope, source->params));
+        vec_push(module->gen_scopes, sema_gen_scope_info_new(source->func.scope, source->gen_params));
     }
 
     sema_module_push_scope(module, NULL);
     for (size_t i = 0; i < vec_len(generic->params); i++) {
         sema_module_push_decl(module, generic->params[i].name, sema_decl_new(module->mempool,
-            module, sema_value_new_type(module->mempool, source->params[i])));
+            module, sema_value_new_type(module->mempool, source->gen_params[i])));
     }
 
     SemaGenericCtx ctx = {

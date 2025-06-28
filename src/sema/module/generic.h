@@ -10,6 +10,7 @@
 typedef enum {
     SEMA_GENERIC_TYPE,
     SEMA_GENERIC_FUNC,
+    SEMA_GENERIC_GENERIC,
 } SemaGenericKind;
 
 typedef struct SemaGeneric {
@@ -17,13 +18,16 @@ typedef struct SemaGeneric {
 
     Slice name;
     SemaModule *module;
-    SemaType **params;
+    SemaType **additional_params;
+    SemaType **gen_params;
 
     union {
         struct {
             AstGeneric *source;
             SemaType *type;
         } type;
+
+        SemaGeneric *generic;
 
         struct {
             SemaType *type;
@@ -35,6 +39,9 @@ typedef struct SemaGeneric {
 
 void sema_generic_fill_type(SemaGeneric *generic, SemaType *type);
 
+size_t sema_generic_input_count(SemaGeneric *generic);
+SemaType **sema_generic_get_input(SemaGeneric *generic, SemaType **input);
+
 static inline void sema_generic_fill_func(SemaGeneric *generic, SemaType *type, HirGenFuncId id) {
     generic->func.type = type;
     generic->func.id = id;
@@ -43,5 +50,6 @@ static inline void sema_generic_fill_func(SemaGeneric *generic, SemaType *type, 
 void sema_generic_add_ext_function(SemaModule *module, SemaGeneric *generic, Slice name, SemaExtDecl decl);
 
 SemaGeneric *sema_generic_new_type(Mempool *mempool, SemaModule *module, Slice name, SemaType **params, AstGeneric *source);
+SemaGeneric *sema_generic_new_generic(Mempool *mempool, SemaModule *module, Slice name, SemaType **params, SemaGeneric *generic);
 SemaGeneric *sema_generic_new_func(Mempool *mempool, SemaModule *module, Slice name, SemaType **params, HirGenScopeId scope);
 SemaValue *sema_generate(SemaGeneric *generic, SemaType **input);

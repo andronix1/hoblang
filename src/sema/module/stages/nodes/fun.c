@@ -1,6 +1,5 @@
 #include "fun.h"
 #include "core/null.h"
-#include "core/assert.h"
 #include "sema/module/ast/generic.h"
 #include "sema/module/ast/global.h"
 #include "sema/module/const.h"
@@ -64,7 +63,33 @@ bool sema_module_stage_fill_fun(SemaModule *module, AstFunDecl *func) {
     SemaGeneric *ext_generic = func->info->ext.sema.func_generic;
     SemaValue *value = NULL;
     if (main_generic && ext_generic) {
-        TODO;
+        assert(main_generic->kind == SEMA_GENERIC_FUNC);
+        assert(vec_len(ext_generic->additional_params) == 0);
+        assert(vec_len(main_generic->additional_params) == 0);
+
+        HirGenScopeId scope = hir_add_gen_scope(module->hir);
+        if (vec_len(module->gen_scopes) > 0) {
+            hir_gen_scope_add_scope(module->hir, vec_top(module->gen_scopes)->scope, scope);
+        } else {
+            hir_add_root_gen_scope(module->hir, scope);
+        }
+
+        SemaType **params = vec_new_in(module->mempool, SemaType*);
+        vec_extend(params, ext_generic->gen_params);
+        vec_extend(params, main_generic->gen_params);
+        main_generic->gen_params = params;
+        main_generic->additional_params = ext_generic->gen_params;
+        main_generic->func.scope = scope;
+
+        for (size_t i = 0; i < vec_len(params); i++) {
+            assert(params[i]->kind == SEMA_TYPE_GEN_PARAM);
+            hir_gen_scope_add_param(module->hir, scope, params[i]->gen_param);
+        }
+        HirGenFuncId id = hir_gen_scope_add_func(module->hir, scope, func_id);
+        sema_generic_fill_func(main_generic, type, id);
+
+        value = sema_value_new_generic(module->mempool, sema_generic_new_generic(module->mempool, module,
+            func->info->name, ext_generic->gen_params, main_generic));
     } else if (!main_generic && !ext_generic) {
         HirDeclId decl_id = hir_add_decl(module->hir);
         hir_init_decl_func(module->hir, decl_id, func_id);

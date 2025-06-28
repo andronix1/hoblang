@@ -110,8 +110,9 @@ bool sema_type_search_ext(SemaModule *module, SemaType *type, Slice name, SemaEx
         }
     }
     if (type->kind == SEMA_TYPE_GENERATE) {
-        assert(type->generate.generic->kind == SEMA_GENERIC_TYPE);
-        SemaExtDecl *decl = keymap_get(type->generate.generic->type.type->alias->decls_map, name);
+        SemaGeneric *generic = type->generate.generic;
+        assert(generic->kind == SEMA_GENERIC_TYPE);
+        SemaExtDecl *decl = keymap_get(generic->type.type->alias->decls_map, name);
         if (decl) {
             *output = *decl;
             SemaGeneric *generic = sema_value_is_generic(output->function);
@@ -119,8 +120,8 @@ bool sema_type_search_ext(SemaModule *module, SemaType *type, Slice name, SemaEx
             output->function = sema_generate(generic, type->generate.params);
             return true;
         }
-        return sema_type_search_ext(module, sema_type_generate(module->mempool, type->generate.generic->type.type,
-            type->generate.generic->params, type->generate.params), name, output);
+        return sema_type_search_ext(module, sema_type_generate(module->mempool, generic->type.type,
+            generic->gen_params, sema_generic_get_input(generic, type->generate.params)), name, output);
     }
     if (!type->alias) {
         return false;

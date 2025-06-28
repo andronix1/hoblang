@@ -64,6 +64,36 @@ void hir_dump_functions(Hir *hir, FILE *stream) {
     }
 }
 
+static void hir_dump_gens(Hir *hir, FILE *stream) {
+    fprintf(stream, "rootGenScope -> (");
+    for (size_t i = 0; i < vec_len(hir->root_gen_scopes); i++) {
+        if (i != 0) fprintf(stream, ", ");
+        fprintf(stream, "genScope%lu", hir->root_gen_scopes[i]);
+    }
+    fprintf(stream, ")\n");
+
+    for (size_t i = 0; i < vec_len(hir->gen_scopes); i++) {
+        HirGenScope *scope = &hir->gen_scopes[i];
+        fprintf(stream, "genScope%lu<", i);
+        for (size_t i = 0; i < vec_len(scope->params); i++) {
+            if (i != 0) fprintf(stream, ", ");
+            fprintf(stream, "genParam%lu", scope->params[i]);
+        }
+        fprintf(stream, "> -> (");
+        for (size_t i = 0; i < vec_len(scope->scopes); i++) {
+            if (i != 0) fprintf(stream, ", ");
+            fprintf(stream, "genScope%lu", scope->scopes[i]);
+        }
+        fprintf(stream, "): ");
+        for (size_t i = 0; i < vec_len(scope->funcs); i++) {
+            if (i != 0) fprintf(stream, ", ");
+            fprintf(stream, "func%lu", scope->funcs[i]);
+        }
+        fprintf(stream, "\n");
+    }
+    fprintf(stream, "\n");
+}
+
 static void hir_dump_decls(Hir *hir, FILE *stream) {
     for (size_t i = 0; i < vec_len(hir->decls); i++) {
         HirDeclInfo *info = &hir->decls[i];
@@ -87,6 +117,7 @@ bool hir_dump(Hir *hir, const Path output) {
     hir_dump_vars(hir, stream);
     hir_dump_externs(hir, stream);
     hir_dump_functions(hir, stream);
+    hir_dump_gens(hir, stream);
     fclose(stream);
     return true;
 }
