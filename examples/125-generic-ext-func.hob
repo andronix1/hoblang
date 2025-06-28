@@ -1,0 +1,16 @@
+import io;
+
+type A = i32;
+
+fun A.printAndGet<T>(self, value: T) -> T {
+    io.out.putByte('0' + self as u8);
+    io.out.putByte('\n');
+    return fun (x: T) -> T {
+        return x;
+    }(value);
+}
+
+global fun main() -> i32 {
+    var a = 8 as A;
+    return a.printAndGet.<i32>(0);
+}

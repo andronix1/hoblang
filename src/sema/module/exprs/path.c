@@ -20,6 +20,50 @@
 #include "sema/module/value.h"
 #include <stdio.h>
 
+typedef struct {
+    struct {
+        bool should_be_cancelled;
+        bool is;
+        size_t of;
+    } ext;
+} SemaPathCtx;
+
+static inline SemaPathCtx sema_path_ctx_new() {
+    SemaPathCtx ctx = {
+        .ext = {
+            .should_be_cancelled = true,
+            .is = false,
+        }
+    };
+    return ctx;
+}
+
+static inline void sema_path_ctx_make_ext(SemaPathCtx *ctx, size_t of) {
+    ctx->ext.is = true;
+    ctx->ext.of = of;
+    ctx->ext.should_be_cancelled = false;
+}
+
+static inline void sema_path_ctx_continue_ext(SemaPathCtx *ctx) {
+    ctx->ext.should_be_cancelled = false;
+}
+
+static inline void sema_path_ctx_step(SemaPathCtx *ctx) {
+    if (ctx->ext.should_be_cancelled) {
+        ctx->ext.is = false;
+    }
+    ctx->ext.should_be_cancelled = true;
+}
+
+static inline SemaValue *sema_path_ctx_finalize_value(SemaModule *module, SemaPathCtx *ctx, SemaValue *value, SemaExprOutput *output) {
+    SemaValueRuntime *runtime = sema_value_is_runtime(value);
+    if (ctx->ext.is && runtime) {
+        return sema_value_new_runtime_ext_expr_step(module->mempool, runtime->kind, runtime->type, 
+            sema_module_expr_emit_runtime(module, runtime, output), ctx->ext.of);
+    }
+    return value;
+}
+
 static SemaValue *sema_module_analyze_expr_path_deref(SemaModule *module, SemaValue *value, Slice slice, SemaExprOutput *output) {
     SemaValueRuntime *runtime = NOT_NULL(sema_value_should_be_runtime(module, slice, value));
     if (runtime->type->kind != SEMA_TYPE_POINTER) {
@@ -52,7 +96,7 @@ static SemaValue *sema_value_analyze_expr_simple_ident(SemaModule *module, SemaT
     return NULL;
 }
 
-static SemaValue *sema_module_analyze_expr_path_ident(SemaModule *module, SemaValue *value, Slice ident, SemaExprOutput *output) {
+static SemaValue *sema_module_analyze_expr_path_ident(SemaModule *module, SemaValue *value, Slice ident, SemaExprOutput *output, SemaPathCtx *path_ctx) {
     SemaModule *in_module = sema_value_is_module(value);
     if (in_module) {
         return NOT_NULL(sema_module_resolve_req_decl_from(in_module, module, ident))->value;
@@ -87,12 +131,8 @@ static SemaValue *sema_module_analyze_expr_path_ident(SemaModule *module, SemaVa
                 }
                 of = sema_expr_output_push_step(output, hir_expr_step_new_take_ref(of));
             }
-            SemaValueRuntime *ext_runtime = sema_value_is_runtime(ext.function);
-            if (ext_runtime) {
-                size_t step_id = sema_module_expr_emit_runtime(module, ext_runtime, output);
-                return sema_value_new_runtime_ext_expr_step(module->mempool, ext_runtime->kind,
-                    ext_runtime->type, step_id, of);
-            }
+            sema_path_ctx_make_ext(path_ctx, of);
+            return ext.function;
         }
         if (root->kind == SEMA_TYPE_POINTER) {
             size_t deref_of = sema_expr_output_push_step(output, hir_expr_step_new_deref(of));
@@ -117,11 +157,12 @@ static SemaValue *sema_module_analyze_expr_path_ident(SemaModule *module, SemaVa
 }
 
 SemaValue *sema_module_emit_expr_path_from(SemaModule *module, SemaValue *value, AstPath *path, size_t offset, SemaExprCtx ctx) {
+    SemaPathCtx path_ctx = sema_path_ctx_new();
     for (size_t i = offset; i < vec_len(path->segments); i++) {
         AstPathSegment *segment = &path->segments[i];
         switch (segment->kind) {
             case AST_PATH_SEGMENT_IDENT:
-                value = NOT_NULL(sema_module_analyze_expr_path_ident(module, value, segment->ident, ctx.output));
+                value = NOT_NULL(sema_module_analyze_expr_path_ident(module, value, segment->ident, ctx.output, &path_ctx));
                 break;
             case AST_PATH_SEGMENT_DEREF:
                 value = NOT_NULL(sema_module_analyze_expr_path_deref(module, value, segment->slice, ctx.output));
@@ -157,6 +198,7 @@ SemaValue *sema_module_emit_expr_path_from(SemaModule *module, SemaValue *value,
                     input[i] = NOT_NULL(sema_module_type(module, segment->generic->params[i]));
                 }
                 value = NOT_NULL(sema_generate(generic, input));
+                sema_path_ctx_continue_ext(&path_ctx);
                 break;
             }
             case AST_PATH_SEGMENT_TYPEOF: {
@@ -165,8 +207,9 @@ SemaValue *sema_module_emit_expr_path_from(SemaModule *module, SemaValue *value,
                 break;
             }
         }
+        sema_path_ctx_step(&path_ctx);
     }
-    return value;
+    return sema_path_ctx_finalize_value(module, &path_ctx, value, ctx.output);
 }
 
 SemaValue *sema_module_emit_expr_path(SemaModule *module, AstPath *path, SemaExprCtx ctx) {
