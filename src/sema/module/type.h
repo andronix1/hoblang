@@ -108,7 +108,12 @@ typedef struct SemaType {
             SemaType **params;
         } generate;
 
-        HirGenParamId gen_param;
+        struct {
+            HirGenParamId id;
+            Slice name;
+        } gen_param;
+
+        Slice generic_name;
     };
 } SemaType;
 
@@ -118,14 +123,14 @@ HirTypeFloatSize sema_type_float_size_to_hir(SemaTypeFloatSize size);
 SemaType *sema_type_new_void(Mempool *mempool);
 SemaType *sema_type_new_bool(Mempool *mempool);
 SemaType *sema_type_new_record(Mempool *mempool, SemaModule *module, size_t type_id);
-SemaType *sema_type_new_gen_param(Mempool *mempool, HirGenParamId gen_param);
+SemaType *sema_type_new_gen_param(Mempool *mempool, Slice name, HirGenParamId gen_param);
 SemaType *sema_type_new_structure(Mempool *mempool, SemaTypeStructField *fields);
 SemaType *sema_type_new_int(Mempool *mempool, SemaTypeIntSize size, bool is_signed);
 SemaType *sema_type_new_float(Mempool *mempool, SemaTypeFloatSize size);
 SemaType *sema_type_new_pointer(Mempool *mempool, SemaType *pointer_to);
 SemaType *sema_type_new_function(Mempool *mempool, SemaType **args, SemaType *returns);
 SemaType *sema_type_new_array(Mempool *mempool, size_t length, SemaType *of);
-SemaType *sema_type_new_generic(Mempool *mempool);
+SemaType *sema_type_new_generic(Mempool *mempool, Slice name);
 SemaType *sema_type_new_generate(Mempool *mempool, SemaGeneric *generic, SemaType **params);
 
 SemaType *sema_type_new_alias(Mempool *mempool, SemaType *type, SemaTypeAlias *alias);

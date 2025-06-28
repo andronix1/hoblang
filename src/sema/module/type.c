@@ -80,8 +80,8 @@ SemaType *sema_type_new_function(Mempool *mempool, SemaType **args, SemaType *re
         out->function.returns = returns;
     )
 
-SemaType *sema_type_new_generic(Mempool *mempool)
-    SEMA_TYPE_CONSTRUCT(SEMA_TYPE_GENERIC,)
+SemaType *sema_type_new_generic(Mempool *mempool, Slice name)
+    SEMA_TYPE_CONSTRUCT(SEMA_TYPE_GENERIC, out->generic_name = name)
 
 SemaType *sema_type_new_generate(Mempool *mempool, SemaGeneric *generic, SemaType **params)
     SEMA_TYPE_CONSTRUCT(SEMA_TYPE_GENERATE,
@@ -89,9 +89,10 @@ SemaType *sema_type_new_generate(Mempool *mempool, SemaGeneric *generic, SemaTyp
         out->generate.params = params;
     )
 
-SemaType *sema_type_new_gen_param(Mempool *mempool, HirGenParamId gen_param)
+SemaType *sema_type_new_gen_param(Mempool *mempool, Slice name, HirGenParamId gen_param)
     SEMA_TYPE_CONSTRUCT(SEMA_TYPE_GEN_PARAM,
-        out->gen_param = gen_param;
+        out->gen_param.id = gen_param;
+        out->gen_param.name = name;
     )
 
 SemaType *sema_type_new_alias(Mempool *mempool, SemaType *type, SemaTypeAlias *alias) {

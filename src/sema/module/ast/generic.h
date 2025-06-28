@@ -14,5 +14,5 @@ typedef struct {
 
 SemaGeneric *sema_module_generic_type(SemaModule *module, AstGeneric *generic, Slice name);
 SemaGeneric *sema_module_generic_func(SemaModule *module, AstGeneric *generic, Slice name);
-SemaGenericCtx sema_module_generic_ctx_setup(SemaModule *module, AstGeneric *generic, SemaGeneric *source);
+SemaGenericCtx sema_module_generic_ctx_setup(SemaModule *module, SemaGeneric *source);
 void sema_module_generic_ctx_clean(SemaModule *module, SemaGenericCtx ctx);

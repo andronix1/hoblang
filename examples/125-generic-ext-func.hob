@@ -1,10 +1,14 @@
 type A<T> = T;
 
-fun A.addWith<Other>(self, value: Other, add: fun (T, Other) -> T) -> T {
-    return add(self, value);
+fun justGet<V, I>(value: V, ignore: I) -> V {
+    return value;
+}
+
+fun A.addWith<O1, O2>(self, o1: O1, o2: O2, add: fun (T, O1, O2) -> T) -> T {
+    return add(self, justGet.<O1, O2>(o1, o2), o2);
 }
 
 global fun main() -> i32 {
     var a = 8 as A.<i32>;
-    return a.addWith.<i32>(123, fun (a, b) { return a + b; });
+    return a.addWith.<i8, i16>(123, 2, fun (a, b, c) { return a + b as i32 + c as i32; });
 }

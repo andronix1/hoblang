@@ -1,5 +1,6 @@
 #include "generic.h"
 #include "ast/generic.h"
+#include "core/assert.h"
 #include "core/mempool.h"
 #include "sema/module/api/type.h"
 #include "sema/module/decl.h"
@@ -20,7 +21,7 @@ SemaGeneric *sema_module_generic_func(SemaModule *module, AstGeneric *generic, S
     for (size_t i = 0; i < vec_len(generic->params); i++) {
         HirGenParamId param = hir_add_gen_param(module->hir);
         hir_gen_scope_add_param(module->hir, gen_scope, param);
-        vec_push(params, sema_type_new_gen_param(module->mempool, param));
+        vec_push(params, sema_type_new_gen_param(module->mempool, generic->params[i].name, param));
     }
     return sema_generic_new_func(module->mempool, module, name, params, gen_scope);
 }
@@ -28,12 +29,20 @@ SemaGeneric *sema_module_generic_func(SemaModule *module, AstGeneric *generic, S
 SemaGeneric *sema_module_generic_type(SemaModule *module, AstGeneric *generic, Slice name) {
     SemaType **params = vec_new_in(module->mempool, SemaType*);
     for (size_t i = 0; i < vec_len(generic->params); i++) {
-        vec_push(params, sema_type_new_generic(module->mempool));
+        vec_push(params, sema_type_new_generic(module->mempool, generic->params[i].name));
     }
     return sema_generic_new_type(module->mempool, module, name, params, generic);
 }
 
-SemaGenericCtx sema_module_generic_ctx_setup(SemaModule *module, AstGeneric *generic, SemaGeneric *source) {
+static inline Slice sema_type_generic_name(SemaType *type) {
+    switch (type->kind) {
+        case SEMA_TYPE_GEN_PARAM: return type->gen_param.name;
+        case SEMA_TYPE_GENERIC: return type->generic_name;
+        default: UNREACHABLE;
+    }
+}
+
+SemaGenericCtx sema_module_generic_ctx_setup(SemaModule *module, SemaGeneric *source) {
     bool is_global = sema_module_is_global_scope(module);
     SemaScopeStack *old_ss = NULL;
 
@@ -46,8 +55,8 @@ SemaGenericCtx sema_module_generic_ctx_setup(SemaModule *module, AstGeneric *gen
     }
 
     sema_module_push_scope(module, NULL);
-    for (size_t i = 0; i < vec_len(generic->params); i++) {
-        sema_module_push_decl(module, generic->params[i].name, sema_decl_new(module->mempool,
+    for (size_t i = 0; i < vec_len(source->gen_params); i++) {
+        sema_module_push_decl(module, sema_type_generic_name(source->gen_params[i]), sema_decl_new(module->mempool,
             module, sema_value_new_type(module->mempool, source->gen_params[i])));
     }
 

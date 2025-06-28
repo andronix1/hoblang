@@ -32,7 +32,7 @@ bool sema_module_stage_init_type_decl(SemaModule *module, AstTypeDecl *type_decl
 
 bool sema_module_stage_fill_type_generics(SemaModule *module, AstTypeDecl *type_decl) {
     if (type_decl->generic) {
-        SemaGenericCtx ctx = sema_module_generic_ctx_setup(module, type_decl->generic, type_decl->sema.generic);
+        SemaGenericCtx ctx = sema_module_generic_ctx_setup(module, type_decl->sema.generic);
         SemaType *type = NOT_NULL(sema_module_type(module, type_decl->type));
         sema_module_generic_ctx_clean(module, ctx);
         sema_generic_fill_type(type_decl->sema.generic, type);

@@ -35,7 +35,7 @@ HirType *sema_type_to_hir(SemaModule* module, SemaType *type) {
         }
         case SEMA_TYPE_ARRAY: return hir_type_new_array(module->mempool, sema_type_to_hir(module, type->array.of), type->array.length);
         case SEMA_TYPE_RECORD: return sema_type_to_hir(module, type->record.module->types[type->record.id]);
-        case SEMA_TYPE_GEN_PARAM: return hir_type_new_gen(module->mempool, type->gen_param);
+        case SEMA_TYPE_GEN_PARAM: return hir_type_new_gen(module->mempool, type->gen_param.id);
 
         case SEMA_TYPE_GENERATE: {
             assert(type->generate.generic->kind == SEMA_GENERIC_TYPE);
@@ -89,8 +89,8 @@ void sema_type_print(va_list list) {
         case SEMA_TYPE_STRUCTURE:
             logs("structure", type->pointer_to);
             break;
-        case SEMA_TYPE_GENERIC: logs("generic function parameter"); break;
-        case SEMA_TYPE_GEN_PARAM: logs("generic type parameter"); break;
+        case SEMA_TYPE_GENERIC: logs("$S", type->generic_name); break;
+        case SEMA_TYPE_GEN_PARAM: logs("$S", type->gen_param.name); break;
         case SEMA_TYPE_GENERATE:
             logs("$S.<", type->generate.generic->name);
             for (size_t i = 0; i < vec_len(type->generate.generic->gen_params); i++) {
@@ -230,7 +230,7 @@ bool sema_type_eq(const SemaType *a, const SemaType *b) {
         case SEMA_TYPE_ARRAY:
             return sema_type_can_be_downcasted(a->array.of, b->array.of) && a->array.length == b->array.length;
         case SEMA_TYPE_FLOAT: return a->float_size == b->float_size;
-        case SEMA_TYPE_GEN_PARAM: return a->gen_param == b->gen_param;
+        case SEMA_TYPE_GEN_PARAM: return a->gen_param.id == b->gen_param.id;
         case SEMA_TYPE_GENERATE:
             if (vec_len(a->generate.params) != vec_len(b->generate.params)) {
                 return false;
