@@ -9,12 +9,12 @@ typedef size_t HirVarId;
 
 typedef struct {
     OptSlice global_name;
-    HirTypeId type;
+    HirType *type;
     bool initialized;
     HirConst initializer;
 } HirVarInfo;
 
-static inline HirVarInfo hir_var_info_new(OptSlice global_name, HirTypeId type) {
+static inline HirVarInfo hir_var_info_new(OptSlice global_name, HirType *type) {
     HirVarInfo info = {
         .global_name = global_name,
         .type = type,

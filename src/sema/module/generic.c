@@ -7,30 +7,23 @@
 #include "sema/module/type.h"
 #include "sema/module/value.h"
 #include "sema/module/const.h"
-#include <stdio.h>
 
 void sema_generic_fill_type(SemaGeneric *generic, SemaType *type) {
     assert(!type->alias);
-    type->alias = sema_type_alias_new(generic->module->mempool, generic->name, -1);
+    type->alias = sema_type_alias_new(generic->module->mempool, generic->name);
     generic->type.type = type;
 }
 
 SemaValue *sema_generate(SemaGeneric *generic, SemaType **input) {
     assert(vec_len(input) == vec_len(generic->params));
+    SemaModule *module = generic->module;
     switch (generic->kind) {
-        case SEMA_GENERIC_TYPE: {
-            return sema_value_new_type(generic->module->mempool, sema_type_new_generate(generic->module, generic, input));
-        }
-        case SEMA_GENERIC_FUNC: {
-            HirTypeId *params = vec_new_in(generic->module->mempool, HirTypeId);
-            vec_resize(params, vec_len(input));
-            for (size_t i = 0; i < vec_len(input); i++) {
-                params[i] = sema_type_hir_id(input[i]);
-            }
-            return sema_value_new_runtime_const(generic->module->mempool, sema_const_new_gen_func(generic->module->mempool,
-                sema_type_generate(generic->module, generic->func.type, generic->params, input), generic->func.scope,
-                    generic->func.id, params));
-        }
+        case SEMA_GENERIC_TYPE:
+            return sema_value_new_type(module->mempool, sema_type_new_generate(module->mempool, generic, input));
+        case SEMA_GENERIC_FUNC:
+            return sema_value_new_runtime_const(module->mempool, sema_const_new_gen_func(module->mempool,
+                sema_type_generate(module->mempool, generic->func.type, generic->params, input),
+                    generic->func.scope, generic->func.id, input));
     }
     UNREACHABLE;
 }

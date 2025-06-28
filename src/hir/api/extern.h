@@ -11,10 +11,10 @@ typedef enum {
 
 typedef struct {
     HirExternKind kind;
-    HirTypeId type;
+    HirType *type;
 } HirExternInfo;
 
-static inline HirExternInfo hir_extern_info_new(HirExternKind kind, HirTypeId type) {
+static inline HirExternInfo hir_extern_info_new(HirExternKind kind, HirType *type) {
     HirExternInfo info = {
         .type = type,
         .kind = kind,

@@ -27,7 +27,7 @@ SemaConst *sema_const_new_func_gen(Mempool *mempool, SemaType *type, HirDeclId d
         out->func_decl = decl;
     )
 
-SemaConst *sema_const_new_gen_func(Mempool *mempool, SemaType *type, HirGenScopeId scope, HirGenFuncId func, HirTypeId *params)
+SemaConst *sema_const_new_gen_func(Mempool *mempool, SemaType *type, HirGenScopeId scope, HirGenFuncId func, SemaType **params)
     MEMPOOL_CONSTRUCT(SemaConst, 
         out->kind = SEMA_CONST_GEN_FUNC;
         out->type = type;

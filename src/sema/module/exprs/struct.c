@@ -51,7 +51,7 @@ SemaValue *sema_module_emit_expr_struct(SemaModule *module, AstExprStructConstru
         sema_module_err(module, type_slice, "there is $l fields in structure, but only $l were initialized",
                 vec_len(root->structure.fields_map), vec_len(structure->fields_map));
     }
-    size_t step_id = sema_expr_output_push_step(ctx.output, hir_expr_step_new_build_struct(sema_type_hir_id(root), fields));
+    size_t step_id = sema_expr_output_push_step(ctx.output, hir_expr_step_new_build_struct(sema_type_to_hir(module, root), fields));
     return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, type, step_id);
 }
 

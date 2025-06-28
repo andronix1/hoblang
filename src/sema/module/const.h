@@ -19,7 +19,7 @@ typedef struct SemaConst {
         long double float_value;
         HirDeclId func_decl;
         struct {
-            HirTypeId *params;
+            SemaType **params;
             HirGenScopeId scope;
             HirGenFuncId func;
         } gen_func;
@@ -30,4 +30,4 @@ SemaConst *sema_const_new_undefined(Mempool *mempool, SemaType *type);
 SemaConst *sema_const_new_integer(Mempool *mempool, SemaType *type, uint64_t integer);
 SemaConst *sema_const_new_float(Mempool *mempool, SemaType *type, long double value);
 SemaConst *sema_const_new_func(Mempool *mempool, SemaType *type, HirDeclId decl);
-SemaConst *sema_const_new_gen_func(Mempool *mempool, SemaType *type, HirGenScopeId scope, HirGenFuncId func, HirTypeId *params);
+SemaConst *sema_const_new_gen_func(Mempool *mempool, SemaType *type, HirGenScopeId scope, HirGenFuncId func, SemaType **params);

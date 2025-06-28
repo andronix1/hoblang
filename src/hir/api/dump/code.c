@@ -1,4 +1,5 @@
 #include "code.h"
+#include "hir/api/dump/type.h"
 #include <stdio.h>
 
 static inline void ftabs(FILE *stream, size_t tabs) {
@@ -6,26 +7,29 @@ static inline void ftabs(FILE *stream, size_t tabs) {
 }
 
 void hir_const_dump(HirConst *constant, FILE *stream) {
+    hir_dump_type(constant->type, stream);
+    fprintf(stream, " ");
     switch (constant->kind) {
         case HIR_CONST_BOOL: fprintf(stream, constant->boolean ? "true" : "false"); break;
-        case HIR_CONST_INT: fprintf(stream, "int of type type%lu %lu", constant->type, constant->integer); break;
-        case HIR_CONST_REAL: fprintf(stream, "real of type type%lu %Lf", constant->type, constant->real); break;
+        case HIR_CONST_INT: fprintf(stream, "%lu", constant->integer); break;
+        case HIR_CONST_REAL: fprintf(stream, "%Lf", constant->real); break;
         case HIR_CONST_STRUCT:
-            fprintf(stream, "type%lu { ", constant->type);
+            fprintf(stream, "{");
             for (size_t i = 0; i < vec_len(constant->struct_fields); i++) {
-                if (i == 0) fprintf(stream, ", ");
+                fprintf(stream, i == 0 ? " " : ", ");
                 hir_const_dump(constant->struct_fields[i], stream);
             }
-            fprintf(stream, "}");
+            fprintf(stream, " }");
             break;
         case HIR_CONST_FUNC: fprintf(stream, "func decl%lu", constant->func_decl); break;
-        case HIR_CONST_UNDEFINED: fprintf(stream, "undefined type%lu", constant->type); break;
+        case HIR_CONST_UNDEFINED: fprintf(stream, "undefined"); break;
         case HIR_CONST_GEN_FUNC:
             fprintf(stream, "genScope%lu.genFunc%lu.<", constant->gen_func.scope, constant->gen_func.func);
             for (size_t i = 0; i < vec_len(constant->gen_func.params); i++) {
-                fprintf(stream, i == 0 ? "type%lu" : ", type%lu", constant->gen_func.params[i]);
+                if (i != 0) fprintf(stream, ", ");
+                hir_dump_type(constant->gen_func.params[i], stream);
             }
-            fprintf(stream, "> of type type%lu", constant->type);
+            fprintf(stream, ">");
             break;
     }
 }
@@ -102,31 +106,38 @@ static void hir_expr_dump(HirExpr *expr, FILE *stream, size_t tabs) {
             case HIR_EXPR_STEP_TAKE_REF: fprintf(stream, "take ref of step%lu", step->ref_step); break;
             case HIR_EXPR_STEP_DEREF: fprintf(stream, "dereference step%lu", step->ref_step); break;
             case HIR_EXPR_STEP_PTR_TO_INT:
-                fprintf(stream, "cast ptr step%lu to int type%lu", step->ptr_to_int.step_id, step->ptr_to_int.type);
+                fprintf(stream, "cast ptr step%lu to ", step->ptr_to_int.step_id);
+                hir_dump_type(step->ptr_to_int.type, stream);
                 break;
             case HIR_EXPR_STEP_INT_TO_PTR:
-                fprintf(stream, "cast int step%lu to ptr type%lu", step->ptr_to_int.step_id, step->ptr_to_int.type);
+                fprintf(stream, "cast int step%lu to ptr ", step->ptr_to_int.step_id);
+                hir_dump_type(step->int_to_ptr.type, stream);
                 break;
             case HIR_EXPR_STEP_CAST_INT:
-                fprintf(stream, "cast int step%lu to type%lu", step->cast_int.step_id, step->cast_int.dest);
+                fprintf(stream, "cast int step%lu to ", step->cast_int.step_id);
+                hir_dump_type(step->cast_int.dest, stream);
                 break;
             case HIR_EXPR_STEP_NOT: fprintf(stream, "not step%lu", step->not_step); break;
             case HIR_EXPR_STEP_BUILD_STRUCT:
-                fprintf(stream, "type%lu { ", step->build_struct.type);
+                hir_dump_type(step->build_struct.type, stream);
+                fprintf(stream, " { ");
                 for (size_t i = 0; i < vec_len(step->build_struct.fields); i++) {
                     fprintf(stream, i == 0 ? "step%lu" : ", step%lu", step->build_struct.fields[i]);
                 }
                 fprintf(stream, "}");
                 break;
             case HIR_EXPR_STEP_BUILD_ARRAY:
-                fprintf(stream, "type%lu [ ", step->build_array.type);
+                hir_dump_type(step->build_array.type, stream);
+                fprintf(stream, " [ ");
                 for (size_t i = 0; i < vec_len(step->build_array.elements); i++) {
                     fprintf(stream, i == 0 ? "step%lu" : ", step%lu", step->build_array.elements[i]);
                 }
                 fprintf(stream, "]");
                 break;
             case HIR_EXPR_STEP_SIZEOF:
-                fprintf(stream, "size of type type%lu of type%lu", step->size.of, step->size.type);
+                hir_dump_type(step->size.type, stream);
+                fprintf(stream, " size of ");
+                hir_dump_type(step->size.type, stream);
                 break;
             case HIR_EXPR_STEP_IDX_ARRAY:
                 fprintf(stream, "idx step%lu of array step%lu", step->idx_array.idx, step->idx_array.value);
@@ -138,7 +149,8 @@ static void hir_expr_dump(HirExpr *expr, FILE *stream, size_t tabs) {
                 fprintf(stream, "neg of step%lu", step->neg.step);
                 break;
             case HIR_EXPR_STEP_CAST_PTR:
-                fprintf(stream, "cast pointer step%lu to type%lu", step->cast_ptr.step_id, step->cast_ptr.type);
+                fprintf(stream, "cast pointer step%lu to ", step->cast_ptr.step_id);
+                hir_dump_type(step->cast_ptr.type, stream);
                 break;
         }
         fprintf(stream, "\n");

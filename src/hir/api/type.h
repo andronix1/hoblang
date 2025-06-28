@@ -1,10 +1,10 @@
 #pragma once
 
+#include "core/mempool.h"
 #include "hir/api/gen.h"
 #include <stdbool.h>
-#include <stddef.h>
 
-typedef size_t HirTypeId;
+typedef struct HirType HirType;
 
 typedef enum {
     HIR_TYPE_VOID,
@@ -36,15 +36,15 @@ typedef struct {
 } HirTypeInt;
 
 typedef struct {
-    HirTypeId of;
+    HirType *of;
     size_t length;
 } HirTypeArray;
 
 typedef struct {
-    HirTypeId type;
+    HirType *type;
 } HirTypeStructField;
 
-static inline HirTypeStructField hir_type_struct_field_new(HirTypeId type) {
+static inline HirTypeStructField hir_type_struct_field_new(HirType *type) {
     HirTypeStructField field = { .type = type };
     return field;
 }
@@ -54,8 +54,8 @@ typedef struct {
 } HirTypeStruct;
 
 typedef struct {
-    HirTypeId *args;
-    HirTypeId returns;
+    HirType **args;
+    HirType *returns;
 } HirTypeFunction;
 
 typedef struct HirType {
@@ -66,7 +66,7 @@ typedef struct HirType {
         HirTypeFloatSize float_size;
         HirTypeFunction function;
         HirTypeArray array;
-        HirTypeId pointer_to;
+        HirType *pointer_to;
         HirTypeStruct structure;
         HirGenParamId gen_param;
     };
@@ -74,79 +74,12 @@ typedef struct HirType {
 
 bool hir_type_eq(const HirType *a, const HirType *b);
 
-static inline HirType hir_type_new_gen(HirGenParamId gen_param) {
-    HirType type = {
-        .kind = HIR_TYPE_GEN,
-        .gen_param = gen_param
-    };
-    return type;
-}
-
-static inline HirType hir_type_new_void() {
-    HirType type = { .kind = HIR_TYPE_VOID };
-    return type;
-}
-
-static inline HirType hir_type_new_pointer(HirTypeId id) {
-    HirType type = {
-        .kind = HIR_TYPE_POINTER,
-        .pointer_to = id
-    };   
-    return type;
-}
-
-static inline HirType hir_type_new_array(HirTypeId of, size_t length) {
-    HirType type = {
-        .kind = HIR_TYPE_ARRAY,
-        .array = {
-            .of = of,
-            .length = length,
-        }
-    };
-    return type;
-}
-
-static inline HirType hir_type_new_bool() {
-    HirType type = { .kind = HIR_TYPE_BOOL };   
-    return type;
-}
-
-static inline HirType hir_type_new_int(HirTypeIntSize size, bool is_signed) {
-    HirType type = {
-        .kind = HIR_TYPE_INT,
-        .integer = {
-            .size = size,
-            .is_signed = is_signed
-        }
-    };
-    return type;
-}
-
-static inline HirType hir_type_new_float(HirTypeFloatSize size) {
-    HirType type = {
-        .kind = HIR_TYPE_FLOAT,
-        .float_size = size,
-    };
-    return type;
-}
-
-static inline HirType hir_type_new_struct(HirTypeStructField *fields) {
-    HirType type = {
-        .kind = HIR_TYPE_STRUCT,
-        .structure = {
-            .fields = fields,
-        },
-    };
-    return type;
-}
-
-static inline HirType hir_type_new_function(HirTypeId *args, HirTypeId returns) {
-    HirType type = {
-        .kind = HIR_TYPE_FUNCTION,
-        .function = {
-            .args = args,
-            .returns = returns
-        },
-    };
-    return type;
-}
+HirType *hir_type_new_gen(Mempool *mempool, HirGenParamId gen_param);
+HirType *hir_type_new_void(Mempool *mempool);
+HirType *hir_type_new_pointer(Mempool *mempool, HirType *to);
+HirType *hir_type_new_array(Mempool *mempool, HirType *of, size_t length);
+HirType *hir_type_new_bool(Mempool *mempool);
+HirType *hir_type_new_int(Mempool *mempool, HirTypeIntSize size, bool is_signed);
+HirType *hir_type_new_float(Mempool *mempool, HirTypeFloatSize size);
+HirType *hir_type_new_struct(Mempool *mempool, HirTypeStructField *fields);
+HirType *hir_type_new_function(Mempool *mempool, HirType **args, HirType *returns);

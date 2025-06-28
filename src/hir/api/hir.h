@@ -16,10 +16,6 @@ typedef struct Hir Hir;
 Hir *hir_new();
 void hir_free(Hir *hir);
 
-HirTypeId hir_add_type(Hir *hir, HirType type);
-HirTypeId hir_register_type(Hir *hir);
-void hir_init_type(Hir *hir, HirTypeId id, HirTypeId type);
-
 HirDeclId hir_add_decl(Hir *hir);
 void hir_init_decl_func(Hir *hir, HirDeclId id, HirFuncId func);
 void hir_init_decl_extern(Hir *hir, HirDeclId id, HirExternId type);
@@ -35,7 +31,7 @@ void hir_set_var_initializer(Hir *hir, HirVarId id, HirConst initializer);
 const HirVarInfo *hir_get_var_info(const Hir *hir, HirVarId id);
 size_t hir_get_vars_count(const Hir *hir);
 
-HirFuncId hir_register_fun(Hir *hir, HirTypeId type);
+HirFuncId hir_register_fun(Hir *hir, HirType *type);
 void hir_init_fun(Hir *hir, HirFuncId id, HirMutability *args_mut, HirFuncInfo info);
 void hir_init_fun_body(Hir *hir, HirFuncId id, HirCode *code);
 HirLocalId hir_fun_add_local(Hir *hir, HirFuncId id, HirFuncLocal local);

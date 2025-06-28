@@ -16,7 +16,7 @@ static SemaProject *cmd_sema_project(Mempool *mempool, CmdSources *sources, Hir 
         vec_push(lib_dirs, mempool_slice_to_cstr(mempool, sources->additional_lib_dirs[i]));
     }
     SemaProject *project = sema_project_new(hir, lib_dirs);
-    sema_project_add_module(project, NULL, sources->entry, false);
+    sema_project_add_module(project, NULL, sources->entry, sources->is_internal);
     return project;
 }
 

@@ -12,7 +12,6 @@
 Hir *hir_new() {
     Hir *hir = malloc(sizeof(Hir));
     hir->mempool = mempool_new(128);
-    hir->types = vec_new_in(hir->mempool, HirTypeInfo);
     hir->decls = vec_new_in(hir->mempool, HirDeclInfo);
     hir->funcs = vec_new_in(hir->mempool, HirFuncRecord);
     hir->vars = vec_new_in(hir->mempool, HirVarInfo);
@@ -26,26 +25,6 @@ Hir *hir_new() {
 void hir_free(Hir *hir) {
     mempool_free(hir->mempool);
     free(hir);
-}
-
-HirTypeId hir_add_type(Hir *hir, HirType type) {
-    for (size_t i = 0; i < vec_len(hir->types); i++) {
-        HirTypeInfo *info = &hir->types[i];
-        if (info->kind == HIR_TYPE_INFO_SIMPLE && hir_type_eq(&info->simple, &type)) {
-            return i;
-        }
-    }
-    vec_push(hir->types, hir_type_info_new_simple(type));
-    return vec_len(hir->types) - 1;
-}
-
-HirTypeId hir_register_type(Hir *hir) {
-    vec_push(hir->types, hir_type_info_new_record());
-    return vec_len(hir->types) - 1;
-}
-
-void hir_init_type(Hir *hir, HirTypeId id, HirTypeId type) {
-    hir_type_info_record_fill(&hir->types[id], type);
 }
 
 HirDeclId hir_add_decl(Hir *hir) {
@@ -80,8 +59,8 @@ HirExternRecord hir_get_extern_info(const Hir *hir, HirExternId id) {
     return hir_extern_record_new(&info->value, info->key);
 }
 
-HirFuncId hir_register_fun(Hir *hir, HirTypeId type) {
-    assert(hir_resolve_simple_type(hir, type)->kind == HIR_TYPE_FUNCTION);
+HirFuncId hir_register_fun(Hir *hir, HirType *type) {
+    assert(type->kind == HIR_TYPE_FUNCTION);
     vec_push(hir->funcs, hir_func_record_new(type));
     return vec_len(hir->funcs) - 1;
 }
@@ -94,7 +73,7 @@ inline HirFuncInfo *hir_get_mut_func_info(Hir *hir, HirFuncId id) {
 
 void hir_init_fun(Hir *hir, HirFuncId id, HirMutability *args, HirFuncInfo info) {
     hir_func_info_fill(&hir->funcs[id], info);
-    HirType *type = hir_resolve_simple_type(hir, hir_get_mut_func_info(hir, id)->type);
+    HirType *type = hir_get_mut_func_info(hir, id)->type;
     assert(type->kind == HIR_TYPE_FUNCTION);
     assert(vec_len(type->function.args) == vec_len(args));
     HirLocalId *args_locals = vec_new_in(hir->mempool, HirLocalId);

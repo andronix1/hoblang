@@ -9,7 +9,7 @@
 
 bool sema_module_emit_stmt_return(SemaModule *module, AstReturn *ret) {
     if (!ret->value) {
-        if (!sema_type_can_be_downcasted(module->ss->returns, sema_type_new_void(module))) {
+        if (!sema_type_can_be_downcasted(module->ss->returns, sema_type_new_void(module->mempool))) {
             sema_module_err(module, ret->slice, "expected function to return $t", module->ss->returns);
         }
         sema_ss_append_stmt(module->ss, hir_stmt_new_ret_void());
@@ -25,7 +25,7 @@ bool sema_module_emit_stmt_return(SemaModule *module, AstReturn *ret) {
         return false;
     }
     HirLocalId local_id = hir_fun_add_local(module->hir, module->ss->func_id, hir_func_local_new(
-        sema_type_hir_id(runtime->type), HIR_IMMUTABLE));
+        sema_type_to_hir(module, runtime->type), HIR_IMMUTABLE));
     sema_ss_append_stmt(module->ss, hir_stmt_new_init_final(local_id, hir_expr_new(output.steps)));
     sema_module_emit_defers(module);
     sema_ss_append_stmt(module->ss, hir_stmt_new_ret(hir_expr_new(vec_create_in(module->mempool,

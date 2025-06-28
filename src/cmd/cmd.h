@@ -6,6 +6,7 @@
 typedef struct {
      Path entry;
      Slice *additional_lib_dirs;
+     bool is_internal;
 } CmdSources;
 
 typedef enum {

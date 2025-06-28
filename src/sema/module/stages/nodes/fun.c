@@ -45,7 +45,7 @@ bool sema_module_stage_fill_fun(SemaModule *module, AstFunDecl *func) {
     SemaType *type = NOT_NULL(sema_func_info_type(module, func->info));
     func->sema.type = type;
 
-    HirFuncId func_id = hir_register_fun(module->hir, sema_type_hir_id(type));
+    HirFuncId func_id = hir_register_fun(module->hir, sema_type_to_hir(module, type));
     func->sema.func_id = func_id;
 
     SemaGeneric *generic = sema_module_func_get_gen(func);
@@ -100,7 +100,7 @@ bool sema_module_stage_emit_fun(SemaModule *module, AstFunDecl *func) {
                 type->function.args[arg_id], hir_get_func_arg_local(module->hir, func_id, arg_id))));
     }
     hir_init_fun_body(module->hir, func_id, sema_module_emit_code(module, func->body, NULL));
-    if (!func->body->sema.breaks && !sema_type_eq(type->function.returns, sema_type_new_void(module))) {
+    if (!func->body->sema.breaks && !sema_type_eq(type->function.returns, sema_type_new_void(module->mempool))) {
         sema_module_err(module, func->info->name, "expected function to return value but its body passes");
     }
 

@@ -67,7 +67,7 @@ bool sema_module_stage_fill_global(SemaModule *module, AstValueDecl *value_decl)
             HirDeclId decl_id = hir_add_decl(module->hir);
             HirVarId var_id = value_decl->sema.var_id = hir_add_var(module->hir, hir_var_info_new(
                 sema_global_to_opt_slice(value_decl->global, value_decl->info->name),
-                sema_type_hir_id(value_decl->sema.type)));
+                sema_type_to_hir(module, value_decl->sema.type)));
             hir_init_decl_var(module->hir, decl_id, var_id);
             sema_module_push_decl(module, value_decl->info->name, sema_decl_new(module->mempool,
                 value_decl->info->is_public ? NULL : module, sema_value_new_runtime_global(module->mempool, 
@@ -145,7 +145,7 @@ bool sema_module_stage_emit_local(SemaModule *module, AstValueDecl *value_decl) 
     }
 
     HirLocalId local_id = hir_fun_add_local(module->hir, module->ss->func_id, hir_func_local_new(
-        sema_type_hir_id(value_decl->sema.type), ast_value_kind_to_hir(info->kind)));
+        sema_type_to_hir(module, value_decl->sema.type), ast_value_kind_to_hir(info->kind)));
     sema_module_push_decl(module, info->name, sema_decl_new(module->mempool, module,
         sema_value_new_runtime_local(module->mempool, ast_value_kind_to_sema(info->kind), value_decl->sema.type,
             local_id)));

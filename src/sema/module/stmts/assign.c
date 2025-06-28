@@ -33,10 +33,10 @@ bool sema_module_emit_stmt_assign(SemaModule *module, AstAssign *assign) {
     }
     HirExpr value_expr = sema_expr_output_collect(&valueo);
     if (assign->short_assign.is) {
-        HirTypeId type = sema_type_hir_id(lvalue->type);
+        HirType *type = sema_type_to_hir(module, lvalue->type);
         
         HirLocalId temp = hir_fun_add_local(module->hir, module->ss->func_id, hir_func_local_new(
-            sema_type_hir_id(sema_type_new_pointer(module, lvalue->type)), HIR_IMMUTABLE));
+            sema_type_to_hir(module, sema_type_new_pointer(module->mempool, lvalue->type)), HIR_IMMUTABLE));
 
         sema_expr_output_push_step(&dsto, hir_expr_step_new_take_ref(sema_expr_output_last_id(&dsto)));
         sema_ss_append_stmt(module->ss, hir_stmt_new_init_final(temp, sema_expr_output_collect(&dsto)));

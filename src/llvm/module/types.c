@@ -1,13 +1,11 @@
 #include "types.h"
 #include "core/assert.h"
-#include "hir/hir.h"
 #include "llvm/module/module.h"
 #include <alloca.h>
 #include <llvm-c/Core.h>
 #include <stdio.h>
 
-LLVMTypeRef llvm_function_type(LlvmModule *module, HirTypeId type_id) {
-    HirType *type = hir_resolve_simple_type(module->hir, type_id);
+LLVMTypeRef llvm_function_type(LlvmModule *module, HirType *type) {
     assert(type->kind == HIR_TYPE_FUNCTION);
     size_t count = vec_len(type->function.args);
     LLVMTypeRef *types = alloca(sizeof(LLVMTypeRef) * count);
@@ -17,8 +15,7 @@ LLVMTypeRef llvm_function_type(LlvmModule *module, HirTypeId type_id) {
     return LLVMFunctionType(llvm_runtime_type(module, type->function.returns), types, count, false);
 }
 
-LLVMTypeRef llvm_runtime_type(LlvmModule *module, HirTypeId type_id) {
-    HirType *type = hir_resolve_simple_type(module->hir, type_id);
+LLVMTypeRef llvm_runtime_type(LlvmModule *module, HirType *type) {
     switch (type->kind) {
         case HIR_TYPE_VOID: return LLVMVoidTypeInContext(module->context);
         case HIR_TYPE_BOOL: return LLVMInt1TypeInContext(module->context);

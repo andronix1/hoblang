@@ -9,7 +9,7 @@
 #include <assert.h>
 #include <stdio.h>
 
-HirTypeId hir_resolve_decl_type_id(Hir *hir, HirDeclId id) {
+static HirType *hir_resolve_decl_type(Hir *hir, HirDeclId id) {
     HirDeclInfo *info = &hir->decls[id];
     assert(info->filled);
     switch (info->kind) {
@@ -25,26 +25,26 @@ HirTypeId hir_resolve_decl_type_id(Hir *hir, HirDeclId id) {
     UNREACHABLE;
 }
 
-static inline HirTypeId hir_get_binop_type(Hir *hir, HirExprStep *steps, HirBinop *binop) {
+static inline HirType *hir_get_binop_type(Hir *hir, HirExprStep *steps, HirBinop *binop) {
     switch (binop->kind) {
         case HIR_BINOP_ARITHMETIC:
             return steps[binop->ls].type;
         case HIR_BINOP_ORDER:
         case HIR_BINOP_COMPARE:
         case HIR_BINOP_BOOL:
-            return hir_add_type(hir, hir_type_new_bool());
+            return hir_type_new_bool(hir->mempool);
         case HIR_BINOP_INT:
             return steps[binop->ls].type;
     }
     UNREACHABLE;
 }
 
-static HirTypeId hir_get_expr_step_type(Hir *hir, HirFuncId func, HirExprStep *steps, size_t idx) {
+static HirType *hir_get_expr_step_type(Hir *hir, HirFuncId func, HirExprStep *steps, size_t idx) {
     HirExprStep *step = &steps[idx];
     switch (step->kind) {
-        case HIR_EXPR_STEP_GET_DECL: return hir_resolve_decl_type_id(hir, step->decl_id);
+        case HIR_EXPR_STEP_GET_DECL: return hir_resolve_decl_type(hir, step->decl_id);
         case HIR_EXPR_STEP_CALL: {
-            HirType *type = hir_resolve_simple_type(hir, steps[step->call.callable].type);
+            HirType *type = steps[step->call.callable].type;
             assert(type->kind == HIR_TYPE_FUNCTION);
             return type->function.returns;
         }
@@ -66,9 +66,9 @@ static HirTypeId hir_get_expr_step_type(Hir *hir, HirFuncId func, HirExprStep *s
             return constant->type;
         }
         case HIR_EXPR_STEP_BINOP: return hir_get_binop_type(hir, steps, &step->binop);
-        case HIR_EXPR_STEP_TAKE_REF: return hir_add_type(hir, hir_type_new_pointer(steps[step->ref_step].type));
+        case HIR_EXPR_STEP_TAKE_REF: return hir_type_new_pointer(hir->mempool, steps[step->ref_step].type);
         case HIR_EXPR_STEP_DEREF: {
-            HirType *type = hir_resolve_simple_type(hir, steps[step->deref_step].type);
+            HirType *type = steps[step->deref_step].type;
             assert(type->kind == HIR_TYPE_POINTER);
             return type->pointer_to;
         }
@@ -80,25 +80,25 @@ static HirTypeId hir_get_expr_step_type(Hir *hir, HirFuncId func, HirExprStep *s
         case HIR_EXPR_STEP_CAST_PTR: return step->cast_ptr.type;
         case HIR_EXPR_STEP_BUILD_STRUCT: return step->build_struct.type;
         case HIR_EXPR_STEP_STRUCT_FIELD: {
-            HirType *type = hir_resolve_simple_type(hir, steps[step->struct_field.step].type);
+            HirType *type = steps[step->struct_field.step].type;
             assert(type->kind == HIR_TYPE_STRUCT);
             return type->structure.fields[step->struct_field.idx].type;
         }
         case HIR_EXPR_STEP_STRING:
-            return hir_add_type(hir, hir_type_new_pointer(hir_add_type(hir, hir_type_new_int(HIR_TYPE_INT_8, false))));
+            return hir_type_new_pointer(hir->mempool, hir_type_new_int(hir->mempool, HIR_TYPE_INT_8, false));
         case HIR_EXPR_STEP_BOOL_SKIP:
         case HIR_EXPR_STEP_NOT:
-            return hir_add_type(hir, hir_type_new_bool());
+            return hir_type_new_bool(hir->mempool);
         case HIR_EXPR_STEP_SIZEOF: return step->size.type;
         case HIR_EXPR_STEP_BUILD_ARRAY:
-            return hir_add_type(hir, hir_type_new_array(step->build_array.type, vec_len(step->build_array.elements)));
+            return hir_type_new_array(hir->mempool, step->build_array.type, vec_len(step->build_array.elements));
         case HIR_EXPR_STEP_IDX_ARRAY: {
-            HirType *type = hir_resolve_simple_type(hir, steps[step->idx_array.value].type);
+            HirType *type = steps[step->idx_array.value].type;
             assert(type->kind == HIR_TYPE_ARRAY);
             return type->array.of;
         }
         case HIR_EXPR_STEP_IDX_POINTER: {
-            HirType *type = hir_resolve_simple_type(hir, steps[step->idx_pointer.value].type);
+            HirType *type = steps[step->idx_pointer.value].type;
             assert(type->kind == HIR_TYPE_POINTER);
             return type->pointer_to;
         }

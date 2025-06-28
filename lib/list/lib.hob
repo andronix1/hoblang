@@ -2,7 +2,7 @@ import std;
 import mem;
 
 public type List<T> = struct {
-    data: std.slice.Slice.<T>,
+    public data: std.slice.Slice.<T>,
     capacity: usize
 };
 

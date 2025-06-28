@@ -23,7 +23,7 @@ public fun Range.next(&self) -> bool {
 
 global fun main() -> i32 {
     var alphabet = "abcdefghijklmnopqrstuvwxyz";
-    for i in std.range(alphabet.length) {
+    for i in range(alphabet.length) {
         io.out.putByte(alphabet.at(i));
     }
     io.out.putByte('\n');

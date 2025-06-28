@@ -37,7 +37,7 @@ static size_t sema_expr_output_push_maybe_ref_local(SemaExprOutput *output, HirL
 bool sema_module_emit_stmt_for(SemaModule *module, AstFor *for_loop) {
     SemaExprOutput output = sema_expr_output_new(module->mempool);
     SemaValueRuntime *runtime = NOT_NULL(sema_module_emit_runtime_expr_full(module, for_loop->iterator,
-        sema_expr_ctx_new(&output, sema_type_new_bool(module))));
+        sema_expr_ctx_new(&output, sema_type_new_bool(module->mempool))));
     bool get_current_by_ref, next_by_ref;
     SemaValueRuntime *get_current = NOT_NULL(sema_type_must_have_ext(module, runtime->type, for_loop->iterator->slice, 
         slice_from_cstr("getCurrent"), &get_current_by_ref));
@@ -45,15 +45,15 @@ bool sema_module_emit_stmt_for(SemaModule *module, AstFor *for_loop) {
         slice_from_cstr("next"), &next_by_ref));
     SemaType *target_type = get_current->type->function.returns;
 
-    SemaType *get_current_type_target = sema_type_new_function(module, vec_create_in(module->mempool,
+    SemaType *get_current_type_target = sema_type_new_function(module->mempool, vec_create_in(module->mempool,
         get_current->type->function.args[0]), target_type);
     if (!sema_type_eq(get_current->type, get_current_type_target)) {
         sema_module_err(module, for_loop->iterator->slice, "`getCurrent` has type $t when $t is required", next->type, get_current_type_target);
         return NULL;
     }
 
-    SemaType *next_type_target = sema_type_new_function(module, vec_create_in(module->mempool,
-        next->type->function.args[0]), sema_type_new_bool(module));
+    SemaType *next_type_target = sema_type_new_function(module->mempool, vec_create_in(module->mempool,
+        next->type->function.args[0]), sema_type_new_bool(module->mempool));
     if (!sema_type_eq(next->type, next_type_target)) {
         sema_module_err(module, for_loop->iterator->slice, "`next` has type $t when $t is required", next->type, next_type_target);
         return NULL;
@@ -70,7 +70,7 @@ bool sema_module_emit_stmt_for(SemaModule *module, AstFor *for_loop) {
         }
      */
     HirLocalId iter = hir_fun_add_local(module->hir, module->ss->func_id,
-        hir_func_local_new(sema_type_hir_id(runtime->type), HIR_MUTABLE));
+        hir_func_local_new(sema_type_to_hir(module, runtime->type), HIR_MUTABLE));
     sema_ss_append_stmt(module->ss, hir_stmt_new_decl_var(iter));
     sema_ss_append_stmt(module->ss, hir_stmt_new_store(hir_expr_new(vec_create_in(module->mempool,
         hir_expr_step_new_get_local(iter) 
@@ -92,7 +92,7 @@ bool sema_module_emit_stmt_for(SemaModule *module, AstFor *for_loop) {
     ));
 
     HirLocalId current_iter = hir_fun_add_local(module->hir, module->ss->func_id,
-        hir_func_local_new(sema_type_hir_id(target_type), HIR_MUTABLE));
+        hir_func_local_new(sema_type_to_hir(module, target_type), HIR_MUTABLE));
     HirExpr current_iter_expr = hir_expr_new(vec_create_in(module->mempool, hir_expr_step_new_get_local(current_iter)));
     HirStmt *stmts = vec_create_in(module->mempool,
         hir_stmt_new_decl_var(current_iter),

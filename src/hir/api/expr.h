@@ -35,7 +35,7 @@ typedef enum {
 typedef struct {
     HirExprStepKind kind;
 
-    HirTypeId type;
+    HirType *type;
 
     union {
         HirConst constant;
@@ -49,20 +49,20 @@ typedef struct {
 
         struct {
             size_t *elements;
-            HirTypeId type;
+            HirType *type;
         } build_array;
 
         HirLocalId local_id;
         HirDeclId decl_id;
 
         struct {
-            HirTypeId value;
-            HirTypeId idx;
+            size_t value;
+            size_t idx;
         } idx_pointer;
 
         struct {
-            HirTypeId value;
-            HirTypeId idx;
+            size_t value;
+            size_t idx;
         } idx_array;
 
         struct {
@@ -71,8 +71,8 @@ typedef struct {
         } neg;
 
         struct {
-            HirTypeId of;
-            HirTypeId type;
+            HirType *of;
+            HirType *type;
         } size;
 
         Slice string;
@@ -84,22 +84,22 @@ typedef struct {
 
         struct {
             size_t step_id;
-            HirTypeId type;
+            HirType *type;
         } cast_ptr;
 
         struct {
             size_t step_id;
-            HirTypeId type;
+            HirType *type;
         } int_to_ptr;
 
         struct {
             size_t step_id;
-            HirTypeId type;
+            HirType *type;
         } ptr_to_int;
 
         struct {
             size_t step_id;
-            HirTypeId source, dest;
+            HirType *source, *dest;
         } cast_int;
 
         struct {
@@ -109,7 +109,7 @@ typedef struct {
         } bool_skip;
 
         struct {
-            HirTypeId type;
+            HirType *type;
             size_t *fields;
         } build_struct;
 
@@ -119,7 +119,7 @@ typedef struct {
     };
 } HirExprStep;
 
-static inline HirExprStep hir_expr_step_new_ptr_to_int(size_t step_id, HirTypeId dest) {
+static inline HirExprStep hir_expr_step_new_ptr_to_int(size_t step_id, HirType *dest) {
     HirExprStep step = {
         .kind = HIR_EXPR_STEP_PTR_TO_INT,
         .ptr_to_int = {
@@ -130,7 +130,7 @@ static inline HirExprStep hir_expr_step_new_ptr_to_int(size_t step_id, HirTypeId
     return step;
 }
 
-static inline HirExprStep hir_expr_step_new_int_to_ptr(size_t step_id, HirTypeId dest) {
+static inline HirExprStep hir_expr_step_new_int_to_ptr(size_t step_id, HirType *dest) {
     HirExprStep step = {
         .kind = HIR_EXPR_STEP_INT_TO_PTR,
         .int_to_ptr = {
@@ -141,7 +141,7 @@ static inline HirExprStep hir_expr_step_new_int_to_ptr(size_t step_id, HirTypeId
     return step;
 }
 
-static inline HirExprStep hir_expr_step_new_sizeof(HirTypeId of, HirTypeId type) {
+static inline HirExprStep hir_expr_step_new_sizeof(HirType *of, HirType *type) {
     HirExprStep step = {
         .kind = HIR_EXPR_STEP_SIZEOF,
         .size = {
@@ -193,7 +193,7 @@ static inline HirExprStep hir_expr_step_new_not(size_t step_id) {
     return step;
 }
 
-static inline HirExprStep hir_expr_step_new_array(HirTypeId type, size_t *elements) {
+static inline HirExprStep hir_expr_step_new_array(HirType *type, size_t *elements) {
     HirExprStep step = {
         .kind = HIR_EXPR_STEP_BUILD_ARRAY,
         .build_array = {
@@ -224,7 +224,7 @@ static inline HirExprStep hir_expr_step_new_bool_skip(size_t condition, bool exp
     return step;
 }
 
-static inline HirExprStep hir_expr_step_new_cast_ptr(size_t step_id, HirTypeId type) {
+static inline HirExprStep hir_expr_step_new_cast_ptr(size_t step_id, HirType *type) {
     HirExprStep step = {
         .kind = HIR_EXPR_STEP_CAST_PTR,
         .cast_ptr = {
@@ -235,13 +235,13 @@ static inline HirExprStep hir_expr_step_new_cast_ptr(size_t step_id, HirTypeId t
     return step;
 }
 
-static inline HirExprStep hir_expr_step_new_cast_int(size_t step_id, HirTypeId source, HirTypeId dst) {
+static inline HirExprStep hir_expr_step_new_cast_int(size_t step_id, HirType *source, HirType *dest) {
     HirExprStep step = {
         .kind = HIR_EXPR_STEP_CAST_INT,
         .cast_int = {
             .step_id = step_id,
             .source = source,
-            .dest = dst
+            .dest = dest,
         }
     };
     return step;
@@ -317,7 +317,7 @@ static inline HirExprStep hir_expr_step_new_const(HirConst constant) {
     return step;
 }
 
-static inline HirExprStep hir_expr_step_new_build_struct(HirTypeId type_id, size_t *fields) {
+static inline HirExprStep hir_expr_step_new_build_struct(HirType *type_id, size_t *fields) {
     HirExprStep step = {
         .kind = HIR_EXPR_STEP_BUILD_STRUCT,
         .build_struct = {

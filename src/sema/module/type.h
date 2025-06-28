@@ -23,12 +23,11 @@ static inline SemaExtDecl sema_alias_decl_new(SemaValue *function, SemaModule *m
 }
 
 typedef struct SemaTypeAlias {
-    HirTypeId id;
     Slice name;
     SemaExtDecl *decls_map;
 } SemaTypeAlias;
 
-SemaTypeAlias *sema_type_alias_new(Mempool *mempool, Slice name, HirTypeId id);
+SemaTypeAlias *sema_type_alias_new(Mempool *mempool, Slice name);
 
 typedef enum {
     SEMA_FLOAT_32,
@@ -74,7 +73,6 @@ typedef struct SemaType {
     SemaTypeKind kind;
 
     SemaTypeAlias *alias;
-    HirTypeId hir_id;
 
     union {
         SemaTypeFloatSize float_size;
@@ -117,18 +115,18 @@ typedef struct SemaType {
 HirTypeIntSize sema_type_int_size_to_hir(SemaTypeIntSize size);
 HirTypeFloatSize sema_type_float_size_to_hir(SemaTypeFloatSize size);
 
-SemaType *sema_type_new_void(SemaModule *module);
-SemaType *sema_type_new_bool(SemaModule *module);
-SemaType *sema_type_new_record(SemaModule *module, size_t type_id);
-SemaType *sema_type_new_gen_param(SemaModule *module, HirGenParamId gen_param);
-SemaType *sema_type_new_structure(SemaModule *module, SemaTypeStructField *fields);
-SemaType *sema_type_new_int(SemaModule *module, SemaTypeIntSize size, bool is_signed);
-SemaType *sema_type_new_float(SemaModule *module, SemaTypeFloatSize size);
-SemaType *sema_type_new_pointer(SemaModule *module, SemaType *pointer_to);
-SemaType *sema_type_new_function(SemaModule *module, SemaType **args, SemaType *returns);
-SemaType *sema_type_new_array(SemaModule *module, size_t length, SemaType *of);
-SemaType *sema_type_new_generic(SemaModule *module);
-SemaType *sema_type_new_generate(SemaModule *module, SemaGeneric *generic, SemaType **params);
+SemaType *sema_type_new_void(Mempool *mempool);
+SemaType *sema_type_new_bool(Mempool *mempool);
+SemaType *sema_type_new_record(Mempool *mempool, SemaModule *module, size_t type_id);
+SemaType *sema_type_new_gen_param(Mempool *mempool, HirGenParamId gen_param);
+SemaType *sema_type_new_structure(Mempool *mempool, SemaTypeStructField *fields);
+SemaType *sema_type_new_int(Mempool *mempool, SemaTypeIntSize size, bool is_signed);
+SemaType *sema_type_new_float(Mempool *mempool, SemaTypeFloatSize size);
+SemaType *sema_type_new_pointer(Mempool *mempool, SemaType *pointer_to);
+SemaType *sema_type_new_function(Mempool *mempool, SemaType **args, SemaType *returns);
+SemaType *sema_type_new_array(Mempool *mempool, size_t length, SemaType *of);
+SemaType *sema_type_new_generic(Mempool *mempool);
+SemaType *sema_type_new_generate(Mempool *mempool, SemaGeneric *generic, SemaType **params);
 
 SemaType *sema_type_new_alias(Mempool *mempool, SemaType *type, SemaTypeAlias *alias);
 

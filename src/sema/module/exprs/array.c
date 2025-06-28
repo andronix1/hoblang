@@ -27,9 +27,9 @@ SemaValue *sema_module_emit_expr_array(SemaModule *module, AstExprArray *array, 
         }
         vec_push(elements, sema_module_expr_emit_runtime(module, runtime, ctx.output));
     }
-    size_t step_id = sema_expr_output_push_step(ctx.output, hir_expr_step_new_array(sema_type_hir_id(type), elements));
+    size_t step_id = sema_expr_output_push_step(ctx.output, hir_expr_step_new_array(sema_type_to_hir(module, type), elements));
     return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL,
-        sema_type_new_array(module, vec_len(elements), type), step_id);
+        sema_type_new_array(module->mempool, vec_len(elements), type), step_id);
 }
 
 

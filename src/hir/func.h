@@ -10,7 +10,7 @@ typedef struct {
     HirFuncInfo info;
 } HirFuncRecord;
 
-static inline HirFuncRecord hir_func_record_new(HirTypeId type) {
+static inline HirFuncRecord hir_func_record_new(HirType *type) {
     HirFuncRecord info = {
         .filled = false,
         .info.type = type,
@@ -20,7 +20,7 @@ static inline HirFuncRecord hir_func_record_new(HirTypeId type) {
 
 static inline void hir_func_info_fill(HirFuncRecord *fun, HirFuncInfo info) {
     assert(!fun->filled);
-    HirTypeId type = fun->info.type;
+    HirType *type = fun->info.type;
     fun->info = info;
     fun->filled = true;
     fun->info.type = type;

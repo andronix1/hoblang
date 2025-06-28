@@ -8,10 +8,10 @@
 typedef struct {
     bool is_from;
     HirGenScopeId from;
-    HirTypeId *params;
+    HirType **params;
 } HirGenScopeUsage;
 
-static inline HirGenScopeUsage hir_gen_scope_usage_new(HirTypeId *params) {
+static inline HirGenScopeUsage hir_gen_scope_usage_new(HirType **params) {
     HirGenScopeUsage usage = {
         .is_from = false,
         .params = params,
@@ -19,7 +19,7 @@ static inline HirGenScopeUsage hir_gen_scope_usage_new(HirTypeId *params) {
     return usage;
 }
 
-static inline HirGenScopeUsage hir_gen_scope_usage_new_from(HirTypeId *params, HirGenScopeId from) {
+static inline HirGenScopeUsage hir_gen_scope_usage_new_from(HirType **params, HirGenScopeId from) {
     HirGenScopeUsage usage = {
         .is_from = true,
         .from = from,

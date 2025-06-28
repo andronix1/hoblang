@@ -9,17 +9,43 @@
 #include "sema/module/module.h"
 #include <stdio.h>
 
-HirTypeId sema_type_hir_id(SemaType *type) {
-    if (type->kind == SEMA_TYPE_GENERIC) {
-        return -1;
+HirType *sema_type_to_hir(SemaModule* module, SemaType *type) {
+    switch (type->kind) {
+        case SEMA_TYPE_VOID: return hir_type_new_void(module->mempool);
+        case SEMA_TYPE_INT: return hir_type_new_int(module->mempool, sema_type_int_size_to_hir(type->integer.size), type->integer.is_signed);
+        case SEMA_TYPE_FLOAT: return hir_type_new_float(module->mempool, sema_type_float_size_to_hir(type->float_size));
+        case SEMA_TYPE_BOOL: return hir_type_new_bool(module->mempool);
+        case SEMA_TYPE_FUNCTION: {
+            HirType **args = vec_new_in(module->mempool, HirType*);
+            vec_resize(args, vec_len(type->function.args));
+            for (size_t i = 0; i < vec_len(type->function.args); i++) {
+                args[i] = sema_type_to_hir(module, type->function.args[i]);
+            }
+            return hir_type_new_function(module->mempool, args, sema_type_to_hir(module, type->function.returns));
+        }
+        case SEMA_TYPE_POINTER: return hir_type_new_pointer(module->mempool, sema_type_to_hir(module, type->pointer_to));
+        case SEMA_TYPE_STRUCTURE: {
+            HirTypeStructField *fields = vec_new_in(module->mempool, HirTypeStructField);
+            vec_resize(fields, vec_len(type->structure.fields_map));
+            for (size_t i = 0; i < vec_len(type->structure.fields_map); i++) {
+                keymap_at(type->structure.fields_map, i, field);
+                fields[i] = hir_type_struct_field_new(sema_type_to_hir(module, field->value.type));
+            }
+            return hir_type_new_struct(module->mempool, fields);
+        }
+        case SEMA_TYPE_ARRAY: return hir_type_new_array(module->mempool, sema_type_to_hir(module, type->array.of), type->array.length);
+        case SEMA_TYPE_RECORD: return sema_type_to_hir(module, type->record.module->types[type->record.id]);
+        case SEMA_TYPE_GEN_PARAM: return hir_type_new_gen(module->mempool, type->gen_param);
+
+        case SEMA_TYPE_GENERATE: {
+            assert(type->generate.generic->kind == SEMA_GENERIC_TYPE);
+            SemaType *generated = sema_type_generate(module->mempool, type->generate.generic->type.type,
+                type->generate.generic->params, type->generate.params);
+            return sema_type_to_hir(module, generated);
+        }
+        case SEMA_TYPE_GENERIC: UNREACHABLE;
     }
-    if (type->kind == SEMA_TYPE_GENERATE) {
-        return sema_type_hir_id(sema_type_root(type));
-    }
-    if (type->alias) {
-        return type->alias->id;
-    }
-    return type->hir_id;
+    UNREACHABLE;
 }
 
 void sema_type_print(va_list list) {
@@ -75,7 +101,7 @@ void sema_type_print(va_list list) {
     }
 }
 
-SemaType *sema_type_generate(SemaModule *module, SemaType *source, SemaType **params, SemaType **input) {
+SemaType *sema_type_generate(Mempool *mempool, SemaType *source, SemaType **params, SemaType **input) {
     for (size_t i = 0; i < vec_len(params); i++) {
         if (params[i] == source) return input[i];
     }
@@ -87,37 +113,37 @@ SemaType *sema_type_generate(SemaModule *module, SemaType *source, SemaType **pa
         case SEMA_TYPE_GEN_PARAM:
             return source;
         case SEMA_TYPE_FUNCTION: {
-            SemaType **args = vec_new_in(module->mempool, SemaType*);
+            SemaType **args = vec_new_in(mempool, SemaType*);
             vec_resize(args, vec_len(source->function.args));
             for (size_t i = 0; i < vec_len(source->function.args); i++) {
-                args[i] = sema_type_generate(module, source->function.args[i], params, input);
+                args[i] = sema_type_generate(mempool, source->function.args[i], params, input);
             }
-            return sema_type_new_function(module, args,
-                sema_type_generate(module, source->function.returns, params, input));
+            return sema_type_new_function(mempool, args,
+                sema_type_generate(mempool, source->function.returns, params, input));
         }
         case SEMA_TYPE_POINTER:
-            return sema_type_new_pointer(module, sema_type_generate(module, source->pointer_to, params, input));
+            return sema_type_new_pointer(mempool, sema_type_generate(mempool, source->pointer_to, params, input));
         case SEMA_TYPE_STRUCTURE: {
-            SemaTypeStructField *fields = keymap_new_in(module->mempool, SemaTypeStructField);
+            SemaTypeStructField *fields = keymap_new_in(mempool, SemaTypeStructField);
             for (size_t i = 0; i < vec_len(source->structure.fields_map); i++) {
                 keymap_at(source->structure.fields_map, i, field); 
                 keymap_insert(fields, field->key, sema_type_struct_field_new(
-                    sema_type_generate(module, field->value.type, params, input),
+                    sema_type_generate(mempool, field->value.type, params, input),
                     field->value.module
                 ));
             }
-            return sema_type_new_structure(module, fields);
+            return sema_type_new_structure(mempool, fields);
         }
         case SEMA_TYPE_ARRAY:
-            return sema_type_new_array(module, source->array.length, sema_type_generate(module, source->array.of,
+            return sema_type_new_array(mempool, source->array.length, sema_type_generate(mempool, source->array.of,
                 params, input));
         case SEMA_TYPE_GENERATE: {
-            SemaType **new_params = vec_new_in(module->mempool, SemaType*);
+            SemaType **new_params = vec_new_in(mempool, SemaType*);
             vec_resize(new_params, vec_len(source->generate.params));
             for (size_t i = 0; i < vec_len(new_params); i++) {
-                new_params[i] = sema_type_generate(module, source->generate.params[i], params, input);
+                new_params[i] = sema_type_generate(mempool, source->generate.params[i], params, input);
             }
-            return sema_type_new_generate(module, source->generate.generic, new_params);
+            return sema_type_new_generate(mempool, source->generate.generic, new_params);
         }
         case SEMA_TYPE_RECORD: case SEMA_TYPE_GENERIC: return source;
     }
@@ -126,7 +152,7 @@ SemaType *sema_type_generate(SemaModule *module, SemaType *source, SemaType **pa
 
 static inline SemaType *sema_type_root_ungenerated(SemaType *type) {
     while (type->kind == SEMA_TYPE_RECORD) {
-        type = type->record.module->types[type->record.id].type;
+        type = type->record.module->types[type->record.id];
     }
     return type;
 }
@@ -139,7 +165,7 @@ SemaType *sema_type_root(SemaType *type) {
         } else if (type->kind == SEMA_TYPE_GENERATE) {
             SemaGeneric *generic = type->generate.generic;
             assert(generic->kind == SEMA_GENERIC_TYPE);
-            type = sema_type_generate(generic->module, type->generate.generic->type.type, type->generate.generic->params,
+            type = sema_type_generate(generic->module->mempool, type->generate.generic->type.type, type->generate.generic->params,
                 type->generate.params);
         } else {
             break;
@@ -155,7 +181,7 @@ inline bool sema_type_can_be_downcasted(SemaType *type, SemaType *to) {
     if (type->kind == SEMA_TYPE_GENERATE) {
         SemaGeneric *generic = type->generate.generic;
         assert(generic->kind == SEMA_GENERIC_TYPE);
-        SemaType *new_type = sema_type_generate(generic->module, type->generate.generic->type.type,
+        SemaType *new_type = sema_type_generate(generic->module->mempool, type->generate.generic->type.type,
             type->generate.generic->params, type->generate.params);
         if (sema_type_eq(new_type, to) || sema_type_can_be_downcasted(new_type, to)) {
             return true;
@@ -169,7 +195,7 @@ inline bool sema_type_can_be_downcasted(SemaType *type, SemaType *to) {
             return true;
         }
         if (type->kind == SEMA_TYPE_RECORD) {
-            type = type->record.module->types[type->record.id].type;
+            type = type->record.module->types[type->record.id];
         } else {
             break;
         }

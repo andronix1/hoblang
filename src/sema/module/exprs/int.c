@@ -14,7 +14,7 @@ SemaValue *sema_module_emit_expr_int(SemaModule *module, uint64_t val, SemaExprC
         }
     }
     if (!type) {
-        type = sema_type_new_int(module, SEMA_INT_32, true);
+        type = sema_type_new_int(module->mempool, SEMA_INT_32, true);
     }
     return sema_value_new_runtime_const(module->mempool, sema_const_new_integer(module->mempool, type, val));
 }

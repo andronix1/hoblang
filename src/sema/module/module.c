@@ -13,14 +13,6 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-static inline SemaTypeInfo sema_type_info_new(HirTypeId id) {
-    SemaTypeInfo info = {
-        .id = id,
-        .type = NULL
-    };
-    return info;
-}
-
 static inline const FileContent *sema_module_file_content(SemaModule *module) {
     return module->parser->lexer->content;
 }
@@ -107,14 +99,13 @@ SemaScopeStack *sema_module_swap_ss(SemaModule *module, SemaScopeStack *new_ss) 
 }
 
 SemaTypeId sema_module_register_type_alias(SemaModule *module) {
-    vec_push(module->types, sema_type_info_new(hir_register_type(module->hir)));
+    vec_push(module->types, NULL);
     return vec_len(module->types) - 1;
 }
 
 void sema_module_init_type_alias(SemaModule *module, SemaTypeId id, SemaType *type) {
-    SemaTypeInfo *info = &module->types[id];
-    assert(!info->type);
-    info->type = type;
+    assert(!module->types[id]);
+    module->types[id] = type;
 }
 
 inline bool sema_module_is_global_scope(SemaModule *module) {
@@ -176,8 +167,4 @@ void sema_module_emit_defers(SemaModule *module) {
 void sema_module_add_defer(SemaModule *module, HirCode *code) {
     assert(module->ss);
     sema_ss_push_defer(module->ss, code);
-}
-
-HirTypeId sema_module_get_type_id(SemaModule *module, SemaTypeId id) {
-    return module->types[id].id;
 }

@@ -10,7 +10,7 @@ SemaValue *sema_module_emit_expr_string(SemaModule *module, Slice string_slice, 
     SemaValueRuntime *new_string = NOT_NULL(sema_module_std_string_new(module, string_slice));
     size_t str = sema_expr_output_push_step(ctx.output, hir_expr_step_new_string(string));
     size_t length = sema_expr_output_push_step(ctx.output, hir_expr_step_new_const(
-        hir_const_new_int(sema_type_hir_id(sema_module_std_usize(module, string_slice)), string.length)));
+        hir_const_new_int(sema_type_to_hir(module, sema_module_std_usize(module, string_slice)), string.length)));
     size_t callable = sema_module_expr_emit_runtime(module, new_string, ctx.output);
     size_t step_id = sema_expr_output_push_step(ctx.output, hir_expr_step_new_call(callable,
         vec_create_in(module->mempool, str, length)));

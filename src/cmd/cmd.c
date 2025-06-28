@@ -68,6 +68,7 @@ static inline Slice *raw_cmd_resolve_opt_list(Mempool *mempool, RawCmd *cmd, con
 static inline bool cmd_sources_parse(Mempool *mempool, RawCmd *raw, CmdSources *sources) {
     sources->entry = NOT_NULL(raw_cmd_take_pos_req(raw, "entry file path"));
     sources->additional_lib_dirs = NOT_NULL(raw_cmd_resolve_opt_list(mempool, raw, "libDirs"));
+    NOT_NULL(raw_cmd_check_flag(raw, "internal", &sources->is_internal));
     return true;
 }
 

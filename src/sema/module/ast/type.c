@@ -20,7 +20,7 @@ SemaType *sema_module_type(SemaModule *module, AstType *type) {
                 NOT_NULL(sema_module_path(module, type->path))));
         }
         case AST_TYPE_POINTER:
-            return sema_type_new_pointer(module, NOT_NULL(sema_module_type(module, type->pointer_to)));
+            return sema_type_new_pointer(module->mempool, NOT_NULL(sema_module_type(module, type->pointer_to)));
         case AST_TYPE_FUNCTION: {
             SemaType **args = vec_new_in(module->mempool, SemaType*);
             for (size_t i = 0; i < vec_len(type->function.args); i++) {
@@ -28,8 +28,8 @@ SemaType *sema_module_type(SemaModule *module, AstType *type) {
             }
             SemaType *returns = type->function.returns ?
                 NOT_NULL(sema_module_type(module, type->function.returns)) :
-                sema_type_new_void(module);
-            return sema_type_new_function(module, args, returns);
+                sema_type_new_void(module->mempool);
+            return sema_type_new_function(module->mempool, args, returns);
         }
         case AST_TYPE_ARRAY: {
             SemaType *of = NOT_NULL(sema_module_type(module, type->array.type));
@@ -41,7 +41,7 @@ SemaType *sema_module_type(SemaModule *module, AstType *type) {
                 return NULL;
             }
             assert(constant->kind == SEMA_CONST_INT);
-            return sema_type_new_array(module, constant->integer, of);
+            return sema_type_new_array(module->mempool, constant->integer, of);
         }
         case AST_TYPE_STRUCT: {
             SemaTypeStructField *fields = keymap_new_in(module->mempool, SemaTypeStructField);
@@ -52,12 +52,12 @@ SemaType *sema_module_type(SemaModule *module, AstType *type) {
                     field->value.is_public ? NULL : module
                 ));
             }
-            return sema_type_new_structure(module, fields);
+            return sema_type_new_structure(module->mempool, fields);
         }
     }
     UNREACHABLE;
 }
 
 SemaType *sema_module_opt_type(SemaModule *module, AstType *type) {
-    return type ? NOT_NULL(sema_module_type(module, type)) : sema_type_new_void(module);
+    return type ? NOT_NULL(sema_module_type(module, type)) : sema_type_new_void(module->mempool);
 }

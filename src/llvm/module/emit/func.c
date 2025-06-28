@@ -1,7 +1,6 @@
 #include "func.h"
 #include "hir/api/hir.h"
 #include "hir/api/code.h"
-#include "hir/hir.h"
 #include "llvm/module/emit/code.h"
 #include "llvm/module/module.h"
 #include "llvm/module/types.h"
@@ -17,7 +16,7 @@ void llvm_emit_func(LlvmModule *module, HirFuncId id, LLVMValueRef func) {
     const HirFuncInfo *info = hir_get_func_info(module->hir, id);
 
     llvm_func_ctx_set(module, id, func);
-    HirType *func_type = hir_resolve_simple_type(module->hir, info->type);
+    HirType *func_type = info->type;
     assert(func_type->kind == HIR_TYPE_FUNCTION);
     for (size_t i = 0; i < vec_len(func_type->function.args); i++) {
         LLVMValueRef value = LLVMGetParam(func, i);

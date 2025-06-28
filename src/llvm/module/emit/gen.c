@@ -16,7 +16,7 @@ static inline bool llvm_usage_should_be_skipped(LlvmModule *module, HirGenScopeU
     return true;
 }
 
-static inline void llvm_setup_gen_params(LlvmModule *module, HirGenParamId *params, HirTypeId *input) {
+static inline void llvm_setup_gen_params(LlvmModule *module, HirGenParamId *params, HirType **input) {
     for (size_t i = 0; i < vec_len(params); i++) {
         HirGenParamId param_id = params[i];
         assert(!module->gen_params[param_id]);

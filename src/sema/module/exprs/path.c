@@ -140,7 +140,7 @@ SemaValue *sema_module_emit_expr_path_from(SemaModule *module, SemaValue *value,
                 }
                 SemaType *usize = sema_module_std_usize(module, segment->slice);
                 size_t step_id = sema_expr_output_push_step(ctx.output, hir_expr_step_new_sizeof(
-                    sema_type_hir_id(type), sema_type_hir_id(usize)));
+                    sema_type_to_hir(module, type), sema_type_to_hir(module, usize)));
                 value = sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, usize, step_id);
                 break;
             }

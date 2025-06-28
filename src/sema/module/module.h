@@ -12,10 +12,18 @@
 #include "sema/module/std.h"
 #include "sema/module/scope.h"
 
-typedef struct SemaTypeInfo {
-    SemaType *type;
-    HirTypeId id;
-} SemaTypeInfo;
+typedef struct {
+    HirGenScopeId scope;
+    SemaType **params;
+} SemaGenScopeInfo;
+
+static inline SemaGenScopeInfo sema_gen_scope_info_new(HirGenScopeId scope, SemaType **params) {
+    SemaGenScopeInfo info = {
+        .scope = scope,
+        .params = params,
+    };
+    return info;
+}
 
 typedef struct SemaModule {
     Mempool *mempool;
@@ -28,10 +36,10 @@ typedef struct SemaModule {
     bool failed;
 
     SemaStd std;
-    HirGenScopeId *gen_scopes;
+    SemaGenScopeInfo *gen_scopes;
     SemaScopeStack *ss;
     SemaDecl **local_decls_map;
-    SemaTypeInfo *types;
+    SemaType **types;
     bool *stage_failures;
 } SemaModule;
 
@@ -61,7 +69,6 @@ void sema_module_pop_scope(SemaModule *module);
 
 SemaTypeId sema_module_register_type_alias(SemaModule *module);
 void sema_module_init_type_alias(SemaModule *module, SemaTypeId id, SemaType *type);
-HirTypeId sema_module_get_type_id(SemaModule *module, SemaTypeId id);
 
 void sema_module_push_decl(SemaModule *module, Slice name, SemaDecl *decl);
 

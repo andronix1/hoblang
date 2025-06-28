@@ -13,14 +13,14 @@ SemaGeneric *sema_module_generic_func(SemaModule *module, AstGeneric *generic, S
     SemaType **params = vec_new_in(module->mempool, SemaType*);
     HirGenScopeId gen_scope = hir_add_gen_scope(module->hir);
     if (vec_len(module->gen_scopes) > 0) {
-        hir_gen_scope_add_scope(module->hir, *vec_top(module->gen_scopes), gen_scope);
+        hir_gen_scope_add_scope(module->hir, vec_top(module->gen_scopes)->scope, gen_scope);
     } else {
         hir_add_root_gen_scope(module->hir, gen_scope);
     }
     for (size_t i = 0; i < vec_len(generic->params); i++) {
         HirGenParamId param = hir_add_gen_param(module->hir);
         hir_gen_scope_add_param(module->hir, gen_scope, param);
-        vec_push(params, sema_type_new_gen_param(module, param));
+        vec_push(params, sema_type_new_gen_param(module->mempool, param));
     }
     return sema_generic_new_func(module->mempool, module, name, params, gen_scope);
 }
@@ -28,7 +28,7 @@ SemaGeneric *sema_module_generic_func(SemaModule *module, AstGeneric *generic, S
 SemaGeneric *sema_module_generic_type(SemaModule *module, AstGeneric *generic, Slice name) {
     SemaType **params = vec_new_in(module->mempool, SemaType*);
     for (size_t i = 0; i < vec_len(generic->params); i++) {
-        vec_push(params, sema_type_new_generic(module));
+        vec_push(params, sema_type_new_generic(module->mempool));
     }
     return sema_generic_new_type(module->mempool, module, name, params, generic);
 }
@@ -42,7 +42,7 @@ SemaGenericCtx sema_module_generic_ctx_setup(SemaModule *module, AstGeneric *gen
     }
 
     if (source->kind == SEMA_GENERIC_FUNC) {
-        vec_push(module->gen_scopes, source->func.scope);
+        vec_push(module->gen_scopes, sema_gen_scope_info_new(source->func.scope, source->params));
     }
 
     sema_module_push_scope(module, NULL);

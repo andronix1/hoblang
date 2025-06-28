@@ -4,6 +4,7 @@
 #include "core/null.h"
 #include "core/vec.h"
 #include "hir/api/hir.h"
+#include "sema/module/api/type.h"
 #include "sema/module/ast/type.h"
 #include "sema/module/const.h"
 #include "sema/module/decl.h"
@@ -41,7 +42,7 @@ SemaValue *sema_module_emit_expr_function(SemaModule *module, AstExprFunc *func,
     } else {
         returns = NOT_NULL(sema_module_opt_type(module, func->returns));
     }
-    SemaType *type = sema_type_new_function(module, args, returns);
+    SemaType *type = sema_type_new_function(module->mempool, args, returns);
 
     HirMutability *args_mut = vec_new_in(module->mempool, HirMutability);
     vec_resize(args_mut, vec_len(type->function.args));
@@ -50,12 +51,12 @@ SemaValue *sema_module_emit_expr_function(SemaModule *module, AstExprFunc *func,
     }
 
     SemaValue *value = NULL;
-    HirFuncId func_id = hir_register_fun(module->hir, sema_type_hir_id(type));
+    HirFuncId func_id = hir_register_fun(module->hir, sema_type_to_hir(module, type));
     if (vec_len(module->gen_scopes)) {
-        HirGenScopeId scope = *vec_top(module->gen_scopes);
-        HirGenFuncId gen_func_id = hir_gen_scope_add_func(module->hir, scope, func_id);
-        value = sema_value_new_runtime_const(module->mempool, sema_const_new_gen_func(module->mempool, type, scope,
-            gen_func_id, hir_get_gen_scope(module->hir, scope)->params));
+        SemaGenScopeInfo *info = vec_top(module->gen_scopes);
+        HirGenFuncId gen_func_id = hir_gen_scope_add_func(module->hir, info->scope, func_id);
+        value = sema_value_new_runtime_const(module->mempool, sema_const_new_gen_func(module->mempool, type, info->scope,
+            gen_func_id, info->params));
     } else {
         HirDeclId decl_id = hir_add_decl(module->hir);
         hir_init_decl_func(module->hir, decl_id, func_id);
@@ -78,7 +79,7 @@ SemaValue *sema_module_emit_expr_function(SemaModule *module, AstExprFunc *func,
         ));
     }
     hir_init_fun_body(module->hir, func_id, sema_module_emit_code(module, func->body, NULL));
-    if (!func->body->sema.breaks && !sema_type_eq(type->function.returns, sema_type_new_void(module))) {
+    if (!func->body->sema.breaks && !sema_type_eq(type->function.returns, sema_type_new_void(module->mempool))) {
         sema_module_err(module, where, "expected function to return value but its body passes");
     }
     sema_module_pop_scope(module);

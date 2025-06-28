@@ -37,7 +37,7 @@ static SemaValue *sema_binop_order(
     size_t step_id = sema_expr_output_push_step(output, hir_expr_step_new_binop(
         hir_expr_binop_new_order(lss, rss, kind, info)));
     return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL,
-        sema_type_new_bool(module), step_id);
+        sema_type_new_bool(module->mempool), step_id);
 }
 
 static SemaValue *sema_binop_compare(
@@ -60,7 +60,7 @@ static SemaValue *sema_binop_compare(
         sema_module_err(module, where, "this binop can be applied for bool or number");
         return NULL;
     }
-    return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, sema_type_new_bool(module), step_id);
+    return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, sema_type_new_bool(module->mempool), step_id);
 }
 
 static SemaValue *sema_binop_arithm(

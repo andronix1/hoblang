@@ -13,10 +13,10 @@ typedef size_t HirLocalId;
 
 typedef struct {
     HirMutability mutability;
-    HirTypeId type;
+    HirType *type;
 } HirFuncLocal;
 
-static inline HirFuncLocal hir_func_local_new(HirTypeId type, HirMutability mutability) {
+static inline HirFuncLocal hir_func_local_new(HirType *type, HirMutability mutability) {
     HirFuncLocal local = {
         .type = type,
         .mutability = mutability,
@@ -25,7 +25,7 @@ static inline HirFuncLocal hir_func_local_new(HirTypeId type, HirMutability muta
 }
 
 typedef struct {
-    HirTypeId type;
+    HirType *type;
     OptSlice global_name;
     HirCode *code;
     HirFuncLocal *locals;

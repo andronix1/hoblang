@@ -14,7 +14,7 @@ SemaValue *sema_module_emit_expr_take_ref(SemaModule *module, AstExpr *inner, Se
     size_t step_id = sema_expr_output_push_step(ctx.output, hir_expr_step_new_take_ref(
         sema_module_expr_emit_runtime(module, runtime, ctx.output)));
     return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL,
-        sema_type_new_pointer(module, runtime->type), step_id);
+        sema_type_new_pointer(module->mempool, runtime->type), step_id);
 }
 
 

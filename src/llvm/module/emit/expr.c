@@ -3,7 +3,6 @@
 #include "core/attributes.h"
 #include "core/mempool.h"
 #include "core/vec.h"
-#include "hir/hir.h"
 #include "llvm/module/module.h"
 #include "llvm/module/types.h"
 #include <alloca.h>
@@ -262,7 +261,7 @@ static LlvmEmitStepRes llvm_emit_expr_step(
             }
         }
         case HIR_EXPR_STEP_BUILD_STRUCT: {
-            HirType *type = hir_resolve_simple_type(module->hir, step->build_struct.type);
+            HirType *type = step->build_struct.type;
             assert(type->kind == HIR_TYPE_STRUCT);
             LLVMTypeRef llvm_type = llvm_runtime_type(module, step->build_struct.type);
             LLVMValueRef result = llvm_alloca(module, llvm_type);
@@ -280,8 +279,8 @@ static LlvmEmitStepRes llvm_emit_expr_step(
         case HIR_EXPR_STEP_CAST_INT: {
             LLVMValueRef what = llvm_get_res_value(module, &results[step->cast_int.step_id]);
             LLVMTypeRef type = llvm_runtime_type(module, step->cast_int.dest);
-            HirTypeInt *source = &hir_resolve_simple_type(module->hir, step->cast_int.source)->integer;
-            HirTypeInt *dest = &hir_resolve_simple_type(module->hir, step->cast_int.dest)->integer;
+            HirTypeInt *source = &step->cast_int.source->integer;
+            HirTypeInt *dest = &step->cast_int.dest->integer;
             if (source->size > dest->size) {
                 return llvm_emit_step_res_new(LLVMBuildTrunc(module->builder, what, type, ""), true);
             } else {

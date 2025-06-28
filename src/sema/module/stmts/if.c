@@ -15,7 +15,7 @@ bool sema_module_emit_stmt_if(SemaModule *module, AstIf *if_else) {
     for (size_t i = 0; i < vec_len(if_else->conds); i++) {
         AstCondBlock *block = &if_else->conds[i];
         SemaExprOutput output = sema_expr_output_new(module->mempool);
-        SemaType *boolean = sema_type_new_bool(module);
+        SemaType *boolean = sema_type_new_bool(module->mempool);
         SemaValueRuntime *runtime = NOT_NULL(sema_module_emit_runtime_expr_full(module,
             block->cond, sema_expr_ctx_new(&output, boolean)));
         if (!sema_type_can_be_downcasted(boolean, runtime->type)) {

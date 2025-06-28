@@ -14,7 +14,7 @@ SemaValue *sema_module_emit_expr_float(SemaModule *module, long double val, Sema
         }
     }
     if (!type) {
-        type = sema_type_new_float(module, SEMA_FLOAT_32);
+        type = sema_type_new_float(module->mempool, SEMA_FLOAT_32);
     }
     return sema_value_new_runtime_const(module->mempool, sema_const_new_float(module->mempool, type, val));
 }
