@@ -1,1 +1,78 @@
-public extern fun exit(number: i32);
+import std;
+import c;
+import io;
+import result;
+import strings;
+import list;
+
+use std.slice.Slice;
+use strings.String;
+use result.{ Result, NoneResult };
+public use c.exit;
+
+public type Pid = i32;
+
+public type CloneFlags = i32;
+
+public fun cloneFlags() -> CloneFlags { return 0 as CloneFlags; }
+fun CloneFlags.or(self, value: i32) -> CloneFlags { return (self as i32 | value) as CloneFlags; }
+public fun CloneFlags.newCGroup(self) -> CloneFlags { return self.or(0x2000000); }
+public fun CloneFlags.newIpc(self) -> CloneFlags { return self.or(0x8000000); }
+public fun CloneFlags.newNet(self) -> CloneFlags { return self.or(0x40000000); }
+public fun CloneFlags.newPid(self) -> CloneFlags { return self.or(0x20000000); }
+public fun CloneFlags.newUser(self) -> CloneFlags { return self.or(0x10000000); }
+public fun CloneFlags.newNs(self) -> CloneFlags { return self.or(0x20000); }
+public fun CloneFlags.newUts(self) -> CloneFlags { return self.or(0x4000000); }
+public fun CloneFlags.vm(self) -> CloneFlags { return self.or(1) as CloneFlags; }
+public fun CloneFlags.vFork(self) -> CloneFlags { return self.or(1 << 14) as CloneFlags; }
+public fun CloneFlags.sigChld(self) -> CloneFlags { return self.or(17); }
+
+public fun clone<T>(flags: CloneFlags, stack: Slice.<u8>, callback: fun (*T) -> i32, arg: *T) -> Result.<Pid> {
+    return c.err.handleMapped.<Pid>(
+        c.clone(callback as fun (*void) -> i32, &stack.raw[stack.length] as *void, flags, arg as *void),
+        fun (value) {
+            return value as Pid;
+        }
+    );
+}
+
+public fun Pid.wait(self) -> Result.<i32> {
+    fun convertStatus(status: i32) -> i32 {
+        return status >> 8; 
+    }
+
+    var status: i32;
+    return c.err.handleNone(c.waitpid(self, &status, 0))
+        .mapDirect.<i32>(convertStatus(status));
+}
+
+public fun run(command: string, args: Slice.<string>) -> NoneResult {
+    var realPath = strings.fromString(command);
+    defer realPath.free();
+    final cPath = realPath.makeC();
+
+    var realArgs = list.newWithCapacity.<String>(args.length);
+    defer realArgs.deepFree(String.free as strings.Free);
+
+    for i in std.range(args.length) {
+        realArgs.push(strings.fromString(args.at(i)));
+    }
+
+    var cArgs = list.newWithCapacity.<*u8>(args.length + 2);
+    defer cArgs.free();
+
+    cArgs.push(cPath);
+    for i in std.range(realArgs.length()) {
+        cArgs.push(realArgs.atRef(i).makeC());
+    }
+    cArgs.push(std.null.<u8>());
+
+    return c.err.handleNone(c.execv(cPath, cArgs.data.raw));
+}
+
+#`
+public fun mapUid(pid: Pid) -> NoneResult {
+    return c.err.handleNone(c.clearenv());
+}
+`#
+

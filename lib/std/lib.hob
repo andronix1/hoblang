@@ -1,10 +1,19 @@
-public import "str.hob" as str;
+public import "int.hob" as int;
 public import "slice.hob" as slice;
-public import "def.hob" as def;
+public import "str.hob" as str;
 public import "panic.hob" as panic;
+public import "range.hob" as rng;
 
-use str.{
-    Str as string,
-    new as newString
+public type None = struct {};
+public fun none() -> None { return {}; }
+
+public fun null<T>() -> *T { return 0 as *T; }
+
+use int.usize;
+use str.string;
+use str.new as newString;
+
+public use rng.{
+    range, rangeFrom,
+    rangeStep, rangeFromStep,
 };
-use def.Size as usize;

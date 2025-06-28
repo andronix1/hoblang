@@ -1,4 +1,25 @@
-public extern(malloc) fun allocate(size: usize) -> *void;
-public extern(realloc) fun reallocate(ptr: *void, size: usize) -> *void;
-public extern(free) fun free(ptr: *void);
+import c;
 
+var allocated: usize = 0; # TODO: atomic / mutex
+
+public fun allocate(size: usize) -> *void {
+    allocated += 1;
+    return c.malloc(size);
+}
+
+public use c.realloc as reallocate;
+
+public fun free(ptr: *void) {
+    allocated -= 1;
+    c.free(ptr);
+}
+
+public fun getAllocatedPtrsCount() -> usize {
+    return allocated;
+}
+
+public fun allocateWith<T>(value: T) -> *T {
+    final ptr = allocate(T.sizeof) as *T;
+    ptr.* = value;
+    return ptr;
+}

@@ -1,43 +1,9 @@
-import std;
+public import "fd.hob" as fd;
+public import "fs.hob" as fs;
+public import "socket.hob" as socket;
 
-use std.panic.assert;
+use fd.Fd;
 
-public type Fd = i32;
-
-extern fun Fd.write(self, ptr: *u8, size: usize);
-public extern fun Fd.close(self);
-
-public fun Fd.putByte(self, byte: u8) {
-    self.write(&byte, 1);
-}
-
-public fun Fd.putString(self, data: string) {
-    self.write(data.raw, data.length);
-}
-
-public fun Fd.putInt32(self, value: i32) {
-    var buffer: [11]u8;
-    var i = buffer.length;
-    var isNegative = value < 0;
-    if isNegative {
-        value = -value;
-    }
-    do {
-        assert(i > 0, "buffer overflow");
-        i -= 1;
-        buffer[i] = '0' + (value % 10) as u8;
-        value /= 10;
-    } while value > 0;
-    if isNegative {
-        assert(i > 0, "buffer overflow");
-        i -= 1;
-        buffer[i] = '-';
-    }
-    self.putString(std.str.new(&buffer[i], buffer.length - i));
-}
-
-public fun Fd.putChar(self, char: u8) {
-    self.putString(std.str.new(&char, 1));
-}
-
+public const input: Fd = 0;
 public const out: Fd = 1;
+public const err: Fd = 2;

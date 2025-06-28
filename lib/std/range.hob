@@ -1,0 +1,36 @@
+import "int.hob" as int;
+
+use int.usize;
+
+type Range = struct {
+    current: usize,
+    step: usize,
+    before: usize,
+};
+
+public fun rangeFromStep(after: usize, before: usize, step: usize) -> Range {
+    return {
+        current: after - 1,
+        step: step,
+        before: before,
+    };
+}
+
+public fun rangeStep(before: usize, step: usize) -> Range {
+    return rangeFromStep(0, before, step);
+}
+
+public fun rangeFrom(after: usize, before: usize) -> Range {
+    return rangeFromStep(after, before, 1);
+}
+
+public fun range(before: usize) -> Range {
+    return rangeStep(before, 1);
+}
+
+public fun Range.getCurrent(&self) -> usize { return self.current; }
+
+public fun Range.next(&self) -> bool {
+    self.current += self.step;
+    return self.current < self.before;
+}

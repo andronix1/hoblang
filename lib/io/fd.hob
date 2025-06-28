@@ -1,0 +1,36 @@
+import c;
+import result;
+import std;
+import conv;
+
+use std.slice.Slice;
+use result.{ NoneResult, Result };
+
+public type Fd = i32;
+
+public fun Fd.readTo(self, slice: Slice.<u8>) -> NoneResult {
+    return c.err.handleNone(c.read(self, slice.raw, slice.length));
+}
+
+public fun Fd.readByte(self) -> Result.<u8> {
+    var byte: u8;
+    return c.err.handleNone(c.read(self, &byte, 1))
+        .mapDirect.<u8>(byte);
+}
+
+public fun Fd.putInt32(self, value: i32) -> NoneResult {
+    var buf: [12]u8;
+    return self.putString(conv.i32ToString(value, std.str.new(&buf[0], 12)).unwrap());
+}
+
+public fun Fd.putString(self, slice: string) -> NoneResult {
+    return c.err.handleNone(c.write(self, slice.raw, slice.length));
+}
+
+public fun Fd.putByte(self, byte: u8) -> NoneResult {
+    return c.err.handleNone(c.write(self, &byte, 1));
+}
+
+public fun Fd.close(self) -> NoneResult {
+    return c.err.handleNone(c.close(self));
+}

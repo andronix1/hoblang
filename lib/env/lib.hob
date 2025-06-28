@@ -1,0 +1,33 @@
+import c;
+import result;
+import strings;
+
+use result.NoneResult;
+
+public fun set(name: string, value: string) -> NoneResult {
+    var cName = strings.fromString(name);
+    defer cName.free();
+    var cValue = strings.fromString(value);
+    defer cValue.free();
+    return c.err.handleNone(c.setenv(cName.makeC(), cValue.makeC()));
+}
+
+public fun clear() -> NoneResult {
+    return c.err.handleNone(c.clearenv());
+}
+
+public fun changeRoot(root: string) -> NoneResult {
+    var cRoot = strings.fromString(root);
+    defer cRoot.free();
+    return c.err.handleNone(c.chroot(cRoot.makeC()));
+}
+
+public fun changeDir(dir: string) -> NoneResult {
+    var cDir = strings.fromString(dir);
+    defer cDir.free();
+    return c.err.handleNone(c.chdir(cDir.makeC()));
+}
+
+public fun setHostname(hostname: string) -> NoneResult {
+    return c.err.handleNone(c.sethostname(hostname.raw, hostname.length));
+}

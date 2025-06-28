@@ -1,47 +1,79 @@
 import std;
 
-public type Result<T, E> = struct { # TODO: unions
-    isOk: bool,
-    ok: T,
-    err: E
+public type Result<T> = struct {
+    public isOk: bool,
+    content: struct {
+        value: T,
+        error: string,
+    },
 };
 
-public fun err<T, E>(err: E) -> Result.<T, E> {
-    return <(Result.<T, E>)> {
-        isOk: false,
-        ok: undefined,
-        err: err
-    };
-}
+public type NoneResult = Result.<std.None>;
 
-public fun ok<T, E>(value: T) -> Result.<T, E> {
-    return <(Result.<T, E>)> {
+public fun ok<T>(value: T) -> Result.<T> {
+    return <(Result.<T>)> {
         isOk: true,
-        ok: value,
-        err: undefined
+        content: {
+            value: value,
+            error: undefined,
+        }
     };
 }
 
-public fun Result.unwrapErr(self) -> E {
-    std.panic.assert(!self.isOk, "Result.unwrapErr failed");
-    return self.err;
+public fun err<T>(error: string) -> Result.<T> {
+    return <(Result.<T>)> {
+        isOk: false,
+        content: {
+            value: undefined,
+            error: error,
+        }
+    };
+}
+
+public fun noneOk() -> Result.<std.None> {
+    return ok.<std.None>(std.none());
+}
+
+public fun noneErr(message: string) -> Result.<std.None> {
+    return err.<std.None>(message);
 }
 
 public fun Result.unwrap(self) -> T {
-    std.panic.assert(self.isOk, "Result.unwrap failed");
-    return self.ok;
-}
-
-public fun Result.map(self, mapper: fun (T) -> T) -> Result.<T, E> {
-    if self.isOk {
-        return ok.<T, E>(mapper(self.ok));
-    }
-    return self;
-}
-
-public fun Result.mapErr(self, mapper: fun (E) -> E) -> Result.<T, E> {
     if !self.isOk {
-        return err.<T, E>(mapper(self.err));
+        std.panic.handler(self.content.error);
     }
-    return self;
+    return self.content.value;
 }
+
+public fun Result.expectErr(self, message: string) {
+    if self.isOk {
+        std.panic.handler(message);
+    }
+}
+
+public fun Result.mapWith<D, T2>(self, data: D, mapper: fun (D, T) -> T2) -> Result.<T2> {
+    if self.isOk {
+        return ok.<T2>(mapper(data, self.content.value));
+    }
+    return err.<T2>(self.content.error);
+}
+
+public fun Result.convertErr<T2>(self) -> Result.<T2> {
+    std.panic.assert(!self.isOk, "Result.convertErr failed");
+    return err.<T2>(self.content.error);
+}
+
+public fun Result.map<T2>(self, mapper: fun (T) -> T2) -> Result.<T2> {
+    if self.isOk {
+        return ok.<T2>(mapper(self.content.value));
+    }
+    return err.<T2>(self.content.error);
+}
+
+public fun Result.mapDirect<T2>(self, other: T2) -> Result.<T2> {
+    if self.isOk {
+        return ok.<T2>(other);
+    }
+    return err.<T2>(self.content.error);
+}
+

@@ -1,0 +1,24 @@
+import result;
+import std;
+import "lib.hob" as c;
+
+use result.Result;
+
+public fun err<T>() -> Result.<T> {
+    return result.err.<T>(std.str.fromC(c.strerror(c.errno().*)));
+}
+
+public fun handleMapped<T>(value: i32, mapper: fun (i32) -> T) -> Result.<T> {
+    if value < 0 {
+        return err.<T>();
+    }
+    return result.ok.<T>(mapper(value));
+}
+
+public fun handleNone(value: i32) -> Result.<std.None> {
+    if value < 0 {
+        return err.<std.None>();
+    }
+    return result.ok.<std.None>(std.none());
+}
+

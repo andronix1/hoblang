@@ -1,0 +1,8 @@
+public type usize = u64;
+
+public fun usize.max(self, other: usize) -> usize {
+    if self > other {
+        return self;
+    }
+    return other;
+}

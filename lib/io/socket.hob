@@ -1,0 +1,21 @@
+import c;
+import result;
+import std;
+import "fd.hob" as fd;
+
+use result.Result;
+
+public type Socket = fd.Fd;
+public type SocketPair = [2]Socket;
+
+public fun SocketPair.close(self) {
+    self[0].close();
+    self[1].close();
+}
+
+public fun createIpcPair() -> Result.<SocketPair> {
+    var output: SocketPair;
+    return c.err.handleNone(c.socketpair(c.AF_UNIX, c.SOCK_STREAM, 0, &output))
+        .mapDirect.<SocketPair>(output);
+}
+

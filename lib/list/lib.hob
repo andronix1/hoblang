@@ -1,67 +1,84 @@
-import std;
 import mem;
+import std;
+
+use std.slice.Slice;
 
 public type List<T> = struct {
-    public data: std.slice.Slice.<T>,
+    public data: Slice.<T>,
     capacity: usize
 };
 
 public fun newWithCapacity<T>(capacity: usize) -> List.<T> {
+    if capacity == 0 { capacity = 1; }
     return <(List.<T>)> {
         data: std.slice.new.<T>(mem.allocate(T.sizeof * capacity) as *T, 0),
         capacity: capacity,
     };
 }
 
-public fun newFromSlice<T>(slice: std.slice.Slice.<T>) -> List.<T> {
-    var result = newWithCapacity.<T>(slice.length);
+public fun new<T>() -> List.<T> { return newWithCapacity.<T>(0); }
+
+public fun fromSlice<T>(slice: Slice.<T>) -> List.<T> {
+    var result = new.<T>();
     result.appendSlice(slice);
     return result;
 }
 
-public fun List.appendSlice(&self, slice: std.slice.Slice.<T>) {
-    self.reserve(self.*.data.length + slice.length);
-
-    var i: usize = 0;
-    while i < slice.length {
-        self.push(slice.raw[i]);
-        i += 1;
-    }
-}
-
 public fun List.reserve(&self, capacity: usize) {
-    if self.*.capacity >= capacity {
+    if capacity <= self.capacity {
         return;
     }
-    self.*.data.raw = mem.reallocate(self.*.data.raw as *void, capacity) as *T;
-    self.*.capacity = capacity;
+    self.data.raw = mem.reallocate(self.data.raw as *void, T.sizeof * capacity) as *T;
+    self.capacity = capacity;
+}
+
+public fun List.appendSlice(&self, slice: Slice.<T>) {
+    self.reserve(self.*.length() + slice.length);
+    for i in std.range(slice.length) {
+        self.push(slice.at(i));
+    }
 }
 
 public fun List.push(&self, value: T) {
-    if self.*.data.length + 1 > self.*.capacity {
-        var newCapacity = self.*.data.length * 2;
-        if newCapacity < self.*.data.length + 1 {
-            newCapacity = self.*.data.length + 1;
-        }
-        self.reserve(newCapacity);
+    if self.capacity < self.data.length + 1 {
+        self.reserve(self.data.length * 2);
     }
-    self.*.data.raw[self.*.data.length] = value;
-    self.*.data.length += 1;
-}
-
-public fun List.at(self, idx: usize) -> T {
-    return self.data.raw[idx];
-}
-
-public fun List.atRef(&self, idx: usize) -> *T {
-    return &self.*.data.raw[idx];
+    self.data.raw[self.data.length] = value;
+    self.data.length += 1;
 }
 
 public fun List.length(self) -> usize {
     return self.data.length;
 }
 
+public fun List.execAll(self, fn: fun (T) -> void) -> void {
+    for i in std.range(self.length()) {
+        fn(self.at(i));
+    }
+}
+
+public fun List.atRef(self, idx: usize) -> *T {
+    return self.data.atRef(idx);
+}
+
+public fun List.at(self, idx: usize) -> T {
+    return self.data.at(idx);
+}
+
 public fun List.free(self) {
     mem.free(self.data.raw as *void);
 }
 
+public fun List.deepFree(self, free: fun (T) -> void) {
+    self.execAll(free);
+    self.free();
+}
+
+public fun List.map<T2>(self, mapper: fun (T) -> T2) -> List.<T2> {
+    var result = newWithCapacity.<T2>(self.length());
+    for i in std.range(self.length()) {
+        result.push(mapper(self.at(i)));
+    }
+    self.free();
+    return result;
+}

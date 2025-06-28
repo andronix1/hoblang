@@ -1,16 +1,16 @@
-public import "slice.hob" as slice;
-public import "def.hob" as def;
+import "slice.hob" as slice;
+import "int.hob" as int;
 
-public type Str = slice.Slice.<u8>;
+use slice.Slice;
+use int.usize;
 
-public fun fromCString(raw: *u8) -> Str {
-    var length: def.Size = 0;
-    while raw[length] != 0 {
+public type string = Slice.<u8>;
+public const new: fun (*u8, usize) -> string = slice.new.<u8>;
+
+public fun fromC(str: *u8) -> string {
+    var length: usize = 0;
+    while str[length] != 0 {
         length += 1;
     }
-    return new(raw, length);
-}
-
-public fun new(raw: *u8, length: def.Size) -> Str {
-    return slice.new.<u8>(raw, length) as Str;
+    return new(str, length);
 }

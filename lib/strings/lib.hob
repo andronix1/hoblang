@@ -1,0 +1,16 @@
+import list;
+import std;
+
+use std.slice.Slice;
+
+public type String = list.List.<u8>;
+public const newWithCapacity: fun (usize) -> String = list.newWithCapacity.<u8>;
+public const new: fun () -> String = list.new.<u8>;
+public const fromString: fun (string) -> String = list.fromSlice.<u8>;
+
+public type Free = fun (String) -> void;
+
+public fun String.makeC(&self) -> *u8 {
+    self.push(0);
+    return self.data.raw;
+}

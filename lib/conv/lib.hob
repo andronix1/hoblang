@@ -1,0 +1,43 @@
+import std;
+import result;
+
+use result.Result;
+
+public fun i32ToString(value: i32, buf: string) -> Result.<string> {
+    if buf.length == 0 {
+        return result.err.<string>("buffer is too small");
+    }
+
+    var len: usize = 0;
+    final isNegative = value < 0;
+
+    if isNegative {
+        buf.atRef(0).* = '-';
+        len += 1;
+        value = -value;
+    }
+
+    do {
+        if len >= buf.length {
+            return result.err.<string>("buffer is too small");
+        }
+        buf.atRef(len).* = '0' + (value % 10) as u8;
+        value /= 10;
+        len += 1;
+    } while value > 0;
+    
+    var offset: usize = 0;
+    if isNegative {
+        offset = 1;
+    }
+
+    for i in std.range((len - offset) / 2) {
+        final leftId = i + offset;
+        final rightId = len - i - 1;
+        final temp = buf.at(leftId);
+        buf.atRef(leftId).* = buf.at(rightId);
+        buf.atRef(rightId).* = temp;
+    }
+
+    return result.ok.<string>(std.str.new(buf.raw, len));
+}

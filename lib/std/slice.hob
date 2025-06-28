@@ -1,22 +1,28 @@
-public import "def.hob" as def;
+import "int.hob" as int;
+import "lib.hob" as std;
+
+use int.usize;
 
 public type Slice<T> = struct {
     public raw: *T,
-    public length: def.Size,
+    public length: usize,
 };
 
-public fun new<T>(raw: *T, length: def.Size) -> Slice.<T> {
+public fun new<T>(raw: *T, length: usize) -> Slice.<T> {
     return <(Slice.<T>)> {
         raw: raw,
         length: length,
     };
 }
 
-public fun Slice.at(self, idx: def.Size) -> T {
+public fun empty<T>() -> Slice.<T> {
+    return new.<T>(std.null.<T>(), 0);
+}
+
+public fun Slice.atRef(self, idx: usize) -> *T {
+    return &self.raw[idx];
+}
+
+public fun Slice.at(self, idx: usize) -> T {
     return self.raw[idx];
 }
-
-public fun Slice.atRef(&self, idx: def.Size) -> *T {
-    return &self.*.raw[idx];
-}
-

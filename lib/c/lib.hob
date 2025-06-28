@@ -1,0 +1,36 @@
+import std;
+import result;
+public import "err.hob" as err;
+
+public extern(__errno_location) fun errno() -> *i32;
+public extern fun strerror(value: i32) -> *u8;
+
+public const AF_UNIX: i32 = 1;
+public const AF_INET: i32 = 2;
+public const SOCK_STREAM: i32 = 1;
+public extern fun socket(domain: i32, sockType: i32, protocol: i32) -> i32;
+public extern fun socketpair(domain: i32, sockType: i32, protocol: i32, output: *[2]i32) -> i32;
+
+public extern fun open(pathname: *u8, flags: i32) -> i32;
+
+public extern fun write(fd: i32, ptr: *u8, size: usize) -> i32;
+public extern fun read(fd: i32, ptr: *u8, size: usize) -> i32;
+public extern fun close(fd: i32) -> i32;
+
+public extern fun execv(pathname: *u8, args: **u8) -> i32;
+public extern fun waitpid(pid: i32, status: *i32, options: i32) -> i32;
+public extern fun clone(callback: fun (*void) -> i32, stackTop: *void, flags: i32, arg: *void) -> i32;
+public extern fun exit(code: i32) -> i32;
+
+public extern fun chroot(root: *u8) -> i32;
+public extern fun chdir(root: *u8) -> i32;
+
+public extern fun setuid(uid: i32) -> i32;
+public extern fun setgid(uid: i32) -> i32;
+public extern fun sethostname(hostname: *u8, length: usize) -> i32;
+public extern fun setenv(name: *u8, value: *u8) -> i32;
+public extern fun clearenv() -> i32;
+
+public extern fun malloc(size: usize) -> *void;
+public extern fun realloc(ptr: *void, size: usize) -> *void;
+public extern fun free(ptr: *void);
