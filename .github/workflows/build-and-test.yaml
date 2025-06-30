@@ -39,12 +39,11 @@ jobs:
           mkdir ${{ matrix.config.artifact }}
           mv ./build/hoblang ${{ matrix.config.artifact }}
           mv ./lib ${{ matrix.config.artifact }}/
+          tar -cJf artifact.tar.gz ${{ matrix.config.artifact }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          archive: tar
-          compression: xz
-          path: ./${{ matrix.config.artifact }}
-          name: ${{ matrix.config.artifact }}
+          path: ./artifact.tar.gz
+          name: ${{ matrix.config.artifact }}.tar.gz
 
