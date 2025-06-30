@@ -13,9 +13,7 @@ jobs:
           - name: "Ubuntu x86_64"
             os: ubuntu-latest
             preset: ubuntu
-            artifact:
-              name: "linux-x86_64"
-              ext: ".tar.xz"
+            artifact: "linux-x86_64"
     steps:
       - uses: actions/checkout@v2
 
@@ -23,7 +21,7 @@ jobs:
         if: ${{ matrix.config.preset == 'ubuntu' }}
         run: |
           sudo apt update
-          sudo apt install cmake llvm-dev tar
+          sudo apt install cmake llvm-dev
 
       - name: Setup build directory
         run: |
@@ -39,13 +37,14 @@ jobs:
       - name: Create artifact
         run: |
           mkdir ${{ matrix.config.artifact.name }}
-          mv ./build/hoblang ${{ matrix.config.artifact.name }}
-          mv ./lib ${{ matrix.config.artifact.name }}/
-          tar -cJf ${{ matrix.config.artifact.name }}${{ matrix.config.artifact.ext }} ${{ matrix.config.artifact.name }}
+          mv ./build/hoblang ${{ matrix.config.artifact }}
+          mv ./lib ${{ matrix.config.artifact }}/
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          path: ./${{ matrix.config.artifact.name }}${{ matrix.config.artifact.ext }}
-          name: ${{ matrix.config.artifact.name }}${{ matrix.config.artifact.ext }}
+          archive: tar
+          compression: xz
+          path: ./${{ matrix.config.artifact.name }}
+          name: ${{ matrix.config.artifact.name }}
 
