@@ -3,9 +3,9 @@
 #include "core/mempool.h"
 #include "core/null.h"
 #include "core/vec.h"
+#include "hir/api/const.h"
 #include "sema/module/api/type.h"
 #include "sema/module/api/value.h"
-#include "sema/module/const.h"
 #include "sema/module/decl.h"
 #include "sema/module/module.h"
 #include "sema/module/type.h"
@@ -83,9 +83,11 @@ static inline bool _sema_module_std_load(SemaModule *module, Slice at) {
     return true;
 }
 
-SemaConst *sema_module_std_new_string(SemaModule *module, Slice at, SemaConst *pointer, SemaConst *len) {
-    NOT_NULL(sema_module_std_load(module, at));
-    return sema_const_new_struct(module->mempool, module->std.string.type, vec_create_in(module->mempool, pointer, len));
+HirConst sema_module_std_new_hir_string(SemaModule *module, HirType *type, Slice string) {
+    assert(module->std.state == SEMA_STD_LOADED);
+    return hir_const_new_struct(type, vec_create_in(module->mempool, 
+        hir_const_new_string_ptr(module->mempool, string),
+        hir_const_new_int(sema_type_to_hir(module, module->std.usize), string.length)));
 }
 
 bool sema_module_std_load(SemaModule *module, Slice at) {

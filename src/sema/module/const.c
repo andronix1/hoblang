@@ -21,10 +21,10 @@ SemaConst *sema_const_new_integer(Mempool *mempool, SemaType *type, uint64_t int
         out->integer = integer;
     )
 
-SemaConst *sema_const_new_string_ptr(Mempool *mempool, Slice string)
+SemaConst *sema_const_new_string(Mempool *mempool, SemaType *type, Slice string)
     MEMPOOL_CONSTRUCT(SemaConst, 
-        out->kind = SEMA_CONST_STRING_PTR;
-        out->type = sema_type_new_pointer(mempool, sema_type_new_int(mempool, SEMA_INT_8, false));
+        out->kind = SEMA_CONST_STRING;
+        out->type = type;
         out->string = string;
     )
 

@@ -9,7 +9,7 @@ typedef enum {
     SEMA_CONST_FUNC,
     SEMA_CONST_GEN_FUNC,
     SEMA_CONST_UNDEFINED,
-    SEMA_CONST_STRING_PTR,
+    SEMA_CONST_STRING,
     SEMA_CONST_STRUCT,
 } SemaConstKind;
 
@@ -38,7 +38,7 @@ SemaConst *sema_const_new_undefined(Mempool *mempool, SemaType *type);
 SemaConst *sema_const_new_integer(Mempool *mempool, SemaType *type, uint64_t integer);
 SemaConst *sema_const_new_bool(Mempool *mempool, bool value);
 SemaConst *sema_const_new_struct(Mempool *mempool, SemaType *type, SemaConst **fields);
-SemaConst *sema_const_new_string_ptr(Mempool *mempool, Slice string);
+SemaConst *sema_const_new_string(Mempool *mempool, SemaType *type, Slice string);
 SemaConst *sema_const_new_float(Mempool *mempool, SemaType *type, long double value);
 SemaConst *sema_const_new_func(Mempool *mempool, SemaType *type, HirDeclId decl);
 SemaConst *sema_const_new_gen_func(Mempool *mempool, SemaType *type, HirGenScopeId scope, HirGenFuncId func, SemaType **params);

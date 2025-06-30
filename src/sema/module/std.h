@@ -1,6 +1,5 @@
 #pragma once
 
-#include "sema/module/api/const.h"
 #include "sema/module/api/type.h"
 #include <stdbool.h>
 
@@ -26,5 +25,5 @@ static inline SemaStd sema_std_module_new() {
 bool sema_module_std_load(SemaModule *module, Slice at);
 SemaType *sema_module_std_string(SemaModule *module, Slice at);
 SemaType *sema_module_std_usize(SemaModule *module, Slice at);
-SemaConst *sema_module_std_new_string(SemaModule *module, Slice at, SemaConst *pointer, SemaConst *len);
+HirConst sema_module_std_new_hir_string(SemaModule *module, HirType *type, Slice string);
 
