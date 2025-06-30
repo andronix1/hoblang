@@ -34,7 +34,7 @@ jobs:
       - name: Build
         working-directory: build
         run: |
-          cmake --build -j6 ./
+          cmake --build ./ -j4
 
       - name: Create artifact
         run: |
