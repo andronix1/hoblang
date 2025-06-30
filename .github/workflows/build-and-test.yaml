@@ -44,7 +44,7 @@ jobs:
           tar -cJf ${{ matrix.config.artifact.name }}${{ matrix.config.artifact.ext }} ${{ matrix.config.artifact.name }}
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           path: ./${{ matrix.config.artifact }}${{ matrix.config.artifact.ext }}
           name: ${{ matrix.config.artifact }}${{ matrix.config.artifact.ext }}
