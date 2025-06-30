@@ -49,12 +49,12 @@ jobs:
           name: ${{ matrix.config.artifact }}.tar.gz
       
       - name: Upload release asset
-        if: github.event_name == 'release' && (github.event.action == 'published' || github.event.action == 'created')
+        if: github.event_name == 'release' && github.event.action == 'created'
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./${{ matrix.config.artifact }}
+          asset_path: ./${{ matrix.config.artifact }}.tar.xz
           asset_name: ${{ matrix.config.artifact }}.tar.xz
           asset_content_type: application/tar+gzip
