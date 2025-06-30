@@ -1,0 +1,62 @@
+name: Build and test
+
+on:
+  push:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    permissions: write-all
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      matrix:
+        config:
+          - name: "Ubuntu x86_64"
+            os: ubuntu-latest
+            preset: ubuntu
+            artifact: "linux-x86_64"
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies on preset 'ubuntu'
+        if: ${{ matrix.config.preset == 'ubuntu' }}
+        run: |
+          sudo apt update
+          sudo apt install cmake llvm-dev
+
+      - name: Setup build directory
+        run: |
+          mkdir build
+          cd build
+          cmake -DDISABLE_TESTS=YES ../
+
+      - name: Build
+        working-directory: build
+        run: |
+          cmake --build ./ -j4
+
+      - name: Create artifact
+        run: |
+          mkdir ${{ matrix.config.artifact }}
+          mv ./build/hoblang ${{ matrix.config.artifact }}
+          mv ./lib ${{ matrix.config.artifact }}/
+          tar -cJf ${{ matrix.config.artifact }}.tar.gz ${{ matrix.config.artifact }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: ./${{ matrix.config.artifact }}.tar.gz
+          name: ${{ matrix.config.artifact }}.tar.gz
+      
+      - name: Upload release asset
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./${{ matrix.config.artifact }}.tar.gz
+          asset_name: ${{ matrix.config.artifact }}.tar.gz
+          asset_content_type: application/tar+gzip
