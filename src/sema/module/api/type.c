@@ -34,7 +34,11 @@ HirType *sema_type_to_hir(SemaModule* module, SemaType *type) {
             return hir_type_new_struct(module->mempool, fields);
         }
         case SEMA_TYPE_ARRAY: return hir_type_new_array(module->mempool, sema_type_to_hir(module, type->array.of), type->array.length);
-        case SEMA_TYPE_RECORD: return sema_type_to_hir(module, type->record.module->types[type->record.id]);
+        case SEMA_TYPE_RECORD: {
+            SemaType *record = type->record.module->types[type->record.id];
+            assert(record);
+            return sema_type_to_hir(module, record);
+        }
         case SEMA_TYPE_GEN_PARAM: return hir_type_new_gen(module->mempool, type->gen_param.id);
 
         case SEMA_TYPE_GENERATE: {

@@ -14,7 +14,7 @@
 #include "sema/module/type.h"
 #include "sema/module/value.h"
 
-inline SemaValueRuntime *sema_type_must_have_ext(SemaModule *module, SemaType *type, Slice where, Slice name, bool *by_ref) {
+SemaValueRuntime *sema_type_must_have_ext(SemaModule *module, SemaType *type, Slice where, Slice name, bool *by_ref) {
     SemaExtDecl decl;
     if (!sema_type_search_ext(module, type, name, &decl)) {
         sema_module_err(module, where, "expression type must have $S extension for using in for-loop", name);

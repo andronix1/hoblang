@@ -41,7 +41,7 @@ bool sema_module_stage_fill_type_generics(SemaModule *module, AstTypeDecl *type_
 }
 
 bool sema_module_stage_fill_type_decl(SemaModule *module, AstTypeDecl *type_decl) {
-    if (!type_decl->generic){
+    if (!type_decl->generic) {
         SemaType *source_type = NOT_NULL(sema_module_type(module, type_decl->type));
         sema_module_init_type_alias(module, type_decl->sema.type_id, source_type);
     }

@@ -65,7 +65,7 @@ HirFuncId hir_register_fun(Hir *hir, HirType *type) {
     return vec_len(hir->funcs) - 1;
 }
 
-inline HirFuncInfo *hir_get_mut_func_info(Hir *hir, HirFuncId id) {
+HirFuncInfo *hir_get_mut_func_info(Hir *hir, HirFuncId id) {
     HirFuncRecord *rec = &hir->funcs[id];
     assert(rec->filled);
     return &rec->info;
