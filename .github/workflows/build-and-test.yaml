@@ -36,7 +36,7 @@ jobs:
 
       - name: Create artifact
         run: |
-          mkdir ${{ matrix.config.artifact.name }}
+          mkdir ${{ matrix.config.artifact }}
           mv ./build/hoblang ${{ matrix.config.artifact }}
           mv ./lib ${{ matrix.config.artifact }}/
 
@@ -45,6 +45,6 @@ jobs:
         with:
           archive: tar
           compression: xz
-          path: ./${{ matrix.config.artifact.name }}
-          name: ${{ matrix.config.artifact.name }}
+          path: ./${{ matrix.config.artifact }}
+          name: ${{ matrix.config.artifact }}
 
