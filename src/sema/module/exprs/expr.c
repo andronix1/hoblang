@@ -34,7 +34,7 @@ SemaValue *sema_module_emit_expr(SemaModule *module, AstExpr *expr, SemaExprCtx 
         case AST_EXPR_CALL: return sema_module_emit_expr_call(module, &expr->call, ctx);
         case AST_EXPR_SCOPE: return sema_module_emit_expr(module, expr->scope, ctx);
         case AST_EXPR_CHAR: return sema_module_emit_expr_char(module, expr->character, ctx);
-        case AST_EXPR_BOOL: return sema_module_emit_expr_bool(module, expr->boolean, ctx);
+        case AST_EXPR_BOOL: return sema_module_emit_expr_bool(module, expr->boolean);
         case AST_EXPR_BINOP: return sema_module_emit_expr_binop(module, &expr->binop, ctx);
         case AST_EXPR_AS: return sema_module_emit_expr_as(module, &expr->as, ctx);
         case AST_EXPR_NOT: return sema_module_emit_expr_not(module, expr->not_inner, ctx);

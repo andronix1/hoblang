@@ -24,7 +24,7 @@ typedef struct HirConst {
     union {
         bool boolean;
         uint64_t integer;
-        HirConst **struct_fields;
+        HirConst *struct_fields;
         HirDeclId func_decl;
         struct {
             HirType **params;
@@ -103,7 +103,7 @@ static inline HirConst hir_const_new_real(HirType *type, long double value) {
     return constant;
 }
 
-static inline HirConst hir_const_new_struct(HirType *type, HirConst **fields) {
+static inline HirConst hir_const_new_struct(HirType *type, HirConst *fields) {
     HirConst constant = {
         .kind = HIR_CONST_STRUCT,
         .type = type,

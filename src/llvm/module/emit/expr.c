@@ -176,9 +176,9 @@ LLVMValueRef llvm_emit_const(LlvmModule *module, const HirConst *constant) {
         case HIR_CONST_STRUCT: {
             LLVMValueRef *fields = alloca(sizeof(LLVMValueRef) * vec_len(constant->struct_fields));
             for (size_t i = 0; i < vec_len(constant->struct_fields); i++) {
-                fields[i] = llvm_emit_const(module, constant->struct_fields[i]);
+                fields[i] = llvm_emit_const(module, &constant->struct_fields[i]);
             }
-            return LLVMConstStruct(fields, vec_len(constant->struct_fields), false);
+            return LLVMConstStructInContext(module->context, fields, vec_len(constant->struct_fields), false);
         }
         case HIR_CONST_FUNC: return module->decls[constant->func_decl];
         case HIR_CONST_GEN_FUNC:

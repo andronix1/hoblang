@@ -1,0 +1,19 @@
+import io;
+
+const value: struct {
+    exitCode: i32,
+    hello: u64,
+    world: bool
+} = {
+    hello: 123,
+    world: true,
+    exitCode: 0
+};
+
+global fun main() -> i32 {
+    if value.world {
+        io.out.putInt32(value.hello as i32);
+        io.out.putString("\n");
+    }
+    return value.exitCode;
+}

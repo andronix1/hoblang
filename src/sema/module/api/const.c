@@ -7,13 +7,22 @@
 #include <string.h>
 
 HirConst sema_const_to_hir(SemaModule *module, SemaConst *constant) {
+    HirType *type = sema_type_to_hir(module, constant->type);
     switch (constant->kind) {
-        case SEMA_CONST_INT: return hir_const_new_int(sema_type_to_hir(module, constant->type), constant->integer);
-        case SEMA_CONST_FLOAT: return hir_const_new_real(sema_type_to_hir(module, constant->type), constant->float_value);
-        case SEMA_CONST_FUNC: return hir_const_new_func(sema_type_to_hir(module, constant->type), constant->func_decl);
-        case SEMA_CONST_UNDEFINED: return hir_const_new_undefined(sema_type_to_hir(module, constant->type));
+        case SEMA_CONST_INT: return hir_const_new_int(type, constant->integer);
+        case SEMA_CONST_BOOL: return hir_const_new_bool(type, constant->boolean);
+        case SEMA_CONST_FLOAT: return hir_const_new_real(type, constant->float_value);
+        case SEMA_CONST_FUNC: return hir_const_new_func(type, constant->func_decl);
+        case SEMA_CONST_UNDEFINED: return hir_const_new_undefined(type);
+        case SEMA_CONST_STRUCT: {
+            HirConst *fields = vec_new_in(module->mempool, HirConst);
+            vec_resize(fields, vec_len(constant->struct_fields));
+            for (size_t i = 0; i < vec_len(constant->struct_fields); i++) {
+                fields[i] = sema_const_to_hir(module, constant->struct_fields[i]);
+            }
+            return hir_const_new_struct(type, fields);
+        }
         case SEMA_CONST_GEN_FUNC: {
-            HirType *type = sema_type_to_hir(module, constant->type);
             HirType **params = vec_new_in(module->mempool, HirType*);
             vec_resize(params, vec_len(constant->gen_func.params));
             for (size_t i = 0; i < vec_len(constant->gen_func.params); i++) {

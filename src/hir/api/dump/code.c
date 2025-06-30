@@ -17,7 +17,7 @@ void hir_const_dump(HirConst *constant, FILE *stream) {
             fprintf(stream, "{");
             for (size_t i = 0; i < vec_len(constant->struct_fields); i++) {
                 fprintf(stream, i == 0 ? " " : ", ");
-                hir_const_dump(constant->struct_fields[i], stream);
+                hir_const_dump(&constant->struct_fields[i], stream);
             }
             fprintf(stream, " }");
             break;
