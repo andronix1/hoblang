@@ -1,7 +1,11 @@
 #include "std.h"
+#include "core/keymap.h"
+#include "core/mempool.h"
 #include "core/null.h"
+#include "core/vec.h"
 #include "sema/module/api/type.h"
 #include "sema/module/api/value.h"
+#include "sema/module/const.h"
 #include "sema/module/decl.h"
 #include "sema/module/module.h"
 #include "sema/module/type.h"
@@ -17,6 +21,7 @@ static SemaType *sema_module_internal_type(SemaModule *module, SemaModule *inter
     return type;
 }
 
+/*
 static SemaValueRuntime *sema_module_internal_value(SemaModule *module, SemaModule *internal, Slice at, Slice name, SemaType *type) {
     SemaDecl *decl = NOT_NULL(sema_module_resolve_req_decl_from_at(internal, internal, at, name));
     SemaValueRuntime *runtime = sema_value_is_runtime(decl->value);
@@ -32,6 +37,24 @@ static SemaValueRuntime *sema_module_internal_value(SemaModule *module, SemaModu
 
     return runtime;
 }
+*/
+
+static bool sema_type_struct_matches(SemaType *type, SemaType **fields) {
+    type = sema_type_root(type);
+    if (type->kind != SEMA_TYPE_STRUCTURE) {
+        return false;
+    }
+    if (vec_len(type->structure.fields_map) != vec_len(fields)) {
+        return false;
+    }
+    for (size_t i = 0; i < vec_len(type->structure.fields_map); i++) {
+        keymap_at(type->structure.fields_map, i, field);
+        if (!sema_type_eq(field->value.type, fields[i])) {
+            return false;
+        }
+    }
+    return true;
+}
 
 static inline bool _sema_module_std_load(SemaModule *module, Slice at) {
     if (module->no_std) {
@@ -46,17 +69,23 @@ static inline bool _sema_module_std_load(SemaModule *module, Slice at) {
 
     SemaType *usize = NOT_NULL(sema_module_internal_type(module, internal_module, at, slice_from_cstr("usize")));
     SemaType *str = NOT_NULL(sema_module_internal_type(module, internal_module, at, slice_from_cstr("string")));
-    SemaValueRuntime *newString = NOT_NULL(sema_module_internal_value(module, internal_module, at,
-        slice_from_cstr("newString"),
-        sema_type_new_function(module->mempool, vec_create_in(module->mempool, 
-            sema_type_new_pointer(module->mempool, sema_type_new_int(module->mempool, SEMA_INT_8, false)),
-            usize 
-        ), str)));
+    if (!sema_type_struct_matches(str, vec_create_in(module->mempool, 
+        sema_type_new_pointer(module->mempool, sema_type_new_int(module->mempool, SEMA_INT_8, false)),
+        usize,
+    ))) {
+        sema_module_err(module, at, "string's structure doesn't matches { *u8, usize }");
+        return false;
+    }
+
 
     module->std.usize = usize;
     module->std.string.type = str;
-    module->std.string.new = newString;
     return true;
+}
+
+SemaConst *sema_module_std_new_string(SemaModule *module, Slice at, SemaConst *pointer, SemaConst *len) {
+    NOT_NULL(sema_module_std_load(module, at));
+    return sema_const_new_struct(module->mempool, module->std.string.type, vec_create_in(module->mempool, pointer, len));
 }
 
 bool sema_module_std_load(SemaModule *module, Slice at) {
@@ -73,11 +102,6 @@ bool sema_module_std_load(SemaModule *module, Slice at) {
 SemaType *sema_module_std_string(SemaModule *module, Slice at) {
     NOT_NULL(sema_module_std_load(module, at));
     return module->std.string.type;
-}
-
-SemaValueRuntime *sema_module_std_string_new(SemaModule *module, Slice at) {
-    NOT_NULL(sema_module_std_load(module, at));
-    return module->std.string.new;
 }
 
 SemaType *sema_module_std_usize(SemaModule *module, Slice at) {

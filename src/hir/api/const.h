@@ -12,6 +12,7 @@ typedef enum {
     HIR_CONST_FUNC,
     HIR_CONST_UNDEFINED,
     HIR_CONST_GEN_FUNC,
+    HIR_CONST_STRING_PTR,
 } HirConstKind;
 
 typedef struct HirConst HirConst;
@@ -26,6 +27,7 @@ typedef struct HirConst {
         uint64_t integer;
         HirConst *struct_fields;
         HirDeclId func_decl;
+        Slice string;
         struct {
             HirType **params;
             HirGenScopeId scope;
@@ -38,6 +40,15 @@ typedef struct HirConst {
     };
     long double real; // Because of ABI warning :(
 } HirConst;
+
+static inline HirConst hir_const_new_string_ptr(Mempool *mempool, Slice string) {
+    HirConst constant = {
+        .kind = HIR_CONST_STRING_PTR,
+        .type = hir_type_new_pointer(mempool, hir_type_new_int(mempool, HIR_TYPE_INT_8, false)),
+        .string = string
+    };
+    return constant;
+}
 
 static inline HirConst hir_const_new_undefined(HirType *type) {
     HirConst constant = {

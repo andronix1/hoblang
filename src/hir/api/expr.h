@@ -24,7 +24,6 @@ typedef enum {
     HIR_EXPR_STEP_BUILD_ARRAY,
     HIR_EXPR_STEP_IDX_ARRAY,
     HIR_EXPR_STEP_IDX_POINTER,
-    HIR_EXPR_STEP_STRING,
     HIR_EXPR_STEP_SIZEOF,
     HIR_EXPR_STEP_NEG,
     HIR_EXPR_STEP_PTR_TO_INT,
@@ -74,8 +73,6 @@ typedef struct {
             HirType *of;
             HirType *type;
         } size;
-
-        Slice string;
 
         struct {
             size_t callable;
@@ -200,14 +197,6 @@ static inline HirExprStep hir_expr_step_new_array(HirType *type, size_t *element
             .elements = elements,
             .type = type
         }
-    };
-    return step;
-}
-
-static inline HirExprStep hir_expr_step_new_string(Slice string) {
-    HirExprStep step = {
-        .kind = HIR_EXPR_STEP_STRING,
-        .string = string
     };
     return step;
 }

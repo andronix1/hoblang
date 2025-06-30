@@ -50,18 +50,9 @@ static HirType *hir_get_expr_step_type(Hir *hir, HirFuncId func, HirExprStep *st
         }
         case HIR_EXPR_STEP_CONST: {
             HirConst *constant = &step->constant;
-            switch (constant->kind) {
-                case HIR_CONST_BOOL:
-                case HIR_CONST_INT:
-                case HIR_CONST_REAL:
-                case HIR_CONST_STRUCT:
-                case HIR_CONST_FUNC:
-                case HIR_CONST_UNDEFINED:
-                    break;
-                case HIR_CONST_GEN_FUNC:
-                    constant->gen_func.usage = hir_add_gen_scope_usage(hir, constant->gen_func.scope,
-                        constant->gen_func.params, constant->gen_func.is_from ? &constant->gen_func.from : NULL);
-                    break;
+            if (constant->kind == HIR_CONST_GEN_FUNC) {
+                constant->gen_func.usage = hir_add_gen_scope_usage(hir, constant->gen_func.scope,
+                    constant->gen_func.params, constant->gen_func.is_from ? &constant->gen_func.from : NULL);
             }
             return constant->type;
         }
@@ -84,8 +75,6 @@ static HirType *hir_get_expr_step_type(Hir *hir, HirFuncId func, HirExprStep *st
             assert(type->kind == HIR_TYPE_STRUCT);
             return type->structure.fields[step->struct_field.idx].type;
         }
-        case HIR_EXPR_STEP_STRING:
-            return hir_type_new_pointer(hir->mempool, hir_type_new_int(hir->mempool, HIR_TYPE_INT_8, false));
         case HIR_EXPR_STEP_BOOL_SKIP:
         case HIR_EXPR_STEP_NOT:
             return hir_type_new_bool(hir->mempool);

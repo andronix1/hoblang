@@ -14,6 +14,7 @@ HirConst sema_const_to_hir(SemaModule *module, SemaConst *constant) {
         case SEMA_CONST_FLOAT: return hir_const_new_real(type, constant->float_value);
         case SEMA_CONST_FUNC: return hir_const_new_func(type, constant->func_decl);
         case SEMA_CONST_UNDEFINED: return hir_const_new_undefined(type);
+        case SEMA_CONST_STRING_PTR: return hir_const_new_string_ptr(module->mempool, constant->string);
         case SEMA_CONST_STRUCT: {
             HirConst *fields = vec_new_in(module->mempool, HirConst);
             vec_resize(fields, vec_len(constant->struct_fields));

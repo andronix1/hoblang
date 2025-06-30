@@ -23,6 +23,7 @@ void hir_const_dump(HirConst *constant, FILE *stream) {
             break;
         case HIR_CONST_FUNC: fprintf(stream, "func decl%lu", constant->func_decl); break;
         case HIR_CONST_UNDEFINED: fprintf(stream, "undefined"); break;
+        case HIR_CONST_STRING_PTR: fprintf(stream, "<string>"); break;
         case HIR_CONST_GEN_FUNC:
             fprintf(stream, "genScope%lu.genFunc%lu.<", constant->gen_func.scope, constant->gen_func.func);
             for (size_t i = 0; i < vec_len(constant->gen_func.params); i++) {
@@ -41,7 +42,6 @@ static void hir_expr_dump(HirExpr *expr, FILE *stream, size_t tabs) {
         ftabs(stream, tabs + 1);
         fprintf(stream, "step%lu: ", i);
         switch (step->kind) {
-            case HIR_EXPR_STEP_STRING: fprintf(stream, "<string>"); break;
             case HIR_EXPR_STEP_CONST: hir_const_dump(&step->constant, stream); break;
             case HIR_EXPR_STEP_BINOP:
                 fprintf(stream, "step%lu ", step->binop.ls);

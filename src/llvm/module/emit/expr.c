@@ -171,6 +171,14 @@ LLVMValueRef llvm_emit_const(LlvmModule *module, const HirConst *constant) {
             return LLVMConstInt(LLVMInt1TypeInContext(module->context), constant->boolean, false);
         case HIR_CONST_REAL:
             return LLVMConstReal(llvm_runtime_type(module, constant->type), constant->real);
+        case HIR_CONST_STRING_PTR: {
+            LLVMValueRef str_global = LLVMAddGlobal(module->module, LLVMArrayType(LLVMInt8Type(), constant->string.length),
+                "");
+            LLVMSetInitializer(str_global, LLVMConstString(constant->string.value, constant->string.length, true));
+            LLVMValueRef str_ptr = LLVMBuildBitCast(module->builder, str_global,
+                LLVMPointerTypeInContext(module->context, 0), "");
+            return str_ptr;
+        }
         case HIR_CONST_UNDEFINED:
             return LLVMGetUndef(llvm_runtime_type(module, constant->type));
         case HIR_CONST_STRUCT: {
@@ -212,14 +220,6 @@ static LlvmEmitStepRes llvm_emit_expr_step(
                 args, vec_len(step->call.args),
                 ""
             ), true);
-        }
-        case HIR_EXPR_STEP_STRING: {
-            LLVMValueRef str_global = LLVMAddGlobal(module->module, LLVMArrayType(LLVMInt8Type(), step->string.length),
-                "");
-            LLVMSetInitializer(str_global, LLVMConstString(step->string.value, step->string.length, true));
-            LLVMValueRef str_ptr = LLVMBuildBitCast(module->builder, str_global,
-                LLVMPointerTypeInContext(module->context, 0), "");
-            return llvm_emit_step_res_new(str_ptr, true);
         }
         case HIR_EXPR_STEP_GET_LOCAL: {
             const HirFuncInfo *info = hir_get_func_info(module->hir, module->func.id);
