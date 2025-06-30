@@ -2,6 +2,7 @@ name: Build and test
 
 on:
   push:
+  release:
 
 jobs:
   build:
