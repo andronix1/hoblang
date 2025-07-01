@@ -13,6 +13,6 @@ typedef struct {
 } SemaGenericCtx;
 
 SemaGeneric *sema_module_generic_type(SemaModule *module, AstGeneric *generic, Slice name);
-SemaGeneric *sema_module_generic_func(SemaModule *module, AstGeneric *generic, Slice name);
+SemaType **sema_module_generic_func_params(SemaModule *module, AstGeneric *generic);
 SemaGenericCtx sema_module_generic_ctx_setup(SemaModule *module, SemaGeneric *source);
 void sema_module_generic_ctx_clean(SemaModule *module, SemaGenericCtx ctx);

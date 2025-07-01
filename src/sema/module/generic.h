@@ -36,6 +36,7 @@ typedef struct SemaGeneric {
 
 size_t sema_generic_input_count(SemaGeneric *generic);
 SemaType **sema_generic_get_input(SemaGeneric *generic, SemaType **input);
+void sema_generic_add_additional_params(SemaGeneric *generic, SemaType **params);
 
 void sema_generic_fill_type(SemaGeneric *generic, SemaType *type);
 static inline void sema_generic_fill_func(SemaGeneric *generic, SemaType *type, HirGenFuncId id) {

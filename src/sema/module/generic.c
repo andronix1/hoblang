@@ -19,6 +19,11 @@ size_t sema_generic_input_count(SemaGeneric *generic) {
     return vec_len(generic->gen_params) - vec_len(generic->additional_params);
 }
 
+void sema_generic_add_additional_params(SemaGeneric *generic, SemaType **params) {
+    vec_extend(generic->additional_params, params);
+    assert(vec_len(generic->additional_params) <= vec_len(generic->gen_params));
+}
+
 SemaType **sema_generic_get_input(SemaGeneric *generic, SemaType **input) {
     assert(vec_len(input) == sema_generic_input_count(generic));
     SemaModule *module = generic->module;

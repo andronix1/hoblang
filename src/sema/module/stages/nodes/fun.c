@@ -10,34 +10,19 @@
 #include "sema/module/stmts/body.h"
 #include "sema/module/type/type.h"
 #include "sema/module/value.h"
+#include <stdio.h>
 
-typedef struct { 
-    SemaGenericCtx ext;
-    SemaGenericCtx main;
-} SemaFuncGenericCtx;
-
-static inline void sema_module_clean_func_ctx(SemaModule *module, AstFunDecl *func, SemaFuncGenericCtx ctx) {
-    if (func->info->ext.sema.func_generic) {
-        sema_module_generic_ctx_clean(module, ctx.main);
-    }
-
-    if (func->info->generic) {
-        sema_module_generic_ctx_clean(module, ctx.ext);
+void sema_module_clean_func_ctx(SemaModule *module, AstFunDecl *func, SemaGenericCtx ctx) {
+    if (func->sema.generic) {
+        sema_module_generic_ctx_clean(module, ctx);
     }
 }
 
-
-static inline SemaFuncGenericCtx sema_module_push_func_ctx(SemaModule *module, AstFunDecl *func) {
-    SemaFuncGenericCtx ctx;
-
-    if (func->info->generic) {
-        ctx.ext = sema_module_generic_ctx_setup(module, func->sema.generic);
+SemaGenericCtx sema_module_push_func_ctx(SemaModule *module, AstFunDecl *func) {
+    SemaGenericCtx ctx = {};
+    if (func->sema.generic) {
+        ctx = sema_module_generic_ctx_setup(module, func->sema.generic);
     }
-
-    if (func->info->ext.sema.func_generic) {
-        ctx.main = sema_module_generic_ctx_setup(module, func->info->ext.sema.func_generic);
-    }
-
     return ctx;
 }
 
@@ -45,13 +30,28 @@ bool sema_module_stage_fill_fun(SemaModule *module, AstFunDecl *func) {
     func->sema.generic = NULL;
 
     NOT_NULL(sema_func_info_setup(module, func->info));
+    SemaType **ext_params = func->info->ext.sema.params;
 
+    SemaType **func_params = NULL;
     if (func->info->generic) {
-        SemaGeneric *generic = NOT_NULL(sema_module_generic_func(module, func->info->generic, func->info->name));
-        func->sema.generic = generic;
+        func_params = sema_module_generic_func_params(module, func->info->generic);
     }
 
-    SemaFuncGenericCtx ctx = sema_module_push_func_ctx(module, func);
+    HirGenScopeId scope = -1;
+    SemaType **params = NULL;
+    if (func_params || ext_params) {
+        params = vec_new_in(module->mempool, SemaType*);
+        if (ext_params) {
+            vec_extend(params, ext_params);
+        }
+        if (func_params) {
+            vec_extend(params, func_params);
+        }
+        scope = sema_module_add_gen_scope(module);
+        func->sema.generic = sema_generic_new_func(module->mempool, module, func->info->name, params, scope);
+    }
+
+    SemaGenericCtx ctx = sema_module_push_func_ctx(module, func);
     SemaType *type = NOT_NULL(sema_func_info_type(module, func->info));
     func->sema.type = type;
     sema_module_clean_func_ctx(module, func, ctx);
@@ -59,51 +59,33 @@ bool sema_module_stage_fill_fun(SemaModule *module, AstFunDecl *func) {
     HirFuncId func_id = hir_register_fun(module->hir, sema_type_to_hir(module, type));
     func->sema.func_id = func_id;
 
-    SemaGeneric *main_generic = func->sema.generic;
-    SemaGeneric *ext_generic = func->info->ext.sema.func_generic;
-    SemaValue *value = NULL;
-    if (main_generic && ext_generic) {
-        assert(main_generic->kind == SEMA_GENERIC_FUNC);
-        assert(vec_len(ext_generic->additional_params) == 0);
-        assert(vec_len(main_generic->additional_params) == 0);
-
-        HirGenScopeId scope = hir_add_gen_scope(module->hir);
-        if (vec_len(module->gen_scopes) > 0) {
-            hir_gen_scope_add_scope(module->hir, vec_top(module->gen_scopes)->scope, scope);
-        } else {
-            hir_add_root_gen_scope(module->hir, scope);
-        }
-
-        SemaType **params = vec_new_in(module->mempool, SemaType*);
-        vec_extend(params, ext_generic->gen_params);
-        vec_extend(params, main_generic->gen_params);
-        SemaGeneric *generic = sema_generic_new_func(module->mempool, module, main_generic->name, params, scope);
-
+    SemaGeneric *generic = func->sema.generic;
+    if (generic) {
+        assert(params);
         for (size_t i = 0; i < vec_len(params); i++) {
             assert(params[i]->kind == SEMA_TYPE_GEN_PARAM);
             hir_gen_scope_add_param(module->hir, scope, params[i]->gen_param.id);
         }
-        HirGenFuncId id = hir_gen_scope_add_func(module->hir, scope, func_id);
-        sema_generic_fill_func(generic, type, id);
+        sema_generic_fill_func(generic, type, hir_gen_scope_add_func(module->hir, scope, func_id));
+    }
 
+    SemaValue *value = NULL;
+    if (func_params && ext_params) {
+        sema_generic_add_additional_params(generic, ext_params);
         value = sema_value_new_generic(module->mempool, sema_generic_new_generic(module->mempool, module,
-            func->info->name, ext_generic->gen_params, generic));
+            func->info->name, ext_params, generic));
         func->sema.generic = generic;
-    } else if (!main_generic && !ext_generic) {
-        HirDeclId decl_id = hir_add_decl(module->hir);
-        hir_init_decl_func(module->hir, decl_id, func_id);
-        value = sema_value_new_runtime_const(module->mempool, sema_const_new_func(module->mempool, type, decl_id));
-    } else {
-        SemaGeneric *generic = main_generic ? main_generic : ext_generic;
+    } else if (func->sema.generic) {
         HirGenFuncId id = hir_gen_scope_add_func(module->hir, generic->func.scope, func_id);
         sema_generic_fill_func(generic, type, id);
         value = sema_value_new_generic(module->mempool, generic);
+    } else {
+        HirDeclId decl_id = hir_add_decl(module->hir);
+        hir_init_decl_func(module->hir, decl_id, func_id);
+        value = sema_value_new_runtime_const(module->mempool, sema_const_new_func(module->mempool, type, decl_id));
     }
     assert(value);
     sema_module_push_fun_info_decl(module, func->info, value);
-    if (main_generic && ext_generic) {
-        func->info->ext.sema.func_generic = NULL;
-    }
 
     HirMutability *args_mut = vec_new_in(module->mempool, HirMutability);
     vec_resize(args_mut, vec_len(type->function.args));
@@ -125,7 +107,7 @@ bool sema_module_stage_emit_fun(SemaModule *module, AstFunDecl *func) {
     SemaScopeStack *old_ss = sema_module_swap_ss(module, sema_scope_stack_new(module->mempool, func_id,
         type->function.returns));
 
-    SemaFuncGenericCtx ctx = sema_module_push_func_ctx(module, func);
+    SemaGenericCtx ctx = sema_module_push_func_ctx(module, func);
 
     sema_module_push_scope(module, NULL);
     if (func->info->ext.is) {
@@ -140,6 +122,7 @@ bool sema_module_stage_emit_fun(SemaModule *module, AstFunDecl *func) {
                 type->function.args[arg_id], hir_get_func_arg_local(module->hir, func_id, arg_id))));
     }
     hir_init_fun_body(module->hir, func_id, sema_module_emit_code(module, func->body, NULL));
+
     if (!func->body->sema.breaks && !sema_type_can_be_downcasted(type->function.returns, sema_type_new_void(module->mempool))) {
         sema_module_err(module, func->info->name, "expected function to return value but its body passes");
     }

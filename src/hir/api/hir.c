@@ -3,6 +3,7 @@
 #include "core/keymap.h"
 #include "core/mempool.h"
 #include "core/vec.h"
+#include "core/attributes.h"
 #include "hir/api/type.h"
 #include "hir/stages/exprs.h"
 #include "hir/hir.h"
@@ -49,7 +50,7 @@ const HirDeclInfo *hir_get_decls(const Hir *hir) {
 }
 
 HirExternId hir_add_extern(Hir *hir, Slice name, HirExternInfo info) {
-    bool has_other = keymap_insert(hir->externs_map, name, info);
+    bool has_other UNUSED = keymap_insert(hir->externs_map, name, info);
     assert(!has_other);
     return vec_len(hir->externs_map) - 1;
 }

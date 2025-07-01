@@ -3,6 +3,9 @@
 #include "core/vec.h"
 
 bool hir_type_eq(const HirType *a, const HirType *b) {
+    if (a == b) { 
+        return true;
+    }
     if (a->kind != b->kind) {
         return false;
     }

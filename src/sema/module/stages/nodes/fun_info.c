@@ -11,30 +11,26 @@
 
 bool sema_func_info_setup(SemaModule *module, AstFunInfo *info) {
     info->ext.sema.type = NULL;
+    info->ext.sema.params = NULL;
     info->ext.sema.generic = NULL;
-    info->ext.sema.func_generic = NULL;
     if (info->ext.is) {
         SemaDecl *decl = NOT_NULL(sema_module_resolve_req_decl_from(module, module, info->ext.of));
 
         SemaType *ext_of = sema_value_is_type(decl->value);
         if (!ext_of) {
             SemaGeneric *generic = sema_value_is_generic(decl->value);
+            info->ext.sema.generic = generic;
             if (generic && generic->kind == SEMA_GENERIC_TYPE) {
-                // TODO: refactor this shit
-                HirGenScopeId gen_scope = sema_module_add_gen_scope(module);
                 SemaType **params = vec_new_in(module->mempool, SemaType*);
                 for (size_t i = 0; i < vec_len(generic->gen_params); i++) {
                     HirGenParamId param = hir_add_gen_param(module->hir);
-                    hir_gen_scope_add_param(module->hir, gen_scope, param);
                     assert(generic->gen_params[i]->kind == SEMA_TYPE_GENERIC);
                     vec_push(params, sema_type_new_gen_param(module->mempool, generic->gen_params[i]->generic_name, param));
                 }
-                SemaGeneric *func_generic = sema_generic_new_func(module->mempool, module, info->name, params, gen_scope);
                 // ----------------
-                ext_of = sema_value_is_type(sema_generate(generic, func_generic->gen_params));
+                ext_of = sema_value_is_type(sema_generate(generic, params));
                 assert(ext_of);
-                info->ext.sema.func_generic = func_generic;
-                info->ext.sema.generic = generic;
+                info->ext.sema.params = params;
             }
         }
         if (!ext_of) {

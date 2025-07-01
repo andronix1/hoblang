@@ -10,15 +10,13 @@
 #include "sema/module/value.h"
 #include <stdio.h>
 
-SemaGeneric *sema_module_generic_func(SemaModule *module, AstGeneric *generic, Slice name) {
-    HirGenScopeId gen_scope = sema_module_add_gen_scope(module);
+SemaType **sema_module_generic_func_params(SemaModule *module, AstGeneric *generic) {
     SemaType **params = vec_new_in(module->mempool, SemaType*);
     for (size_t i = 0; i < vec_len(generic->params); i++) {
         HirGenParamId param = hir_add_gen_param(module->hir);
-        hir_gen_scope_add_param(module->hir, gen_scope, param);
         vec_push(params, sema_type_new_gen_param(module->mempool, generic->params[i].name, param));
     }
-    return sema_generic_new_func(module->mempool, module, name, params, gen_scope);
+    return params;
 }
 
 SemaGeneric *sema_module_generic_type(SemaModule *module, AstGeneric *generic, Slice name) {
