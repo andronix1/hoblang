@@ -4,7 +4,7 @@
 #include "sema/module/decl.h"
 #include "sema/module/module.h"
 #include "sema/module/stages/stages.h"
-#include "sema/module/type.h"
+#include "sema/module/type/type.h"
 #include "sema/module/value.h"
 #include <stdio.h>
 

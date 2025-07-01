@@ -7,7 +7,7 @@
 #include "sema/module/scope.h"
 #include "sema/module/stmts/body.h"
 #include "sema/module/exprs/expr.h"
-#include "sema/module/type.h"
+#include "sema/module/type/type.h"
 
 bool sema_module_emit_stmt_while(SemaModule *module, AstWhile *while_loop) {
     SemaExprOutput output = sema_expr_output_new(module->mempool);

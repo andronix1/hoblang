@@ -1,13 +1,12 @@
 #include "fun_info.h"
 #include "core/null.h"
 #include "sema/module/api/value.h"
-#include "sema/module/ast/generic.h"
 #include "sema/module/ast/type.h"
 #include "sema/module/decl.h"
 #include "sema/module/generic.h"
 #include "sema/module/module.h"
 #include "ast/node.h"
-#include "sema/module/type.h"
+#include "sema/module/type/type.h"
 #include "sema/module/value.h"
 
 bool sema_func_info_setup(SemaModule *module, AstFunInfo *info) {
@@ -21,7 +20,17 @@ bool sema_func_info_setup(SemaModule *module, AstFunInfo *info) {
         if (!ext_of) {
             SemaGeneric *generic = sema_value_is_generic(decl->value);
             if (generic && generic->kind == SEMA_GENERIC_TYPE) {
-                SemaGeneric *func_generic = NOT_NULL(sema_module_generic_func(module, generic->type.source, info->name));
+                // TODO: refactor this shit
+                HirGenScopeId gen_scope = sema_module_add_gen_scope(module);
+                SemaType **params = vec_new_in(module->mempool, SemaType*);
+                for (size_t i = 0; i < vec_len(generic->gen_params); i++) {
+                    HirGenParamId param = hir_add_gen_param(module->hir);
+                    hir_gen_scope_add_param(module->hir, gen_scope, param);
+                    assert(generic->gen_params[i]->kind == SEMA_TYPE_GENERIC);
+                    vec_push(params, sema_type_new_gen_param(module->mempool, generic->gen_params[i]->generic_name, param));
+                }
+                SemaGeneric *func_generic = sema_generic_new_func(module->mempool, module, info->name, params, gen_scope);
+                // ----------------
                 ext_of = sema_value_is_type(sema_generate(generic, func_generic->gen_params));
                 assert(ext_of);
                 info->ext.sema.func_generic = func_generic;
@@ -59,7 +68,7 @@ void sema_module_push_fun_info_decl(SemaModule *module, AstFunInfo *info, SemaVa
     if (info->ext.is) {
         SemaType *ext_type = info->ext.sema.type;
         if (info->ext.sema.generic) {
-            sema_generic_add_ext_function(module, info->ext.sema.generic, info->name,
+            sema_generic_type_add_extension(module, info->ext.sema.generic, info->name,
                 sema_alias_decl_new(value, source_module, info->ext.by_ref));
         } else {
             if (!ext_type->alias) {

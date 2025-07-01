@@ -8,7 +8,7 @@
 #include "sema/module/stages/nodes/fun_info.h"
 #include "sema/module/module.h"
 #include "sema/module/stmts/body.h"
-#include "sema/module/type.h"
+#include "sema/module/type/type.h"
 #include "sema/module/value.h"
 
 typedef struct { 
@@ -140,7 +140,7 @@ bool sema_module_stage_emit_fun(SemaModule *module, AstFunDecl *func) {
                 type->function.args[arg_id], hir_get_func_arg_local(module->hir, func_id, arg_id))));
     }
     hir_init_fun_body(module->hir, func_id, sema_module_emit_code(module, func->body, NULL));
-    if (!func->body->sema.breaks && !sema_type_eq(type->function.returns, sema_type_new_void(module->mempool))) {
+    if (!func->body->sema.breaks && !sema_type_can_be_downcasted(type->function.returns, sema_type_new_void(module->mempool))) {
         sema_module_err(module, func->info->name, "expected function to return value but its body passes");
     }
 

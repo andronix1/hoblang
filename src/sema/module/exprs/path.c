@@ -15,7 +15,7 @@
 #include "sema/module/exprs/expr.h"
 #include "sema/module/generic.h"
 #include "sema/module/std.h"
-#include "sema/module/type.h"
+#include "sema/module/type/type.h"
 #include "sema/module/module.h"
 #include "sema/module/value.h"
 #include <stdio.h>

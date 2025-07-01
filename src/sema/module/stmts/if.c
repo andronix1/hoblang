@@ -7,7 +7,7 @@
 #include "sema/module/module.h"
 #include "sema/module/stmts/body.h"
 #include "sema/module/exprs/expr.h"
-#include "sema/module/type.h"
+#include "sema/module/type/type.h"
 
 bool sema_module_emit_stmt_if(SemaModule *module, AstIf *if_else) {
     HirStmtCondJmpBlock *conds = vec_new_in(module->mempool, HirStmtCondJmpBlock);

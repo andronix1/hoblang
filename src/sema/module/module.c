@@ -148,6 +148,16 @@ void sema_module_scope_break(SemaModule *module) {
     scope->breaks = true;
 }
 
+HirGenScopeId sema_module_add_gen_scope(SemaModule *module) {
+    HirGenScopeId gen_scope = hir_add_gen_scope(module->hir);
+    if (vec_len(module->gen_scopes) > 0) {
+        hir_gen_scope_add_scope(module->hir, vec_top(module->gen_scopes)->scope, gen_scope);
+    } else {
+        hir_add_root_gen_scope(module->hir, gen_scope);
+    }
+    return gen_scope;
+}
+
 void sema_module_emit_defers_before_loop(SemaModule *module, HirLoopId id) {
     return sema_module_emit_defers_before_opt_loop(module, &id);
 }

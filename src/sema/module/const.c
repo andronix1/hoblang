@@ -1,5 +1,5 @@
 #include "const.h"
-#include "sema/module/type.h"
+#include "sema/module/type/type.h"
 
 SemaConst *sema_const_new_undefined(Mempool *mempool, SemaType *type)
     MEMPOOL_CONSTRUCT(SemaConst, 

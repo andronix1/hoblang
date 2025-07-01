@@ -6,18 +6,13 @@
 #include "sema/module/decl.h"
 #include "sema/module/generic.h"
 #include "sema/module/module.h"
-#include "sema/module/type.h"
+#include "sema/module/type/type.h"
 #include "sema/module/value.h"
 #include <stdio.h>
 
 SemaGeneric *sema_module_generic_func(SemaModule *module, AstGeneric *generic, Slice name) {
+    HirGenScopeId gen_scope = sema_module_add_gen_scope(module);
     SemaType **params = vec_new_in(module->mempool, SemaType*);
-    HirGenScopeId gen_scope = hir_add_gen_scope(module->hir);
-    if (vec_len(module->gen_scopes) > 0) {
-        hir_gen_scope_add_scope(module->hir, vec_top(module->gen_scopes)->scope, gen_scope);
-    } else {
-        hir_add_root_gen_scope(module->hir, gen_scope);
-    }
     for (size_t i = 0; i < vec_len(generic->params); i++) {
         HirGenParamId param = hir_add_gen_param(module->hir);
         hir_gen_scope_add_param(module->hir, gen_scope, param);
@@ -31,7 +26,7 @@ SemaGeneric *sema_module_generic_type(SemaModule *module, AstGeneric *generic, S
     for (size_t i = 0; i < vec_len(generic->params); i++) {
         vec_push(params, sema_type_new_generic(module->mempool, generic->params[i].name));
     }
-    return sema_generic_new_type(module->mempool, module, name, params, generic);
+    return sema_generic_new_type(module->mempool, module, name, params);
 }
 
 static inline Slice sema_type_generic_name(SemaType *type) {

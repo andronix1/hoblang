@@ -7,7 +7,7 @@
 #include "sema/module/scope.h"
 #include "sema/module/exprs/expr.h"
 #include "sema/module/exprs/binop.h"
-#include "sema/module/type.h"
+#include "sema/module/type/type.h"
 #include <assert.h>
 #include <stdio.h>
 

@@ -12,7 +12,7 @@
 #include "sema/module/decl.h"
 #include "sema/module/exprs/expr.h"
 #include "sema/module/module.h"
-#include "sema/module/type.h"
+#include "sema/module/type/type.h"
 #include "sema/module/value.h"
 
 static inline SemaRuntimeKind ast_value_kind_to_sema(AstValueDeclKind kind) {
