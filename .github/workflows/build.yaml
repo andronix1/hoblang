@@ -30,7 +30,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake -DDISABLE_TESTS=YES ../
+          cmake -DDISABLE_TESTS=YES -DCMAKE_BUILD_TYPE=Release ../
 
       - name: Build
         working-directory: build
