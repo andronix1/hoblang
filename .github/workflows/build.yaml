@@ -42,6 +42,8 @@ jobs:
           mkdir ${{ matrix.config.artifact }}
           mv ./build/hoblang ${{ matrix.config.artifact }}
           mv ./lib ${{ matrix.config.artifact }}/
+          chmod +x ./install.sh
+          mv ./install.sh ${{ matrix.config.artifact }}/
           tar -cJf ${{ matrix.config.artifact }}.tar.gz ${{ matrix.config.artifact }}
 
       - name: Upload artifact
