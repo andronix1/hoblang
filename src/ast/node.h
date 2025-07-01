@@ -59,7 +59,7 @@ typedef struct AstFunInfo {
         struct {
             SemaType *type;
             SemaGeneric *generic;
-            SemaGeneric *func_generic;
+            SemaType **params;
         } sema;
     } ext;
 } AstFunInfo;

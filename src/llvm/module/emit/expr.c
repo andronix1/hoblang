@@ -261,7 +261,7 @@ static LlvmEmitStepRes llvm_emit_expr_step(
             }
         }
         case HIR_EXPR_STEP_BUILD_STRUCT: {
-            HirType *type = step->build_struct.type;
+            HirType *type UNUSED = step->build_struct.type;
             assert(type->kind == HIR_TYPE_STRUCT);
             LLVMTypeRef llvm_type = llvm_runtime_type(module, step->build_struct.type);
             LLVMValueRef result = llvm_alloca(module, llvm_type);

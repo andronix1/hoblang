@@ -11,7 +11,7 @@
 #include "sema/module/const.h"
 #include "sema/module/exprs/expr.h"
 #include "sema/module/module.h"
-#include "sema/module/type.h"
+#include "sema/module/type/type.h"
 
 SemaType *sema_module_type(SemaModule *module, AstType *type) {
     switch (type->kind) {

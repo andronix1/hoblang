@@ -7,7 +7,7 @@
 #include "sema/module/ast/type.h"
 #include "sema/module/const.h"
 #include "sema/module/module.h"
-#include "sema/module/type.h"
+#include "sema/module/type/type.h"
 #include "ast/type.h"
 #include "sema/module/value.h"
 #include <string.h>

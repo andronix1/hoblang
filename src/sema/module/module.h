@@ -3,6 +3,7 @@
 #include "ast/api/node.h"
 #include "core/mempool.h"
 #include "core/slice.h"
+#include "hir/api/gen.h"
 #include "hir/api/hir.h"
 #include "parser/api.h"
 #include "sema/api/project.h"
@@ -71,5 +72,7 @@ SemaTypeId sema_module_register_type_alias(SemaModule *module);
 void sema_module_init_type_alias(SemaModule *module, SemaTypeId id, SemaType *type);
 
 void sema_module_push_decl(SemaModule *module, Slice name, SemaDecl *decl);
+
+HirGenScopeId sema_module_add_gen_scope(SemaModule *module);
 
 bool sema_module_is_global_scope(SemaModule *module);

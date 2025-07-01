@@ -10,7 +10,7 @@
 #include "sema/module/decl.h"
 #include "sema/module/module.h"
 #include "sema/module/stmts/body.h"
-#include "sema/module/type.h"
+#include "sema/module/type/type.h"
 #include "sema/module/value.h"
 
 SemaValue *sema_module_emit_expr_function(SemaModule *module, AstExprFunc *func, Slice where, SemaExprCtx ctx) {
@@ -79,7 +79,7 @@ SemaValue *sema_module_emit_expr_function(SemaModule *module, AstExprFunc *func,
         ));
     }
     hir_init_fun_body(module->hir, func_id, sema_module_emit_code(module, func->body, NULL));
-    if (!func->body->sema.breaks && !sema_type_eq(type->function.returns, sema_type_new_void(module->mempool))) {
+    if (!func->body->sema.breaks && !sema_type_can_be_downcasted(type->function.returns, sema_type_new_void(module->mempool))) {
         sema_module_err(module, where, "expected function to return value but its body passes");
     }
     sema_module_pop_scope(module);

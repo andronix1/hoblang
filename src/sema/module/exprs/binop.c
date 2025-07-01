@@ -5,7 +5,7 @@
 #include "sema/module/api/type.h"
 #include "sema/module/api/value.h"
 #include "sema/module/module.h"
-#include "sema/module/type.h"
+#include "sema/module/type/type.h"
 #include "sema/module/value.h"
 
 bool sema_type_to_hir_number_info(SemaType *type, HirNumberInfo *output) {

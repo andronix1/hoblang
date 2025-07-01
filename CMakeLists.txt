@@ -10,8 +10,13 @@ set(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
 find_package(LLVM REQUIRED)
 message(STATUS "LLVM version: ${LLVM_PACKAGE_VERSION}")
 
-add_compile_options(-O3 -g -fsanitize=address -Wall -Wextra -Werror)
-add_link_options(-fsanitize=address)
+add_compile_options(
+    "-Wall" "-Wextra" "-Werror"
+    "$<$<CONFIG:DEBUG>:-g;-fsanitize=address>"
+)
+add_link_options(
+    "$<$<CONFIG:DEBUG>:-fsanitize=address>"
+)
 
 file(GLOB_RECURSE sources src/*.c)
 list(FILTER sources EXCLUDE REGEX "\\.test\\.")

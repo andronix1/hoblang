@@ -27,12 +27,6 @@ HirTypeIntSize sema_type_int_size_to_hir(SemaTypeIntSize size) {
     UNREACHABLE;
 }
 
-SemaTypeAlias *sema_type_alias_new(Mempool *mempool, Slice name)
-    MEMPOOL_CONSTRUCT(SemaTypeAlias,
-        out->name = name;
-        out->decls_map = keymap_new_in(mempool, SemaExtDecl);
-    )
-
 #define SEMA_TYPE_CONSTRUCT(KIND, FIELDS) { \
         SemaType *out = mempool_alloc(mempool, SemaType); \
         out->kind = KIND; \
@@ -87,6 +81,7 @@ SemaType *sema_type_new_generate(Mempool *mempool, SemaGeneric *generic, SemaTyp
     SEMA_TYPE_CONSTRUCT(SEMA_TYPE_GENERATE,
         out->generate.generic = generic;
         out->generate.params = params;
+        out->generate.cache = NULL;
     )
 
 SemaType *sema_type_new_gen_param(Mempool *mempool, Slice name, HirGenParamId gen_param)
@@ -103,17 +98,22 @@ SemaType *sema_type_new_alias(Mempool *mempool, SemaType *type, SemaTypeAlias *a
     return result;
 }
 
-bool sema_type_search_ext(SemaModule *module, SemaType *type, Slice name, SemaExtDecl *output) {
-    if (type->kind == SEMA_TYPE_POINTER) {
-        if (sema_type_search_ext(module, type->pointer_to, name, output) && output->by_ref) {
-            output->by_ref = false;
-            return true;
-        }
-    }
+SemaType *sema_type_generate(SemaType *type) {
+    assert(type->kind == SEMA_TYPE_GENERATE);
+    if (type->generate.cache) return type->generate.cache;
+    return type->generate.cache = sema_generic_type_generate(type->generate.generic, type->generate.params);
+}
+
+SemaType *sema_type_get_record(SemaType *type) {
+    assert(type->kind == SEMA_TYPE_RECORD);
+    return type->record.module->types[type->record.id];
+}
+
+static inline bool sema_type_search_primary_ext(SemaModule *module, SemaType *type, Slice name, SemaExtDecl *output) {
     if (type->kind == SEMA_TYPE_GENERATE) {
         SemaGeneric *generic = type->generate.generic;
         assert(generic->kind == SEMA_GENERIC_TYPE);
-        SemaExtDecl *decl = keymap_get(generic->type.type->alias->decls_map, name);
+        SemaExtDecl *decl = keymap_get(generic->type->alias->decls_map, name);
         if (decl) {
             *output = *decl;
             SemaGeneric *generic = sema_value_is_generic(output->function);
@@ -121,23 +121,42 @@ bool sema_type_search_ext(SemaModule *module, SemaType *type, Slice name, SemaEx
             output->function = sema_generate(generic, type->generate.params);
             return true;
         }
-        return sema_type_search_ext(module, sema_type_generate(module->mempool, generic->type.type,
-            generic->gen_params, sema_generic_get_input(generic, type->generate.params)), name, output);
+        return sema_type_search_ext(module, sema_type_generate(type), name, output);
     }
     if (!type->alias) {
         return false;
     }
     SemaExtDecl *decl = keymap_get(type->alias->decls_map, name);
     if (decl) {
-        if (decl->module != NULL && decl->module != module) {
-            sema_module_err(module, name, "`$S` is private", name);
-            return false;
-        }
         *output = *decl;
         return true;
     }
     if (type->kind == SEMA_TYPE_RECORD) {
-        return sema_type_search_ext(module, type->record.module->types[type->record.id], name, output);
+        return sema_type_search_ext(module, sema_type_get_record(type), name, output);
+    }
+    return false;
+}
+
+static inline bool sema_type_search_all_ext(SemaModule *module, SemaType *type, Slice name, SemaExtDecl *output) {
+    if (sema_type_search_primary_ext(module, type, name, output)) {
+        return true;
+    }
+    if (type->kind == SEMA_TYPE_POINTER) {
+        if (sema_type_search_primary_ext(module, type->pointer_to, name, output) && output->by_ref) {
+            output->by_ref = false;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool sema_type_search_ext(SemaModule *module, SemaType *type, Slice name, SemaExtDecl *output) {
+    if (sema_type_search_all_ext(module, type, name, output)) {
+        if (output->module != NULL && output->module != module) {
+            sema_module_err(module, name, "`$S` is private", name);
+            return false;
+        }
+        return true;
     }
     return false;
 }

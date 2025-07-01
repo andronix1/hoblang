@@ -5,7 +5,7 @@
 #include "sema/module/module.h"
 #include "sema/module/scope.h"
 #include "sema/module/exprs/expr.h"
-#include "sema/module/type.h"
+#include "sema/module/type/type.h"
 
 bool sema_module_emit_stmt_return(SemaModule *module, AstReturn *ret) {
     if (!ret->value) {

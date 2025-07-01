@@ -2,7 +2,7 @@
 #include "sema/module/api/type.h"
 #include "sema/module/const.h"
 #include "sema/module/module.h"
-#include "sema/module/type.h"
+#include "sema/module/type/type.h"
 #include "sema/module/value.h"
 
 SemaValue *sema_module_emit_expr_int(SemaModule *module, uint64_t val, SemaExprCtx ctx) {

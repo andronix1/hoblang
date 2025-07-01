@@ -11,10 +11,10 @@
 #include "sema/module/scope.h"
 #include "sema/module/stmts/body.h"
 #include "sema/module/exprs/expr.h"
-#include "sema/module/type.h"
+#include "sema/module/type/type.h"
 #include "sema/module/value.h"
 
-inline SemaValueRuntime *sema_type_must_have_ext(SemaModule *module, SemaType *type, Slice where, Slice name, bool *by_ref) {
+SemaValueRuntime *sema_type_must_have_ext(SemaModule *module, SemaType *type, Slice where, Slice name, bool *by_ref) {
     SemaExtDecl decl;
     if (!sema_type_search_ext(module, type, name, &decl)) {
         sema_module_err(module, where, "expression type must have $S extension for using in for-loop", name);
@@ -47,14 +47,14 @@ bool sema_module_emit_stmt_for(SemaModule *module, AstFor *for_loop) {
 
     SemaType *get_current_type_target = sema_type_new_function(module->mempool, vec_create_in(module->mempool,
         get_current->type->function.args[0]), target_type);
-    if (!sema_type_eq(get_current->type, get_current_type_target)) {
+    if (!sema_type_can_be_downcasted(get_current->type, get_current_type_target)) {
         sema_module_err(module, for_loop->iterator->slice, "`getCurrent` has type $t when $t is required", next->type, get_current_type_target);
         return NULL;
     }
 
     SemaType *next_type_target = sema_type_new_function(module->mempool, vec_create_in(module->mempool,
         next->type->function.args[0]), sema_type_new_bool(module->mempool));
-    if (!sema_type_eq(next->type, next_type_target)) {
+    if (!sema_type_can_be_downcasted(next->type, next_type_target)) {
         sema_module_err(module, for_loop->iterator->slice, "`next` has type $t when $t is required", next->type, next_type_target);
         return NULL;
     }

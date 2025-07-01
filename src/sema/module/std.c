@@ -8,7 +8,7 @@
 #include "sema/module/api/value.h"
 #include "sema/module/decl.h"
 #include "sema/module/module.h"
-#include "sema/module/type.h"
+#include "sema/module/type/type.h"
 
 #define MODULE_NAME "std"
 
@@ -49,7 +49,7 @@ static bool sema_type_struct_matches(SemaType *type, SemaType **fields) {
     }
     for (size_t i = 0; i < vec_len(type->structure.fields_map); i++) {
         keymap_at(type->structure.fields_map, i, field);
-        if (!sema_type_eq(field->value.type, fields[i])) {
+        if (!sema_type_can_be_downcasted(field->value.type, fields[i])) {
             return false;
         }
     }
