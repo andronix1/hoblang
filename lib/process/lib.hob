@@ -12,24 +12,26 @@ public use c.exit;
 
 public type Pid = i32;
 
-public type CloneFlags = i32;
+public type CloneFlags = enum (i32) {
+    none,
+    newCGroup = 0x2000000,
+    newIpc = 0x8000000,
+    newNet = 0x40000000,
+    newPid = 0x20000000,
+    newUser = 0x10000000,
+    newNs = 0x20000,
+    newUts = 0x4000000,
+    vm = 1,
+    vFork = 1,
+    sigChld = 17,
+};
 
 public fun cloneFlags() -> CloneFlags { return 0 as CloneFlags; }
-fun CloneFlags.or(self, value: i32) -> CloneFlags { return (self as i32 | value) as CloneFlags; }
-public fun CloneFlags.newCGroup(self) -> CloneFlags { return self.or(0x2000000); }
-public fun CloneFlags.newIpc(self) -> CloneFlags { return self.or(0x8000000); }
-public fun CloneFlags.newNet(self) -> CloneFlags { return self.or(0x40000000); }
-public fun CloneFlags.newPid(self) -> CloneFlags { return self.or(0x20000000); }
-public fun CloneFlags.newUser(self) -> CloneFlags { return self.or(0x10000000); }
-public fun CloneFlags.newNs(self) -> CloneFlags { return self.or(0x20000); }
-public fun CloneFlags.newUts(self) -> CloneFlags { return self.or(0x4000000); }
-public fun CloneFlags.vm(self) -> CloneFlags { return self.or(1) as CloneFlags; }
-public fun CloneFlags.vFork(self) -> CloneFlags { return self.or(1 << 14) as CloneFlags; }
-public fun CloneFlags.sigChld(self) -> CloneFlags { return self.or(17); }
+public fun CloneFlags.with(self, value: CloneFlags) -> CloneFlags { return (self as i32 | value as i32) as CloneFlags; }
 
 public fun clone<T>(flags: CloneFlags, stack: Slice.<u8>, callback: fun (*T) -> i32, arg: *T) -> Result.<Pid> {
     return c.err.handleMapped.<Pid>(
-        c.clone(callback as fun (*void) -> i32, &stack.raw[stack.length] as *void, flags, arg as *void),
+        c.clone(callback as fun (*void) -> i32, &stack.raw[stack.length] as *void, flags as i32, arg as *void),
         fun (value) {
             return value as Pid;
         }
@@ -76,7 +78,7 @@ public fun Pid.mapUid(self, source: i32, dest: i32, count: i32) -> NoneResult {
     path.appendInt32(self);
     path.appendSlice("/uid_map");
 
-    final fileRes = io.fs.open(path.toString(), io.fs.openFlags().writeOnly());
+    final fileRes = io.fs.open(path.toString(), io.fs.OpenFlags.writeOnly);
     if !fileRes.isOk {
         return fileRes.convertErr.<std.None>();
     }
