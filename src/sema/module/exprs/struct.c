@@ -40,6 +40,7 @@ SemaValue *sema_module_emit_expr_struct(SemaModule *module, AstExprStructConstru
 
     bool is_not_const = false;
 
+    bool failed = true;
     for (size_t i = 0; i < vec_len(structure->fields_map); i++) {
         keymap_at(structure->fields_map, i, field);
         size_t idx = keymap_get_idx(root->structure.fields_map, field->key);
@@ -49,7 +50,10 @@ SemaValue *sema_module_emit_expr_struct(SemaModule *module, AstExprStructConstru
             SemaType *field_type = tfield->value.type;
             SemaValueRuntime *runtime = sema_module_emit_runtime_expr(module, field->value.expr, sema_expr_ctx_new(
                 ctx.output, field_type));
-            if (!runtime) continue;
+            if (!runtime) {
+                failed = true;
+                continue;
+            }
             if (!sema_type_can_be_downcasted(runtime->type, field_type)) {
                 sema_module_err(module, field->value.expr->slice,
                     "cannot set expression of type $t to field struct of type $t", runtime->type, field_type);
@@ -67,6 +71,9 @@ SemaValue *sema_module_emit_expr_struct(SemaModule *module, AstExprStructConstru
     if (vec_len(structure->fields_map) != vec_len(root->structure.fields_map)) {
         sema_module_err(module, type_slice, "there is $l fields in structure, but only $l were initialized",
                 vec_len(root->structure.fields_map), vec_len(structure->fields_map));
+    }
+    if (failed) {
+        return NULL;
     }
     if (is_not_const) {
         size_t step_id = sema_expr_output_push_step(ctx.output, hir_expr_step_new_build_struct(sema_type_to_hir(module, root), fields));
