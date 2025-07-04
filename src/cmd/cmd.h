@@ -15,9 +15,14 @@ typedef enum {
 } CmdBuildKind;
 
 typedef struct {
+    bool release;
+} CmdCodeGen;
+
+typedef struct {
     CmdBuildKind kind;
     CmdSources sources;
     Path output;
+    CmdCodeGen code_gen;
 
     union {
         struct {
@@ -39,6 +44,9 @@ typedef struct {
     CmdEmitKind kind;
     CmdSources sources;
     Path output;
+    union {
+        CmdCodeGen code_gen;
+    };
 } CmdEmit;
 
 typedef enum {

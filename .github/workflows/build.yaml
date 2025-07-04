@@ -2,6 +2,8 @@ name: Build and test
 
 on:
   push:
+    branches:
+      - feature
   release:
     types: [created]
 
@@ -30,7 +32,10 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake -DDISABLE_TESTS=YES -DCMAKE_BUILD_TYPE=Release ../
+          cmake \
+            -DDISABLE_TESTS=YES \
+            -DHOBLANG_VERSION=${{ github.event.release != null && github.event.release.tag_name || '' }} \
+            -DCMAKE_BUILD_TYPE=Release ../
 
       - name: Build
         working-directory: build

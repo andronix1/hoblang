@@ -5,6 +5,13 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(DISABLE_TESTS "Disable tests generation" OFF)
 
+if(NOT "${HOBLANG_VERSION}" STREQUAL "")
+    add_definitions(-DHOBLANG_VERSION=${HOBLANG_VERSION})
+else()
+    string(TIMESTAMP CURRENT_TIME "%s")
+    add_definitions(-DHOBLANG_VERSION=build-${CURRENT_TIME})
+endif()
+
 set(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
 set(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
 find_package(LLVM REQUIRED)
