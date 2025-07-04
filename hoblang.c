@@ -172,8 +172,11 @@ static bool cmd_help(char *exe) {
     return true;
 }
 
+#define _STR(WHAT) #WHAT
+#define STR(WHAT) _STR(WHAT) 
+
 static bool cmd_version() {
-    logln("1.0.0-preview");
+    logln(STR(HOBLANG_VERSION));
     return true;
 }
 
