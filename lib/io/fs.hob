@@ -1,5 +1,11 @@
 import "fd.hob" as fd;
 
+import result;
+import strings;
+import c;
+
+use result.Result;
+
 public type File = fd.Fd;
 
 type OpenFlags = i32;
@@ -12,11 +18,13 @@ public fun OpenFlags.exclusive(self) -> OpenFlags { return self.or(200); }
 public fun OpenFlags.trunc(self) -> OpenFlags { return self.or(1000); }
 public fun OpenFlags.append(self) -> OpenFlags { return self.or(2000); }
 
-#`
 public fun open(path: string, flags: OpenFlags) -> Result.<File> {
-    c.open();
+    var cPath = strings.fromString(path);
+    defer cPath.free();
+    return c.err.handleMapped.<File>(c.open(cPath.makeC(), flags), fun (res) {
+        return res as File;
+    });
 }
-`#
 
 
 

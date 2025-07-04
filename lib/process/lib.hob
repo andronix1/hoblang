@@ -70,9 +70,28 @@ public fun run(command: string, args: Slice.<string>) -> NoneResult {
     return c.err.handleNone(c.execv(cPath, cArgs.data.raw));
 }
 
-#`
-public fun mapUid(pid: Pid) -> NoneResult {
-    return c.err.handleNone(c.clearenv());
+public fun Pid.mapUid(self, source: i32, dest: i32, count: i32) -> NoneResult {
+    var path = strings.fromString("/proc/");
+    defer path.free();
+    path.appendInt32(self);
+    path.appendSlice("/uid_map");
+
+    final fileRes = io.fs.open(path.toString(), io.fs.openFlags().writeOnly());
+    if !fileRes.isOk {
+        return fileRes.convertErr.<std.None>();
+    }
+    final file = fileRes.unwrap();
+    defer file.close();
+
+    var content = strings.new();
+    defer content.free();
+    content.appendInt32(source);
+    content.appendSlice(" ");
+    content.appendInt32(dest);
+    content.appendSlice(" ");
+    content.appendInt32(count);
+    content.appendSlice("\n");
+
+    return file.putString(content.toString());
 }
-`#
 

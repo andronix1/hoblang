@@ -16,6 +16,10 @@ public fun clear() -> NoneResult {
     return c.err.handleNone(c.clearenv());
 }
 
+public fun setUid(uid: i32) -> NoneResult {
+    return c.err.handleNone(c.setuid(uid));
+}
+
 public fun changeRoot(root: string) -> NoneResult {
     var cRoot = strings.fromString(root);
     defer cRoot.free();
