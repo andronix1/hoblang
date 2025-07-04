@@ -74,6 +74,12 @@ SemaType *sema_type_new_function(Mempool *mempool, SemaType **args, SemaType *re
         out->function.returns = returns;
     )
 
+SemaType *sema_type_new_enum(Mempool *mempool, SemaType *type, SemaEnumVariant *variants_map)
+    SEMA_TYPE_CONSTRUCT(SEMA_TYPE_ENUM,
+        out->enumeration.variants_map = variants_map;
+        out->enumeration.type = type;
+    )
+
 SemaType *sema_type_new_generic(Mempool *mempool, Slice name)
     SEMA_TYPE_CONSTRUCT(SEMA_TYPE_GENERIC, out->generic_name = name)
 

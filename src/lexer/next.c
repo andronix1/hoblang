@@ -236,6 +236,7 @@ static Token lexer_try_next(Lexer *lexer) {
                 else if (slice_eq(slice, slice_from_cstr("undefined"))) return token_simple(TOKEN_UNDEFINED);
                 else if (slice_eq(slice, slice_from_cstr("for"))) return token_simple(TOKEN_FOR);
                 else if (slice_eq(slice, slice_from_cstr("in"))) return token_simple(TOKEN_IN);
+                else if (slice_eq(slice, slice_from_cstr("enum"))) return token_simple(TOKEN_ENUM);
                 else return token_simple(TOKEN_IDENT);
             }
             return token_simple(TOKEN_FAILED);

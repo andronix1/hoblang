@@ -44,6 +44,11 @@ bool ast_type_eq(const AstType *a, const AstType *b) {
             return true;
         }
         case AST_TYPE_POINTER: return ast_type_eq(a->pointer_to, b->pointer_to);
+        case AST_TYPE_ENUM:
+            if (vec_len(a->enumeration.variants_map) != vec_len(b->enumeration.variants_map)) {
+                return false;
+            }
+            return equals_nullable(a->enumeration.explicit_type, b->enumeration.explicit_type, (EqFunc)ast_type_eq);
         case AST_TYPE_ARRAY:
             return ast_expr_eq(a->array.length, a->array.length) && ast_type_eq(a->array.type, b->array.type);
         case AST_TYPE_FUNCTION:
@@ -80,3 +85,9 @@ AstType *ast_type_new_path(Mempool *mempool, AstPath *path)
 
 AstType *ast_type_new_pointer(Mempool *mempool, AstType *to)
     CONSTRUCT(AST_TYPE_POINTER, out->pointer_to = to;)
+
+AstType *ast_type_new_enum(Mempool *mempool, AstType *explicit, AstEnumVariant *variants_map)
+    CONSTRUCT(AST_TYPE_ENUM,
+        out->enumeration.explicit_type = explicit;
+        out->enumeration.variants_map = variants_map;
+    )

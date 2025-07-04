@@ -45,6 +45,23 @@ AstType *parse_type(Parser *parser) {
             PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_SQUARE_BRACE);
             return ast_type_new_array(parser->mempool, length, NOT_NULL(parse_type(parser)));
         }
+        case TOKEN_ENUM: {
+            AstType *explicit = NULL;
+            if (parser_next_should_be(parser, TOKEN_OPENING_CIRCLE_BRACE)) {
+                explicit = NOT_NULL(parse_type(parser));
+                PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_CIRCLE_BRACE);
+            }
+            PARSER_EXPECT_NEXT(parser, TOKEN_OPENING_FIGURE_BRACE);
+            AstEnumVariant *variants = keymap_new_in(parser->mempool, AstEnumVariant);
+            while (!parser_next_should_be(parser, TOKEN_CLOSING_FIGURE_BRACE)) {
+                Slice name = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
+                if (keymap_insert(variants, name, ast_enum_variant_new())) {
+                    parser_err(parser, name, "duplicate field");
+                }
+                if (!parser_check_list_sep(parser, TOKEN_CLOSING_FIGURE_BRACE)) return NULL;
+            }
+            return ast_type_new_enum(parser->mempool, explicit, variants);
+        }
         case TOKEN_IDENT:
             parser_skip_next(parser);
             return ast_type_new_path(parser->mempool, NOT_NULL(parse_path(parser)));
