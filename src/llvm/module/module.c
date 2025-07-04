@@ -19,7 +19,12 @@ void llvm_func_ctx_set(LlvmModule *module, HirFuncId id, LLVMValueRef func) {
 }
 
 LLVMValueRef llvm_alloca(LlvmModule *module, LLVMTypeRef type) {
-    LLVMPositionBuilderAtEnd(module->builder, module->func.defs);
+    LLVMValueRef instr = LLVMGetLastInstruction(module->func.defs);
+    if (instr && LLVMIsATerminatorInst(instr)) {
+        LLVMPositionBuilderBefore(module->builder, instr);
+    } else {
+        LLVMPositionBuilderAtEnd(module->builder, module->func.defs);
+    }
     LLVMValueRef value = LLVMBuildAlloca(module->builder, type, "");
     LLVMPositionBuilderAtEnd(module->builder, module->func.code);
     return value;
@@ -31,4 +36,16 @@ void llvm_module_set_block(LlvmModule *module, LLVMBasicBlockRef block) {
         module->func.defs = block;
     }
     LLVMPositionBuilderAtEnd(module->builder, block);
+}
+
+bool llvm_module_begin_loop(LlvmModule *module) {
+    if (module->func.in_loop) {
+        return false;
+    }
+    module->func.in_loop = true;
+    return true;
+}
+
+void llvm_module_end_loop(LlvmModule *module) {
+    module->func.in_loop = false;
 }

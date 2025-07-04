@@ -79,7 +79,11 @@ static void llvm_emit_stmt(LlvmModule *module, HirStmt *stmt) {
             llvm_emit_cond_jmp(module, &stmt->cond_jmp);
             break;
         case HIR_STMT_LOOP:
+            bool begun = llvm_module_begin_loop(module);
             llvm_emit_loop(module, &stmt->loop);
+            if (begun) {
+                llvm_module_end_loop(module); 
+            }
             break;
         case HIR_STMT_BREAK:
             LLVMBuildBr(module->builder, module->func.loops[stmt->break_loop.id].end);
