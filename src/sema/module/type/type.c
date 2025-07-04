@@ -140,6 +140,9 @@ static inline bool sema_type_search_primary_ext(SemaModule *module, SemaType *ty
     if (type->kind == SEMA_TYPE_RECORD) {
         return sema_type_search_ext(module, sema_type_get_record(type), name, output);
     }
+    if (type->kind == SEMA_TYPE_ENUM) {
+        return sema_type_search_ext(module, type->enumeration.type, name, output);
+    }
     return false;
 }
 

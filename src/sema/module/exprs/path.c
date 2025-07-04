@@ -147,6 +147,14 @@ static SemaValue *sema_module_analyze_expr_path_ident(SemaModule *module, SemaVa
     }
     SemaType *type = sema_value_is_type(value);
     if (type) {
+        SemaType *root = sema_type_root(type);
+        if (root->kind == SEMA_TYPE_ENUM) {
+            SemaEnumVariant *variant = keymap_get(root->enumeration.variants_map, ident);
+            if (variant) {
+                return sema_value_new_runtime_const(module->mempool, sema_const_new_integer(module->mempool,
+                    type, variant->value));
+            }
+        }
         SemaExtDecl ext;
         if (sema_type_search_ext(module, type, ident, &ext)) {
             return ext.function;
