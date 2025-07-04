@@ -40,7 +40,7 @@ SemaValue *sema_module_emit_expr_struct(SemaModule *module, AstExprStructConstru
 
     bool is_not_const = false;
 
-    bool failed = true;
+    bool failed = false;
     for (size_t i = 0; i < vec_len(structure->fields_map); i++) {
         keymap_at(structure->fields_map, i, field);
         size_t idx = keymap_get_idx(root->structure.fields_map, field->key);
