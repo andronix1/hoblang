@@ -41,7 +41,7 @@ static bool cmd_build(Mempool *mempool, CmdBuild *build) {
 
     complete_hir(hir);
 
-    LlvmModule *llvm = llvm_module_new();
+    LlvmModule *llvm = llvm_module_new(llvm_module_config(build->code_gen.release));
     llvm_module_emit(llvm, hir);
 
     char *temp_obj_path = "/tmp/hoblang-obj.o";
@@ -112,7 +112,7 @@ static bool cmd_emit(Mempool *mempool, CmdEmit *emit) {
         }
         case CMD_EMIT_IR: {
             complete_hir(hir);
-            LlvmModule *llvm = llvm_module_new();
+            LlvmModule *llvm = llvm_module_new(llvm_module_config(emit->code_gen.release));
             if (!llvm) {
                 sema_project_free(project);
                 hir_free(hir);
@@ -141,6 +141,11 @@ static bool cmd_emit(Mempool *mempool, CmdEmit *emit) {
 
 static inline void cmd_help_sources() {
     FLAG_VALUE("libDirs", "lib1,lib2,...", "add library search directories");
+    FLAG_EMPTY("internal", "should std module be used in this module?");
+}
+
+static inline void cmd_help_code_gen() {
+    FLAG_EMPTY("release", "is release mode?");
 }
 
 static bool cmd_help(char *exe) {
@@ -151,15 +156,18 @@ static bool cmd_help(char *exe) {
     });
     HELP_COMMAND("emit-llvm", "<entry> <output>", "emit LLVM IR", {
         cmd_help_sources();
+        cmd_help_code_gen();
     });
     HELP_COMMAND("build-exe", "<entry> <output>", "emit executable", {
         cmd_help_sources();
+        cmd_help_code_gen();
         FLAG_EMPTY("run", "run executable after successful build");
         FLAG_VALUE("linker", "/path/to/linker", "specify linker path");
         FLAG_VALUE("linkerFlags", "flag1,flag2,...", "specify additional flags for linker");
     });
     HELP_COMMAND("build-obj", "<entry> <output>", "emit executable", {
         cmd_help_sources();
+        cmd_help_code_gen();
     });
     return true;
 }

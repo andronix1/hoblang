@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static bool llvm_setup(LlvmModule *module) {
+static bool llvm_setup(LlvmModule *module, LlvmModuleConfig *config) {
     LLVMInitializeNativeAsmParser();
     LLVMInitializeNativeAsmPrinter();
     LLVMInitializeNativeTarget();
@@ -30,19 +30,20 @@ static bool llvm_setup(LlvmModule *module) {
     char *features = LLVMGetHostCPUFeatures();
     char *cpu = LLVMGetHostCPUName();
     char *triple = LLVMGetDefaultTargetTriple();
-    module->machine = LLVMCreateTargetMachine(target, triple, cpu, features, LLVMCodeGenLevelNone, LLVMRelocDefault, LLVMCodeModelDefault);
+    module->machine = LLVMCreateTargetMachine(target, triple, cpu, features,
+        config->release ? LLVMCodeGenLevelAggressive : LLVMCodeGenLevelNone,
+        LLVMRelocDefault, LLVMCodeModelDefault);
     free(features); free(cpu); free(triple);
-    // module->state = llvm_state(NULL, NULL, NULL);
     module->context = LLVMContextCreate();
     module->module = LLVMModuleCreateWithNameInContext("main", module->context);
     module->builder = LLVMCreateBuilderInContext(module->context);
     return true;
 }
 
-LlvmModule *llvm_module_new() {
+LlvmModule *llvm_module_new(LlvmModuleConfig config) {
     LlvmModule *result = malloc(sizeof(LlvmModule));
     result->mempool = mempool_new(1024);
-    if (!llvm_setup(result)) {
+    if (!llvm_setup(result, &config)) {
         llvm_module_free(result);
         return NULL;
     }

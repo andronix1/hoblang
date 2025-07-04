@@ -65,6 +65,11 @@ static inline Slice *raw_cmd_resolve_opt_list(Mempool *mempool, RawCmd *cmd, con
     }
 }
 
+static inline bool cmd_code_gen_parse(RawCmd *raw, CmdCodeGen *code_gen) {
+    NOT_NULL(raw_cmd_check_flag(raw, "release", &code_gen->release));
+    return true;
+}
+
 static inline bool cmd_sources_parse(Mempool *mempool, RawCmd *raw, CmdSources *sources) {
     sources->entry = NOT_NULL(raw_cmd_take_pos_req(raw, "entry file path"));
     sources->additional_lib_dirs = NOT_NULL(raw_cmd_resolve_opt_list(mempool, raw, "libDirs"));
@@ -89,6 +94,7 @@ Cmd *cmd_parse(Mempool *mempool, RawCmd *raw) {
         NOT_NULL(cmd_sources_parse(mempool, raw, &sources));
         char *output = NOT_NULL(raw_cmd_take_pos_req(raw, "output path"));
         cmd_setup_emit(cmd, CMD_EMIT_IR, output, sources);
+        NOT_NULL(cmd_code_gen_parse(raw, &cmd->emit.code_gen));
         return cmd;
     }
 
@@ -105,6 +111,7 @@ Cmd *cmd_parse(Mempool *mempool, RawCmd *raw) {
         NOT_NULL(cmd_sources_parse(mempool, raw, &sources));
         char *output = NOT_NULL(raw_cmd_take_pos_req(raw, "output path"));
         cmd_setup_build_obj(cmd, output, sources);
+        NOT_NULL(cmd_code_gen_parse(raw, &cmd->build.code_gen));
         return cmd;
     }
 
@@ -122,6 +129,7 @@ Cmd *cmd_parse(Mempool *mempool, RawCmd *raw) {
         Slice *linker_flags = NOT_NULL(raw_cmd_resolve_opt_list(mempool, raw, "linkerFlags"));
         bool run;
         NOT_NULL(raw_cmd_check_flag(raw, "run", &run));
+        NOT_NULL(cmd_code_gen_parse(raw, &cmd->build.code_gen));
         cmd_setup_build_exe(cmd, output, sources, linker_path, linker_flags, run);
         return cmd;
     }
