@@ -90,10 +90,10 @@ void sema_type_print(va_list list) {
             logs("*$t", type->pointer_to);
             break;
         case SEMA_TYPE_STRUCTURE:
-            logs("structure", type->pointer_to);
+            logs("structure");
             break;
         case SEMA_TYPE_ENUM:
-            logs("enumeration", type->pointer_to);
+            logs("enumeration");
             break;
         case SEMA_TYPE_GENERIC: logs("$S", type->generic_name); break;
         case SEMA_TYPE_GEN_PARAM: logs("$S", type->gen_param.name); break;
@@ -189,7 +189,7 @@ bool sema_type_can_be_downcasted(SemaType *type, SemaType *to) {
         return false;
     }
     switch (type->kind) {
-        case SEMA_TYPE_GEN_PARAM: case SEMA_TYPE_GENERIC: case SEMA_TYPE_STRUCTURE: case SEMA_TYPE_ENUM:  return false;
+        case SEMA_TYPE_GEN_PARAM: case SEMA_TYPE_GENERIC: case SEMA_TYPE_STRUCTURE: case SEMA_TYPE_ENUM: return false;
         case SEMA_TYPE_RECORD:
             return (type->record.module == to->record.module && type->record.id == to->record.id) || 
                 sema_type_can_be_downcasted(sema_type_get_record(type), to);
