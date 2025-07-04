@@ -34,7 +34,7 @@ AstType *parse_type(Parser *parser) {
                 Slice name = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
                 PARSER_EXPECT_NEXT(parser, TOKEN_COLON);
                 if (keymap_insert(fields, name, ast_struct_field_new(is_public, NOT_NULL(parse_type(parser))))) {
-                    parser_err(parser, name, "duplicate field");
+                    parser_err(parser, name, "duplicated field");
                 }
                 if (!parser_check_list_sep(parser, TOKEN_CLOSING_FIGURE_BRACE)) return NULL;
             }
@@ -55,8 +55,10 @@ AstType *parse_type(Parser *parser) {
             AstEnumVariant *variants = keymap_new_in(parser->mempool, AstEnumVariant);
             while (!parser_next_should_be(parser, TOKEN_CLOSING_FIGURE_BRACE)) {
                 Slice name = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
-                if (keymap_insert(variants, name, ast_enum_variant_new())) {
-                    parser_err(parser, name, "duplicate field");
+                AstExpr *expr = parser_next_should_be(parser, TOKEN_ASSIGN) ?
+                    NOT_NULL(parse_expr(parser)) : NULL;
+                if (keymap_insert(variants, name, ast_enum_variant_new(expr))) {
+                    parser_err(parser, name, "duplicated field");
                 }
                 if (!parser_check_list_sep(parser, TOKEN_CLOSING_FIGURE_BRACE)) return NULL;
             }

@@ -5,6 +5,7 @@
 #include "core/mempool.h"
 #include "core/slice.h"
 #include "ast/api/type.h"
+#include "sema/module/api/type.h"
 #include <stdbool.h>
 
 typedef enum {
@@ -35,10 +36,19 @@ typedef struct {
     AstType *type;
 } AstArray;
 
-typedef struct { } AstEnumVariant;
+typedef struct {
+    AstExpr *expr;
 
-static inline AstEnumVariant ast_enum_variant_new() {
-    AstEnumVariant variant = {};
+    struct {
+        SemaType *type;
+        size_t value;
+    } sema;
+} AstEnumVariant;
+
+static inline AstEnumVariant ast_enum_variant_new(AstExpr *expr) {
+    AstEnumVariant variant = {
+        .expr = expr
+    };
     return variant;
 }
 
