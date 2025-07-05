@@ -7,5 +7,5 @@ type ArchI8 = enum (i8) {
 };
 
 global fun main() -> i32 {
-    return ArchI8.arm as i32;
+    return ArchI8.arm as ?;
 }

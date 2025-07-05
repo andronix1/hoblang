@@ -5,9 +5,9 @@ import conv;
 use std.slice.Slice;
 
 public type String = list.List.<u8>;
-public const newWithCapacity: fun (usize) -> String = list.newWithCapacity.<u8>;
-public const new: fun () -> String = list.new.<u8>;
-public const fromString: fun (string) -> String = list.fromSlice.<u8>;
+public const newWithCapacity: fun (usize) -> String = list.newWithCapacity.<u8> as ?;
+public const new: fun () -> String = list.new.<u8> as ?;
+public const fromString: fun (string) -> String = list.fromSlice.<u8> as ?;
 
 public type Free = fun (String) -> void;
 

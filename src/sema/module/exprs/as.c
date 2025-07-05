@@ -9,7 +9,11 @@
 #include "sema/module/value.h"
 
 SemaValue *sema_module_emit_expr_as(SemaModule *module, AstAs *as, SemaExprCtx ctx) {
-    SemaType *dest = NOT_NULL(sema_module_type(module, as->type));
+    SemaType *dest = as->type ? NOT_NULL(sema_module_type(module, as->type)) : ctx.expectation;
+    if (!dest) {
+        sema_module_err(module, as->slice, "type infering specified but there is no type expected");
+        return NULL;
+    }
 
     SemaValueRuntime *source_runtime = NOT_NULL(sema_module_emit_runtime_expr(module, as->inner,
         sema_expr_ctx_new(ctx.output, dest)));
