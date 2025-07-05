@@ -5,7 +5,7 @@ use slice.Slice;
 use int.usize;
 
 public type string = Slice.<u8>;
-public const new: fun (*u8, usize) -> string = slice.new.<u8>;
+public const new: fun (*u8, usize) -> string = slice.new.<u8> as fun (*u8, usize) -> string;
 
 public fun fromC(str: *u8) -> string {
     var length: usize = 0;

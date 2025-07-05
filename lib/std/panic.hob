@@ -2,8 +2,7 @@ import "str.hob" as str;
 
 use str.string;
 
-public type PanicHandler = fun (string);
-public var handler: PanicHandler = fun (message) {
+public var handler: fun (string) = fun (message) {
     while true {}
 };
 

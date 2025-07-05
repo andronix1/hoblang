@@ -206,7 +206,8 @@ bool sema_type_can_be_downcasted(SemaType *type, SemaType *to) {
                 }
             }
             return sema_type_can_be_downcasted(type->function.returns, to->function.returns);
-        case SEMA_TYPE_POINTER: return sema_type_can_be_downcasted(type->pointer_to, to->pointer_to);
+        case SEMA_TYPE_POINTER:
+            return sema_type_can_be_downcasted(type->pointer_to, to->pointer_to) || to->pointer_to->kind == SEMA_TYPE_VOID;
         case SEMA_TYPE_ARRAY:
             return sema_type_can_be_downcasted(type->array.of, to->array.of) && type->array.length == to->array.length;
         case SEMA_TYPE_FLOAT: return type->float_size == to->float_size;
