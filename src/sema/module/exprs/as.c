@@ -21,7 +21,8 @@ SemaValue *sema_module_emit_expr_as(SemaModule *module, AstAs *as, SemaExprCtx c
 
     size_t source_id = sema_module_expr_emit_runtime(module, source_runtime, ctx.output);
 
-    if (sema_type_can_be_casted(source, dest)) {
+    if (sema_type_can_be_casted(source, dest) &&
+        !sema_type_can_be_downcasted(dest, sema_type_new_pointer(module->mempool, sema_type_new_void(module->mempool)))) {
         SemaConst *constant = sema_value_runtime_is_const(source_runtime);
         if (constant) {
             return sema_value_new_runtime_const(module->mempool, sema_const_nest(module->mempool, constant, dest));

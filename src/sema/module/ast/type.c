@@ -57,10 +57,6 @@ static inline SemaType *detect_enum_type(SemaModule *module, AstType *explicit_t
     } else if (max_variants < 0xFFFFFFFF) {
         return sema_type_new_int(module->mempool, SEMA_INT_32, false);
     } else {
-        // I don't know, who can reach this limit btw
-        //
-        // Pointers are too small to enumerate RAM wanted
-        // for store such big number of variants, but... why not?)
         return sema_type_new_int(module->mempool, SEMA_INT_64, false);
     }
 }
