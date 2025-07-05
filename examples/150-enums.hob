@@ -1,0 +1,11 @@
+type Arch = enum { x86, arm, jvm };
+
+type ArchI8 = enum (i8) {
+    x86 = 10,
+    arm,
+    jvm = 1,
+};
+
+global fun main() -> i32 {
+    return ArchI8.arm as ?;
+}

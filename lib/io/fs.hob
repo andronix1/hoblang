@@ -1,22 +1,31 @@
 import "fd.hob" as fd;
 
+import result;
+import strings;
+import c;
+
+use result.Result;
+
 public type File = fd.Fd;
 
-type OpenFlags = i32;
-fun OpenFlags.or(self, value: i32) -> OpenFlags { return (self as i32 | value) as OpenFlags; }
-public fun openFlags() -> OpenFlags { return 0; }
-public fun OpenFlags.writeOnly(self) -> OpenFlags { return self.or(1); }
-public fun OpenFlags.readWrite(self) -> OpenFlags { return self.or(2); }
-public fun OpenFlags.create(self) -> OpenFlags { return self.or(100); }
-public fun OpenFlags.exclusive(self) -> OpenFlags { return self.or(200); }
-public fun OpenFlags.trunc(self) -> OpenFlags { return self.or(1000); }
-public fun OpenFlags.append(self) -> OpenFlags { return self.or(2000); }
+public type OpenFlags = enum (i32) {
+    none = 0,
+    writeOnly = 1,
+    readWrite = 2,
+    create = 100,
+    exclusive = 200,
+    trunc = 1000,
+    append = 2000,
+};
+fun OpenFlags.with(self, value: OpenFlags) -> OpenFlags { return (self as i32 | value as i32) as OpenFlags; }
 
-#`
 public fun open(path: string, flags: OpenFlags) -> Result.<File> {
-    c.open();
+    var cPath = strings.fromString(path);
+    defer cPath.free();
+    return c.err.handleMapped.<File>(c.open(cPath.makeC(), flags as i32), fun (res) {
+        return res as File;
+    });
 }
-`#
 
 
 

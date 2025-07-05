@@ -46,6 +46,7 @@ HirType *sema_type_to_hir(SemaModule* module, SemaType *type) {
             return sema_type_to_hir(module, record);
         }
         case SEMA_TYPE_GENERATE: return sema_type_to_hir(module, sema_type_generate(type));
+        case SEMA_TYPE_ENUM: return sema_type_to_hir(module, type->enumeration.type);
     }
     UNREACHABLE;
 }
@@ -89,7 +90,10 @@ void sema_type_print(va_list list) {
             logs("*$t", type->pointer_to);
             break;
         case SEMA_TYPE_STRUCTURE:
-            logs("structure", type->pointer_to);
+            logs("structure");
+            break;
+        case SEMA_TYPE_ENUM:
+            logs("enumeration");
             break;
         case SEMA_TYPE_GENERIC: logs("$S", type->generic_name); break;
         case SEMA_TYPE_GEN_PARAM: logs("$S", type->gen_param.name); break;
@@ -110,7 +114,8 @@ SemaType *sema_type_replace(Mempool *mempool, SemaType *source, SemaType **from,
         if (from[i] == source) return to[i];
     }
     switch (source->kind) {
-        case SEMA_TYPE_VOID: case SEMA_TYPE_INT: case SEMA_TYPE_FLOAT: case SEMA_TYPE_BOOL: case SEMA_TYPE_GEN_PARAM:
+        case SEMA_TYPE_VOID: case SEMA_TYPE_INT: case SEMA_TYPE_FLOAT:
+        case SEMA_TYPE_BOOL: case SEMA_TYPE_GEN_PARAM: case SEMA_TYPE_ENUM:
             return source;
         case SEMA_TYPE_FUNCTION: {
             SemaType **args = vec_new_in(mempool, SemaType*);
@@ -184,7 +189,7 @@ bool sema_type_can_be_downcasted(SemaType *type, SemaType *to) {
         return false;
     }
     switch (type->kind) {
-        case SEMA_TYPE_GEN_PARAM: case SEMA_TYPE_GENERIC: case SEMA_TYPE_STRUCTURE: return false;
+        case SEMA_TYPE_GEN_PARAM: case SEMA_TYPE_GENERIC: case SEMA_TYPE_STRUCTURE: case SEMA_TYPE_ENUM: return false;
         case SEMA_TYPE_RECORD:
             return (type->record.module == to->record.module && type->record.id == to->record.id) || 
                 sema_type_can_be_downcasted(sema_type_get_record(type), to);
@@ -201,7 +206,8 @@ bool sema_type_can_be_downcasted(SemaType *type, SemaType *to) {
                 }
             }
             return sema_type_can_be_downcasted(type->function.returns, to->function.returns);
-        case SEMA_TYPE_POINTER: return sema_type_can_be_downcasted(type->pointer_to, to->pointer_to);
+        case SEMA_TYPE_POINTER:
+            return sema_type_can_be_downcasted(type->pointer_to, to->pointer_to) || to->pointer_to->kind == SEMA_TYPE_VOID;
         case SEMA_TYPE_ARRAY:
             return sema_type_can_be_downcasted(type->array.of, to->array.of) && type->array.length == to->array.length;
         case SEMA_TYPE_FLOAT: return type->float_size == to->float_size;

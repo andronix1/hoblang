@@ -26,6 +26,7 @@ void token_print(va_list list) {
         case TOKEN_CLOSING_SQUARE_BRACE: printf("`]`"); return;
         case TOKEN_OPENING_ANGLE_BRACE: printf("`<`"); return;
         case TOKEN_CLOSING_ANGLE_BRACE: printf("`>`"); return;
+        case TOKEN_QUESTION_MARK: printf("`?`"); return;
         case TOKEN_COLON: printf("`:`"); return;
         case TOKEN_SEMICOLON: printf("`;`"); return;
         case TOKEN_COMMA: printf("`,`"); return;
@@ -61,6 +62,7 @@ void token_print(va_list list) {
         case TOKEN_FOR: printf("`for`"); return;
         case TOKEN_IN: printf("`in`"); return;
         case TOKEN_UNDEFINED: printf("`undefined`"); return;
+        case TOKEN_ENUM: printf("`enum`"); return;
         case TOKEN_FAILED: printf("<fail>"); return;
         case TOKEN_EOI: printf("<end of input>"); return;
         case TOKEN_EQUALS: printf("`==`"); return;

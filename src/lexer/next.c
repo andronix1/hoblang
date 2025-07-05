@@ -136,6 +136,7 @@ static Token lexer_try_next(Lexer *lexer) {
         case ':': return token_simple(TOKEN_COLON);
         case ';': return token_simple(TOKEN_SEMICOLON);
         case '%': return token_simple(TOKEN_MOD);
+        case '?': return token_simple(TOKEN_QUESTION_MARK);
         case '&':
             if (lexer_next_char_is(lexer, '&')) return token_simple(TOKEN_AND);
             return token_simple(TOKEN_BITAND);
@@ -236,6 +237,7 @@ static Token lexer_try_next(Lexer *lexer) {
                 else if (slice_eq(slice, slice_from_cstr("undefined"))) return token_simple(TOKEN_UNDEFINED);
                 else if (slice_eq(slice, slice_from_cstr("for"))) return token_simple(TOKEN_FOR);
                 else if (slice_eq(slice, slice_from_cstr("in"))) return token_simple(TOKEN_IN);
+                else if (slice_eq(slice, slice_from_cstr("enum"))) return token_simple(TOKEN_ENUM);
                 else return token_simple(TOKEN_IDENT);
             }
             return token_simple(TOKEN_FAILED);

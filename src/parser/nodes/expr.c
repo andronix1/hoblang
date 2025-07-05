@@ -23,8 +23,10 @@ static inline AstExpr *parse_binop_additions(Parser *parser, AstExpr *expr) {
         Token token = parser_take(parser);
         switch (token.kind) {
             case TOKEN_AS: {
-                AstType *type = NOT_NULL(parse_type(parser));
-                expr = ast_expr_new_as(parser->mempool, slice_union(expr->slice, type->slice), token.slice, expr, type);
+                bool infer = parser_next_is(parser, TOKEN_QUESTION_MARK);
+                AstType *type = infer ? NULL : NOT_NULL(parse_type(parser));
+                Slice end = infer ? parser_take(parser).slice : type->slice;
+                expr = ast_expr_new_as(parser->mempool, slice_union(expr->slice, end), token.slice, expr, type);
                 break;
             }
             default:

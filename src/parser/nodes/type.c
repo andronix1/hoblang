@@ -14,12 +14,16 @@ AstType *parse_type(Parser *parser) {
         case TOKEN_FUN: {
             PARSER_EXPECT_NEXT(parser, TOKEN_OPENING_CIRCLE_BRACE);
             AstType **args = vec_new_in(parser->mempool, AstType*);
-            while (!parser_next_should_be(parser, TOKEN_CLOSING_CIRCLE_BRACE)) {
+            while (parser_next_is_not(parser, TOKEN_CLOSING_CIRCLE_BRACE)) {
                 vec_push(args, NOT_NULL(parse_type(parser)));
                 if (!parser_check_list_sep(parser, TOKEN_CLOSING_CIRCLE_BRACE)) return NULL;
             }
+            Slice slice = slice_union(token.slice, parser_take(parser).slice);
             AstType *returns = parser_next_should_be(parser, TOKEN_FUN_RETURNS) ? NOT_NULL(parse_type(parser)) : NULL;
-            return ast_type_new_function(parser->mempool, args, returns);
+            if (returns) {
+                slice = slice_union(slice, returns->slice);
+            }
+            return ast_type_new_function(parser->mempool, slice, args, returns);
         }
         case TOKEN_OPENING_CIRCLE_BRACE: {
             AstType *type = NOT_NULL(parse_type(parser));
@@ -29,27 +33,48 @@ AstType *parse_type(Parser *parser) {
         case TOKEN_STRUCT: {
             PARSER_EXPECT_NEXT(parser, TOKEN_OPENING_FIGURE_BRACE);
             AstStructField *fields = keymap_new_in(parser->mempool, AstStructField);
-            while (!parser_next_should_be(parser, TOKEN_CLOSING_FIGURE_BRACE)) {
+            while (parser_next_is_not(parser, TOKEN_CLOSING_FIGURE_BRACE)) {
                 bool is_public = parser_next_should_be(parser, TOKEN_PUBLIC);
                 Slice name = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
                 PARSER_EXPECT_NEXT(parser, TOKEN_COLON);
                 if (keymap_insert(fields, name, ast_struct_field_new(is_public, NOT_NULL(parse_type(parser))))) {
-                    parser_err(parser, name, "duplicate field");
+                    parser_err(parser, name, "duplicated field");
                 }
                 if (!parser_check_list_sep(parser, TOKEN_CLOSING_FIGURE_BRACE)) return NULL;
             }
-            return ast_type_new_struct(parser->mempool, fields);
+            return ast_type_new_struct(parser->mempool, slice_union(token.slice, parser_take(parser).slice), fields);
         }
         case TOKEN_OPENING_SQUARE_BRACE: {
             AstExpr *length = NOT_NULL(parse_expr(parser));
             PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_SQUARE_BRACE);
-            return ast_type_new_array(parser->mempool, length, NOT_NULL(parse_type(parser)));
+            AstType *type = NOT_NULL(parse_type(parser));
+            return ast_type_new_array(parser->mempool, slice_union(token.slice, type->slice), length, type);
+        }
+        case TOKEN_ENUM: {
+            AstType *explicit = NULL;
+            if (parser_next_should_be(parser, TOKEN_OPENING_CIRCLE_BRACE)) {
+                explicit = NOT_NULL(parse_type(parser));
+                PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_CIRCLE_BRACE);
+            }
+            PARSER_EXPECT_NEXT(parser, TOKEN_OPENING_FIGURE_BRACE);
+            AstEnumVariant *variants = keymap_new_in(parser->mempool, AstEnumVariant);
+            while (parser_next_is_not(parser, TOKEN_CLOSING_FIGURE_BRACE)) {
+                Slice name = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
+                AstExpr *expr = parser_next_should_be(parser, TOKEN_ASSIGN) ?
+                    NOT_NULL(parse_expr(parser)) : NULL;
+                if (keymap_insert(variants, name, ast_enum_variant_new(expr))) {
+                    parser_err(parser, name, "duplicated field");
+                }
+                if (!parser_check_list_sep(parser, TOKEN_CLOSING_FIGURE_BRACE)) return NULL;
+            }
+            return ast_type_new_enum(parser->mempool, slice_union(token.slice, parser_take(parser).slice),
+                explicit, variants);
         }
         case TOKEN_IDENT:
             parser_skip_next(parser);
             return ast_type_new_path(parser->mempool, NOT_NULL(parse_path(parser)));
         case TOKEN_STAR:
-            return ast_type_new_pointer(parser->mempool, NOT_NULL(parse_type(parser)));
+            return ast_type_new_pointer(parser->mempool, token.slice, NOT_NULL(parse_type(parser)));
         default:
             parser_err(parser, token.slice, "expected type");
             return NULL;

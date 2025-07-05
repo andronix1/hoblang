@@ -24,6 +24,7 @@ typedef enum {
     SEMA_TYPE_INT,
     SEMA_TYPE_FLOAT,
     SEMA_TYPE_BOOL,
+    SEMA_TYPE_ENUM,
     SEMA_TYPE_FUNCTION,
     SEMA_TYPE_POINTER,
     SEMA_TYPE_STRUCTURE,
@@ -47,6 +48,15 @@ static inline SemaTypeStructField sema_type_struct_field_new(SemaType *type, Sem
     return field;
 }
 
+typedef struct {
+    uint64_t value;
+} SemaEnumVariant;
+
+static inline SemaEnumVariant sema_enum_variant_new(uint64_t value) {
+    SemaEnumVariant variant = { .value = value };
+    return variant;
+}
+
 typedef struct SemaType {
     SemaTypeKind kind;
 
@@ -65,9 +75,14 @@ typedef struct SemaType {
         } structure;
 
         struct {
-            SemaType **args;
             SemaType *returns;
+            SemaType **args;
         } function;
+
+        struct {
+            SemaType *type;
+            SemaEnumVariant *variants_map;
+        } enumeration;
 
         struct {
             size_t length;
@@ -110,6 +125,7 @@ SemaType *sema_type_new_float(Mempool *mempool, SemaTypeFloatSize size);
 SemaType *sema_type_new_pointer(Mempool *mempool, SemaType *pointer_to);
 SemaType *sema_type_new_function(Mempool *mempool, SemaType **args, SemaType *returns);
 SemaType *sema_type_new_array(Mempool *mempool, size_t length, SemaType *of);
+SemaType *sema_type_new_enum(Mempool *mempool, SemaType *type, SemaEnumVariant *variants_map);
 SemaType *sema_type_new_generic(Mempool *mempool, Slice name);
 SemaType *sema_type_new_generate(Mempool *mempool, SemaGeneric *generic, SemaType **params);
 SemaType *sema_type_new_alias(Mempool *mempool, SemaType *type, SemaTypeAlias *alias);

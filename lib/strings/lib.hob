@@ -1,12 +1,13 @@
 import list;
 import std;
+import conv;
 
 use std.slice.Slice;
 
 public type String = list.List.<u8>;
-public const newWithCapacity: fun (usize) -> String = list.newWithCapacity.<u8>;
-public const new: fun () -> String = list.new.<u8>;
-public const fromString: fun (string) -> String = list.fromSlice.<u8>;
+public const newWithCapacity: fun (usize) -> String = list.newWithCapacity.<u8> as ?;
+public const new: fun () -> String = list.new.<u8> as ?;
+public const fromString: fun (string) -> String = list.fromSlice.<u8> as ?;
 
 public type Free = fun (String) -> void;
 
@@ -14,3 +15,13 @@ public fun String.makeC(&self) -> *u8 {
     self.push(0);
     return self.data.raw;
 }
+
+public fun String.toString(self) -> string {
+    return self.data as string;
+}
+
+public fun String.appendInt32(&self, value: i32) {
+    var buf: [12]u8;
+    self.appendSlice(conv.i32ToString(value, std.str.new(&buf[0], 12)).unwrap());
+}
+

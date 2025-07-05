@@ -5,10 +5,12 @@
 #include "core/mempool.h"
 #include "core/slice.h"
 #include "ast/api/type.h"
+#include "sema/module/api/type.h"
 #include <stdbool.h>
 
 typedef enum {
     AST_TYPE_STRUCT,
+    AST_TYPE_ENUM,
     AST_TYPE_PATH,
     AST_TYPE_ARRAY,
     AST_TYPE_POINTER,
@@ -34,6 +36,27 @@ typedef struct {
     AstType *type;
 } AstArray;
 
+typedef struct {
+    AstExpr *expr;
+
+    struct {
+        SemaType *type;
+        size_t value;
+    } sema;
+} AstEnumVariant;
+
+static inline AstEnumVariant ast_enum_variant_new(AstExpr *expr) {
+    AstEnumVariant variant = {
+        .expr = expr
+    };
+    return variant;
+}
+
+typedef struct {
+    AstType *explicit_type;
+    AstEnumVariant *variants_map;
+} AstEnum;
+
 typedef struct AstType {
     AstTypeKind kind;
     Slice slice;
@@ -41,6 +64,7 @@ typedef struct AstType {
     union {
         AstStruct structure;
         AstArray array;
+        AstEnum enumeration;
         AstFunction function;
         AstPath *path;
         AstType *pointer_to;
@@ -51,9 +75,9 @@ typedef struct AstType {
 bool ast_type_eq(const AstType *a, const AstType *b);
 
 AstStructField ast_struct_field_new(bool is_public, AstType *type);
-AstType *ast_type_new_struct(Mempool *mempool, AstStructField *fields_map);
-AstType *ast_type_new_function(Mempool *mempool, AstType **args, AstType *returns);
-AstType *ast_type_new_array(Mempool *mempool, AstExpr *length, AstType *type);
+AstType *ast_type_new_struct(Mempool *mempool, Slice slice, AstStructField *fields_map);
+AstType *ast_type_new_function(Mempool *mempool, Slice slice, AstType **args, AstType *returns);
+AstType *ast_type_new_array(Mempool *mempool, Slice slice, AstExpr *length, AstType *type);
 AstType *ast_type_new_path(Mempool *mempool, AstPath *path);
-AstType *ast_type_new_pointer(Mempool *mempool, AstType *of);
-AstType *ast_type_new_slice(Mempool *mempool, AstType *of);
+AstType *ast_type_new_pointer(Mempool *mempool, Slice star_slice, AstType *of);
+AstType *ast_type_new_enum(Mempool *mempool, Slice slice, AstType *explicit, AstEnumVariant *variants_map);
