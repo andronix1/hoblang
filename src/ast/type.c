@@ -65,29 +65,32 @@ bool ast_type_eq(const AstType *a, const AstType *b) {
     UNREACHABLE;
 }
 
-AstType *ast_type_new_function(Mempool *mempool, AstType **args, AstType *returns)
+AstType *ast_type_new_function(Mempool *mempool, Slice slice, AstType **args, AstType *returns)
     CONSTRUCT(AST_TYPE_FUNCTION,
         out->function.args = args;
         out->function.returns = returns;
+        out->slice = slice;
     )
 
-AstType *ast_type_new_array(Mempool *mempool, AstExpr *length, AstType *type)
+AstType *ast_type_new_array(Mempool *mempool, Slice slice, AstExpr *length, AstType *type)
     CONSTRUCT(AST_TYPE_ARRAY,
         out->array.length = length;
         out->array.type = type;
+        out->slice = slice;
     )
 
-AstType *ast_type_new_struct(Mempool *mempool, AstStructField *fields_map)
-    CONSTRUCT(AST_TYPE_STRUCT, out->structure.fields_map = fields_map;)
+AstType *ast_type_new_struct(Mempool *mempool, Slice slice, AstStructField *fields_map)
+    CONSTRUCT(AST_TYPE_STRUCT, out->structure.fields_map = fields_map; out->slice = slice)
 
 AstType *ast_type_new_path(Mempool *mempool, AstPath *path)
     CONSTRUCT(AST_TYPE_PATH, out->path = path; out->slice = ast_path_slice(path))
 
-AstType *ast_type_new_pointer(Mempool *mempool, AstType *to)
-    CONSTRUCT(AST_TYPE_POINTER, out->pointer_to = to;)
+AstType *ast_type_new_pointer(Mempool *mempool, Slice star_slice, AstType *to)
+    CONSTRUCT(AST_TYPE_POINTER, out->pointer_to = to; out->slice = slice_union(star_slice, to->slice))
 
-AstType *ast_type_new_enum(Mempool *mempool, AstType *explicit, AstEnumVariant *variants_map)
+AstType *ast_type_new_enum(Mempool *mempool, Slice slice, AstType *explicit, AstEnumVariant *variants_map)
     CONSTRUCT(AST_TYPE_ENUM,
         out->enumeration.explicit_type = explicit;
         out->enumeration.variants_map = variants_map;
+        out->slice = slice
     )

@@ -75,10 +75,9 @@ typedef struct AstType {
 bool ast_type_eq(const AstType *a, const AstType *b);
 
 AstStructField ast_struct_field_new(bool is_public, AstType *type);
-AstType *ast_type_new_struct(Mempool *mempool, AstStructField *fields_map);
-AstType *ast_type_new_function(Mempool *mempool, AstType **args, AstType *returns);
-AstType *ast_type_new_array(Mempool *mempool, AstExpr *length, AstType *type);
+AstType *ast_type_new_struct(Mempool *mempool, Slice slice, AstStructField *fields_map);
+AstType *ast_type_new_function(Mempool *mempool, Slice slice, AstType **args, AstType *returns);
+AstType *ast_type_new_array(Mempool *mempool, Slice slice, AstExpr *length, AstType *type);
 AstType *ast_type_new_path(Mempool *mempool, AstPath *path);
-AstType *ast_type_new_pointer(Mempool *mempool, AstType *of);
-AstType *ast_type_new_slice(Mempool *mempool, AstType *of);
-AstType *ast_type_new_enum(Mempool *mempool, AstType *explicit, AstEnumVariant *variants_map);
+AstType *ast_type_new_pointer(Mempool *mempool, Slice star_slice, AstType *of);
+AstType *ast_type_new_enum(Mempool *mempool, Slice slice, AstType *explicit, AstEnumVariant *variants_map);
