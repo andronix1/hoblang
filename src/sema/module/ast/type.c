@@ -48,6 +48,7 @@ static inline SemaType *detect_enum_type(SemaModule *module, AstType *explicit_t
             sema_module_err(module, explicit_type->slice, "variants count more than max value can be reached with specified type ($l > $l)", max_variants, max_value);
             return NULL;
         }
+        return type;
     }
     if (max_variants < 0xFF) {
         return sema_type_new_int(module->mempool, SEMA_INT_8, false);

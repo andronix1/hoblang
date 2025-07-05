@@ -183,8 +183,9 @@ bool sema_type_can_be_downcasted(SemaType *type, SemaType *to) {
         if (type->kind == SEMA_TYPE_RECORD) {
             return sema_type_can_be_downcasted(sema_type_get_record(type), to);
         } else if (type->kind == SEMA_TYPE_GENERATE) {
-            return sema_type_can_be_downcasted(sema_generic_type_generate(type->generate.generic, type->generate.params),
-                to);
+            return sema_type_can_be_downcasted(sema_generic_type_generate(type->generate.generic, type->generate.params), to);
+        } else if (type->kind == SEMA_TYPE_ENUM) {
+            return sema_type_can_be_downcasted(type->enumeration.type, to);
         }
         return false;
     }
