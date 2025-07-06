@@ -358,7 +358,7 @@ static LlvmEmitStepRes llvm_emit_expr_step(
         case HIR_EXPR_STEP_PTR_TO_INT: {
             LLVMTypeRef type = llvm_runtime_type(module, step->ptr_to_int.type);
             LLVMValueRef value = llvm_get_res_value(module, &results[step->ptr_to_int.step_id]);
-            return llvm_emit_step_res_new(LLVMBuildBitCast(module->builder, value, type, ""), true);
+            return llvm_emit_step_res_new(LLVMBuildPtrToInt(module->builder, value, type, ""), true);
         }
     }
     UNREACHABLE;
