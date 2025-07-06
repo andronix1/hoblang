@@ -8,6 +8,7 @@
 #include "sema/module/stmts/body.h"
 #include "sema/module/exprs/expr.h"
 #include "sema/module/type/type.h"
+#include <stdio.h>
 
 bool sema_module_emit_stmt_if(SemaModule *module, AstIf *if_else) {
     HirStmtCondJmpBlock *conds = vec_new_in(module->mempool, HirStmtCondJmpBlock);
@@ -26,7 +27,16 @@ bool sema_module_emit_stmt_if(SemaModule *module, AstIf *if_else) {
     }
     HirCode *else_body = NULL;
     if (if_else->else_body) {
+        bool breaks = true;
+        for (size_t i = 0; i < vec_len(if_else->conds); i++) {
+            if (!if_else->conds[i].body->sema.breaks) {
+                breaks = false;
+            }
+        }
         else_body = NOT_NULL(sema_module_emit_code(module, if_else->else_body, NULL));
+        if (breaks && if_else->else_body->sema.breaks) {
+            sema_module_scope_break(module);
+        }
     }
     sema_ss_append_stmt(module->ss, hir_stmt_new_cond_jmp(conds, else_body));
     return true;
