@@ -4,8 +4,19 @@ import "lib.hob" as c;
 
 use result.Result;
 
+public fun errFrom<T>(errno: i32) -> Result.<T> {
+    return result.err.<T>(std.str.fromC(c.strerror(errno)));
+}
+
 public fun err<T>() -> Result.<T> {
-    return result.err.<T>(std.str.fromC(c.strerror(c.errno().*)));
+    return errFrom.<T>(c.errno().*);
+}
+
+public fun handle(value: i32) -> Result.<i32> {
+    if value < 0 {
+        return err.<i32>();
+    }
+    return result.ok.<i32>(value);
 }
 
 public fun handleMapped<T>(value: i32, mapper: fun (i32) -> T) -> Result.<T> {

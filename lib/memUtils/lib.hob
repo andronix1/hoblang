@@ -1,0 +1,7 @@
+import std;
+
+use std.slice.Slice;
+
+public fun byteSliceOf<T>(raw: *T) -> Slice.<u8> {
+    return std.slice.new.<u8>(raw as *u8, T.sizeof);
+}

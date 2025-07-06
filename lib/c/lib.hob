@@ -5,9 +5,18 @@ public import "err.hob" as err;
 public extern(__errno_location) fun errno() -> *i32;
 public extern fun strerror(value: i32) -> *u8;
 
+public type Errno = enum (i32) {
+    eperm = 1,
+    enoent, esrch, eintr, eio, enxio, e2big, enoexec, ebadf, echild, eagain, enomem, eacces,
+    efault, enotblk, ebusy, eexist, exdev, enodev, enotdir, eisdir, einval, enfile, emfile,
+    enotty, etxtbsy, efbig, enospc, espipe, erofs, emlink, epipe, edom, erange,
+};
+
 public const AF_UNIX: i32 = 1;
 public const AF_INET: i32 = 2;
 public const SOCK_STREAM: i32 = 1;
+public const SOCK_DGRAM: i32 = 2;
+
 public extern fun socket(domain: i32, sockType: i32, protocol: i32) -> i32;
 public extern fun socketpair(domain: i32, sockType: i32, protocol: i32, output: *[2]i32) -> i32;
 
