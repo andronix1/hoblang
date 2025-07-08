@@ -47,6 +47,7 @@ static char lexer_peek_escaped_char(Lexer *lexer, char c, char brace) {
         switch (c) {
             case '0': return '\0';
             case 'n': return '\n';
+            case 'r': return '\r';
             case 't': return '\t';
             case '\\': return '\\';
             default: {
