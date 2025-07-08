@@ -14,6 +14,7 @@ typedef enum {
     SEMA_VALUE_MODULE,
     SEMA_VALUE_RUNTIME,
     SEMA_VALUE_GENERIC,
+    SEMA_VALUE_FINISH,
 } SemaValueKind;
 
 typedef struct SemaValue {
@@ -28,6 +29,7 @@ typedef struct SemaValue {
 } SemaValue;
 
 SemaValue *sema_value_new_type(Mempool *mempool, SemaType *type);
+SemaValue *sema_value_new_finish(Mempool *mempool);
 SemaValue *sema_value_new_module(Mempool *mempool, SemaModule *module);
 SemaValue *sema_value_new_generic(Mempool *mempool, SemaGeneric *generic);
 SemaValue *sema_value_new_runtime_global(Mempool *mempool, SemaRuntimeKind kind, SemaType *type, HirDeclId id);

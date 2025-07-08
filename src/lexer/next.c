@@ -132,7 +132,7 @@ static Token lexer_try_next(Lexer *lexer) {
             return token_simple(TOKEN_ASSIGN);
         case '!':
             if (lexer_next_char_is(lexer, '=')) return token_simple(TOKEN_NOT_EQUALS);
-            return token_simple(TOKEN_NOT);
+            return token_simple(TOKEN_EXCLAMATION_MARK);
         case ':': return token_simple(TOKEN_COLON);
         case ';': return token_simple(TOKEN_SEMICOLON);
         case '%': return token_simple(TOKEN_MOD);

@@ -123,7 +123,7 @@ static inline AstExpr *_parse_middle_expr(Parser *parser) {
             AstPath *path = NOT_NULL(parse_path(parser));
             return ast_expr_new_path(parser->mempool, ast_path_slice(path), path);
         }
-        case TOKEN_NOT: {
+        case TOKEN_EXCLAMATION_MARK: {
             AstExpr *inner = NOT_NULL(parse_middle_expr(parser));
             return ast_expr_new_not(parser->mempool, slice_union(token.slice, inner->slice), inner);
         }

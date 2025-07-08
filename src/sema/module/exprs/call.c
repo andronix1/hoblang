@@ -48,6 +48,9 @@ SemaValue *sema_module_emit_expr_call(SemaModule *module, AstCall *call, SemaExp
         vec_push(args, sema_module_expr_emit_runtime(module, runtime, ctx.output));
     }
     size_t step_id = sema_expr_output_push_step(ctx.output, hir_expr_step_new_call(callable, args));
+    if (!type->function.returns) {
+        return sema_value_new_finish(module->mempool);
+    }
     return sema_value_new_runtime_expr_step(module->mempool, SEMA_RUNTIME_FINAL, type->function.returns, step_id);
 }
 

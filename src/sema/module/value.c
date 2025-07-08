@@ -12,8 +12,14 @@ void sema_value_print(va_list list) {
         case SEMA_VALUE_RUNTIME: printf("value"); break;
         case SEMA_VALUE_MODULE: printf("module"); break;
         case SEMA_VALUE_GENERIC: printf("generic"); break;
+        case SEMA_VALUE_FINISH: printf("finish"); break;
     }
 }
+
+SemaValue *sema_value_new_finish(Mempool *mempool)
+    MEMPOOL_CONSTRUCT(SemaValue,
+        out->kind = SEMA_VALUE_FINISH;
+    );
 
 SemaValue *sema_value_new_runtime_global(Mempool *mempool, SemaRuntimeKind kind, SemaType *type, HirDeclId id)
     MEMPOOL_CONSTRUCT(SemaValue,

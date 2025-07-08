@@ -29,7 +29,9 @@ HirType *sema_type_to_hir(SemaModule* module, SemaType *type) {
             for (size_t i = 0; i < vec_len(type->function.args); i++) {
                 args[i] = sema_type_to_hir(module, type->function.args[i]);
             }
-            return hir_type_new_function(module->mempool, args, sema_type_to_hir(module, type->function.returns));
+            return hir_type_new_function(module->mempool, args, type->function.returns ?
+                sema_type_to_hir(module, type->function.returns) :
+                hir_type_new_void(module->mempool));
         }
         case SEMA_TYPE_STRUCTURE: {
             HirTypeStructField *fields = vec_new_in(module->mempool, HirTypeStructField);
@@ -81,7 +83,7 @@ void sema_type_print(va_list list) {
             for (size_t i = 0; i < vec_len(type->function.args); i++) {
                 logs(i == 0 ? "$t" : ", $t", type->function.args[i]);
             }
-            logs(") -> $t", type->function.returns);
+            logs(type->function.returns ? ") -> $t" : ") -> !", type->function.returns);
             break;
         case SEMA_TYPE_RECORD:
             logs("$t", type->record.module->types[type->record.id]);

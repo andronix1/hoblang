@@ -43,12 +43,32 @@ typedef struct {
     AstType *type;
 } AstFunArg;
 
+typedef struct {
+    bool breaks_flow;
+    AstType *type;
+} AstFunReturns;
+
+static inline AstFunReturns ast_fun_returns_flow_break() {
+    AstFunReturns result = {
+        .breaks_flow = true,
+    };
+    return result;
+}
+
+static inline AstFunReturns ast_fun_returns_type(AstType *type) {
+    AstFunReturns result = {
+        .breaks_flow = false,
+        .type = type,
+    };
+    return result;
+}
+
 typedef struct AstFunInfo {
     bool is_public;
     Slice name;
     AstGeneric *generic;
     AstFunArg *args;
-    AstType *returns;
+    AstFunReturns returns;
 
     struct {
         bool is;
@@ -185,11 +205,11 @@ bool ast_node_eq(const AstNode *a, const AstNode *b);
 AstFunArg ast_fun_arg_new(Slice name, AstType *type);
 AstFunInfo *ast_fun_info_new(Mempool *mempool,
     bool is_public, Slice name, AstGeneric *generic,
-    AstFunArg *args, AstType *returns
+    AstFunArg *args, AstFunReturns returns
 );
 AstFunInfo *ast_ext_fun_info_new(Mempool *mempool,
     bool is_public, Slice name, AstGeneric *generic,
-    AstFunArg *args, AstType *returns,
+    AstFunArg *args, AstFunReturns returns,
     Slice of, bool by_ref, Slice self_name
 );
 AstValueInfo *ast_value_info_new(Mempool *mempool,

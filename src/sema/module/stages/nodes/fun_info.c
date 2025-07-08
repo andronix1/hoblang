@@ -55,7 +55,7 @@ SemaType *sema_func_info_type(SemaModule *module, AstFunInfo *info) {
         vec_push(args, NOT_NULL(sema_module_type(module, info->args[i].type)));
     }
 
-    SemaType *returns = NOT_NULL(sema_module_opt_type(module, info->returns));
+    SemaType *returns = info->returns.breaks_flow ? NULL : NOT_NULL(sema_module_opt_type(module, info->returns.type));
     return sema_type_new_function(module->mempool, args, returns);
 }
 

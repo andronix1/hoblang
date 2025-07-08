@@ -170,6 +170,9 @@ static inline void hir_code_dump_tabbed(HirCode *code, FILE *stream, size_t tabs
                 fprintf(stream, "expr ");
                 hir_expr_dump(&stmt->expr, stream, tabs);
                 break;
+            case HIR_STMT_UNREACHABLE:
+                fprintf(stream, "unreachable");
+                break;
             case HIR_STMT_RET:
                 fprintf(stream, "return ");
                 hir_expr_dump(&stmt->ret.value, stream, tabs);

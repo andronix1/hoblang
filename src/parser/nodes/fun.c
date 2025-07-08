@@ -1,6 +1,5 @@
 #include "fun.h"
 #include "ast/api/body.h"
-#include "ast/api/type.h"
 #include "ast/node.h"
 #include "core/mempool.h"
 #include "core/null.h"
@@ -42,7 +41,11 @@ AstFunInfo *parse_fun_info(Parser *parser, bool is_public) {
         vec_push(args, ast_fun_arg_new(arg_name, NOT_NULL(parse_type(parser))));
         if (!parser_check_list_sep(parser, TOKEN_CLOSING_CIRCLE_BRACE)) return NULL;
     }
-    AstType *returns = parser_next_should_be(parser, TOKEN_FUN_RETURNS) ? NOT_NULL(parse_type(parser)) : NULL;
+    AstFunReturns returns = parser_next_should_be(parser, TOKEN_FUN_RETURNS) ? (
+        parser_next_should_be(parser, TOKEN_EXCLAMATION_MARK) ?
+            ast_fun_returns_flow_break() :
+            ast_fun_returns_type(NOT_NULL(parse_type(parser)))
+    ) : ast_fun_returns_type(NULL);
     return is_ext ?
         ast_ext_fun_info_new(parser->mempool, is_public, name, generic, args, returns, ext_of, by_ref, self_name):
         ast_fun_info_new(parser->mempool, is_public, name, generic, args, returns);

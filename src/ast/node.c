@@ -58,7 +58,10 @@ bool ast_value_info_eq(const AstValueInfo *a, const AstValueInfo *b) {
 bool ast_fun_info_eq(const AstFunInfo *a, const AstFunInfo *b) {
     bool meta_equals = a->is_public == b->is_public &&
         slice_eq(a->name, b->name) &&
-        equals_nullable(a->returns, b->returns, (EqFunc)ast_type_eq) &&
+        (
+            a->returns.breaks_flow == b->returns.breaks_flow &&
+            (a->returns.breaks_flow || equals_nullable(a->returns.type, b->returns.type, (EqFunc)ast_type_eq))
+        ) &&
         vec_len(a->args) == vec_len(b->args);
     if (!meta_equals) {
         return false;
@@ -154,7 +157,7 @@ AstFunArg ast_fun_arg_new(Slice name, AstType *type) {
 
 AstFunInfo *ast_fun_info_new(Mempool *mempool,
     bool is_public, Slice name, AstGeneric *generic,
-    AstFunArg *args, AstType *returns
+    AstFunArg *args, AstFunReturns returns
 ) MEMPOOL_CONSTRUCT(AstFunInfo,
     out->is_public = is_public;
     out->ext.is = false;
@@ -166,7 +169,7 @@ AstFunInfo *ast_fun_info_new(Mempool *mempool,
 
 AstFunInfo *ast_ext_fun_info_new(Mempool *mempool,
     bool is_public, Slice name, AstGeneric *generic,
-    AstFunArg *args, AstType *returns,
+    AstFunArg *args, AstFunReturns returns,
     Slice of, bool by_ref, Slice self_name
 ) MEMPOOL_CONSTRUCT(AstFunInfo,
     out->is_public = is_public;

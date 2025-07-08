@@ -13,6 +13,7 @@ typedef enum {
     HIR_STMT_LOOP,
     HIR_STMT_BREAK,
     HIR_STMT_CONTINUE,
+    HIR_STMT_UNREACHABLE,
 } HirStmtKind;
 
 typedef struct {
@@ -79,6 +80,11 @@ typedef struct HirCode {
 } HirCode;
 
 HirCode *hir_code_new(Mempool *mempool, HirStmt *stmts);
+
+static inline HirStmt hir_stmt_new_unreachable() {
+    HirStmt stmt = { .kind = HIR_STMT_UNREACHABLE };
+    return stmt;
+}
 
 static inline HirStmt hir_stmt_new_expr(HirExpr expr) {
     HirStmt stmt = {

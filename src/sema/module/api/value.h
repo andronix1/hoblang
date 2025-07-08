@@ -36,6 +36,7 @@ typedef struct {
 
 typedef struct SemaValue SemaValue;
 
+bool sema_value_is_finish(SemaValue *value);
 SemaType *sema_value_should_be_type(SemaModule *module, Slice where, SemaValue *value);
 SemaConst *sema_value_runtime_should_be_constant(SemaModule *module, Slice where, SemaValueRuntime *runtime);
 SemaValueRuntime *sema_value_should_be_runtime(SemaModule *module, Slice where, SemaValue *value);

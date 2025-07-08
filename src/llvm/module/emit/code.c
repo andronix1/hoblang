@@ -57,6 +57,9 @@ static void llvm_emit_stmt(LlvmModule *module, HirStmt *stmt) {
         case HIR_STMT_RET:
             LLVMBuildRet(module->builder, llvm_emit_expr(module, &stmt->ret.value, true));
             break;
+        case HIR_STMT_UNREACHABLE:
+            LLVMBuildUnreachable(module->builder);
+            break;
         case HIR_STMT_RET_VOID:
             LLVMBuildRetVoid(module->builder);
             break;

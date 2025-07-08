@@ -141,6 +141,8 @@ static bool hir_fill_stmt(Hir *hir, HirFuncId func, HirStmt *stmt) {
         case HIR_STMT_EXPR:
             hir_fill_expr(hir, func, &stmt->expr);
             return false;
+        case HIR_STMT_UNREACHABLE:
+            return true;
         case HIR_STMT_RET:
             hir_fill_expr(hir, func, &stmt->ret.value);
             return true;

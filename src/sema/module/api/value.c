@@ -1,7 +1,10 @@
 #include "value.h"
-#include "core/null.h"
 #include "sema/module/module.h"
 #include "sema/module/value.h"
+
+bool sema_value_is_finish(SemaValue *value) {
+    return value->kind == SEMA_VALUE_FINISH;
+}
 
 inline SemaGeneric *sema_value_is_generic(SemaValue *value) {
     if (value->kind != SEMA_VALUE_GENERIC) {
