@@ -3,6 +3,7 @@
 #include "core/file_content.h"
 #include "core/keymap.h"
 #include "core/log.h"
+#include "core/mempool.h"
 #include "core/path.h"
 #include "parser/parser.h"
 #include "lexer/lexer.h"
@@ -85,6 +86,11 @@ void sema_module_push_scope(SemaModule *module, SemaLoop *loop) {
         loop = NULL;
     }
     sema_ss_push_scope(module->ss, loop, module->mempool);
+}
+
+void sema_module_push_scope_with(SemaModule *module, SemaLoop *loop, SemaDecl **decls_map) {
+    sema_module_push_scope(module, loop);
+    vec_top(module->ss->scopes)->decls_map = decls_map;
 }
 
 void sema_module_pop_scope(SemaModule *module) {
@@ -172,6 +178,23 @@ void sema_module_emit_current_defers(SemaModule *module) {
 
 void sema_module_emit_defers(SemaModule *module) {
     return sema_module_emit_defers_before_opt_loop(module, NULL);
+}
+
+SemaDecl **sema_module_get_non_runtime_decls_map(SemaModule *module) {
+    SemaDecl **result = keymap_new_in(module->mempool, SemaDecl*);
+    if (module->ss) {
+        for (size_t i = 0; i < vec_len(module->ss->scopes); i++) {
+            SemaScope *scope = &module->ss->scopes[i];
+            for (size_t j = 0; j < vec_len(scope->decls_map); j++) {
+                keymap_at(scope->decls_map, j, decl);
+                SemaValueRuntime *runtime = sema_value_is_runtime(decl->value->value);
+                if (!runtime || sema_value_runtime_is_const(runtime)) {
+                    keymap_insert(result, decl->key, decl->value);
+                }
+            }
+        }
+    }
+    return result;
 }
 
 void sema_module_add_defer(SemaModule *module, HirCode *code) {

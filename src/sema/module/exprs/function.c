@@ -63,9 +63,11 @@ SemaValue *sema_module_emit_expr_function(SemaModule *module, AstExprFunc *func,
         value = sema_value_new_runtime_const(module->mempool, sema_const_new_func(module->mempool, type, decl_id));
     }
 
+    SemaDecl **decls_map = sema_module_get_non_runtime_decls_map(module);
     SemaScopeStack *old_ss = sema_module_swap_ss(module, sema_scope_stack_new(module->mempool, func_id,
         type->function.returns));
 
+    sema_module_push_scope_with(module, NULL, decls_map);
     sema_module_push_scope(module, NULL);
     hir_init_fun(module->hir, func_id, args_mut, hir_func_info_new(module->mempool, opt_slice_new_null()));
     for (size_t i = 0; i < vec_len(func->args); i++) {
@@ -82,6 +84,7 @@ SemaValue *sema_module_emit_expr_function(SemaModule *module, AstExprFunc *func,
     if (!func->body->sema.breaks && !sema_type_can_be_downcasted(type->function.returns, sema_type_new_void(module->mempool))) {
         sema_module_err(module, where, "expected function to return value but its body passes");
     }
+    sema_module_pop_scope(module);
     sema_module_pop_scope(module);
     sema_module_swap_ss(module, old_ss);
 

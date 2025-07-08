@@ -51,6 +51,7 @@ void sema_module_link_project(SemaModule *module, SemaProject *project);
 void sema_module_make_no_std(SemaModule *module);
 Path sema_module_file_path(SemaModule *module);
 
+SemaDecl **sema_module_get_non_runtime_decls_map(SemaModule *module);
 SemaDecl *sema_module_resolve_req_decl(SemaModule *module, Slice name);
 SemaDecl *sema_module_resolve_req_decl_from(SemaModule *module, SemaModule *from, Slice name);
 SemaDecl *sema_module_resolve_req_decl_from_at(SemaModule *module, SemaModule *from, Slice at, Slice name);
@@ -66,6 +67,7 @@ void sema_module_emit_defers_before_loop(SemaModule *module, HirLoopId id);
 
 void sema_module_push_scope_looped(SemaModule *module, SemaLoop *loop);
 void sema_module_push_scope(SemaModule *module, SemaLoop *loop);
+void sema_module_push_scope_with(SemaModule *module, SemaLoop *loop, SemaDecl **decls_map);
 void sema_module_pop_scope(SemaModule *module);
 
 SemaTypeId sema_module_register_type_alias(SemaModule *module);
