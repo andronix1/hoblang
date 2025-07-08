@@ -11,8 +11,8 @@ SemaValue *sema_module_emit_expr_array(SemaModule *module, AstExprArray *array, 
     SemaType *type = NULL;
     if (array->type) {
         type = NOT_NULL(sema_module_type(module, array->type));
-    } else if (ctx.expectation) {
-        type = ctx.expectation;
+    } else if (ctx.expectation && ctx.expectation->kind == SEMA_TYPE_ARRAY) {
+        type = ctx.expectation->array.of;
     } else {
         sema_module_err(module, where, "implicit type with no type expected");
         return NULL;
