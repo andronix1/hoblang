@@ -29,8 +29,8 @@ void sema_module_setup(SemaModule *module) {
 
     if (!module->no_std) {
         sema_module_push_type(module, "string", sema_module_std_string(module, sema_module_internal_slice()));
-        sema_module_push_type(module, "usize", sema_module_std_usize(module, sema_module_internal_slice()));
     }
+    sema_module_push_type(module, "usize", sema_module_std_usize(module, sema_module_internal_slice()));
     
     for (size_t i = 0; i < sema_setup_stages_count; i++) {
         sema_module_run_stage(module, i);

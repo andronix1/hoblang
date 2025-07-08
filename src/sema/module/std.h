@@ -11,7 +11,6 @@ typedef enum {
 
 typedef struct {
     SemaStdState state;
-    SemaType *usize;
     struct {
         SemaType *type;
     } string;

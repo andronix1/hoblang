@@ -3,6 +3,7 @@
 #include "core/mempool.h"
 #include "core/null.h"
 #include "core/vec.h"
+#include "core/attributes.h"
 #include "hir/api/const.h"
 #include "sema/module/api/type.h"
 #include "sema/module/api/value.h"
@@ -67,18 +68,16 @@ static inline bool _sema_module_std_load(SemaModule *module, Slice at) {
         return false;
     }
 
-    SemaType *usize = NOT_NULL(sema_module_internal_type(module, internal_module, at, slice_from_cstr("usize")));
     SemaType *str = NOT_NULL(sema_module_internal_type(module, internal_module, at, slice_from_cstr("string")));
     if (!sema_type_struct_matches(str, vec_create_in(module->mempool, 
         sema_type_new_pointer(module->mempool, sema_type_new_int(module->mempool, SEMA_INT_8, false)),
-        usize,
+        sema_module_std_usize(module, at),
     ))) {
         sema_module_err(module, at, "string's structure doesn't matches { *u8, usize }");
         return false;
     }
 
 
-    module->std.usize = usize;
     module->std.string.type = str;
     return true;
 }
@@ -87,7 +86,7 @@ HirConst sema_module_std_new_hir_string(SemaModule *module, HirType *type, Slice
     assert(module->std.state == SEMA_STD_LOADED);
     return hir_const_new_struct(type, vec_create_in(module->mempool, 
         hir_const_new_string_ptr(module->mempool, string),
-        hir_const_new_int(sema_type_to_hir(module, module->std.usize), string.length)));
+        hir_const_new_int(sema_type_to_hir(module, sema_module_std_usize(module, string)), string.length)));
 }
 
 bool sema_module_std_load(SemaModule *module, Slice at) {
@@ -106,8 +105,7 @@ SemaType *sema_module_std_string(SemaModule *module, Slice at) {
     return module->std.string.type;
 }
 
-SemaType *sema_module_std_usize(SemaModule *module, Slice at) {
-    NOT_NULL(sema_module_std_load(module, at));
-    return module->std.usize;
+SemaType *sema_module_std_usize(SemaModule *module, Slice at UNUSED) {
+    return sema_type_new_int(module->mempool, SEMA_INT_64, false);
 }
 
