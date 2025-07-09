@@ -35,7 +35,7 @@ void sema_module_err(SemaModule *module, Slice where, const char *fmt, ...) {
         logv(fmt, list);
     } else {
         const FileContent *content = sema_module_file_content(module);
-        logs("$L: error: ", file_content_locate(content, where).begin);
+        logs("$s:$L: error: ", content->path, file_content_locate(content, where).begin);
         logv(fmt, list);
         logln("\n$V", file_content_get_in_lines_view(content, where));
     }
