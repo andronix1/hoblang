@@ -14,6 +14,9 @@ bool sema_type_to_hir_number_info(SemaType *type, HirNumberInfo *output) {
         *output = hir_number_info_new_int(type->integer.is_signed, sema_type_int_size_to_hir(type->integer.size));
         return true;
     }
+    if (type->kind == SEMA_TYPE_ENUM) {
+        return sema_type_to_hir_number_info(type->enumeration.type, output);
+    }
     if (type->kind == SEMA_TYPE_FLOAT) {
         *output = hir_number_info_new_float(sema_type_float_size_to_hir(type->float_size));
         return true;
