@@ -17,7 +17,7 @@ bool sema_module_stage_init_type_decl(SemaModule *module, AstTypeDecl *type_decl
             sema_value_new_generic(module->mempool, generic)));
         type_decl->sema.generic = generic;
         return true;
-    } else {
+    } else if (!type_decl->is_direct) {
         SemaTypeId id = sema_module_register_type_alias(module);
         type_decl->sema.type_id = id;
 
@@ -28,6 +28,7 @@ bool sema_module_stage_init_type_decl(SemaModule *module, AstTypeDecl *type_decl
         type_decl->sema.type = type;
         return true;
     }
+    return true;
 }
 
 bool sema_module_stage_fill_type_generics(SemaModule *module, AstTypeDecl *type_decl) {
@@ -40,8 +41,18 @@ bool sema_module_stage_fill_type_generics(SemaModule *module, AstTypeDecl *type_
     return true;
 }
 
+bool sema_module_stage_fill_direct_type_decl(SemaModule *module, AstTypeDecl *type_decl) {
+    if (!type_decl->generic && type_decl->is_direct) {
+        SemaModule *scope_module = type_decl->is_public ? NULL : module;
+        SemaType *source_type = NOT_NULL(sema_module_type(module, type_decl->type));
+        sema_module_push_decl(module, type_decl->name, sema_decl_new(module->mempool,
+            scope_module, sema_value_new_type(module->mempool, source_type)));
+    }
+    return true;
+}
+
 bool sema_module_stage_fill_type_decl(SemaModule *module, AstTypeDecl *type_decl) {
-    if (!type_decl->generic) {
+    if (!type_decl->generic && !type_decl->is_direct) {
         SemaType *source_type = NOT_NULL(sema_module_type(module, type_decl->type));
         sema_module_init_type_alias(module, type_decl->sema.type_id, source_type);
     }
