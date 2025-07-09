@@ -59,6 +59,7 @@ static inline SemaEnumVariant sema_enum_variant_new(uint64_t value) {
 
 typedef struct SemaType {
     SemaTypeKind kind;
+    HirType *cache;
 
     SemaTypeAlias *alias;
 

@@ -31,6 +31,7 @@ HirTypeIntSize sema_type_int_size_to_hir(SemaTypeIntSize size) {
         SemaType *out = mempool_alloc(mempool, SemaType); \
         out->kind = KIND; \
         out->alias = NULL; \
+        out->cache = NULL; \
         FIELDS; \
         return out; \
     }

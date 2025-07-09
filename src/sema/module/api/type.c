@@ -10,7 +10,7 @@
 #include "sema/module/module.h"
 #include <stdio.h>
 
-HirType *sema_type_to_hir(SemaModule* module, SemaType *type) {
+static inline HirType *_sema_type_to_hir(SemaModule* module, SemaType *type) {
     switch (type->kind) {
         case SEMA_TYPE_VOID: return hir_type_new_void(module->mempool);
         case SEMA_TYPE_GEN_PARAM: return hir_type_new_gen(module->mempool, type->gen_param.id);
@@ -24,23 +24,26 @@ HirType *sema_type_to_hir(SemaModule* module, SemaType *type) {
             return hir_type_new_int(module->mempool, sema_type_int_size_to_hir(type->integer.size),
                 type->integer.is_signed);
         case SEMA_TYPE_FUNCTION: {
-            HirType **args = vec_new_in(module->mempool, HirType*);
-            vec_resize(args, vec_len(type->function.args));
+            HirType *new_type = hir_type_new_function(module->mempool, vec_new_in(module->mempool, HirType*),
+                type->function.returns ?
+                    sema_type_to_hir(module, type->function.returns) :
+                    hir_type_new_void(module->mempool));
+            type->cache = new_type;
+            vec_resize(new_type->function.args, vec_len(type->function.args));
             for (size_t i = 0; i < vec_len(type->function.args); i++) {
-                args[i] = sema_type_to_hir(module, type->function.args[i]);
+                new_type->function.args[i] = sema_type_to_hir(module, type->function.args[i]);
             }
-            return hir_type_new_function(module->mempool, args, type->function.returns ?
-                sema_type_to_hir(module, type->function.returns) :
-                hir_type_new_void(module->mempool));
+            return new_type;
         }
         case SEMA_TYPE_STRUCTURE: {
-            HirTypeStructField *fields = vec_new_in(module->mempool, HirTypeStructField);
-            vec_resize(fields, vec_len(type->structure.fields_map));
+            HirType *new_type = hir_type_new_struct(module->mempool, vec_new_in(module->mempool, HirTypeStructField));
+            type->cache = new_type;
+            vec_resize(new_type->structure.fields, vec_len(type->structure.fields_map));
             for (size_t i = 0; i < vec_len(type->structure.fields_map); i++) {
                 keymap_at(type->structure.fields_map, i, field);
-                fields[i] = hir_type_struct_field_new(sema_type_to_hir(module, field->value.type));
+                new_type->structure.fields[i] = hir_type_struct_field_new(sema_type_to_hir(module, field->value.type));
             }
-            return hir_type_new_struct(module->mempool, fields);
+            return new_type;
         }
         case SEMA_TYPE_RECORD: {
             SemaType *record = type->record.module->types[type->record.id];
@@ -51,6 +54,13 @@ HirType *sema_type_to_hir(SemaModule* module, SemaType *type) {
         case SEMA_TYPE_ENUM: return sema_type_to_hir(module, type->enumeration.type);
     }
     UNREACHABLE;
+}
+
+HirType *sema_type_to_hir(SemaModule* module, SemaType *type) {
+    if (type->cache) {
+        return type->cache;
+    }
+    return type->cache = _sema_type_to_hir(module, type);
 }
 
 void sema_type_print(va_list list) {
