@@ -199,12 +199,13 @@ AstNode *ast_node_new_use(Mempool *mempool, bool is_public, AstModulePath *path)
         out->use.path = path;
     )
 
-AstNode *ast_node_new_type_decl(Mempool *mempool, bool is_public, Slice name, AstGeneric *generics, AstType *type)
+AstNode *ast_node_new_type_decl(Mempool *mempool, bool is_public, bool is_direct, Slice name, AstGeneric *generics, AstType *type)
     CONSTRUCT(AST_NODE_TYPE_DECL,
         out->type_decl.name = name;
         out->type_decl.type = type;
         out->type_decl.generic = generics;
         out->type_decl.is_public = is_public;
+        out->type_decl.is_direct = is_direct;
     )
 
 AstNode *ast_node_new_fun_decl(Mempool *mempool,

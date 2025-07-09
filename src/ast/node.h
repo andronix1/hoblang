@@ -25,6 +25,7 @@ typedef enum {
 
 typedef struct {
     bool is_public;
+    bool is_direct;
     Slice name;
     AstType *type;
     AstGeneric *generic;
@@ -217,7 +218,7 @@ AstValueInfo *ast_value_info_new(Mempool *mempool,
     AstType *explicit_type
 );
 
-AstNode *ast_node_new_type_decl(Mempool *mempool, bool is_public, Slice name, AstGeneric *generic, AstType *type);
+AstNode *ast_node_new_type_decl(Mempool *mempool, bool is_public, bool is_direct, Slice name, AstGeneric *generic, AstType *type);
 AstNode *ast_node_new_fun_decl(Mempool *mempool, AstGlobal *global, AstFunInfo *info, AstBody *body);
 AstNode *ast_node_new_value_decl(Mempool *mempool, AstGlobal *global, AstValueInfo *info, AstExpr *initializer);
 AstNode *ast_node_new_external_value(Mempool *mempool, AstValueInfo *info, OptSlice alias);
