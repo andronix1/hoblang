@@ -2,7 +2,7 @@ import std;
 
 public type Result<T> = struct {
     public isOk: bool,
-    content: struct {
+    content: union {
         value: T,
         error: string,
     },
@@ -15,7 +15,6 @@ public fun ok<T>(value: T) -> Result.<T> {
         isOk: true,
         content: {
             value: value,
-            error: undefined,
         }
     };
 }
@@ -24,7 +23,6 @@ public fun err<T>(error: string) -> Result.<T> {
     return <(Result.<T>)> {
         isOk: false,
         content: {
-            value: undefined,
             error: error,
         }
     };
