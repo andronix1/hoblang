@@ -8,9 +8,10 @@
 #include <stdio.h>
 
 static void llvm_emit_cond_jmp(LlvmModule *module, HirStmtCondJmp *cond_jmp) {
-    LLVMBasicBlockRef end = LLVMAppendBasicBlock(module->func.value, "");
+    LLVMBasicBlockRef end;
     LLVMBasicBlockRef final_end = cond_jmp->breaks ? NULL : LLVMAppendBasicBlock(module->func.value, "");
     for (size_t i = 0; i < vec_len(cond_jmp->conds); i++) {
+        end = LLVMAppendBasicBlock(module->func.value, "");
         HirStmtCondJmpBlock *block = &cond_jmp->conds[i];
         LLVMBasicBlockRef body = LLVMAppendBasicBlock(module->func.value, "");
         LLVMValueRef value = llvm_emit_expr(module, &block->cond, true);

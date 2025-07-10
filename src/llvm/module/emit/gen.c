@@ -49,8 +49,9 @@ static void llvm_setup_gen_usage(LlvmModule *module, HirGenScopeId id, HirGenUsa
 
 static void llvm_emit_usage(LlvmModule *module, HirGenScopeId id, HirGenUsageId usage) {
     const HirGenScope *scope = hir_get_gen_scope(module->hir, id);
-    if (llvm_usage_should_be_skipped(module, &scope->usages[usage])) return;
-    llvm_setup_gen_params(module, scope->params, scope->usages[usage].params);
+    HirGenScopeUsage *hir_usage = &scope->usages[usage];
+    if (llvm_usage_should_be_skipped(module, hir_usage)) return;
+    llvm_setup_gen_params(module, scope->params, hir_usage->params);
 
     vec_push(module->curr_gen_scopes, id);
     for (size_t i = 0; i < vec_len(scope->linked_scopes); i++) {
