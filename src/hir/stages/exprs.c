@@ -70,6 +70,7 @@ static HirType *hir_get_expr_step_type(Hir *hir, HirFuncId func, HirExprStep *st
         case HIR_EXPR_STEP_CAST_INT: return step->cast_int.dest;
         case HIR_EXPR_STEP_CAST_PTR: return step->cast_ptr.type;
         case HIR_EXPR_STEP_BUILD_STRUCT: return step->build_struct.type;
+        case HIR_EXPR_STEP_BUILD_UNION: return step->build_union.type;
         case HIR_EXPR_STEP_STRUCT_FIELD: {
             HirType *type = steps[step->struct_field.step].type;
             assert(type->kind == HIR_TYPE_STRUCT);

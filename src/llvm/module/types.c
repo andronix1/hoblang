@@ -2,6 +2,7 @@
 #include "core/assert.h"
 #include "llvm/module/module.h"
 #include <alloca.h>
+#include <assert.h>
 #include <llvm-c/Core.h>
 #include <stdio.h>
 
@@ -24,7 +25,8 @@ size_t llvm_get_max_size(LlvmModule *module, HirType **variants) {
             max_size = size;
         }
     }
-    return max_size;
+    assert(!max_size % 8 == 0);
+    return max_size / 8;
 }
 
 LLVMTypeRef llvm_runtime_type(LlvmModule *module, HirType *type) {

@@ -17,7 +17,7 @@ typedef enum {
     AST_EXPR_CALL,
     AST_EXPR_SCOPE,
     AST_EXPR_BINOP,
-    AST_EXPR_STRUCT,
+    AST_EXPR_CONSTRUCTOR,
     AST_EXPR_ARRAY,
     AST_EXPR_AS,
     AST_EXPR_TAKE_REF,
@@ -73,12 +73,12 @@ typedef struct {
 
 typedef struct {
     AstExpr *expr;
-} AstExprStructField;
+} AstExprField;
 
 typedef struct {
     AstType *type;
-    AstExprStructField *fields_map;
-} AstExprStructConstructor;
+    AstExprField *members_map;
+} AstExprConstructor;
 
 typedef struct {
     AstExpr *inner;
@@ -131,14 +131,14 @@ typedef struct AstExpr {
         AstCall call;
         AstAs as;
         AstBinop binop;
-        AstExprStructConstructor structure;
+        AstExprConstructor constructor;
     };
 } AstExpr;
 
 bool ast_expr_eq(const AstExpr *a, const AstExpr *b);
 
-static inline AstExprStructField ast_expr_struct_field_new(AstExpr *expr) {
-    AstExprStructField field = {
+static inline AstExprField ast_expr_struct_field_new(AstExpr *expr) {
+    AstExprField field = {
         .expr = expr
     };
     return field;
@@ -167,4 +167,4 @@ AstExpr *ast_expr_new_string(Mempool *mempool, Slice slice, Slice string);
 AstExpr *ast_expr_new_callable(Mempool *mempool, Slice slice, AstExpr *inner, AstExpr **args);
 AstExpr *ast_expr_new_scope(Mempool *mempool, Slice slice, AstExpr *inner);
 AstExpr *ast_expr_new_binop(Mempool *mempool, Slice slice, AstBinopKind kind, AstExpr *left, AstExpr *right);
-AstExpr *ast_expr_new_struct(Mempool *mempool, Slice slice, AstType *type, AstExprStructField *fields_map);
+AstExpr *ast_expr_new_constructor(Mempool *mempool, Slice slice, AstType *type, AstExprField *fields_map);

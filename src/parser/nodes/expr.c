@@ -81,7 +81,7 @@ static inline AstExpr *parse_after_angle_brace(Parser *parser, Slice token_slice
     Token begin_token = parser_take(parser);
     switch (begin_token.kind) {
         case TOKEN_OPENING_FIGURE_BRACE: {
-            AstExprStructField *fields_map = keymap_new_in(parser->mempool, AstExprStructField);
+            AstExprField *fields_map = keymap_new_in(parser->mempool, AstExprField);
             while (parser_next_is_not(parser, TOKEN_CLOSING_FIGURE_BRACE)) {
                 Slice name = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
                 PARSER_EXPECT_NEXT(parser, TOKEN_COLON);
@@ -92,7 +92,7 @@ static inline AstExpr *parse_after_angle_brace(Parser *parser, Slice token_slice
                 if (!parser_check_list_sep(parser, TOKEN_CLOSING_FIGURE_BRACE)) return false;
             }
             Token closing = PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_FIGURE_BRACE);
-            return ast_expr_new_struct(parser->mempool, slice_union(token_slice, closing.slice), type, fields_map);
+            return ast_expr_new_constructor(parser->mempool, slice_union(token_slice, closing.slice), type, fields_map);
         }
         case TOKEN_OPENING_SQUARE_BRACE: {
             AstExpr **elements = vec_new_in(parser->mempool, AstExpr*);

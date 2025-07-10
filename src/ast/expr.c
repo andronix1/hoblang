@@ -51,12 +51,12 @@ bool ast_expr_eq(const AstExpr *a, const AstExpr *b) {
             ast_expr_eq(a->binop.left, b->binop.left) &&
             ast_expr_eq(a->binop.right, b->binop.right);
         case AST_EXPR_STRING: return slice_eq(a->string, b->string);
-        case AST_EXPR_STRUCT:
-            if (!ast_type_eq(a->structure.type, b->structure.type)) return false;
-            if (vec_len(a->structure.fields_map) != vec_len(b->structure.fields_map)) return false;
-            for (size_t i = 0; i < vec_len(a->structure.fields_map); i++) {
-                keymap_at(a->structure.fields_map, i, af);
-                keymap_at(b->structure.fields_map, i, bf);
+        case AST_EXPR_CONSTRUCTOR:
+            if (!ast_type_eq(a->constructor.type, b->constructor.type)) return false;
+            if (vec_len(a->constructor.members_map) != vec_len(b->constructor.members_map)) return false;
+            for (size_t i = 0; i < vec_len(a->constructor.members_map); i++) {
+                keymap_at(a->constructor.members_map, i, af);
+                keymap_at(b->constructor.members_map, i, bf);
                 if (!slice_eq(af->key, bf->key) || !ast_expr_eq(af->value.expr, bf->value.expr)) return false;
             }
             return true;
@@ -156,8 +156,8 @@ AstExpr *ast_expr_new_binop(Mempool *mempool, Slice slice, AstBinopKind binop, A
         out->binop.right = right;
     )
 
-AstExpr *ast_expr_new_struct(Mempool *mempool, Slice slice, AstType *type, AstExprStructField *fields_map)
-    CONSTRUCT(AST_EXPR_STRUCT,
-        out->structure.type = type;
-        out->structure.fields_map = fields_map;
+AstExpr *ast_expr_new_constructor(Mempool *mempool, Slice slice, AstType *type, AstExprField *members_map)
+    CONSTRUCT(AST_EXPR_CONSTRUCTOR,
+        out->constructor.type = type;
+        out->constructor.members_map = members_map;
     )

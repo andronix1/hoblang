@@ -129,6 +129,10 @@ static void hir_expr_dump(HirExpr *expr, FILE *stream, size_t tabs) {
                 }
                 fprintf(stream, "}");
                 break;
+            case HIR_EXPR_STEP_BUILD_UNION:
+                hir_dump_type(step->build_union.type, stream);
+                fprintf(stream, "(step%lu)", step->build_union.value);
+                break;
             case HIR_EXPR_STEP_BUILD_ARRAY:
                 hir_dump_type(step->build_array.type, stream);
                 fprintf(stream, " [ ");

@@ -19,7 +19,7 @@
 #include "sema/module/exprs/path.h"
 #include "sema/module/exprs/inner_path.h"
 #include "sema/module/exprs/string.h"
-#include "sema/module/exprs/struct.h"
+#include "sema/module/exprs/constructor.h"
 #include "sema/module/exprs/take_ref.h"
 #include "sema/module/exprs/undefined.h"
 #include "sema/module/module.h"
@@ -41,7 +41,7 @@ SemaValue *sema_module_emit_expr(SemaModule *module, AstExpr *expr, SemaExprCtx 
         case AST_EXPR_NEG: return sema_module_emit_expr_neg(module, expr->neg_inner, ctx);
         case AST_EXPR_TAKE_REF: return sema_module_emit_expr_take_ref(module, expr->not_inner, ctx);
         case AST_EXPR_INNER_PATH: return sema_module_emit_expr_inner_path(module, &expr->inner_path, ctx);
-        case AST_EXPR_STRUCT: return sema_module_emit_expr_struct(module, &expr->structure, expr->slice, ctx);
+        case AST_EXPR_CONSTRUCTOR: return sema_module_emit_expr_constructor(module, &expr->constructor, expr->slice, ctx);
         case AST_EXPR_STRING: return sema_module_emit_expr_string(module, expr->slice, expr->string);
         case AST_EXPR_ARRAY: return sema_module_emit_expr_array(module, &expr->array, expr->slice, ctx);
         case AST_EXPR_IDX: return sema_module_emit_expr_idx(module, &expr->idx, ctx);

@@ -29,6 +29,7 @@ typedef enum {
     HIR_EXPR_STEP_PTR_TO_INT,
     HIR_EXPR_STEP_INT_TO_PTR,
     HIR_EXPR_STEP_CAST_PTR,
+    HIR_EXPR_STEP_BUILD_UNION,
     HIR_EXPR_STEP_GET_UNION_VARIANT,
 } HirExprStepKind;
 
@@ -51,6 +52,12 @@ typedef struct {
             size_t idx;
             size_t step;
         } struct_field;
+
+        struct {
+            size_t idx;
+            size_t value;
+            HirType *type;
+        } build_union;
 
         struct {
             size_t *elements;
@@ -203,6 +210,18 @@ static inline HirExprStep hir_expr_step_new_not(size_t step_id) {
     HirExprStep step = {
         .kind = HIR_EXPR_STEP_NOT,
         .not_step = step_id
+    };
+    return step;
+}
+
+static inline HirExprStep hir_expr_step_new_union(HirType *type, size_t value, size_t idx) {
+    HirExprStep step = {
+        .kind = HIR_EXPR_STEP_BUILD_UNION,
+        .build_union = {
+            .idx = idx,
+            .value = value,
+            .type = type
+        }
     };
     return step;
 }

@@ -3,6 +3,7 @@
 #include "core/attributes.h"
 #include "core/mempool.h"
 #include "core/vec.h"
+#include "hir/api/expr.h"
 #include "llvm/module/module.h"
 #include "llvm/module/types.h"
 #include <alloca.h>
@@ -276,6 +277,13 @@ static LlvmEmitStepRes llvm_emit_expr_step(
             }
             return llvm_emit_step_res_new(LLVMBuildLoad2(module->builder, llvm_type, result, ""), true);
         }
+        case HIR_EXPR_STEP_BUILD_UNION: {
+            LLVMTypeRef type = llvm_runtime_type(module, step->type);
+            LLVMValueRef allocated = llvm_alloca(module, llvm_runtime_type(module, steps[step->build_union.value].type));
+            LLVMValueRef value = llvm_get_res_value(module, &results[step->build_union.value]);
+            LLVMBuildStore(module->builder, value, allocated);
+            return llvm_emit_step_res_new(LLVMBuildLoad2(module->builder, type, allocated, ""), true);
+        }
         case HIR_EXPR_STEP_CAST_INT: {
             LLVMValueRef what = llvm_get_res_value(module, &results[step->cast_int.step_id]);
             LLVMTypeRef type = llvm_runtime_type(module, step->cast_int.dest);
@@ -328,13 +336,12 @@ static LlvmEmitStepRes llvm_emit_expr_step(
         case HIR_EXPR_STEP_GET_UNION_VARIANT: {
             LlvmEmitStepRes *res = &results[step->union_variant.step];
             if (res->loaded) {
-                LLVMTypeRef type = llvm_runtime_type(module, step->type->union_data.variants[step->union_variant.idx]);
-                return llvm_emit_step_res_new(LLVMBuildTrunc(module->builder, res->value, type, ""), true);
+                LLVMTypeRef type = llvm_runtime_type(module, step->type);
+                LLVMValueRef allocated = llvm_alloca(module, llvm_runtime_type(module, steps[step->union_variant.step].type));
+                LLVMBuildStore(module->builder, res->value, allocated);
+                return llvm_emit_step_res_new(LLVMBuildLoad2(module->builder, type, allocated, ""), true);
             } else {
-                return llvm_emit_step_res_new(
-                    LLVMBuildPointerCast(module->builder, res->value, LLVMPointerTypeInContext(module->context, 0), ""),
-                    false
-                );
+                return llvm_emit_step_res_new(res->value, false);
             }
         }
         case HIR_EXPR_STEP_IDX_ARRAY: {
