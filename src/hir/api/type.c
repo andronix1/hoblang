@@ -92,6 +92,12 @@ HirType *hir_type_new_float(Mempool *mempool, HirTypeFloatSize size)
         out->float_size = size;
     )
 
+HirType *hir_type_new_union(Mempool *mempool, HirType **variants)
+    MEMPOOL_CONSTRUCT(HirType,
+        out->kind = HIR_TYPE_UNION;
+        out->union_data.variants = variants;
+    )
+
 HirType *hir_type_new_struct(Mempool *mempool, HirTypeStructField *fields)
     MEMPOOL_CONSTRUCT(HirType,
         out->kind = HIR_TYPE_STRUCT;

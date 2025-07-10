@@ -52,6 +52,16 @@ static inline HirType *_sema_type_to_hir(SemaModule* module, SemaType *type) {
         }
         case SEMA_TYPE_GENERATE: return sema_type_to_hir(module, sema_type_generate(type));
         case SEMA_TYPE_ENUM: return sema_type_to_hir(module, type->enumeration.type);
+        case SEMA_TYPE_UNION: {
+            HirType *new_type = hir_type_new_union(module->mempool, vec_new_in(module->mempool, HirType*));
+            type->cache = new_type;
+            vec_resize(new_type->union_data.variants, vec_len(type->union_data.variants_map));
+            for (size_t i = 0; i < vec_len(type->union_data.variants_map); i++) {
+                keymap_at(type->union_data.variants_map, i, field);
+                new_type->union_data.variants[i] = sema_type_to_hir(module, field->value.type);
+            }
+            return new_type;
+        }
     }
     UNREACHABLE;
 }
@@ -95,18 +105,11 @@ void sema_type_print(va_list list) {
             }
             logs(type->function.returns ? ") -> $t" : ") -> !", type->function.returns);
             break;
-        case SEMA_TYPE_RECORD:
-            logs("$t", type->record.module->types[type->record.id]);
-            break;
-        case SEMA_TYPE_POINTER:
-            logs("*$t", type->pointer_to);
-            break;
-        case SEMA_TYPE_STRUCTURE:
-            logs("structure");
-            break;
-        case SEMA_TYPE_ENUM:
-            logs("enumeration");
-            break;
+        case SEMA_TYPE_RECORD: logs("$t", type->record.module->types[type->record.id]); break;
+        case SEMA_TYPE_POINTER: logs("*$t", type->pointer_to); break;
+        case SEMA_TYPE_STRUCTURE: logs("structure"); break;
+        case SEMA_TYPE_ENUM: logs("enumeration"); break;
+        case SEMA_TYPE_UNION: logs("union"); break;
         case SEMA_TYPE_GENERIC: logs("$S", type->generic_name); break;
         case SEMA_TYPE_GEN_PARAM: logs("$S", type->gen_param.name); break;
         case SEMA_TYPE_GENERATE: {
@@ -149,6 +152,17 @@ SemaType *sema_type_replace(Mempool *mempool, SemaType *source, SemaType **from,
                 ));
             }
             return sema_type_new_structure(mempool, fields);
+        }
+        case SEMA_TYPE_UNION: {
+            SemaTypeUnionField *fields = keymap_new_in(mempool, SemaTypeUnionField);
+            for (size_t i = 0; i < vec_len(source->union_data.variants_map); i++) {
+                keymap_at(source->union_data.variants_map, i, field); 
+                keymap_insert(fields, field->key, sema_type_union_field_new(
+                    sema_type_replace(mempool, field->value.type, from, to),
+                    field->value.module
+                ));
+            }
+            return sema_type_new_union(mempool, fields);
         }
         case SEMA_TYPE_ARRAY:
             return sema_type_new_array(mempool, source->array.length, sema_type_replace(mempool, source->array.of,
@@ -202,7 +216,12 @@ bool sema_type_can_be_downcasted(SemaType *type, SemaType *to) {
         return false;
     }
     switch (type->kind) {
-        case SEMA_TYPE_GEN_PARAM: case SEMA_TYPE_GENERIC: case SEMA_TYPE_STRUCTURE: case SEMA_TYPE_ENUM: return false;
+        case SEMA_TYPE_GEN_PARAM:
+        case SEMA_TYPE_GENERIC:
+        case SEMA_TYPE_STRUCTURE:
+        case SEMA_TYPE_UNION:
+        case SEMA_TYPE_ENUM:
+            return false;
         case SEMA_TYPE_RECORD:
             return (type->record.module == to->record.module && type->record.id == to->record.id) || 
                 sema_type_can_be_downcasted(sema_type_get_record(type), to);

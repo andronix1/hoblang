@@ -48,6 +48,9 @@ SemaType *sema_type_new_record(Mempool *mempool, SemaModule *module, size_t type
 SemaType *sema_type_new_structure(Mempool *mempool, SemaTypeStructField *fields_map)
     SEMA_TYPE_CONSTRUCT(SEMA_TYPE_STRUCTURE, out->structure.fields_map = fields_map;)
 
+SemaType *sema_type_new_union(Mempool *mempool, SemaTypeUnionField *variants_map)
+    SEMA_TYPE_CONSTRUCT(SEMA_TYPE_UNION, out->union_data.variants_map = variants_map;)
+
 SemaType *sema_type_new_bool(Mempool *mempool)
     SEMA_TYPE_CONSTRUCT(SEMA_TYPE_BOOL,)
 

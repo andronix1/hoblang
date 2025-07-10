@@ -88,5 +88,5 @@ HirType *hir_type_new_bool(Mempool *mempool);
 HirType *hir_type_new_int(Mempool *mempool, HirTypeIntSize size, bool is_signed);
 HirType *hir_type_new_float(Mempool *mempool, HirTypeFloatSize size);
 HirType *hir_type_new_struct(Mempool *mempool, HirTypeStructField *fields);
-HirType *hir_type_new_union(Mempool *mempool, HirType *variants);
+HirType *hir_type_new_union(Mempool *mempool, HirType **variants);
 HirType *hir_type_new_function(Mempool *mempool, HirType **args, HirType *returns);

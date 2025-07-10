@@ -28,6 +28,7 @@ typedef enum {
     SEMA_TYPE_FUNCTION,
     SEMA_TYPE_POINTER,
     SEMA_TYPE_STRUCTURE,
+    SEMA_TYPE_UNION,
     SEMA_TYPE_ARRAY,
     SEMA_TYPE_GENERIC,
     SEMA_TYPE_GENERATE,
@@ -42,6 +43,19 @@ typedef struct {
 
 static inline SemaTypeStructField sema_type_struct_field_new(SemaType *type, SemaModule *module) {
     SemaTypeStructField field = {
+        .type = type,
+        .module = module
+    };
+    return field;
+}
+
+typedef struct {
+    SemaModule *module;
+    SemaType *type;
+} SemaTypeUnionField;
+
+static inline SemaTypeUnionField sema_type_union_field_new(SemaType *type, SemaModule *module) {
+    SemaTypeUnionField field = {
         .type = type,
         .module = module
     };
@@ -74,6 +88,10 @@ typedef struct SemaType {
         struct {
             SemaTypeStructField *fields_map;
         } structure;
+
+        struct {
+            SemaTypeUnionField *variants_map;
+        } union_data;
 
         struct {
             SemaType *returns;
@@ -121,6 +139,7 @@ SemaType *sema_type_new_bool(Mempool *mempool);
 SemaType *sema_type_new_record(Mempool *mempool, SemaModule *module, size_t type_id);
 SemaType *sema_type_new_gen_param(Mempool *mempool, Slice name, HirGenParamId gen_param);
 SemaType *sema_type_new_structure(Mempool *mempool, SemaTypeStructField *fields);
+SemaType *sema_type_new_union(Mempool *mempool, SemaTypeUnionField *variants_map);
 SemaType *sema_type_new_int(Mempool *mempool, SemaTypeIntSize size, bool is_signed);
 SemaType *sema_type_new_float(Mempool *mempool, SemaTypeFloatSize size);
 SemaType *sema_type_new_pointer(Mempool *mempool, SemaType *pointer_to);
