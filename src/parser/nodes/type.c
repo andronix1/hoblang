@@ -44,6 +44,20 @@ AstType *parse_type(Parser *parser) {
             }
             return ast_type_new_struct(parser->mempool, slice_union(token.slice, parser_take(parser).slice), fields);
         }
+        case TOKEN_UNION: {
+            PARSER_EXPECT_NEXT(parser, TOKEN_OPENING_FIGURE_BRACE);
+            AstUnionField *variants = keymap_new_in(parser->mempool, AstUnionField);
+            while (parser_next_is_not(parser, TOKEN_CLOSING_FIGURE_BRACE)) {
+                bool is_public = parser_next_should_be(parser, TOKEN_PUBLIC);
+                Slice name = PARSER_EXPECT_NEXT(parser, TOKEN_IDENT).slice;
+                PARSER_EXPECT_NEXT(parser, TOKEN_COLON);
+                if (keymap_insert(variants, name, ast_union_field_new(is_public, NOT_NULL(parse_type(parser))))) {
+                    parser_err(parser, name, "duplicated field");
+                }
+                if (!parser_check_list_sep(parser, TOKEN_CLOSING_FIGURE_BRACE)) return NULL;
+            }
+            return ast_type_new_union(parser->mempool, slice_union(token.slice, parser_take(parser).slice), variants);
+        }
         case TOKEN_OPENING_SQUARE_BRACE: {
             AstExpr *length = NOT_NULL(parse_expr(parser));
             PARSER_EXPECT_NEXT(parser, TOKEN_CLOSING_SQUARE_BRACE);

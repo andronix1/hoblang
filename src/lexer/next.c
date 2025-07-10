@@ -214,6 +214,7 @@ static Token lexer_try_next(Lexer *lexer) {
                 Slice slice = lexer_slice(lexer);
                 if (slice_eq(slice, slice_from_cstr("type"))) return token_simple(TOKEN_TYPE);
                 else if (slice_eq(slice, slice_from_cstr("struct"))) return token_simple(TOKEN_STRUCT);
+                else if (slice_eq(slice, slice_from_cstr("union"))) return token_simple(TOKEN_UNION);
                 else if (slice_eq(slice, slice_from_cstr("public"))) return token_simple(TOKEN_PUBLIC);
                 else if (slice_eq(slice, slice_from_cstr("fun"))) return token_simple(TOKEN_FUN);
                 else if (slice_eq(slice, slice_from_cstr("var"))) return token_simple(TOKEN_VAR);

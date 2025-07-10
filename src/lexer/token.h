@@ -7,7 +7,7 @@
 typedef enum {
     // Keywords
     TOKEN_TYPE,
-    TOKEN_STRUCT,
+    TOKEN_STRUCT, TOKEN_UNION,
     TOKEN_PUBLIC,
     TOKEN_FUN,
     TOKEN_VAR, TOKEN_FINAL, TOKEN_CONST,

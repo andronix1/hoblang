@@ -10,6 +10,14 @@
 
 #define CONSTRUCT(KIND, FIELDS) MEMPOOL_CONSTRUCT(AstType, out->kind = KIND; FIELDS)
 
+AstUnionField ast_union_field_new(bool is_public, AstType *type) {
+    AstUnionField field = {
+        .is_public = is_public,
+        .type = type,
+    };
+    return field;
+}
+
 AstStructField ast_struct_field_new(bool is_public, AstType *type) {
     AstStructField field = {
         .is_public = is_public,
@@ -31,6 +39,25 @@ bool ast_type_eq(const AstType *a, const AstType *b) {
             for (size_t i = 0; i < vec_len(a->structure.fields_map); i++) {
                 keymap_at(a->structure.fields_map, i, af);
                 keymap_at(a->structure.fields_map, i, bf);
+                if (af->value.is_public != bf->value.is_public) {
+                    return false;
+                }
+                if (!slice_eq(af->key, bf->key)) {
+                    return false;
+                }
+                if (!ast_type_eq(af->value.type, bf->value.type)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        case AST_TYPE_UNION: {
+            if (vec_len(a->union_data.variants_map) != vec_len(b->union_data.variants_map)) {
+                return false;
+            }
+            for (size_t i = 0; i < vec_len(a->union_data.variants_map); i++) {
+                keymap_at(a->union_data.variants_map, i, af);
+                keymap_at(a->union_data.variants_map, i, bf);
                 if (af->value.is_public != bf->value.is_public) {
                     return false;
                 }
@@ -81,6 +108,9 @@ AstType *ast_type_new_array(Mempool *mempool, Slice slice, AstExpr *length, AstT
 
 AstType *ast_type_new_struct(Mempool *mempool, Slice slice, AstStructField *fields_map)
     CONSTRUCT(AST_TYPE_STRUCT, out->structure.fields_map = fields_map; out->slice = slice)
+
+AstType *ast_type_new_union(Mempool *mempool, Slice slice, AstUnionField *variants_map)
+    CONSTRUCT(AST_TYPE_UNION, out->union_data.variants_map = variants_map; out->slice = slice)
 
 AstType *ast_type_new_path(Mempool *mempool, AstPath *path)
     CONSTRUCT(AST_TYPE_PATH, out->path = path; out->slice = ast_path_slice(path))

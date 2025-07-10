@@ -141,6 +141,17 @@ SemaType *sema_module_type(SemaModule *module, AstType *type) {
             }
             return sema_type_new_structure(module->mempool, fields);
         }
+        case AST_TYPE_UNION: {
+            SemaTypeUnionField *variants = keymap_new_in(module->mempool, SemaTypeUnionField);
+            for (size_t i = 0; i < vec_len(type->union_data.variants_map); i++) {
+                keymap_at(type->union_data.variants_map, i, field);
+                keymap_insert(variants, field->key, sema_type_union_field_new(
+                    NOT_NULL(sema_module_type(module, field->value.type)),
+                    field->value.is_public ? NULL : module
+                ));
+            }
+            return sema_type_new_union(module->mempool, variants);
+        }
     }
     UNREACHABLE;
 }

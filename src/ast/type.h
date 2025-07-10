@@ -10,6 +10,7 @@
 
 typedef enum {
     AST_TYPE_STRUCT,
+    AST_TYPE_UNION,
     AST_TYPE_ENUM,
     AST_TYPE_PATH,
     AST_TYPE_ARRAY,
@@ -25,6 +26,15 @@ typedef struct {
 typedef struct {
     AstStructField *fields_map;
 } AstStruct;
+
+typedef struct {
+    bool is_public;
+    AstType *type;
+} AstUnionField;
+
+typedef struct {
+    AstUnionField *variants_map;
+} AstUnion;
 
 typedef struct {
     AstType **args;
@@ -63,6 +73,7 @@ typedef struct AstType {
 
     union {
         AstStruct structure;
+        AstUnion union_data;
         AstArray array;
         AstEnum enumeration;
         AstFunction function;
@@ -75,7 +86,9 @@ typedef struct AstType {
 bool ast_type_eq(const AstType *a, const AstType *b);
 
 AstStructField ast_struct_field_new(bool is_public, AstType *type);
+AstUnionField ast_union_field_new(bool is_public, AstType *type);
 AstType *ast_type_new_struct(Mempool *mempool, Slice slice, AstStructField *fields_map);
+AstType *ast_type_new_union(Mempool *mempool, Slice slice, AstUnionField *variants_map);
 AstType *ast_type_new_function(Mempool *mempool, Slice slice, AstType **args, AstType *returns);
 AstType *ast_type_new_array(Mempool *mempool, Slice slice, AstExpr *length, AstType *type);
 AstType *ast_type_new_path(Mempool *mempool, AstPath *path);
