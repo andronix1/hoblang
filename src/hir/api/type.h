@@ -15,6 +15,7 @@ typedef enum {
     HIR_TYPE_POINTER,
     HIR_TYPE_ARRAY,
     HIR_TYPE_STRUCT,
+    HIR_TYPE_UNION,
     HIR_TYPE_GEN,
 } HirTypeKind;
 
@@ -50,6 +51,10 @@ static inline HirTypeStructField hir_type_struct_field_new(HirType *type) {
 }
 
 typedef struct {
+    HirType **variants;
+} HirTypeUnion;
+
+typedef struct {
     HirTypeStructField *fields;
 } HirTypeStruct;
 
@@ -66,6 +71,7 @@ typedef struct HirType {
         HirTypeFloatSize float_size;
         HirTypeFunction function;
         HirTypeArray array;
+        HirTypeUnion union_data;
         HirType *pointer_to;
         HirTypeStruct structure;
         HirGenParamId gen_param;
@@ -82,4 +88,5 @@ HirType *hir_type_new_bool(Mempool *mempool);
 HirType *hir_type_new_int(Mempool *mempool, HirTypeIntSize size, bool is_signed);
 HirType *hir_type_new_float(Mempool *mempool, HirTypeFloatSize size);
 HirType *hir_type_new_struct(Mempool *mempool, HirTypeStructField *fields);
+HirType *hir_type_new_union(Mempool *mempool, HirType *variants);
 HirType *hir_type_new_function(Mempool *mempool, HirType **args, HirType *returns);

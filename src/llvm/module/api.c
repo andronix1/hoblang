@@ -37,6 +37,8 @@ static bool llvm_setup(LlvmModule *module, LlvmModuleConfig *config) {
     module->context = LLVMContextCreate();
     module->module = LLVMModuleCreateWithNameInContext("main", module->context);
     module->builder = LLVMCreateBuilderInContext(module->context);
+    module->target_data = LLVMCreateTargetDataLayout(module->machine);
+    LLVMSetModuleDataLayout(module->module, module->target_data);
     return true;
 }
 
@@ -124,6 +126,7 @@ bool llvm_module_write_ir(LlvmModule *module, const char *output) {
 
 void llvm_module_free(LlvmModule *module) {
     LLVMDisposeBuilder(module->builder);
+    LLVMDisposeTargetData(module->target_data);
     LLVMDisposeTargetMachine(module->machine);
     LLVMContextDispose(module->context);
     LLVMShutdown();

@@ -336,19 +336,25 @@ static LlvmEmitStepRes llvm_emit_expr_step(
                     false
                 );
             }
+        }
         case HIR_EXPR_STEP_IDX_ARRAY: {
             LlvmEmitStepRes *res = &results[step->idx_array.value];
+            LLVMTypeRef type = llvm_runtime_type(module, steps[step->idx_array.value].type);
+            LLVMValueRef value = res->value;
             if (res->loaded) {
-                return llvm_emit_step_res_new(LLVMBuildExtractValue(module->builder, res->value,
-                    step->idx_array.idx, ""), true);
-            } else {
-                LLVMTypeRef type = llvm_runtime_type(module, steps[step->idx_array.value].type);
-                LLVMValueRef indices[] = {
-                    LLVMConstInt(LLVMInt32Type(), 0, false),
-                    llvm_get_res_value(module, &results[step->idx_array.idx])
-                };
-                return llvm_emit_step_res_new(LLVMBuildGEP2(module->builder, type, res->value, indices, 2, ""), false);
+                LLVMValueRef allocated = llvm_alloca(module, type);
+                LLVMBuildStore(module->builder, res->value, allocated);
+                value = allocated;
             }
+            LLVMValueRef indices[] = {
+                LLVMConstInt(LLVMInt32Type(), 0, false),
+                llvm_get_res_value(module, &results[step->idx_array.idx])
+            };
+            LLVMValueRef output = LLVMBuildGEP2(module->builder, type, value, indices, 2, "");
+            if (res->loaded) {
+                output = LLVMBuildLoad2(module->builder, llvm_runtime_type(module, step->type), output, "");
+            }
+            return llvm_emit_step_res_new(output, res->loaded);
         }
         case HIR_EXPR_STEP_IDX_POINTER: {
             LLVMTypeRef type = llvm_runtime_type(module, step->type);

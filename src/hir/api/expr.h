@@ -29,6 +29,7 @@ typedef enum {
     HIR_EXPR_STEP_PTR_TO_INT,
     HIR_EXPR_STEP_INT_TO_PTR,
     HIR_EXPR_STEP_CAST_PTR,
+    HIR_EXPR_STEP_GET_UNION_VARIANT,
 } HirExprStepKind;
 
 typedef struct {
@@ -40,6 +41,11 @@ typedef struct {
         HirConst constant;
 
         HirBinop binop;
+
+        struct {
+            size_t idx;
+            size_t step;
+        } union_variant;
 
         struct {
             size_t idx;
@@ -115,6 +121,17 @@ typedef struct {
         size_t not_step;
     };
 } HirExprStep;
+
+static inline HirExprStep hir_expr_step_new_union_variant(size_t step_id, size_t idx) {
+    HirExprStep step = {
+        .kind = HIR_EXPR_STEP_GET_UNION_VARIANT,
+        .union_variant = {
+            .idx = idx,
+            .step = step_id,
+        }
+    };
+    return step;
+}
 
 static inline HirExprStep hir_expr_step_new_ptr_to_int(size_t step_id, HirType *dest) {
     HirExprStep step = {

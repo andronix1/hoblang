@@ -44,6 +44,7 @@ typedef struct LlvmModule {
 
     LLVMTargetMachineRef machine;
     LLVMModuleRef module;
+    LLVMTargetDataRef target_data;
     LLVMBuilderRef builder;
     LLVMContextRef context;
 } LlvmModule;

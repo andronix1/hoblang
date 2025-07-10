@@ -20,17 +20,27 @@ bool hir_type_eq(const HirType *a, const HirType *b) {
                 return false;
             }
             for (size_t i = 0; i < vec_len(a->function.args); i++) {
-                if (hir_type_eq(a->function.args[i], b->function.args[i])) {
+                if (!hir_type_eq(a->function.args[i], b->function.args[i])) {
                     return false;
                 }
             }
             return a->function.returns == b->function.returns;
+        case HIR_TYPE_UNION:
+            if (vec_len(a->union_data.variants) != vec_len(b->union_data.variants)) {
+                return false;
+            }
+            for (size_t i = 0; i < vec_len(a->union_data.variants); i++) {
+                if (!hir_type_eq(a->union_data.variants[i], b->union_data.variants[i])) {
+                    return false;
+                }
+            }
+            return true;
         case HIR_TYPE_STRUCT:
             if (vec_len(a->structure.fields) != vec_len(b->structure.fields)) {
                 return false;
             }
             for (size_t i = 0; i < vec_len(a->structure.fields); i++) {
-                if (hir_type_eq(a->structure.fields[i].type, b->structure.fields[i].type)) {
+                if (!hir_type_eq(a->structure.fields[i].type, b->structure.fields[i].type)) {
                     return false;
                 }
             }

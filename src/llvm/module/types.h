@@ -5,4 +5,5 @@
 
 LLVMTypeRef llvm_function_type(LlvmModule *module, HirType *type);
 LLVMTypeRef llvm_runtime_type(LlvmModule *module, HirType *type);
+size_t llvm_get_max_size(LlvmModule *module, HirType **variants);
 

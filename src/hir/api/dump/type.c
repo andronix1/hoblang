@@ -37,9 +37,17 @@ void hir_dump_type(HirType *type, FILE *stream) {
             fprintf(stream, "[%lu]", type->array.length);
             hir_dump_type(type->array.of, stream);
             break;
+        case HIR_TYPE_UNION:
+            fprintf(stream, "[");
+            for (size_t i = 0; i < vec_len(type->union_data.variants); i++) {
+                fprintf(stream, i == 0 ? " " : ", ");
+                hir_dump_type(type->union_data.variants[i], stream);
+            }
+            fprintf(stream, " ]");
+            break;
         case HIR_TYPE_STRUCT:
             fprintf(stream, "{");
-            for (size_t i = 0; i < vec_len(type->function.args); i++) {
+            for (size_t i = 0; i < vec_len(type->structure.fields); i++) {
                 fprintf(stream, i == 0 ? " " : ", ");
                 hir_dump_type(type->structure.fields[i].type, stream);
             }

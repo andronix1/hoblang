@@ -90,6 +90,9 @@ static void hir_expr_dump(HirExpr *expr, FILE *stream, size_t tabs) {
             case HIR_EXPR_STEP_STRUCT_FIELD:
                 fprintf(stream, "struct field %lu from step%lu", step->struct_field.idx, step->struct_field.step);
                 break;
+            case HIR_EXPR_STEP_GET_UNION_VARIANT:
+                fprintf(stream, "union variant %lu from step%lu", step->union_variant.idx, step->union_variant.step);
+                break;
             case HIR_EXPR_STEP_GET_DECL: fprintf(stream, "decl%lu", step->decl_id); break;
             case HIR_EXPR_STEP_GET_LOCAL: fprintf(stream, "local%lu", step->decl_id); break;
             case HIR_EXPR_STEP_CALL:

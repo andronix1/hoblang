@@ -75,6 +75,11 @@ static HirType *hir_get_expr_step_type(Hir *hir, HirFuncId func, HirExprStep *st
             assert(type->kind == HIR_TYPE_STRUCT);
             return type->structure.fields[step->struct_field.idx].type;
         }
+        case HIR_EXPR_STEP_GET_UNION_VARIANT: {
+            HirType *type = steps[step->union_variant.step].type;
+            assert(type->kind == HIR_TYPE_UNION);
+            return type->union_data.variants[step->union_variant.idx];
+        }
         case HIR_EXPR_STEP_BOOL_SKIP:
         case HIR_EXPR_STEP_NOT:
             return hir_type_new_bool(hir->mempool);

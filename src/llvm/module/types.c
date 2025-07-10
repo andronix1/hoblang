@@ -15,6 +15,18 @@ LLVMTypeRef llvm_function_type(LlvmModule *module, HirType *type) {
     return LLVMFunctionType(llvm_runtime_type(module, type->function.returns), types, count, false);
 }
 
+size_t llvm_get_max_size(LlvmModule *module, HirType **variants) {
+    size_t max_size = 0;
+    for (size_t i = 0; i < vec_len(variants); i++) {
+        LLVMTypeRef llvm_type = llvm_runtime_type(module, variants[i]);
+        size_t size = LLVMSizeOfTypeInBits(module->target_data, llvm_type);
+        if (size > max_size) {
+            max_size = size;
+        }
+    }
+    return max_size;
+}
+
 LLVMTypeRef llvm_runtime_type(LlvmModule *module, HirType *type) {
     switch (type->kind) {
         case HIR_TYPE_VOID: return LLVMVoidTypeInContext(module->context);
@@ -43,6 +55,9 @@ LLVMTypeRef llvm_runtime_type(LlvmModule *module, HirType *type) {
             }
             return LLVMStructTypeInContext(module->context, types, count, false);
         }
+        case HIR_TYPE_UNION:
+            return LLVMArrayType2(LLVMInt8TypeInContext(module->context),
+                llvm_get_max_size(module, type->union_data.variants));
         case HIR_TYPE_GEN: {
             LLVMTypeRef result = module->gen_params[type->gen_param];
             assert(result);
