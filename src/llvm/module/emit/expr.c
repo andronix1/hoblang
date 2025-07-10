@@ -325,6 +325,17 @@ static LlvmEmitStepRes llvm_emit_expr_step(
             }
             return llvm_emit_step_res_new(LLVMBuildLoad2(module->builder, llvm_type, result, ""), true);
         }
+        case HIR_EXPR_STEP_GET_UNION_VARIANT: {
+            LlvmEmitStepRes *res = &results[step->union_variant.step];
+            if (res->loaded) {
+                LLVMTypeRef type = llvm_runtime_type(module, step->type->union_data.variants[step->union_variant.idx]);
+                return llvm_emit_step_res_new(LLVMBuildTrunc(module->builder, res->value, type, ""), true);
+            } else {
+                return llvm_emit_step_res_new(
+                    LLVMBuildPointerCast(module->builder, res->value, LLVMPointerTypeInContext(module->context, 0), ""),
+                    false
+                );
+            }
         case HIR_EXPR_STEP_IDX_ARRAY: {
             LlvmEmitStepRes *res = &results[step->idx_array.value];
             if (res->loaded) {
