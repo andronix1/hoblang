@@ -121,9 +121,15 @@ bool sema_module_stage_emit_fun(SemaModule *module, AstFunDecl *func) {
             sema_decl_new(module->mempool, module, sema_value_new_runtime_local(module->mempool, SEMA_RUNTIME_VAR,
                 type->function.args[arg_id], hir_get_func_arg_local(module->hir, func_id, arg_id))));
     }
-    hir_init_fun_body(module->hir, func_id, sema_module_emit_code(module, func->body, NULL));
+    HirCode *code = sema_module_emit_code(module, func->body, NULL);
+    hir_init_fun_body(module->hir, func_id, code);
 
-    if (!func->body->sema.breaks && !sema_type_can_be_downcasted(type->function.returns, sema_type_new_void(module->mempool))) {
+    if (!type->function.returns) {
+        if (!func->body->sema.breaks) {
+            vec_push(code->stmts, hir_stmt_new_unreachable());
+        }
+        // TODO
+    } else if (!func->body->sema.breaks && !sema_type_can_be_downcasted(type->function.returns, sema_type_new_void(module->mempool))) {
         sema_module_err(module, func->info->name, "expected function to return value but its body passes");
     }
 
