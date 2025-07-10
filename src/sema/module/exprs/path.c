@@ -87,6 +87,17 @@ static SemaValue *sema_value_analyze_expr_simple_ident(SemaModule *module, SemaT
             return sema_value_new_runtime_expr_step(module->mempool, runtime, field->value.type, step_id);
         }
     }
+    if (root->kind == SEMA_TYPE_UNION) {
+        size_t idx = keymap_get_idx(root->union_data.variants_map, ident);
+        if (idx != (size_t)-1) {
+            size_t step_id = sema_expr_output_push_step(output, hir_expr_step_new_union_variant(of, idx));
+            keymap_at(root->union_data.variants_map, idx, field);
+            if (field->value.module && field->value.module != module) {
+                sema_module_err(module, ident, "field is private");
+            }
+            return sema_value_new_runtime_expr_step(module->mempool, runtime, field->value.type, step_id);
+        }
+    }
     if (root->kind == SEMA_TYPE_ARRAY) {
         if (slice_eq(ident, slice_from_cstr("length"))) {
             return sema_value_new_runtime_const(module->mempool, sema_const_new_integer(module->mempool,
