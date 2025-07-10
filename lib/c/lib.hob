@@ -17,8 +17,25 @@ public const AF_INET: i32 = 2;
 public const SOCK_STREAM: i32 = 1;
 public const SOCK_DGRAM: i32 = 2;
 
+public type SoLevel = enum (i32) {
+    socket = 1,
+};
+
+public type SoName = enum (i32) {
+    debug = 1,
+    reuseAddr, soType, error, dontRoute, broadcast, sndBuf, rcvBuf, sndBufForce,
+    rcvBufForce, keepAlive, ooBinline, noCheck, priority, linger, bsdCompat,
+    reusePort, passCred, peerCred, rcvLowAt, sndLowAt, rcvTimeoOld, sndTimeoOld,
+};
+
+public const SOL_REUSEADDR: i32 = 2;
+
 public extern fun socket(domain: i32, sockType: i32, protocol: i32) -> i32;
 public extern fun socketpair(domain: i32, sockType: i32, protocol: i32, output: *[2]i32) -> i32;
+public extern fun bind(socket: i32, address: *void, length: usize) -> i32;
+public extern fun listen(socket: i32, backlog: usize) -> i32;
+public extern fun accept(socket: i32, address: *void, length: *usize) -> i32;
+public extern fun setsockopt(socket: i32, level: SoLevel, name: SoName, value: *void, length: usize) -> i32;
 
 public extern fun open(pathname: *u8, flags: i32) -> i32;
 
@@ -43,3 +60,13 @@ public extern fun clearenv() -> i32;
 public extern fun malloc(size: usize) -> *void;
 public extern fun realloc(ptr: *void, size: usize) -> *void;
 public extern fun free(ptr: *void);
+
+public type FnctlOp = enum (i32) {
+    dupFd,
+    getFd,
+    setFd,
+    getFlags,
+    setFlags,
+};
+
+public extern fun fcntl(fd: i32, op: FnctlOp, arg: i32) -> i32;

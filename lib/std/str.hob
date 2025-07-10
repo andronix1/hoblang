@@ -1,8 +1,7 @@
 import "slice.hob" as slice;
-import "int.hob" as int;
+import "range.hob" as range;
 
 use slice.Slice;
-use int.usize;
 
 public type string = Slice.<u8>;
 public const new: fun (*u8, usize) -> string = slice.new.<u8> as fun (*u8, usize) -> string;
@@ -13,4 +12,63 @@ public fun fromC(str: *u8) -> string {
         length += 1;
     }
     return new(str, length);
+}
+
+public fun string.splitOnce(self, char: u8) -> [2]string {
+    var idx: usize = 0;
+    while self.at(idx) != char && idx < self.length {
+        idx += 1;
+    }
+    return [
+        self.subslice(0, idx) as string,
+        self.subslice(idx + 1, self.length) as string,
+    ];
+}
+
+fun charIsSpace(c: u8) -> bool {
+    return c == ' ' || c == '\t' || c == '\n' || c == '\r';
+}
+
+public fun string.equals(self, other: string) -> bool {
+    if self.length != other.length {
+        return false;
+    }
+    for i in range.range(other.length) {
+        if self.at(i) != other.at(i) {
+            return false;
+        }
+    }
+    return true;
+}
+
+public fun string.contains(self, char: u8) -> bool {
+    for i in range.range(self.length) {
+        if self.at(i) == char {
+            return true;
+        }
+    }
+    return false;
+}
+
+public fun string.trimRight(self) -> string {
+    var result = self;
+    var i: usize = 0;
+    while i < result.length && charIsSpace(result.at(i)) {
+        result.raw = &result.raw[1];
+        result.length -= 1;
+        i += 1;
+    }
+    return result;
+}
+
+public fun string.trimLeft(self) -> string {
+    var result = self;
+    while result.length != 0 && charIsSpace(result.at(result.length - 1)) {
+        result.length -= 1;
+    }
+    return result;
+}
+
+public fun string.trim(self) -> string {
+    return self.trimLeft().trimRight();
 }

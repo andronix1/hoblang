@@ -6,6 +6,10 @@ public var handler: fun (string) = fun (message) {
     while true {}
 };
 
+public fun panic(message: string) -> ! {
+    handler(message);
+}
+
 public fun assert(ok: bool, message: string) {
     if (!ok) {
         handler(message);

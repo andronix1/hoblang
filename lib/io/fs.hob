@@ -17,7 +17,7 @@ public type OpenFlags = enum (i32) {
     trunc = 1000,
     append = 2000,
 };
-fun OpenFlags.with(self, value: OpenFlags) -> OpenFlags { return (self as i32 | value as i32) as OpenFlags; }
+public fun OpenFlags.with(self, value: OpenFlags) -> OpenFlags { return (self as i32 + value as i32) as OpenFlags; }
 
 public fun open(path: string, flags: OpenFlags) -> Result.<File> {
     var cPath = strings.fromString(path);
@@ -26,6 +26,3 @@ public fun open(path: string, flags: OpenFlags) -> Result.<File> {
         return res as File;
     });
 }
-
-
-

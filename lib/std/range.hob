@@ -1,7 +1,3 @@
-import "int.hob" as int;
-
-use int.usize;
-
 type Range = struct {
     current: usize,
     step: usize,

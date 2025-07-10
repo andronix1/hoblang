@@ -8,6 +8,12 @@ public type List<T> = struct {
     capacity: usize
 };
 
+public fun newSized<T>(size: usize) -> List.<T> {
+    var list = newWithCapacity.<T>(size);
+    list.data.length = size;
+    return list;
+}
+
 public fun newWithCapacity<T>(capacity: usize) -> List.<T> {
     if capacity == 0 { capacity = 1; }
     return <(List.<T>)> {
@@ -47,6 +53,13 @@ public fun List.push(&self, value: T) {
     self.data.length += 1;
 }
 
+public fun List.removeAt(&self, idx: usize) {
+    for i in std.rangeFrom(idx, self.*.length() - 1) {
+        self.data.raw[i] = self.data.raw[i + 1];
+    }
+    self.data.length -= 1;
+}
+
 public fun List.length(self) -> usize {
     return self.data.length;
 }
@@ -72,6 +85,15 @@ public fun List.free(self) {
 public fun List.deepFree(self, free: fun (T) -> void) {
     self.execAll(free);
     self.free();
+}
+
+public fun List.mapWith<D, T2>(self, data: D, mapper: fun (D, T) -> T2) -> List.<T2> {
+    var result = newWithCapacity.<T2>(self.length());
+    for i in std.range(self.length()) {
+        result.push(mapper(data, self.at(i)));
+    }
+    self.free();
+    return result;
 }
 
 public fun List.map<T2>(self, mapper: fun (T) -> T2) -> List.<T2> {

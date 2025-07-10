@@ -1,7 +1,4 @@
-import "int.hob" as int;
 import "lib.hob" as std;
-
-use int.usize;
 
 public type Slice<T> = struct {
     public raw: *T,
@@ -25,4 +22,15 @@ public fun Slice.atRef(self, idx: usize) -> *T {
 
 public fun Slice.at(self, idx: usize) -> T {
     return self.raw[idx];
+}
+
+public fun Slice.subslice(self, begin: usize, end: usize) -> Slice.<T> {
+    var result = self;
+    result.raw = &result.raw[begin];
+    if end <= begin {
+        result.length = 0;
+    } else {
+        result.length = end - begin;
+    }
+    return result;
 }

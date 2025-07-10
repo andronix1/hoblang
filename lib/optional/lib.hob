@@ -1,0 +1,32 @@
+import std;
+
+public type Optional<T> = struct {
+    public isEmpty: bool,
+    public value: T,
+};
+
+public fun some<T>(value: T) -> Optional.<T> {
+    return {
+        isEmpty: false,
+        value: value,
+    };
+}
+
+public fun none<T>() -> Optional.<T> {
+    return {
+        isEmpty: true,
+        value: undefined,
+    };
+}
+
+public fun Optional.unwrap(self) -> T {
+    std.panic.assert(!self.isEmpty, "failed to unwrap optional");
+    return self.value;
+}
+
+public fun Optional.map<T2>(self, mapper: fun (T) -> T2) -> Optional.<T2> {
+    if !self.isEmpty {
+        return some.<T2>(mapper(self.value));
+    }
+    return none.<T2>();
+}

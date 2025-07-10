@@ -19,6 +19,13 @@ public fun handle(value: i32) -> Result.<i32> {
     return result.ok.<i32>(value);
 }
 
+public fun handleIgnored(value: i32, filter: fun (i32) -> bool) -> Result.<i32> {
+    if value < 0 && !filter(c.errno().*) {
+        return err.<i32>();
+    }
+    return result.ok.<i32>(value);
+}
+
 public fun handleMapped<T>(value: i32, mapper: fun (i32) -> T) -> Result.<T> {
     if value < 0 {
         return err.<T>();

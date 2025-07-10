@@ -8,8 +8,12 @@ use result.{ NoneResult, Result };
 
 public type Fd = i32;
 
-public fun Fd.readTo(self, slice: Slice.<u8>) -> NoneResult {
-    return c.err.handleNone(c.read(self, slice.raw, slice.length));
+public fun Fd.readTo(self, slice: Slice.<u8>) -> Result.<(Slice.<u8>)> {
+    return c.err.handle(c.read(self, slice.raw, slice.length))
+        .mapWith.<(Slice.<u8>), (Slice.<u8>)>(slice, fun (slice, length) {
+            slice.length = length as ?;
+            return slice;
+        });
 }
 
 public fun Fd.readByte(self) -> Result.<u8> {
@@ -33,4 +37,19 @@ public fun Fd.putByte(self, byte: u8) -> NoneResult {
 
 public fun Fd.close(self) -> NoneResult {
     return c.err.handleNone(c.close(self));
+}
+
+public fun Fd.getFlags(self) -> Result.<i32> {
+    return c.err.handle(c.fcntl(self, c.FnctlOp.getFlags, 0));
+}
+
+public fun Fd.setNonBlocking(self) -> NoneResult {
+    final flagsRes = self.getFlags();
+    if !flagsRes.isOk {
+        return flagsRes.convertErr.<std.None>();
+    }
+    final flags = flagsRes.unwrap();
+
+    const O_NONBLOCK = 4000;
+    return c.err.handleNone(c.fcntl(self, c.FnctlOp.setFlags, flags | 4000));
 }
